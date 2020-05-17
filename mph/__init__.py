@@ -1,5 +1,5 @@
 ﻿"""
-Pythonic scripting interface for Comsol Multiphysics
+Python scripting interface for Comsol Multiphysics
 """
 
 # Meta information
