@@ -305,7 +305,7 @@ class Model:
         values   = array(solution.getPVals())
         return (indices, values)
 
-    def outer(self, dataset):
+    def outer(self, dataset=None):
         """
         Returns the indices and values of outer solutions.
 
