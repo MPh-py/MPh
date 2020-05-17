@@ -114,7 +114,7 @@ nitpicky           = True              # Warn about missing references?
 # Code documentation
 add_module_names    = False            # Don't precede members with module name.
 autodoc_default_options = {
-    'members': True,                   # Include module/class members.
+    'members':       None,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
 
