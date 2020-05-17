@@ -23,5 +23,5 @@ classifiers = [
 doc = ['Sphinx', 'Sphinx-RTD-theme', 'reCommonMark']
 
 [tool.flit.metadata.urls]
-documentation = 'https://mph.readthedocs.io'
-source = 'https://github.com/john-hennig/mph'
+Documentation = 'https://mph.readthedocs.io'
+Source = 'https://github.com/john-hennig/mph'
