@@ -1,0 +1,27 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+dist-name = 'MPh'
+module = 'mph'
+author = 'John Hennig'
+requires = ['JPype1', 'NumPy']
+requires-python = '>=3.6'
+description-file = 'ReadMe.md'
+keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Programming Language :: Python :: 3',
+    'Operating System :: Microsoft :: Windows',
+    'Topic :: Scientific/Engineering :: Physics',
+    'Intended Audience :: Science/Research',
+    'Natural Language :: English',
+    'License :: OSI Approved :: MIT License']
+
+[tool.flit.metadata.requires-extra]
+doc = ['Sphinx', 'Sphinx-RTD-theme', 'reCommonMark']
+
+[tool.flit.metadata.urls]
+documentation = 'https://mph.readthedocs.io'
+source = 'https://github.com/john-hennig/mph'

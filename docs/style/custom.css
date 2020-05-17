@@ -1,0 +1,12 @@
+﻿.section { text-align: justify }
+.pre { color:black }
+.rst-content ul.simple li > p { margin-bottom: 0}
+.rst-content dd ul.simple li > p { margin-bottom: 0 !important }
+p + ul.simple { margin-top: -24px }
+dd p + ul.simple { margin-top: -12px }
+.rst-content ol.simple li > p { margin-bottom: 0}
+.rst-content dd ol.simple li > p { margin-bottom: 0 !important }
+p + ol.simple { margin-top: -24px }
+ol.simple ol.simple { margin-top: 0; margin-bottom: 0; }
+dd p + ol.simple { margin-top: -12px }
+p + div[class^="highlight"] { margin-top: -12px !important }

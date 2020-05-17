@@ -1,0 +1,4 @@
+Server
+======
+
+.. autoclass:: mph.Server

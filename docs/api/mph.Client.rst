@@ -1,0 +1,4 @@
+Client
+======
+
+.. autoclass:: mph.Client

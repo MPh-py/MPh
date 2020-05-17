@@ -1,0 +1,8 @@
+/dev/
+/docs/rendered/
+/dist/
+**/__pycache__
+**/.pytest_cache
+flake8.txt
+*.lnk
+Thumbs.db

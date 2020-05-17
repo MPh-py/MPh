@@ -1,0 +1,4 @@
+Model
+=====
+
+.. autoclass:: mph.Model
