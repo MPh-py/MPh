@@ -1,0 +1,2 @@
+jpype1
+numpy
