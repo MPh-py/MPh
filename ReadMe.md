@@ -29,7 +29,7 @@ Find the [full documentation on Read-the-Docs][docs].
 [jpype]:  https://pypi.org/project/JPype1
 [docs]:   https://mph.readthedocs.io
 
-[![version](https://img.shields.io/pypi/v/mph.svg)](https://pypi.python.org/pypi/mph)
+[![release](https://img.shields.io/pypi/v/mph.svg)](https://pypi.python.org/pypi/mph)
 [![downloads](https://pepy.tech/badge/mph)](https://pepy.tech/project/mph)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![documentation](https://readthedocs.org/projects/mph/badge/?version=latest)](https://mph.readthedocs.io/en/latest/?badge=latest)
