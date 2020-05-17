@@ -4,8 +4,8 @@ Python scripting interface for Comsol Multiphysics
 
 # Meta information
 __title__     = 'MPh'
-__version__   = '0.7.1'
-__date__      = '2020–05–17'
+__version__   = '0.7.2'
+__date__      = '2020–05–18'
 __author__    = 'John Hennig'
 __copyright__ = 'John Hennig'
 __license__   = 'MIT'
