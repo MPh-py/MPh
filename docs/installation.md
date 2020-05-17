@@ -3,7 +3,7 @@
 
 MPh is [available on PyPI][dist] and can be readily installed via `pip`:
 ```none
-    pip install mph
+pip install mph
 ```
 
 Add `--user` to the above command to make it a per-user installation,
