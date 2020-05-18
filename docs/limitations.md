@@ -26,8 +26,8 @@ though Comsol itself is available on other platforms, namely Linux
 and MacOS. The code that identifies installed Comsol versions and
 locates the executables would have to be adapted to support the
 other operating systems. This is not particularly difficult for
-someone with access to a test environment. Contributions [on
-Github][mph-repo] are welcome.
+someone with access to a test environment. Contributions or even
+just suggestions [on GitHub][mph-repo] are welcome.
 
 The API is intentionally scope-limited to automating the simulation
 workflow, such as running parameter sweeps or optimization routines

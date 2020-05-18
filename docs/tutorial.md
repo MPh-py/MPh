@@ -3,8 +3,8 @@
 
 To follow along with this tutorial in an interactive Python session,
 if you wish to do so, make sure you have downloaded the [demonstration
-model "capacitor.mph"][demo] from this library's Github repository, and saved
-it in the same folder from which you run Python.
+model "capacitor.mph"][demo] from this library's GitHub repository,
+and saved it in the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -16,7 +16,8 @@ Comsol platform, but not for any add-on module beyond that.
 
 ### Starting Comsol
 
-To start a Comsol client on the local machine, just do this:
+In the beginning was the client. And the client was with Comsol. And
+the client was Comsol. So let there be a Comsol client.
 ```python
 >>> import mph
 >>> client = mph.Client(cores=1)
@@ -53,20 +54,20 @@ list the names of all models the client currently manages.
 
 If we were to load more models, that list would be longer. Note that
 the above simply displays the names of the models. The actual model
-*objects* can be obtained as follows:
+objects can be recalled as follows:
 ```python
 >>> client.models()
 [<mph.model.Model object at 0x000002CAF6C0BE80>]
 ```
 
-We will generally not need to bother with these lists, as long as we
-hold on to the `model` reference we received from the client. But to
-free up memory, we could remove a specific model.
+We will generally not need to bother with these lists, as we would
+rather hold on to the `model` reference we received from the client.
+But to free up memory, we could remove a specific model.
 ```python
 >>> client.remove(model)
 ```
 
-Or we could remove all models at once, start with a clean slate.
+Or we could remove all models at once — restart from a clean slate.
 ```python
 >>> client.clear()
 >>> client.names()
@@ -122,9 +123,8 @@ This is Python though. We hide implementation details as much as we
 can. Abstract them out. So refer to things in the model tree by what
 you name them in the model tree. If you remove a feature and then put
 it back in, just give it the same name, and nothing has changed. You
-may also set up different models than can be automated by the same
-script. No problem, as long as your naming convention is consistent
-between them.
+may also set up different models to be automated by the same script.
+No problem, as long as your naming scheme is consistent throughout.
 
 
 ### Modifying parameters
@@ -151,10 +151,10 @@ This particular model's only geometry sequence
 >>> model.geometries()
 ['geometry']
 ```
-is set up to depend on that very value. So the geometry will
-effectively change the next time it is rebuilt. Comsol performs the
-rebuild automatically once we solve the model, but we may also trigger
-it right away.
+is set up to depend on that very value. So it will effectively change
+the next time it is rebuilt. This will happen automatically once we
+solve the model. But we may also trigger the geometry rebuild right
+away.
 ```python
 >>> model.build()
 ```
@@ -163,28 +163,28 @@ it right away.
 
 To solve the model, we need to create a mesh. This would also be taken
 care of automatically, but let's make sure this critical step passes
-without errors.
+without a hitch.
 ```python
 >>> model.mesh()
 ```
 
 Now run the first study, the one set up to compute the electrostatic
-solution, i.e. the instantaneous and purely capacitive response,
-without any leakage currents.
+solution, i.e. the instantaneous and purely capacitive response to the
+applied voltage, before leakage currents have any time to set in.
 ```python
 >>> model.solve('static')
 ```
 
-This modest simulation should not take longer than a few seconds. While
-we are at it, we may as well solve the remaining two studies, one
-time-dependent, the other a parameter sweep.
+This modest simulation should not take longer than a few seconds.
+While we are at it, we may as well solve the remaining two studies,
+one time-dependent, the other a parameter sweep.
 ```python
 >>> model.solve('relaxation')
 >>> model.solve('sweep')
 ```
 
 They take a little longer, but not much. We could have solved all three
-studies at once, or rather, all the studies defined in the model.
+studies at once, or rather, all of the studies defined in the model.
 ```python
 >>> model.solve()
 ```
@@ -200,7 +200,7 @@ array(1.31947349)
 ```
 
 All results are returned as NumPy arrays. Though scalars such as this
-one could be readily cast to a regular `float`.
+one could be readily cast to a (regular Python) `float`.
 
 We could also ask where the electric field is strongest.
 ```python
@@ -220,19 +220,19 @@ We also did not specify the dataset, even though there are three
 different studies that have separate solutions and datasets associated
 along with them. When not named specifically, the default dataset is
 used. That generally refers to the study defined first, here "static".
-The default dataset is the one resulting from that study, here
-(inconsistently) named "electrostatic".
+The default dataset is the one resulting from that study, here —
+inconsistently — named "electrostatic".
 ```python
 >>> model.datasets()
 ['electrostatic', 'time-dependent', 'parametric sweep']
 ```
 
 Now let's look at the time dependence. The two media in this model
-have a small, but finite conductivity, leading to leakage currents.
-As the two conductivities also differ in value, charges will accumulate
-at the interface between the media. This interface charge leads to a
-gradual relaxation of the total capacitance over time. We can see    that
-from its value at the first and last time step.
+have a small, but finite conductivity, leading to leakage currents in
+the long run. As the two conductivities also differ in value, charges
+will accumulate at the interface between the media. This interface
+charge leads to a gradual relaxation of the total capacitance over
+time. We can tell that from its value at the first and last time step.
 ```python
 >>> C = '2*ec.intWe/U^2'
 >>> model.evaluate(C, 'pF', 'time-dependent', 'first')
@@ -241,10 +241,21 @@ array(1.31947349)
 array(1.48410629)
 ```
 
+The "first" and "last" time step defined in that study are 0 and 1
+second, respectively.
+```python
+>>> (indices, values) = model.inner('time-dependent')
+>>> values[0]
+0.0
+>>> values[-1]
+1.0
+```
+
 Obviously, the capacitance also varies if we change the distance
 between the electrodes. In the model, a parameter sweep was used to
-study that. These "outer" solutions are referenced by indices, integer
-numbers, each of which corresponds to a particular parameter value.
+study that. These "outer" solutions, just like the time-dependent
+"inner" solutions, are referenced by indices, i.e. integer numbers,
+each of which corresponds to a particular parameter value.
 ```python
 >>> (indices, values) = model.outer('parametric sweep')
 >>> indices
@@ -264,8 +275,10 @@ well run the time-dependent study a number of times and change the
 parameter value from one run to the next. General parameter sweeps
 can get quite complicated in terms of how they map to indices as
 soon as combinations of parameters are allowed. Support for this may
-therefore be dropped in a future release, while the API is still
-considered unstable, just to keep things simple and clean.
+therefore be dropped in a future release — while the API is still
+considered unstable, which it is for as long as the version number
+of this library does not start with a 1 —, just to keep things simple
+and clean.
 
 
 ### Saving results
@@ -287,9 +300,9 @@ in the first place.
 Maybe we don't actually need to keep the solution and mesh data around.
 The model was quick enough to solve, and we do like free disk space.
 We would just like to be able to look up modeling details somewhere
-down the line. Comsol also keeps track of the modeling history — a log
-of which features were created or modified, and in which order. That
-is, typically irrelevant details, which we can prune of by resetting
+down the line. Comsol also keeps track of the modeling history: a log
+of which features were created, deleted, modified, and in which order.
+Typically, such details are irrelevant. We can prune them by resetting
 that record.
 ```python
 >>> model.clear()
