@@ -22,7 +22,7 @@ for multiphysics. Hence the name of this library. It is open-source
 and in no way associated with Comsol Inc., the company that develops
 and licenses the simulation software.
 
-Find the [full documentation on Read-the-Docs][docs].
+Find the full [documentation on Read-the-Docs][docs].
 
 
 [comsol]: https://www.comsol.com

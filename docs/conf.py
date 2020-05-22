@@ -8,7 +8,7 @@ triggered by running  `sphinx-build . rendered` on the command line,
 no matter the operating system. The rendered HTML then ends up in the
 sub-folder `rendered`, where `index.html` is the start page.
 
-The documentation source is comprised of the `.md` files here, of which
+The documentation source comprises the `.md` files here, of which
 `index.md` maps to the start page, as well as the documentation strings
 in the package's source code for the API documentation.
 
@@ -58,31 +58,37 @@ import mph as meta
 # Customization                        #
 ########################################
 
-def convert(text):
+def syntax_tweaks(lines):
     """
-    Converts text from Markdown to reStructuredText syntax.
+    Applies custom tweaks to the Markdown syntax.
 
-    Also converts the Unicode bullet character (•) to a standard
+    Namely, converts the Unicode bullet character (•) to a standard
     list-item marker (*) so that the CommomMark parser recognizes it
     as such — which it regrettably doesn't.
     """
-    text = re.sub(r'^([ \t]*)•', r'\1*', text, flags=re.MULTILINE)
-    ast = commonmark.Parser().parse(text)
-    rst = commonmark.ReStructuredTextRenderer().render(ast)
-    return rst
+    tweaked = [re.sub(r'^([ \t]*)•', r'\1*', line) for line in lines]
+    return tweaked
 
 
-def docstrings(app, what, name, obj, options, lines):
-    """Converts Markdown in doc-strings to reStructuredText."""
-    md  = '\n'.join(lines)
-    rst = convert(md)
+def source_files(app, docname, lines):
+    """Post-processes source files."""
+    pass
+
+
+def doc_strings(app, what, name, obj, options, lines):
+    """Converts doc-strings from Markdown to reStructuredText."""
+    tweaked  = syntax_tweaks(lines)
+    markdown = '\n'.join(tweaked)
+    parsed   = commonmark.Parser().parse(markdown)
+    restruct = commonmark.ReStructuredTextRenderer().render(parsed)
     lines.clear()
-    lines += rst.splitlines()
+    lines += restruct.splitlines()
 
 
 def setup(app):
-    """Sets up event hooks for customized source processing."""
-    app.connect('autodoc-process-docstring', docstrings)
+    """Configure customized text processing."""
+    app.connect('source-read', source_files)
+    app.connect('autodoc-process-docstring', doc_strings)
     app.add_config_value('recommonmark_config', {
         'auto_toc_tree_section': 'Contents',
         'enable_math': True,
