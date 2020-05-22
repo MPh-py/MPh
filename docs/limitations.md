@@ -7,7 +7,8 @@ machine can be managed within the same Python session, and thus only
 one Comsol client. If several simulations are to be run in parallel,
 distributed over independent processor cores in an effort to achieve
 maximum speed-up of a parameter sweep, they have to be started as
-separate Python (sub-)processes.
+separate Python (sub-)processes. This is a feasible work-around, but
+a limitation nonetheless.
 
 For the same reason, it seems, the [unit tests][mph-tests] that
 come with MPh fail when collected and run via the testing framework
@@ -28,6 +29,13 @@ locates the executables would have to be adapted to support the
 other operating systems. This is not particularly difficult for
 someone with access to a test environment. Contributions or even
 just suggestions [on GitHub][mph-repo] are welcome.
+
+Cross-network client–server connections, while ostensibly supported
+by this library, have never actually been tested — for lack of a
+network license, required for that purpose. It may work as is, or may
+require transmitting login details: user name and password. File a
+GitHub issue if you are in a position to test this scenario and want
+the problem solved.
 
 The API is intentionally scope-limited to automating the simulation
 workflow, such as running parameter sweeps or optimization routines
