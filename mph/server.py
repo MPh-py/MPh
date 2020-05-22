@@ -49,6 +49,10 @@ class Server:
         server.stop()
     ```
 
+    For this to work, make sure the Comsol server was started at least
+    once from the command line, so that you have had a chance to define
+    a user name and password.
+
     For client―server connections across the network, the server's
     host name or IP address has to be known by the client. This
     information is *not* provided by this library. It has to either

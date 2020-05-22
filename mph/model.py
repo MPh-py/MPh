@@ -151,12 +151,12 @@ class Model:
         """
         Returns or sets the parameter of the given `name`.
 
-        If no value is given (the default `None` is passed), returns
+        If no `value` is given (the default `None` is passed), returns
         the value of the named parameter. Otherwise sets it.
 
         Numerical values are accepted, but will be converted to a
-        string. An optional `unit` may be specified, though it may
-        already be part of the value string, inside square brackets.
+        string. An optional `unit` may be specified, if it's not
+        already part of the value string, inside square brackets.
 
         Values are always returned as strings, i.e. the expression as
         entered in the user interface. That expression may include the
@@ -339,7 +339,7 @@ class Model:
         sequence of indices, or by passing "first"/"last" to select
         the very first/last index. If the dataset represents a
         parameter sweep, the `outer` solution(s) can be selected by
-        index of sequence of indices.
+        index or sequence of indices.
 
         Results are returned as NumPy arrays of whichever
         dimensionality they may have. The expression may be a global

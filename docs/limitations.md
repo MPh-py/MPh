@@ -5,7 +5,7 @@ This library depends on the Python-to-Java bridge [JPype][jpype-repo].
 It therefore inherits its limitation, in that only one Java virtual
 machine can be managed within the same Python session, and thus only
 one Comsol client. If several simulations are to be run in parallel,
-distributed over independent process cores in an effort to achieve
+distributed over independent processor cores in an effort to achieve
 maximum speed-up of a parameter sweep, they have to be started as
 separate Python (sub-)processes.
 
