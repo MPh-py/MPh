@@ -33,6 +33,7 @@ from unittest.mock import MagicMock    # mock imports
 from pathlib import Path               # file-system paths
 
 extensions = [
+    'sphinx_rtd_theme',                # Register Read-the-Docs theme.
     'recommonmark',                    # Accept Markdown as input.
     'sphinx.ext.autodoc',              # Get documentation from doc-strings.
     'sphinx.ext.autosummary',          # Create summaries automatically.
@@ -50,7 +51,7 @@ for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy', 'winreg'):
     sys.modules[package] = MagicMock()
 
 # Import package to make meta data available.
-import mph as package
+import mph as meta
 
 
 ########################################
@@ -80,7 +81,7 @@ def docstrings(app, what, name, obj, options, lines):
 
 
 def setup(app):
-    """Sets up event hooks for customized text processing."""
+    """Sets up event hooks for customized source processing."""
     app.connect('autodoc-process-docstring', docstrings)
     app.add_config_value('recommonmark_config', {
         'auto_toc_tree_section': 'Contents',
@@ -96,39 +97,35 @@ def setup(app):
 ########################################
 
 # Meta information
-project   = package.__title__
-version   = package.__version__
-date      = package.__date__
-author    = package.__author__
-copyright = package.__copyright__
-license   = package.__license__
+project   = meta.__title__
+version   = meta.__version__
+release   = meta.__version__
+date      = meta.__date__
+author    = meta.__author__
+copyright = meta.__copyright__
+license   = meta.__license__
 
 # Source parsing
 master_doc         = 'index'           # start page
 source_suffix      = ['.md', '.rst']   # valid source-file suffixes
-exclude_patterns   = []                # files and folders to ignore
 language           = None              # language for auto-generated content
-todo_include_todos = False             # Include "todo" and "todoList"?
 nitpicky           = True              # Warn about missing references?
 
 # Code documentation
-add_module_names    = False            # Don't precede members with module name.
+default_role       = 'code'            # Back-ticks denote code in reST.
+add_module_names   = False             # Don't precede members with module name.
 autodoc_default_options = {
     'members':       None,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
 
-# HTML rendering
-html_theme          = 'sphinx_rtd_theme'
-html_theme_path     = [sphinx_rtd_theme.get_html_theme_path()]
-html_theme_options  = {}
-templates_path      = ['layout']       # layout tweaks
-html_static_path    = ['style']        # style tweaks
-html_css_files      = ['custom.css']   # style sheets
-pygments_style      = 'trac'           # syntax highlighting style
-html_use_index      = False            # Create document index?
+# Output style
+html_theme       = 'sphinx_rtd_theme'  # Use Read-the-Docs theme.
+html_static_path = ['style']           # folders to include in output
+html_css_files   = ['custom.css']      # additional style files
+pygments_style   = 'trac'              # syntax highlighting style
+
+# Output options
 html_copy_source    = False            # Copy documentation source files?
 html_show_copyright = False            # Show copyright notice in footer?
 html_show_sphinx    = False            # Show Sphinx blurb in footer?
-html_favicon        = None             # browser icon
-html_logo           = None             # project logo

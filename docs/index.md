@@ -30,9 +30,12 @@ and licenses the simulation software.
 [jpype]:  https://pypi.org/project/JPype1
 
 
-Contents
---------
-* [Installation](installation.md)
-* [Tutorial](tutorial.md)
-* [Limitations](limitations.md)
-* [API](api.md)
+```eval_rst
+.. toctree::
+    :hidden:
+
+    installation
+    tutorial
+    limitations
+    api
+```
