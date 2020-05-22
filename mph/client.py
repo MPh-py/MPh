@@ -147,7 +147,19 @@ class Client:
         return model
 
     def create(self, name):
-        """Creates and returns a new, empty model with the given `name`."""
+        """
+        Creates and returns a new, empty model with the given `name`.
+
+        This is not particularly useful unless you are prepared to
+        drop down to the Java layer and add model features on your
+        own. It may help to call the returned (Python) model object
+        something like `pymodel` and assign the name `model` to
+        `pymodel.java`. Then you can just copy-and-paste Java or
+        Matlab code from the Comsol programming manual or as exported
+        from the Comsol front-end itself. Python will gracefully
+        overlook gratuitous semicolons at the end of statements, so
+        this approach would even work for entire blocks of code.
+        """
         java = self.java.createUnique('model')
         logger.debug(f'Created model with tag "{java.tag()}".')
         model = Model(java)
