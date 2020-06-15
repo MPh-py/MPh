@@ -166,7 +166,7 @@ class Model:
             return str(self.java.param().get(name))
         else:
             value = str(value)
-            if unit is not None:
+            if unit:
                 value += f'[{unit}]'
             self.java.param().set(name, value)
 
