@@ -1,4 +1,4 @@
-﻿"""Runs all tests in the intended order."""
+﻿"""Runs all tests in the intended order, while logging to the console."""
 __license__ = 'MIT'
 
 
@@ -9,8 +9,10 @@ from sys import argv
 
 here = Path(__file__).parent
 arguments = argv[1:]
+if 'log' not in arguments:
+    arguments.append('log')
 
 for test in ('backend', 'client', 'model', 'server', 'remote'):
-    result = run(['python', f'test_{test}.py'] + arguments, cwd=here)
-    if result.returncode:
+    process = run(['python', f'test_{test}.py'] + arguments, cwd=here)
+    if process.returncode != 0:
         break
