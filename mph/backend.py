@@ -269,10 +269,10 @@ def inspect(java):
     print(f'display: {java.getDisplayString()}')
     print(f'doc:     {java.docMarker()}')
 
-    # Notify if feature is deactivated or has warnings.
+    # Display comments and notify if feature is deactivated or has warnings.
     comments = str(java.comments())
     if comments:
-        print(f'comment: {comments})')
+        print(f'comment: {comments}')
     if not java.isActive():
         print('This feature is currently deactivated.')
     try:
