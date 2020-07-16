@@ -1,11 +1,11 @@
 ﻿"""
-Python scripting interface for Comsol Multiphysics
+Python scripting interface for Comsol Multiphysics.
 """
 
 # Meta information
 __title__     = 'MPh'
-__version__   = '0.7.3'
-__date__      = '2020–06–15'
+__version__   = '0.7.4'
+__date__      = '2020–07–16'
 __author__    = 'John Hennig'
 __copyright__ = 'John Hennig'
 __license__   = 'MIT'
