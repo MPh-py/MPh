@@ -18,7 +18,7 @@ API, and wraps it in a layer of pythonic ease-of-use. The Python
 wrapper only covers common scripting tasks, such as loading a model
 from a file, modifying some parameters, running the simulation, to
 then evaluate the results. Though the full functionality is available
-to those who dig down to the Java layer underneath.
+to those willing to dig down to the Java layer underneath.
 
 Comsol models are marked by their `.mph` file extension, which stands
 for multiphysics. Hence the name of this library. It is open-source
