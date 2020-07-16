@@ -97,6 +97,7 @@ class Client:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
         # Start the Java virtual machine.
+        logger.info(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
         jpype.startJVM(str(jvm), classpath=str(api), convertStrings=False)
         from com.comsol.model.util import ModelUtil as java
