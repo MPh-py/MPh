@@ -1,5 +1,5 @@
 ﻿"""
-Provides the wrapper for a Comsol model objects.
+Provides the wrapper for Comsol model objects.
 """
 __license__ = 'MIT'
 
@@ -40,7 +40,7 @@ class Model:
     Example:
     ```python
         import mph
-        client = mph.Client(cores=1)
+        client = mph.Client()
         model = client.load('capacitor.mph')
         model.parameter('U', '1', 'V')
         model.parameter('d', '1', 'mm')
@@ -50,7 +50,7 @@ class Model:
     ```
 
     While only a minimal subset of the functionality is exposed by the
-    class directly, the full Comsol Java API can be accessed via the
+    class directly, the entire Comsol Java API can be accessed via the
     instance attribute `.java`.
     """
 
@@ -125,7 +125,7 @@ class Model:
         return [str(self.java.sol(tag).name()) for tag in tags]
 
     def datasets(self):
-        """Returns the names of all datasets."""
+        """Returns the names of all data-sets."""
         tags = [str(tag) for tag in self.java.result().dataset().tags()]
         return [str(self.java.result().dataset(tag).name()) for tag in tags]
 
@@ -154,9 +154,9 @@ class Model:
         If no `value` is given (the default `None` is passed), returns
         the value of the named parameter. Otherwise sets it.
 
-        Numerical values are accepted, but will be converted to a
-        string. An optional `unit` may be specified, if it's not
-        already part of the value string, inside square brackets.
+        Numerical values are accepted, but will be converted to strings.
+        An optional `unit` may be specified, unless it is already part
+        of the value string itself, inside square brackets.
 
         Values are always returned as strings, i.e. the expression as
         entered in the user interface. That expression may include the
@@ -170,17 +170,17 @@ class Model:
                 value += f'[{unit}]'
             self.java.param().set(name, value)
 
-    def load(self, file, function):
+    def load(self, file, interpolation):
         """
         Loads an external `file` and assigns its data to the named
-        interpolation `function`.
+        `interpolation` function.
         """
         for tag in self.java.func().tags():
             tag = str(tag)
-            if str(self.java.func(tag).label()) == function:
+            if str(self.java.func(tag).label()) == interpolation:
                 break
         else:
-            error = f'Function "{function}" does not exist.'
+            error = f'Interpolation function "{interpolation}" does not exist.'
             logger.error(error)
             raise ValueError(error)
         file = Path(file)
@@ -263,10 +263,10 @@ class Model:
 
     def _dataset(self, name=None):
         """
-        Returns the Java dataset object.
+        Returns the Java data-set object.
 
-        If `name` is given, returns the dataset object with that name.
-        Otherwise returns the default dataset.
+        If `name` is given, returns the data-set object with that name.
+        Otherwise returns the default data-set.
         """
         if name is not None:
             names = self.datasets()
@@ -296,7 +296,7 @@ class Model:
         These are the solution indices and time values in
         time-dependent studies, returned as a tuple of an integer
         array and a floating-point array. A `dataset` name may be
-        specified. Otherwise the default dataset is used.
+        specified. Otherwise the default data-set is used.
         """
         dataset  = self._dataset(dataset)
         solution = self._solution(dataset.name())
@@ -312,7 +312,7 @@ class Model:
         These are the solution indices and values in parametric sweeps,
         returned as a tuple of an integer array and a floating-point
         array. A `dataset` name may be specified. Otherwise the default
-        dataset is used.
+        data-set is used.
         """
         dataset  = self._dataset(dataset)
         solution = self._solution(dataset.name())
@@ -333,11 +333,11 @@ class Model:
         units are used.
 
         A `dataset` may be specified. Otherwise the expression will
-        be evaluated on the default dataset. If the solution stored in
-        the dataset is time-dependent, one or several `inner`
+        be evaluated on the default data-set. If the solution stored in
+        the data-set is time-dependent, one or several `inner`
         solution(s) can be preselected, either by an index number, a
         sequence of indices, or by passing "first"/"last" to select
-        the very first/last index. If the dataset represents a
+        the very first/last index. If the data-set represents a
         parameter sweep, the `outer` solution(s) can be selected by
         index or sequence of indices.
 
@@ -348,7 +348,7 @@ class Model:
         solution not having been computed.
         """
 
-        # Get dataset and solution (Java) objects.
+        # Get data-set and solution (Java) objects.
         dataset = self._dataset(dataset)
         logger.info(f'Evaluating {expression} on "{dataset.name()}" dataset.')
         solution = self._solution(dataset.name())
@@ -410,10 +410,10 @@ class Model:
         except Exception:
             logger.info('Global evaluation failed.')
 
-        # Find out the type of the dataset.
+        # Find out the type of the data-set.
         dtype = str(dataset.getType()).lower()
 
-        # For particle datasets, create an EvalPoint node.
+        # For particle data-sets, create an EvalPoint node.
         etag = self.java.result().numerical().uniquetag('eval')
         if dtype == 'particle':
             eval = self.java.result().numerical().create(etag, 'EvalPoint')
@@ -427,7 +427,7 @@ class Model:
         else:
             eval = self.java.result().numerical().create(etag, 'Eval')
 
-        # Select the dataset, if specified.
+        # Select the data-set, if specified.
         if dataset is not None:
             eval.set('data', dataset.tag())
 

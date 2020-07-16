@@ -48,10 +48,10 @@ class Client:
     ```
 
     Due to limitations of the Java bridge, provided by the JPype
-    library, only one client can be instantiated at a time. That is
+    library, only one client can be instantiated at a time. This is
     because JPype cannot manage more than one Java virtual machine
-    within the same Python session. Multiple, separate Python processes
-    would have to be run to work around this limitation.
+    within the same Python session. Separate Python processes would
+    have to be run to work around this limitation.
 
     The number of `cores` (threads) the client instance uses can
     be restricted by specifying a number. Otherwise all available
@@ -69,7 +69,7 @@ class Client:
     Raises `RuntimeError` if another client is already running.
 
     Internally, the client is a wrapper around the `ModelUtil` object
-    provided by the Comsol Java API, which can be accessed directly via
+    provided by Comsol's Java API, which can be accessed directly via
     the `.java` instance attribute.
     """
 
@@ -138,7 +138,7 @@ class Client:
         self.java    = java
 
     def load(self, file):
-        """Loads and returns the model from the given `file`."""
+        """Returns the model loaded from the given `file`."""
         file = Path(file)
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
@@ -167,7 +167,7 @@ class Client:
         return model
 
     def models(self):
-        """Lists all models that are currently held in memory."""
+        """Returns all model objects currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
 
     def names(self):

@@ -2,11 +2,11 @@
 Discovers Comsol installations on the local machine.
 
 This is a helper module that is not part of the public API. It
-retrieves information about installed Comsol versions, i.e. about
-available simulation back-ends, and locates the installation folder.
+retrieves information about installed Comsol versions, i.e. available
+simulation back-ends, and locates the installation folder.
 
-That mechanism currently only works on Windows, as it relies on the
-Registry to provide that information.
+The discovery mechanism currently only works on Windows, as it relies
+on the Registry to provide that information.
 """
 __license__ = 'MIT'
 
