@@ -29,6 +29,7 @@ def setup_module():
 
 
 def teardown_module():
+    client.clear()
     if saveas.exists():
         saveas.unlink()
 
