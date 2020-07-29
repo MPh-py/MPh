@@ -1,0 +1,12 @@
+﻿Releases
+‾‾‾‾‾‾‾‾
+
+To release a new version, do the following:
+• Bump version number and enter current date in `mph/__init__.py`.
+• Possibly add a dedicated commit, or include it in a meaningful commit.
+• Tag that commit with the version number, for example: `git tag -a v0.9.0`.
+• Enter the change log relative to the previous release as an annotation.
+• Push the commit (but not the tag): `git push origin master`.
+• Publish to PyPI by running `deploy/publish.py`.
+• Then push the tag: `git push --tags`.
+• Possibly "draft a new release" on GitHub.
