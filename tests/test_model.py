@@ -290,6 +290,5 @@ if __name__ == '__main__':
         test_clear()
         test_reset()
         test_save()
-        client.remove(model)
     finally:
         teardown_module()
