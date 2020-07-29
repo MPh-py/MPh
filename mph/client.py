@@ -157,9 +157,9 @@ class Client:
         something like `pymodel` and assign the name `model` to
         `pymodel.java`. Then you can just copy-and-paste Java or
         Matlab code from the Comsol programming manual or as exported
-        from the Comsol front-end itself. Python will gracefully
-        overlook gratuitous semicolons at the end of statements, so
-        this approach would even work for entire blocks of code.
+        from the Comsol front-end. Python will gracefully overlook
+        gratuitous semicolons at the end of statements, so this
+        approach would even work for entire blocks of code.
         """
         java = self.java.createUnique('model')
         logger.debug(f'Created model with tag "{java.tag()}".')

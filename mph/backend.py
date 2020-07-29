@@ -200,7 +200,7 @@ def folder(version=None):
     installed, for example `version='5.3a'`. Otherwise the latest
     version is used.
 
-    Relies on `version()` to discover installations.
+    Relies on `versions()` to discover installations.
 
     Raises `ValueError` if the requested version is not installed.
     """
@@ -230,7 +230,7 @@ def architecture():
     longer supports 32-bit architectures, neither does this library.
 
     Raises `OSError` if the operating system the application runs on
-    is not supported. Currently, these all all operating systems apart
+    is not supported. Currently, these are all operating systems apart
     from Windows.
     """
     system = platform.system()

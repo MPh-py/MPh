@@ -49,16 +49,23 @@ Java layer directly, via the `.java` attribute of `Client` instances
 (mapping to Comsol's `ModelUtil`) as well as `Model` (mapping to
 Comsol's `model`). Refer to Comsol's programming manual for details.
 
-This might even be worthwhile for Java developers, as the interactive
-Python prompt provides easy introspection of the object hierarchy and
-lets them learn by doing. In these circumstances, one might find the
-convenience function `mph.inspect` helpful, as it not only lists an
-object's methods in a more readable way than the built-in `dir`, but
-also displays the "properties" possibly defined on a model node. Keep
-in mind, however, that JPype cannot perform all type conversions
-silently in the background. Occasionally, when there is ambiguity in
-overloaded methods, you will have to cast types explicitly. Refer to
-the [JPype documentation][jpype-docs] for help.
+This might even be worthwhile for Java developers of Comsol
+applications, as the interactive Python prompt provides easy
+introspection of the object hierarchy. In these circumstances, one
+might find the convenience function `mph.inspect` helpful, as it not
+only lists an object's methods in a more readable way than the
+built-in `dir`, but also displays the "properties" possibly defined
+on a model node.
+
+It may equally help to call the returned Python model object something
+like `pymodel` and assign the name `model` to `pymodel.java`. Then you
+can just copy-and-paste Java or Matlab code from the Comsol programming
+manual or as exported from the Comsol front-end. Python will gracefully overlook gratuitous semicolons at the end of statements, so this approach
+would even work for entire blocks of code. Keep in mind, however, that
+JPype cannot perform all type conversions silently in the background.
+Occasionally, when there is ambiguity in overloaded methods, you will
+have to cast types explicitly. Refer to the [JPype
+documentation][jpype-docs] for help.
 
 
 [mph-repo]:    https://github.com/john-hennig/mph

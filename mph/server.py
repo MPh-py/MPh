@@ -54,10 +54,11 @@ class Server:
     a user name and password.
 
     For client―server connections across the network, the server's
-    host name or IP address has to be known by the client. This
-    information is *not* provided by this library. It has to either
-    be hard-coded or managed otherwise. Though if client and server
-    run on the same machine, it is simply `"localhost"`.
+    host name or IP address has to be known by the client up front. It
+    has to be either hard-coded or managed otherwise. Though if client
+    and server run on the same machine, it is simply `"localhost"`.
+    (However, *in* that situation, you may be better served — pardon
+    the pun — to simply run a stand-alone client.)
 
     The first server starting on a given computer will typically accept
     client connections on TCP communication port 2036, as per Comsol's
@@ -70,8 +71,8 @@ class Server:
     restricted. If no number is given, all cores are used by default.
 
     A specific `version` of the Comsol back-end can be specified if
-    several are installed on the local machine, for example
-    `version='5.3a'`. Otherwise the latest version is used.
+    several are installed on the machine, for example `version='5.3a'`.
+    Otherwise the latest version is used.
 
     A `timeout` can be set for the server to start up. The default
     is 60 seconds. A `TimeoutError` exception is raised if the server
