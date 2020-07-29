@@ -13,6 +13,8 @@ different dielectric permittivity fill the separate halves of the
 electrode gap. Running the model only requires a license for the core
 Comsol platform, but not for any add-on module beyond that.
 
+![screen-shot of capacitor model in Comsol GUI](images/capacitor.png)
+
 
 ### Starting Comsol
 
