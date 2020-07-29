@@ -22,8 +22,7 @@ file   = here / 'capacitor.mph'
 
 
 def setup_module():
-    global client
-    client = mph.Client(cores=1)
+    pass
 
 
 def teardown_module():
@@ -34,7 +33,9 @@ def teardown_module():
 # Tests                                #
 ########################################
 
-def test_started():
+def test_start():
+    global client
+    client = mph.Client(cores=1)
     assert client.java is not None
 
 
@@ -91,7 +92,7 @@ if __name__ == '__main__':
 
     setup_module()
     try:
-        test_started()
+        test_start()
         test_cores()
         test_load()
         test_create()
