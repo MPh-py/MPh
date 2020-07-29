@@ -123,7 +123,10 @@ class Client:
         noun = 'core' if cores == 1 else 'cores'
         logger.info(f'Running on {cores} processor {noun}.')
 
-        # Override the default setting of certain preferences.
+        # Load Comsol settings from disk so as to not just use defaults.
+        java.loadPreferences()
+
+        # Override certain settings not useful in headless operation.
         java.setPreference('updates.update.check', 'off')
         java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
         java.setPreference('tempfiles.recovery.autosave', 'off')
