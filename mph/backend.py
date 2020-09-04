@@ -15,7 +15,10 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 import platform                        # platform information
-import winreg                          # Windows registry
+try:
+    import winreg                          # Windows registry
+except: 
+    pass
 import re                              # regular expressions
 from subprocess import run, PIPE       # external processes
 from collections import namedtuple     # named tuples
@@ -58,83 +61,23 @@ def versions():
     Version = namedtuple('version',
                         ('major', 'minor', 'patch', 'build', 'folder'))
 
-    # Bail out if not on the Windows platform.
     system = platform.system()
-    if system != 'Windows':
-        error = (f'Unsupported operating system "{system}".'
-                 f'This library is (currently) Windows-only.')
-        logger.error(error)
-        raise NotImplementedError(error)
-
-    # Open main Comsol registry node.
-    path_main = r'SOFTWARE\Comsol'
-    try:
-        main = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_main)
-    except FileNotFoundError:
-        error = 'Did not find Comsol registry entry.'
-        logger.error(error)
-        raise OSError(error) from None
-
-    # Parse sub-nodes to get list of installed Comsol versions.
-    versions = {}
-    index = 0
-    while True:
-
-        # Get name of next node. Exit loop if list exhausted.
-        try:
-            name = winreg.EnumKey(main, index)
-            index += 1
-        except OSError:
-            break
-
-        # Ignore nodes that don't follow naming pattern.
-        if not re.match(r'(?i)Comsol\d+[a-z]?', name):
-            logger.debug(f'Ignoring registry node "{name}".')
-            continue
-
-        # Open the sub-node.
-        path_node = path_main + '\\' + name
-        logger.debug(f'Checking registry node "{path_node}".')
-        try:
-            node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_node)
-        except FileNotFoundError:
-            error = f'Could not open registry node "{name}".'
-            logger.error(error)
-            continue
-
-        # Get installation folder from corresponding key.
-        key = 'COMSOLROOT'
-        try:
-            value = winreg.QueryValueEx(node, key)
-        except FileNotFoundError:
-            error = f'Key "{key}" missing in node "{name}".'
-            logger.error(error)
-            continue
-        folder = Path(value[0])
-        logger.debug(f'Checking installation folder "{folder}".')
-
-        # Check that server executable exists.
-        path = folder / 'bin' / architecture() / 'comsolmphserver.exe'
-        if not path.exists():
-            error = 'Did not find Comsol server executable.'
-            logger.error(error)
-            continue
+    if system == 'Linux':
+        versions = {}
 
         # Query the Comsol server's version information.
-        flags = 0x08000000 if platform.system() == 'Windows' else 0
-        process = run(f'{path} --version', stdout=PIPE, creationflags=flags)
+        process = run(['comsol', '--version'], stdout=PIPE)
         if process.returncode != 0:
             error = 'Querying version information failed.'
             logger.error(error)
         answer = process.stdout.decode('ascii', errors='ignore').strip()
         logger.debug(f'Reported version info is "{answer}".')
 
-        # Parse out the actual version number.
-        match = re.match(r'(?i)Comsol.*?(\d+(?:\.\d+)*)', answer)
+        # Parse out the version number.
+        match = re.match(r'(?i)COMSOL Multiphysics.*?(\d+(?:\.\d+)*)', answer)
         if not match:
             error = f'Unexpected answer "{answer}" to version query.'
             logger.error(error)
-            continue
         number = match.group(1)
 
         # Break the version number down into parts.
@@ -142,13 +85,11 @@ def versions():
         if len(parts) > 4:
             error = f'Reported version "{number}" has more than four parts.'
             logger.error(error)
-            continue
         try:
             parts = [int(part) for part in parts]
         except ValueError:
             error = f'Not all parts of version "{number}" are numbers.'
             logger.error(error)
-            continue
         parts = parts + [0]*(4-len(parts))
         (major, minor, patch, build) = parts
 
@@ -158,26 +99,133 @@ def versions():
             name += chr(ord('a') + patch - 1)
         logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Check that Java virtual machine exists.
-        java = folder / 'java' / architecture() / 'jre' / 'bin'
-        jvm  = java / 'server' / 'jvm.dll'
-        if not jvm.exists():
-            error = 'Did not find Java virtual machine.'
+        # Query the Comsol server's install location.
+        process = run(['which', 'comsol'], stdout=PIPE)
+        if process.returncode != 0:
+            error = 'Querying install location failed.'
             logger.error(error)
-            continue
-
-        # Check that Java API folder exists.
-        path = folder / 'plugins'
-        if not path.exists():
-            error = 'Did not find Comsol API plugins.'
+        answer = process.stdout.decode('ascii', errors='ignore').strip()
+        logger.debug(f'Reported location info is "{answer}".')
+        folder = Path(answer).parent.parent
+        
+        versions[name] = Version(major, minor, patch, build, folder)
+    elif system == 'Windows':
+        # Open main Comsol registry node.
+        path_main = r'SOFTWARE\Comsol'
+        try:
+            main = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_main)
+        except FileNotFoundError:
+            error = 'Did not find Comsol registry entry.'
             logger.error(error)
-            continue
+            raise OSError(error) from None
 
-        # Add to list of installed versions.
-        if name in versions:
-            logger.warning(f'Ignoring duplicate of Comsol version {name}.')
-        else:
-            versions[name] = Version(major, minor, patch, build, folder)
+        # Parse sub-nodes to get list of installed Comsol versions.
+        versions = {}
+        index = 0
+        while True:
+
+            # Get name of next node. Exit loop if list exhausted.
+            try:
+                name = winreg.EnumKey(main, index)
+                index += 1
+            except OSError:
+                break
+
+            # Ignore nodes that don't follow naming pattern.
+            if not re.match(r'(?i)Comsol\d+[a-z]?', name):
+                logger.debug(f'Ignoring registry node "{name}".')
+                continue
+
+            # Open the sub-node.
+            path_node = path_main + '\\' + name
+            logger.debug(f'Checking registry node "{path_node}".')
+            try:
+                node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_node)
+            except FileNotFoundError:
+                error = f'Could not open registry node "{name}".'
+                logger.error(error)
+                continue
+
+            # Get installation folder from corresponding key.
+            key = 'COMSOLROOT'
+            try:
+                value = winreg.QueryValueEx(node, key)
+            except FileNotFoundError:
+                error = f'Key "{key}" missing in node "{name}".'
+                logger.error(error)
+                continue
+            folder = Path(value[0])
+            logger.debug(f'Checking installation folder "{folder}".')
+
+            # Check that server executable exists.
+            path = folder / 'bin' / architecture() / 'comsolmphserver.exe'
+            if not path.exists():
+                error = 'Did not find Comsol server executable.'
+                logger.error(error)
+                continue
+
+            # Query the Comsol server's version information.
+            flags = 0x08000000 if platform.system() == 'Windows' else 0
+            process = run(f'{path} --version', stdout=PIPE, creationflags=flags)
+            if process.returncode != 0:
+                error = 'Querying version information failed.'
+                logger.error(error)
+            answer = process.stdout.decode('ascii', errors='ignore').strip()
+            logger.debug(f'Reported version info is "{answer}".')
+
+            # Parse out the actual version number.
+            match = re.match(r'(?i)Comsol.*?(\d+(?:\.\d+)*)', answer)
+            if not match:
+                error = f'Unexpected answer "{answer}" to version query.'
+                logger.error(error)
+                continue
+            number = match.group(1)
+
+            # Break the version number down into parts.
+            parts = number.split('.')
+            if len(parts) > 4:
+                error = f'Reported version "{number}" has more than four parts.'
+                logger.error(error)
+                continue
+            try:
+                parts = [int(part) for part in parts]
+            except ValueError:
+                error = f'Not all parts of version "{number}" are numbers.'
+                logger.error(error)
+                continue
+            parts = parts + [0]*(4-len(parts))
+            (major, minor, patch, build) = parts
+
+            # Assign a standardized name to this version.
+            name = f'{major}.{minor}'
+            if patch > 0:
+                name += chr(ord('a') + patch - 1)
+            logger.debug(f'Assigned name "{name}" to this installation.')
+
+            # Check that Java virtual machine exists.
+            java = folder / 'java' / architecture() / 'jre' / 'bin'
+            jvm  = java / 'server' / 'jvm.dll'
+            if not jvm.exists():
+                error = 'Did not find Java virtual machine.'
+                logger.error(error)
+                continue
+
+            # Check that Java API folder exists.
+            path = folder / 'plugins'
+            if not path.exists():
+                error = 'Did not find Comsol API plugins.'
+                logger.error(error)
+                continue
+
+            # Add to list of installed versions.
+            if name in versions:
+                logger.warning(f'Ignoring duplicate of Comsol version {name}.')
+            else:
+                versions[name] = Version(major, minor, patch, build, folder)
+    else:
+        error = (f'Unsupported operating system "{system}".')
+        logger.error(error)
+        raise NotImplementedError(error)
 
     # Report error if no Comsol installation was found.
     if not versions:
@@ -190,7 +238,6 @@ def versions():
 
     # Return list of installed versions.
     return versions
-
 
 def folder(version=None):
     """
