@@ -12,6 +12,7 @@ from .model import Model               # model object
 ########################################
 # Dependencies                         #
 ########################################
+import platform                        # platform information
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
 import atexit                          # exit handler
@@ -72,7 +73,13 @@ class Client:
     """
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
-
+        # Check system compatibility
+        system = platform.system()
+        if not (system == 'Linux' or system == 'Windows'):
+            error = (f'Unsupported operating system "{system}".')
+            logger.error(error)
+            raise NotImplementedError(error)
+        
         # Make sure this is the first (and only) client created.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
@@ -82,13 +89,16 @@ class Client:
         # Determine relevant folders of the Comsol back-end.
         main = backend.folder(version)
         arch = backend.architecture()
-        jre  = main / 'java' / arch / 'jre' / 'bin'
-        jvm  = jre / 'server' / 'jvm.dll'
+        jre  = main / 'java' / arch / 'jre'
+        if system == 'Linux':
+            jvm  = jre / 'lib' / 'amd64' / 'server' / 'libjvm.so'
+        elif system == 'Windows':
+            jvm  = jre / 'bin' / 'server' / 'jvm.dll'
         api  = main / 'plugins' / '*'
 
         # Manipulate binary search path to only point to Comsol's JVM.
         path = os.environ['PATH']
-        os.environ['PATH'] = str(jre)
+        os.environ['PATH'] = str(jre / 'bin')
 
         # Set environment variable so Comsol will restrict cores at start-up.
         if cores:
@@ -128,7 +138,10 @@ class Client:
         java.setPreference('updates.update.check', 'off')
         java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
         java.setPreference('tempfiles.recovery.autosave', 'off')
-        java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
+        try:
+            java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
+        except:
+            pass
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save setup in instance attributes.
