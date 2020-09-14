@@ -104,9 +104,10 @@ def versions():
         if process.returncode != 0:
             error = 'Querying install location failed.'
             logger.error(error)
-        answer = process.stdout.decode('ascii', errors='ignore').strip()
+        answer = Path(process.stdout.decode('ascii',
+                        errors='ignore').strip()).resolve()
         logger.debug(f'Reported location info is "{answer}".')
-        folder = Path(answer).parent.parent
+        folder = answer.parent.parent
         
         versions[name] = Version(major, minor, patch, build, folder)
     elif system == 'Windows':
