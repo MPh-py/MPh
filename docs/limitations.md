@@ -17,6 +17,11 @@ line. Since they cannot be used for continuous integration testing
 anyway, given that they depend on Comsol being installed on the local
 machine, this is but a minor inconvenience.
 
+Furthermore, there are some known, but unresolved issues with JPype's
+shutdown of the Java virtual machine. Most notably, pressing
+<kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
+the entire Python session. So do not rely on that to work.
+
 There is an alternative Java bridge, [pyJNIus][jnius-repo], which is
 not limited to one virtual machine, but then fails in another regard:
 A number of Java methods exposed by Comsol are inexplicably missing
@@ -25,10 +30,10 @@ from the Python encapsulation.
 MPh is, at this point, also limited to work on Windows only, even
 though Comsol itself is available on other platforms, namely Linux
 and MacOS. The code that identifies installed Comsol versions and
-locates the executables would have to be adapted to support the
-other operating systems. This is not particularly difficult for
-someone with access to a test environment. Contributions or even
-just suggestions [on GitHub][mph-repo] are welcome.
+locates the executables has to be adapted to support the other
+operating systems. This is not difficult per se, but the devil is
+in the details. Contributions or even just suggestions
+[on GitHub][mph-repo] are welcome.
 
 Cross-network client–server connections, while ostensibly supported
 by this library, have never actually been tested — for lack of a

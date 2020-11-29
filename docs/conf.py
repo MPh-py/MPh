@@ -10,11 +10,10 @@ sub-folder `rendered`, where `index.html` is the start page.
 
 The documentation source comprises the `.md` files here, of which
 `index.md` maps to the start page, as well as the documentation strings
-in the package's source code for the API documentation.
-
-All text may use mark-up according to the CommonMark specification of
-the Markdown syntax. The Sphinx extension `reCommonMark` is used to
-convert Markdown to reStructuredText, Sphinx's native input format.
+in the package's source code for the API documentation. All text may
+use mark-up according to the CommonMark specification of the Markdown
+syntax. The Sphinx extension `reCommonMark` is used to convert Markdown
+to reStructuredText, Sphinx's native input format.
 """
 __license__ = 'MIT'
 
@@ -23,7 +22,6 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 
-import sphinx_rtd_theme                # Read-the-Docs theme
 import recommonmark                    # Markdown extension
 import recommonmark.transform          # Markdown transformations
 import commonmark                      # Markdown parser
@@ -49,6 +47,8 @@ sys.path.insert(0, str(main))
 autodoc_mock_imports = ['jpype', 'numpy', 'winreg']
 for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy', 'winreg'):
     sys.modules[package] = MagicMock()
+import jpype
+jpype.__version__ = '1.1.2'
 
 # Import package to make meta data available.
 import mph as meta
@@ -121,14 +121,13 @@ nitpicky           = True              # Warn about missing references?
 default_role       = 'code'            # Back-ticks denote code in reST.
 add_module_names   = False             # Don't precede members with module name.
 autodoc_default_options = {
-    'members':       None,             # Include module/class members.
-    'member-order': 'bysource',        # Order members as in source file.
-}
+    'members':       True,             # Include module/class members.
+    'member-order': 'bysource'}        # Order members as in source file.
 
 # Output style
-html_theme       = 'sphinx_rtd_theme'  # Use Read-the-Docs theme.
+html_theme       = 'sphinx_rtd_theme'  # Read-the-Docs theme
 html_static_path = ['style']           # folders to include in output
-html_css_files   = ['custom.css']      # additional style files
+html_css_files   = ['custom.css']      # extra style files to apply
 pygments_style   = 'trac'              # syntax highlighting style
 
 # Output options
