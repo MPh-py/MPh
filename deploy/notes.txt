@@ -9,5 +9,6 @@ To release a new version, do the following:
 • Push the commit (but not the tag): `git push origin master`.
 • Check that documentation built successfully on Read-the-Docs.
 • Publish to PyPI by running `deploy/publish.py`.
+• Check that meta information is correct on PyPI.
 • Then push the tag: `git push --tags`.
 • Possibly "draft a new release" on GitHub.
