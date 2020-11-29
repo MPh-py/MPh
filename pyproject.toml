@@ -6,8 +6,8 @@ build-backend = "flit_core.buildapi"
 dist-name = 'MPh'
 module = 'mph'
 author = 'John Hennig'
-requires = ['JPype1==0.7.5', 'NumPy']
-requires-python = '>=3.6,<=3.8.3'
+requires = ['JPype1', 'NumPy']
+requires-python = '>=3.6'
 description-file = 'ReadMe.md'
 keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
 classifiers = [

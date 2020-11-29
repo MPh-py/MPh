@@ -210,6 +210,10 @@ def shutdown():
     from application code.
     """
     if jpype.isJVMStarted():
-        logger.info('Shutting down the Java virtual machine.')
-        jpype.shutdownJVM()
+        if jpype.__version__ > '0.7.5':
+            logger.info('Exiting the Java virtual machine.')
+            jpype.java.lang.Runtime.getRuntime().exit(0)
+        else:
+            logger.info('Shutting down the Java virtual machine.')
+            jpype.shutdownJVM()
         logger.info('Java virtual machine has shut down.')
