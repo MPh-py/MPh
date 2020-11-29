@@ -69,7 +69,8 @@ def versions():
     # Open main Comsol registry node.
     path_main = r'SOFTWARE\Comsol'
     try:
-        main = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_main)
+        main = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_main,
+                              access=winreg.KEY_READ | winreg.KEY_WOW64_64KEY)
     except FileNotFoundError:
         error = 'Did not find Comsol registry entry.'
         logger.error(error)
@@ -96,7 +97,8 @@ def versions():
         path_node = path_main + '\\' + name
         logger.debug(f'Checking registry node "{path_node}".')
         try:
-            node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_node)
+            node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_node,
+                      access=winreg.KEY_READ | winreg.KEY_WOW64_64KEY)
         except FileNotFoundError:
             error = f'Could not open registry node "{name}".'
             logger.error(error)
