@@ -8,6 +8,8 @@ module = 'mph'
 author = 'John Hennig'
 requires = ['JPype1', 'NumPy']
 requires-python = '>=3.6'
+licenes = 'MIT'
+homepage = 'https://github.com/john-hennig/mph'
 description-file = 'ReadMe.md'
 keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
 classifiers = [
