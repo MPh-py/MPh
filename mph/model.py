@@ -1,6 +1,4 @@
-﻿"""
-Provides the wrapper for Comsol model objects.
-"""
+﻿"""Provides the wrapper for Comsol model objects."""
 __license__ = 'MIT'
 
 

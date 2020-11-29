@@ -1,6 +1,4 @@
-﻿"""
-Provides the wrapper for Comsol server instances.
-"""
+﻿"""Provides the wrapper for Comsol server instances."""
 __license__ = 'MIT'
 
 

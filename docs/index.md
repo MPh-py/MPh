@@ -1,7 +1,7 @@
 ﻿MPh
 ===
 
-Python scripting interface for Comsol Multiphysics®.
+Pythonic scripting interface for Comsol Multiphysics®.
 
 [Comsol][comsol] is a commercial software application that is widely
 used in science and industry for research and development. It excels
