@@ -17,7 +17,7 @@ arch = 'win64'
 jre  = main / 'java' / arch / 'jre' / 'bin'
 jvm  = jre / 'server' / 'jvm.dll'
 api  = main / 'plugins' / '*'
-print(f'Path to JVM: {jvm}')
+print(f'JVM path: {jvm}')
 jpype.startJVM(str(jvm), classpath=str(api), convertStrings=False)
 print('JVM started.')
 
