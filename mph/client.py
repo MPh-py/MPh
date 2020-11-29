@@ -133,7 +133,7 @@ class Client:
 
         # Save setup in instance attributes.
         self.cores   = cores
-        self.version = version
+        self.version = list(backend.versions().keys())[-1]
         self.host    = host
         self.port    = port
         self.folder  = main
