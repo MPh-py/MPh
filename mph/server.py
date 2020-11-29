@@ -84,18 +84,17 @@ class Server:
         architecture = backend.architecture()
         if system() == 'Windows':
             executable = 'comsolmphserver'
-            arguments  = ''
+            arguments  = []
         else:
             executable = 'comsol'
-            arguments  = ' mphserver'
+            arguments  = ['mphserver']
         fullpath = folder / 'bin' / architecture / executable
-        command = f'{fullpath}{arguments}'
         logger.info('Starting external server process.')
         if cores:
-            command += f' -np {cores}'
+            arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        process = start(command, stdin=PIPE, stdout=PIPE)
+        process = start([str(fullpath)] + arguments, stdin=PIPE, stdout=PIPE)
 
         # Wait for it to report the port number.
         t0 = now()

@@ -122,7 +122,8 @@ def versions():
 
         # Query the Comsol server's version information.
         flags = 0x08000000 if platform.system() == 'Windows' else 0
-        process = run(f'{path} --version', stdout=PIPE, creationflags=flags)
+        command = [str(path), '--version']
+        process = run(command, stdout=PIPE, creationflags=flags)
         if process.returncode != 0:
             error = 'Querying version information failed.'
             logger.error(error)
