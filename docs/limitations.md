@@ -65,11 +65,12 @@ on a model node.
 It may equally help to call the returned Python model object something
 like `pymodel` and assign the name `model` to `pymodel.java`. Then you
 can just copy-and-paste Java or Matlab code from the Comsol programming
-manual or as exported from the Comsol front-end. Python will gracefully overlook gratuitous semicolons at the end of statements, so this approach
-would even work for entire blocks of code. Keep in mind, however, that
-JPype cannot perform all type conversions silently in the background.
-Occasionally, when there is ambiguity in overloaded methods, you will
-have to cast types explicitly. Refer to the [JPype
+manual or as exported from the Comsol front-end. Python will gracefully
+overlook gratuitous semicolons at the end of statements, so this
+approach would even work for entire blocks of code. Keep in mind,
+however, that JPype cannot perform all type conversions silently in
+the background. Occasionally, when there is ambiguity in overloaded
+methods, you will have to cast types explicitly. Refer to the [JPype
 documentation][jpype-docs] for help.
 
 
