@@ -1,4 +1,0 @@
-backend
-=======
-
-.. automodule:: mph.backend

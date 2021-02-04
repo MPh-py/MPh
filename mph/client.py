@@ -79,7 +79,7 @@ class Client:
             error = (f'Unsupported operating system "{system}".')
             logger.error(error)
             raise NotImplementedError(error)
-        
+
         # Make sure this is the first (and only) client created.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'

@@ -12,4 +12,4 @@ __license__   = 'MIT'
 from .model   import Model
 from .client  import Client
 from .server  import Server
-from .backend import inspect
+from .tools   import inspect

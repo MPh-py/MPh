@@ -15,5 +15,5 @@ provided by this library.
     Model
     Client
     Server
-    backend
+    tools
 ```
