@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Components                           #
 ########################################
-from . import backend                  # back-end information
+from . import discovery                # back-end discovery
 
 
 ########################################
@@ -80,8 +80,8 @@ class Server:
     def __init__(self, cores=None, version=None, timeout=60):
 
         # Start the Comsol server as an external process.
-        folder = backend.folder(version)
-        architecture = backend.architecture()
+        folder = discovery.folder(version)
+        architecture = discovery.architecture()
         if system() == 'Windows':
             executable = 'comsolmphserver'
             arguments  = []

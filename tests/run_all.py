@@ -12,7 +12,7 @@ arguments = argv[1:]
 if 'log' not in arguments:
     arguments.append('log')
 
-for test in ('backend', 'client', 'model', 'server', 'remote'):
+for test in ('discovery', 'client', 'model', 'server', 'remote'):
     print(f'test_{test}')
     process = run(['python', f'test_{test}.py'] + arguments, cwd=here)
     if process.returncode != 0:

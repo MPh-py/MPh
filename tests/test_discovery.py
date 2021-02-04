@@ -1,4 +1,4 @@
-﻿"""Tests finding back-end installations."""
+﻿"""Tests discovering back-end installations."""
 __license__ = 'MIT'
 
 
@@ -16,17 +16,17 @@ from sys import argv
 ########################################
 
 def test_versions():
-    versions = mph.backend.versions()
+    versions = mph.discovery.versions()
     assert bool(versions)
 
 
 def test_folder():
-    folder = mph.backend.folder()
+    folder = mph.discovery.folder()
     assert folder.is_dir()
 
 
 def test_architecture():
-    architecture = mph.backend.architecture()
+    architecture = mph.discovery.architecture()
     architectures = ('win64', 'glnxa64', 'maci64')
     assert architecture in architectures
 

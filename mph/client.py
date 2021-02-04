@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Components                           #
 ########################################
-from . import backend                  # back-end information
+from . import discovery                # back-end discovery
 from .model import Model               # model object
 
 
@@ -87,8 +87,8 @@ class Client:
             raise RuntimeError(error)
 
         # Determine relevant folders of the Comsol back-end.
-        main = backend.folder(version)
-        arch = backend.architecture()
+        main = discovery.folder(version)
+        arch = discovery.architecture()
         jre  = main / 'java' / arch / 'jre'
         if system == 'Linux':
             jvm  = jre / 'lib' / 'amd64' / 'server' / 'libjvm.so'
@@ -146,7 +146,7 @@ class Client:
 
         # Save setup in instance attributes.
         self.cores   = cores
-        self.version = list(backend.versions().keys())[-1]
+        self.version = list(discovery.versions().keys())[-1]
         self.host    = host
         self.port    = port
         self.folder  = main
