@@ -15,20 +15,19 @@ from sys import argv
 # Tests                                #
 ########################################
 
-def test_versions():
-    versions = mph.discovery.versions()
-    assert bool(versions)
+def test_parse():
+    version = 'COMSOL Multiphysics 5.5.0.359'
+    (name, major, minor, patch, build) = mph.discovery.parse(version)
+    assert name == '5.5'
+    assert major == 5
+    assert minor == 5
+    assert patch == 0
+    assert build == 359
 
 
-def test_folder():
-    folder = mph.discovery.folder()
-    assert folder.is_dir()
-
-
-def test_architecture():
-    architecture = mph.discovery.architecture()
-    architectures = ('win64', 'glnxa64', 'maci64')
-    assert architecture in architectures
+def test_backend():
+    backends = mph.discovery.backend()
+    assert bool(backends)
 
 
 ########################################
@@ -38,12 +37,11 @@ def test_architecture():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'log' in arguments:
+    if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',
             datefmt = '%H:%M:%S')
 
-    test_versions()
-    test_folder()
-    test_architecture()
+    test_parse()
+    test_backend()

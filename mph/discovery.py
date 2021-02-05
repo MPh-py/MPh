@@ -1,12 +1,14 @@
 ﻿"""
 Discovers Comsol installations on the local machine.
 
-This is a helper module that is not part of the public API. It
-retrieves information about installed Comsol versions, i.e. available
-simulation back-ends, and locates the installation folder.
+This is an internal helper module that is not part of the public API.
+It retrieves information about installed Comsol versions, i.e.
+available simulation back-ends, and locates the installation folders
+of Comsol itself and its Java runtime environment.
 
-The discovery mechanism currently only works on Windows, as it relies
-on the Registry to provide that information.
+On Windows, the discovery mechanism relies on the Registry to provide
+information about install locations. On Linux and MacOS, Comsol is
+expected to be installed at its respective default location.
 """
 __license__ = 'MIT'
 
@@ -15,15 +17,9 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 import platform                        # platform information
-try:
-    import winreg                          # Windows registry
-except:
-    pass
 import re                              # regular expressions
 from subprocess import run, PIPE       # external processes
-from collections import namedtuple     # named tuples
 from functools import lru_cache        # least-recently-used cache
-from numpy import array                # numerical arrays
 from pathlib import Path               # file paths
 from logging import getLogger          # event logging
 
@@ -35,263 +31,393 @@ logger = getLogger(__package__)        # package-wide event logger
 
 
 ########################################
-# Functions                            #
+# Version information                  #
 ########################################
 
-@lru_cache(maxsize=1)
-def versions():
+def parse(version):
     """
-    Returns version information of available Comsol installations.
+    Parses version information as returned by Comsol executable.
 
-    Version information is returned as a list of named tuples
-    containing the major, minor and patch version numbers, the
-    build number, and the installation folder.
+    Returns `(name, major, minor, patch, build)` where `name` is a
+    string and the rest are numbers. The name is a short-hand based
+    on the major, minor, and patch version numbers, e.g. "5.3a".
 
-    Currently, this has only been implemented for the Windows
-    operating system. On other platforms, such as Linux and MacOS,
-    the code here would have to be amended, namely because
-    locating installed software is system-specific.
-
-    Raises `RuntimeError` if no Comsol installation was found.
-    Raises `NotImplementedError` on operating systems other than
-    Windows.
+    Raises `ValueError` if the input string `version` deviates from
+    the expected format, i.e., the format in which the Comsol
+    executable returns version information.
     """
 
-    # Define data type describing a back-end installation.
-    Version = namedtuple('version',
-                        ('major', 'minor', 'patch', 'build', 'folder'))
+    # Separate version number from preceding text.
+    match = re.match(r'(?i)Comsol.*?(\d+(?:\.\d+)*)', version)
+    if not match:
+        raise ValueError(f'Version info "{version}" has invalid format.')
+    number = match.group(1)
 
-    system = platform.system()
+    # Break the version number down into parts.
+    parts = number.split('.')
+    if len(parts) > 4:
+        raise ValueError(f'Version number "{number}" has too many parts.')
+    try:
+        parts = [int(part) for part in parts]
+    except ValueError:
+        raise ValueError(f'Not all parts of version "{number}" are numbers.')
+    parts = parts + [0]*(4-len(parts))
+    (major, minor, patch, build) = parts
 
-    if system == 'Linux':
-        versions = {}
+    # Assign a short-hand name to this version.
+    name = f'{major}.{minor}'
+    if patch > 0:
+        name += chr(ord('a') + patch - 1)
 
-        # Query the Comsol server's version information.
-        process = run(['comsol', '--version'], stdout=PIPE)
-        if process.returncode != 0:
-            error = 'Querying version information failed.'
-            logger.error(error)
-        answer = process.stdout.decode('ascii', errors='ignore').strip()
-        logger.debug(f'Reported version info is "{answer}".')
+    # Return version details.
+    return (name, major, minor, patch, build)
 
-        # Parse out the version number.
-        match = re.match(r'(?i)COMSOL Multiphysics.*?(\d+(?:\.\d+)*)', answer)
-        if not match:
-            error = f'Unexpected answer "{answer}" to version query.'
-            logger.error(error)
-        number = match.group(1)
 
-        # Break the version number down into parts.
-        parts = number.split('.')
-        if len(parts) > 4:
-            error = f'Reported version "{number}" has more than four parts.'
-            logger.error(error)
+########################################
+# Discovery mechanism                  #
+########################################
+
+def search_Windows():
+    """Searches for Comsol installations on a Windows system."""
+
+    # Collect all information in a list.
+    backends = []
+
+    # Import Windows-specific library for registry access.
+    import winreg
+
+    # Open main Comsol registry node.
+    main_path = r'SOFTWARE\Comsol'
+    try:
+        main_node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, main_path)
+    except FileNotFoundError:
+        error = 'Did not find Comsol registry entry.'
+        logger.critical(error)
+        raise OSError(error) from None
+
+    # Parse child nodes to get list of installed Comsol versions.
+    index = 0
+    while True:
+
+        # Get name of next node. Exit loop when list exhausted.
         try:
-            parts = [int(part) for part in parts]
-        except ValueError:
-            error = f'Not all parts of version "{number}" are numbers.'
-            logger.error(error)
-        parts = parts + [0]*(4-len(parts))
-        (major, minor, patch, build) = parts
+            node_name = winreg.EnumKey(main_node, index)
+            index += 1
+        except OSError:
+            break
 
-        # Assign a standardized name to this version.
-        name = f'{major}.{minor}'
-        if patch > 0:
-            name += chr(ord('a') + patch - 1)
+        # Ignore nodes that don't follow naming pattern.
+        if not re.match(r'(?i)Comsol\d+[a-z]?', node_name):
+            logger.debug(f'Ignoring registry node "{node_name}".')
+            continue
+
+        # Open the child node.
+        node_path = main_path + '\\' + node_name
+        logger.debug(f'Checking registry node "{node_path}".')
+        try:
+            node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, node_path)
+        except FileNotFoundError:
+            logger.error(f'Could not open registry node "{node_name}".')
+            continue
+
+        # Get installation folder from corresponding key.
+        key = 'COMSOLROOT'
+        try:
+            value = winreg.QueryValueEx(node, key)
+        except FileNotFoundError:
+            logger.error(f'Key "{key}" missing in node "{node_name}".')
+            continue
+        root = Path(value[0])
+        logger.debug(f'Checking installation folder "{root}".')
+
+        # Check that Comsol server executable exists.
+        server = root/'bin'/'win64'/'comsolmphserver.exe'
+        if not server.exists():
+            logger.error('Did not find Comsol server executable.')
+            continue
+
+        # Get version information from Comsol server.
+        process = run([str(server), '--version'], stdout=PIPE,
+                      creationflags=0x08000000)
+        if process.returncode != 0:
+            logger.error('Querying version information failed.')
+            continue
+        version = process.stdout.decode('ascii', errors='ignore').strip()
+        logger.debug(f'Reported version info is "{version}".')
+
+        # Parse version information.
+        try:
+            (name, major, minor, patch, build) = parse(version)
+        except ValueError as error:
+            logger.error(error)
+            continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Query the Comsol server's install location.
-        process = run(['which', 'comsol'], stdout=PIPE)
+        # Ignore version if name is a duplicate.
+        names = [backend['version']['name'] for backend in backends]
+        if name in names:
+            logger.warning(f'Ignoring duplicate of Comsol version {name}.')
+            continue
+
+        # Check existence of required files and folders.
+        jre = root/'java'/'win64'/'jre'
+        if not jre.exists():
+            logger.error('Did not find Java run-time environment.')
+            continue
+        java = jre/'bin'
+        if not java.exists():
+            logger.error('Did not find Java run-time binaries.')
+            continue
+        jvm = java/'server'/'jvm.dll'
+        if not jvm.exists():
+            logger.error('Did not find Java virtual machine.')
+            continue
+        api = root/'plugins'
+        if not api.exists():
+            logger.error('Did not find Comsol Java API plug-ins.')
+            continue
+        lib = root/'lib'/'win64'
+        if not lib.exists():
+            logger.error('Did not find Comsol run-time libraries.')
+            continue
+
+        # Collect all information in a dictionary and add it to the list.
+        backends.append({
+            'version':   {'name':   name,
+                          'major':  major,
+                          'minor':  minor,
+                          'patch':  patch,
+                          'build':  build},
+            'paths':     {'root':   root,
+                          'jre':    jre,
+                          'java':   java,
+                          'jvm':    jvm,
+                          'api':    api,
+                          'lib':    lib,
+                          'server': server},
+            'arguments': {'server': []}
+        })
+
+    # Return list with information about all installed Comsol back-ends.
+    return backends
+
+
+def search_Linux():
+    """Searches for Comsol installations on a Linux system."""
+
+    # Collect all information in a list.
+    backends = []
+
+    # Loop over Comsol folders in /usr/local.
+    folders = [item for item in Path('/usr/local').glob('comsol*')
+               if item.is_dir()]
+    for folder in folders:
+
+        # Root folder is the sub-directory "multiphysics".
+        root = folder/'multiphysics'
+        if not root.is_dir():
+            logger.debug(f'No folder "multiphysics" in "{folder.name}".')
+            continue
+        logger.debug(f'Checking installation folder "{root}".')
+
+        # Check that Comsol executable exists.
+        comsol = root/'bin'/'glnxa64'/'comsol'
+        if not comsol.exists():
+            logger.error('Did not find Comsol executable.')
+            continue
+
+        # Get version information from Comsol server.
+        process = run([str(comsol), 'server', '--version'], stdout=PIPE)
         if process.returncode != 0:
-            error = 'Querying install location failed.'
-            logger.error(error)
-        answer = Path(process.stdout.decode('ascii',
-                        errors='ignore').strip()).resolve()
-        logger.debug(f'Reported location info is "{answer}".')
-        folder = answer.parent.parent
+            logger.error('Querying version information failed.')
+            continue
+        version = process.stdout.decode('ascii', errors='ignore').strip()
+        logger.debug(f'Reported version info is "{version}".')
 
-        versions[name] = Version(major, minor, patch, build, folder)
-
-    elif system == 'Windows':
-        # Open main Comsol registry node.
-        path_main = r'SOFTWARE\Comsol'
+        # Parse version information.
         try:
-            main = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_main)
-        except FileNotFoundError:
-            error = 'Did not find Comsol registry entry.'
+            (name, major, minor, patch, build) = parse(version)
+        except ValueError as error:
             logger.error(error)
-            raise OSError(error) from None
+            continue
+        logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Parse sub-nodes to get list of installed Comsol versions.
-        versions = {}
-        index = 0
-        while True:
+        # Ignore version if name is a duplicate.
+        names = [backend['version']['name'] for backend in backends]
+        if name in names:
+            logger.warning(f'Ignoring duplicate of Comsol version {name}.')
+            continue
 
-            # Get name of next node. Exit loop if list exhausted.
-            try:
-                name = winreg.EnumKey(main, index)
-                index += 1
-            except OSError:
-                break
+        # Check existence of required files and folders.
+        jre = root/'java'/'glnxa64'/'jre'
+        if not jre.exists():
+            logger.error('Did not find Java run-time environment.')
+            continue
+        java = jre/'bin'
+        if not java.exists():
+            logger.error('Did not find Java run-time binaries.')
+            continue
+        jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+        if not jvm.exists():
+            logger.error('Did not find Java virtual machine.')
+            continue
+        api = root/'plugins'
+        if not api.exists():
+            logger.error('Did not find Comsol Java API plug-ins.')
+            continue
+        lib = root/'lib'/'glnxa64'
+        if not lib.exists():
+            logger.error('Did not find Comsol libraries.')
+            continue
 
-            # Ignore nodes that don't follow naming pattern.
-            if not re.match(r'(?i)Comsol\d+[a-z]?', name):
-                logger.debug(f'Ignoring registry node "{name}".')
-                continue
+        # Collect all information in a dictionary and add it to the list.
+        backends.append({
+            'version':   {'name':   name,
+                          'major':  major,
+                          'minor':  minor,
+                          'patch':  patch,
+                          'build':  build},
+            'paths':     {'root':   root,
+                          'jre':    jre,
+                          'java':   java,
+                          'jvm':    jvm,
+                          'api':    api,
+                          'lib':    lib,
+                          'server': comsol},
+            'arguments': {'server': ['server']}
+        })
 
-            # Open the sub-node.
-            path_node = path_main + '\\' + name
-            logger.debug(f'Checking registry node "{path_node}".')
-            try:
-                node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_node)
-            except FileNotFoundError:
-                error = f'Could not open registry node "{name}".'
-                logger.error(error)
-                continue
+    # Return list with information about all installed Comsol back-ends.
+    return backends
 
-            # Get installation folder from corresponding key.
-            key = 'COMSOLROOT'
-            try:
-                value = winreg.QueryValueEx(node, key)
-            except FileNotFoundError:
-                error = f'Key "{key}" missing in node "{name}".'
-                logger.error(error)
-                continue
-            folder = Path(value[0])
-            logger.debug(f'Checking installation folder "{folder}".')
 
-            # Check that server executable exists.
-            path = folder / 'bin' / architecture() / 'comsolmphserver.exe'
-            if not path.exists():
-                error = 'Did not find Comsol server executable.'
-                logger.error(error)
-                continue
+def search_MacOS():
+    """Searches for Comsol installations on a MacOS system."""
 
-            # Query the Comsol server's version information.
-            flags = 0x08000000 if platform.system() == 'Windows' else 0
-            process = run(f'{path} --version', stdout=PIPE, creationflags=flags)
-            if process.returncode != 0:
-                error = 'Querying version information failed.'
-                logger.error(error)
-            answer = process.stdout.decode('ascii', errors='ignore').strip()
-            logger.debug(f'Reported version info is "{answer}".')
+    # Collect all information in a list.
+    backends = []
 
-            # Parse out the actual version number.
-            match = re.match(r'(?i)Comsol.*?(\d+(?:\.\d+)*)', answer)
-            if not match:
-                error = f'Unexpected answer "{answer}" to version query.'
-                logger.error(error)
-                continue
-            number = match.group(1)
+    # Loop over Comsol folders in /Applications.
+    folders = [item for item in Path('/Applications').glob('COMSOL*')
+               if item.is_dir()]
+    for folder in folders:
 
-            # Break the version number down into parts.
-            parts = number.split('.')
-            if len(parts) > 4:
-                error = f'Reported version "{number}" has more than four parts.'
-                logger.error(error)
-                continue
-            try:
-                parts = [int(part) for part in parts]
-            except ValueError:
-                error = f'Not all parts of version "{number}" are numbers.'
-                logger.error(error)
-                continue
-            parts = parts + [0]*(4-len(parts))
-            (major, minor, patch, build) = parts
+        # Root folder is the sub-directory "Multiphysics".
+        root = folder/'Multiphysics'
+        if not root.is_dir():
+            logger.debug(f'No folder "Multiphysics" in "{folder.name}".')
+            continue
+        logger.debug(f'Checking installation folder "{root}".')
 
-            # Assign a standardized name to this version.
-            name = f'{major}.{minor}'
-            if patch > 0:
-                name += chr(ord('a') + patch - 1)
-            logger.debug(f'Assigned name "{name}" to this installation.')
+        # Check that Comsol executable exists.
+        comsol = root/'bin'/'maci64'/'comsol'
+        if not comsol.exists():
+            logger.error('Did not find Comsol executable.')
+            continue
 
-            # Check that Java virtual machine exists.
-            java = folder / 'java' / architecture() / 'jre' / 'bin'
-            jvm  = java / 'server' / 'jvm.dll'
-            if not jvm.exists():
-                error = 'Did not find Java virtual machine.'
-                logger.error(error)
-                continue
+        # Get version information from Comsol server.
+        process = run([str(comsol), 'server', '--version'], stdout=PIPE)
+        if process.returncode != 0:
+            logger.error('Querying version information failed.')
+            continue
+        version = process.stdout.decode('ascii', errors='ignore').strip()
+        logger.debug(f'Reported version info is "{version}".')
 
-            # Check that Java API folder exists.
-            path = folder / 'plugins'
-            if not path.exists():
-                error = 'Did not find Comsol API plugins.'
-                logger.error(error)
-                continue
-
-            # Add to list of installed versions.
-            if name in versions:
-                logger.warning(f'Ignoring duplicate of Comsol version {name}.')
-            else:
-                versions[name] = Version(major, minor, patch, build, folder)
-
-    else:
-        error = (f'Unsupported operating system "{system}".')
-        logger.error(error)
-        raise NotImplementedError(error)
-
-    # Report error if no Comsol installation was found.
-    if not versions:
-        error = 'Could not locate any Comsol installation.'
-        logger.error(error)
-        raise RuntimeError(error)
-
-    # Sort versions by name.
-    versions = dict(sorted(versions.items()))
-
-    # Return list of installed versions.
-    return versions
-
-def folder(version=None):
-    """
-    Returns the path to the Comsol installation folder.
-
-    A specific Comsol `version` can be named, if several are
-    installed, for example `version='5.3a'`. Otherwise the latest
-    version is used.
-
-    Relies on `versions()` to discover installations.
-
-    Raises `ValueError` if the requested version is not installed.
-    """
-    if version is not None:
-        if version not in versions():
-            error = f'Version {version} is not installed.'
+        # Parse version information.
+        try:
+            (name, major, minor, patch, build) = parse(version)
+        except ValueError as error:
             logger.error(error)
-            raise ValueError(error)
-        return versions()[version].folder
-    else:
-        last = list(versions().keys())[-1]
-        return versions()[last].folder
+            continue
+        logger.debug(f'Assigned name "{name}" to this installation.')
+
+        # Ignore version if name is a duplicate.
+        names = [backend['version']['name'] for backend in backends]
+        if name in names:
+            logger.warning(f'Ignoring duplicate of Comsol version {name}.')
+            continue
+
+        # Check existence of required files and folders.
+        jre = root/'java'/'maci64'/'jre'
+        if not jre.exists():
+            logger.error('Did not find Java run-time environment.')
+            continue
+        java = jre/'bin'
+        if not java.exists():
+            logger.error('Did not find Java run-time binaries.')
+            continue
+        jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+        if not jvm.exists():
+            logger.error('Did not find Java virtual machine.')
+            continue
+        api = root/'plugins'
+        if not api.exists():
+            logger.error('Did not find Comsol Java API plug-ins.')
+            continue
+        lib = root/'lib'/'maci64'
+        if not lib.exists():
+            logger.error('Did not find Comsol libraries.')
+            continue
+
+        # Collect all information in a dictionary and add it to the list.
+        backends.append({
+            'version':   {'name':   name,
+                          'major':  major,
+                          'minor':  minor,
+                          'patch':  patch,
+                          'build':  build},
+            'paths':     {'root':   root,
+                          'jre':    jre,
+                          'java':   java,
+                          'jvm':    jvm,
+                          'api':    api,
+                          'lib':    lib,
+                          'server': comsol},
+            'arguments': {'server': ['server']}
+        })
+
+    # Return list with information about all installed Comsol back-ends.
+    return backends
 
 
 @lru_cache(maxsize=1)
-def architecture():
-    """
-    Returns the name of the "architecture" folder inside the
-    Comsol root folder.
-
-    That folder name is platform-dependent:
-    • `win64` on Windows
-    • `glnxa64` on Linux
-    • `maci64` on Mac OS
-
-    These are all builds for 64-bit CPU architectures. As Comsol no
-    longer supports 32-bit architectures, neither does this library.
-
-    Raises `OSError` if the operating system the application runs on
-    is not supported. Currently, these are all operating systems apart
-    from Windows.
-    """
+def search_system():
+    """Searches the system for Comsol installations."""
     system = platform.system()
     if system == 'Windows':
-        return 'win64'
+        return search_Windows()
     elif system == 'Linux':
-        return 'glnxa64'
+        return search_Linux()
     elif system == 'Darwin':
-        return 'maci64'
+        return search_MacOS()
     else:
-        error = f'Operating system "{system}" not supported.'
-        logger.error(error)
-        raise OSError(error)
+        error = f'Unsupported operating system "{system}".'
+        logger.critical(error)
+        raise NotImplementedError(error)
+
+
+########################################
+# Back-end selection                   #
+########################################
+
+def backend(version=None):
+    """
+    Returns information about the Comsol back-end.
+
+    A specific Comsol `version` can be selected if several are
+    installed, for example `version='5.3a'`. Otherwise the latest
+    version is used.
+    """
+    backends = search_system()
+    if not backends:
+        error = 'Could not locate any Comsol installation.'
+        logger.critical(error)
+        raise RuntimeError(error)
+    if version is None:
+        versions = [(backend['version']['major'], backend['version']['minor'],
+                     backend['version']['patch'], backend['version']['build'])
+                    for backend in backends]
+        return backends[versions.index(max(versions))]
+    else:
+        versions = [backend['version']['name'] for backend in backends]
+        return backends[versions.index(version)]

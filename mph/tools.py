@@ -1,5 +1,5 @@
 ﻿"""
-Tools for code development.
+Tools for software development.
 
 This module provides functionality that a user might find helpful
 when extending this very package or when developing applications
@@ -12,6 +12,7 @@ __license__ = 'MIT'
 ########################################
 # Dependencies                         #
 ########################################
+from numpy import array                # numerical arrays
 
 
 ########################################

@@ -14,7 +14,6 @@ from . import discovery                # back-end discovery
 from subprocess import Popen as start  # background process
 from subprocess import PIPE            # I/O redirection
 from subprocess import TimeoutExpired  # communication time-out
-from platform import system            # platform information
 from re import match as regex          # regular expression
 from time import perf_counter as now   # wall-clock time
 from time import sleep                 # execution delay
@@ -52,7 +51,7 @@ class Server:
     a user name and password.
 
     For client―server connections across the network, the server's
-    host name or IP address has to be known by the client up front. It
+    host name or IP address has to be known up front by the client. It
     has to be either hard-coded or managed otherwise. Though if client
     and server run on the same machine, it is simply `"localhost"`.
     (However, *in* that situation, you may be better served — pardon
@@ -73,28 +72,22 @@ class Server:
     Otherwise the latest version is used.
 
     A `timeout` can be set for the server to start up. The default
-    is 60 seconds. A `TimeoutError` exception is raised if the server
-    failed to start within that period.
+    is 60 seconds. Raises `TimeoutError` if the server failed to start
+    within that period.
     """
 
     def __init__(self, cores=None, version=None, timeout=60):
 
         # Start the Comsol server as an external process.
-        folder = discovery.folder(version)
-        architecture = discovery.architecture()
-        if system() == 'Windows':
-            executable = 'comsolmphserver'
-            arguments  = []
-        else:
-            executable = 'comsol'
-            arguments  = ['mphserver']
-        fullpath = folder / 'bin' / architecture / executable
+        backend = discovery.backend(version)
+        executable = backend['paths']['server']
+        arguments  = backend['arguments']['server']
         logger.info('Starting external server process.')
         if cores:
             arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        process = start([str(fullpath)] + arguments, stdin=PIPE, stdout=PIPE)
+        process = start([str(executable)] + arguments, stdin=PIPE, stdout=PIPE)
 
         # Wait for it to report the port number.
         t0 = now()
@@ -114,8 +107,7 @@ class Server:
         self.port    = port
         self.cores   = cores
         self.process = process
-        self.version = version
-        self.folder  = folder
+        self.version = backend['version']['name']
 
     def running(self):
         """Returns whether the server process is still running."""

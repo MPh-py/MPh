@@ -51,7 +51,7 @@ def test_stop():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'log' in arguments:
+    if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',

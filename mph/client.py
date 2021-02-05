@@ -6,18 +6,17 @@ __license__ = 'MIT'
 # Components                           #
 ########################################
 from . import discovery                # back-end discovery
-from .model import Model               # model object
+from .model import Model               # model class
 
 
 ########################################
 # Dependencies                         #
 ########################################
-import platform                        # platform information
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
-import atexit                          # exit handler
 import os                              # operating system
-from pathlib import Path               # file paths
+import atexit                          # exit handler
+from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
 
 
@@ -32,11 +31,11 @@ logger = getLogger(__package__)        # package-wide event logger
 ########################################
 class Client:
     """
-    Represents the (single) Comsol client instance.
+    Manages the Comsol client instance.
 
     A client can either be a stand-alone instance or it could connect
-    to a Comsol server started independently, possibly on a different
-    machine on the network.
+    to a Comsol server instance started independently, possibly on a
+    different machine on the network.
 
     Example:
     ```python
@@ -50,7 +49,7 @@ class Client:
     library, only one client can be instantiated at a time. This is
     because JPype cannot manage more than one Java virtual machine
     within the same Python session. Separate Python processes would
-    have to be run to work around this limitation.
+    have to be run, or spawned, to work around this limitation.
 
     The number of `cores` (threads) the client instance uses can
     be restricted by specifying a number. Otherwise all available
@@ -73,32 +72,19 @@ class Client:
     """
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
-        # Check system compatibility
-        system = platform.system()
-        if not (system == 'Linux' or system == 'Windows'):
-            error = (f'Unsupported operating system "{system}".')
-            logger.error(error)
-            raise NotImplementedError(error)
 
-        # Make sure this is the first (and only) client created.
+        # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
             logger.error(error)
-            raise RuntimeError(error)
+            raise NotImplementedError(error)
 
-        # Determine relevant folders of the Comsol back-end.
-        main = discovery.folder(version)
-        arch = discovery.architecture()
-        jre  = main / 'java' / arch / 'jre'
-        if system == 'Linux':
-            jvm  = jre / 'lib' / 'amd64' / 'server' / 'libjvm.so'
-        elif system == 'Windows':
-            jvm  = jre / 'bin' / 'server' / 'jvm.dll'
-        api  = main / 'plugins' / '*'
+        # Discover Comsol back-end.
+        backend = discovery.backend(version)
 
-        # Manipulate binary search path to only point to Comsol's JVM.
-        path = os.environ['PATH']
-        os.environ['PATH'] = str(jre / 'bin')
+        # Manipulate binary search path to only point to Comsol's Java RE.
+        path_backup = os.environ['PATH']
+        os.environ['PATH'] = str(backend['paths']['java'])
 
         # Set environment variable so Comsol will restrict cores at start-up.
         if cores:
@@ -107,12 +93,14 @@ class Client:
         # Start the Java virtual machine.
         logger.info(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
-        jpype.startJVM(str(jvm), classpath=str(api), convertStrings=False)
+        jpype.startJVM(str(backend['paths']['jvm']),
+                       classpath=str(backend['paths']['api']/'*'),
+                       convertStrings=False)
         from com.comsol.model.util import ModelUtil as java
         logger.info('Java virtual machine has started.')
 
-        # Restore the original search path.
-        os.environ['PATH'] = path
+        # Restore original binary search path.
+        os.environ['PATH'] = path_backup
 
         # Connect to a server if requested.
         if port is not None:
@@ -121,7 +109,7 @@ class Client:
         # Otherwise initialize stand-alone session.
         else:
             logger.info('Initializing stand-alone client.')
-            graphics = False
+            graphics = True
             java.initStandalone(graphics)
             logger.info('Stand-alone client initialized.')
 
@@ -140,16 +128,15 @@ class Client:
         java.setPreference('tempfiles.recovery.autosave', 'off')
         try:
             java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
-        except:
-            pass
+        except Exception:
+            logger.warning('Could not turn off check for recovery files.')
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save setup in instance attributes.
         self.cores   = cores
-        self.version = list(discovery.versions().keys())[-1]
+        self.version = backend['version']['name']
         self.host    = host
         self.port    = port
-        self.folder  = main
         self.java    = java
 
     def load(self, file):

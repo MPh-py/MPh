@@ -18,7 +18,7 @@ from pathlib import Path
 client = None
 model  = None
 here   = Path(__file__).parent
-file   = here / 'capacitor.mph'
+file   = here/'capacitor.mph'
 
 
 def setup_module():
@@ -84,7 +84,7 @@ def test_clear():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'log' in arguments:
+    if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',

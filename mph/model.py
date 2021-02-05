@@ -9,7 +9,7 @@ import numpy                           # fast numerics
 from numpy import array                # numerical array
 from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
-from pathlib import Path               # file paths
+from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
 
 
@@ -24,7 +24,7 @@ logger = getLogger(__package__)        # package-wide event logger
 ########################################
 class Model:
     """
-    Wraps a Comsol model object.
+    Represents a Comsol model.
 
     This is a Python wrapper for the Comsol model's Java API. The
     class is not intended to be instantiated directly. Rather, the
@@ -529,9 +529,9 @@ class Model:
         else:
             name = self.name()
             if isinstance(path, str):
-                path = Path.cwd() / path
+                path = Path.cwd()/path
             if path.is_dir():
-                path = path / name
+                path = path/name
             if not path.name.endswith('.mph'):
                 path = path.with_name(path.name + '.mph')
             logger.info(f'Saving model as "{path}".')
