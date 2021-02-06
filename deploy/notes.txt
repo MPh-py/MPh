@@ -1,7 +1,7 @@
 ﻿Releases
 ‾‾‾‾‾‾‾‾
 
-To release a new version, do the following:
+Steps to take when releasing a new version:
 • Bump version number and enter current date in `mph/__init__.py`.
 • Possibly add a dedicated commit, or include it in a meaningful commit.
 • Tag that commit with the version number, for example: `git tag -a v0.9.0`.
