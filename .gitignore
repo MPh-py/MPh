@@ -1,6 +1,7 @@
 /develop/
 /deploy/docs/
 /deploy/dist/
+/dist/
 **/__pycache__
 **/.pytest_cache
 flake8.txt

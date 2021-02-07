@@ -1,7 +1,6 @@
 ﻿MPh
 ===
-
-Pythonic scripting interface for Comsol Multiphysics®.
+Pythonic scripting interface for Comsol Multiphysics®
 
 [Comsol][comsol] is a commercial software application that is widely
 used in science and industry for research and development. It excels
@@ -11,13 +10,13 @@ It comes with a modern graphical user interface to set up simulation
 models and can be scripted from Matlab® or via its native Java API.
 
 This library brings the dearly missing power of Python to the world
-of Comsol — at least on Windows (for now). It leverages the universal
-Python-to-Java bridge provided by [JPype][jpype] to access the native
-API, and wraps it in a layer of pythonic ease-of-use. The Python
-wrapper only covers common scripting tasks, such as loading a model
-from a file, modifying some parameters, running the simulation, to
-then evaluate the results. Though the full functionality is available
-to those willing to drop down to the Java layer underneath.
+of Comsol. It leverages the universal Python-to-Java bridge provided
+by [JPype][jpype] to access the native API, and wraps it in a layer
+of pythonic ease-of-use. The Python wrapper only covers common
+scripting tasks, such as loading a model from a file, modifying some
+parameters, running the simulation, to then evaluate the results.
+Though the full functionality is available to those willing to drop
+down to the Java layer underneath.
 
 Comsol models are marked by their `.mph` file extension, which stands
 for multi-physics. Hence the name of this library. It is open-source

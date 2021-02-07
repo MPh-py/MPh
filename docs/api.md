@@ -16,4 +16,5 @@ provided by this library.
     Client
     Server
     tools
+    discovery
 ```
