@@ -4,9 +4,9 @@ Configuration file for rendering the documentation.
 This folder contains the documentation source files that are to be
 rendered as a static web site by the documentation generator Sphinx.
 The rendering process is configured by this very script and would be
-triggered by running  `sphinx-build . rendered` on the command line,
-no matter the operating system. The rendered HTML then ends up in the
-sub-folder `rendered`, where `index.html` is the start page.
+triggered by running  `sphinx-build . path/to/output` on the command
+line, no matter the operating system. The rendered HTML then ends up
+in the output folder, wherein `index.html` is the start page.
 
 The documentation source comprises the `.md` files here, of which
 `index.md` maps to the start page, as well as the documentation strings
@@ -47,8 +47,6 @@ sys.path.insert(0, str(main))
 autodoc_mock_imports = ['jpype', 'numpy', 'winreg']
 for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy', 'winreg'):
     sys.modules[package] = MagicMock()
-import jpype
-jpype.__version__ = '1.1.2'
 
 # Import package to make meta data available.
 import mph as meta
