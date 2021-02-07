@@ -8,12 +8,11 @@ location. Other versions can be tested by editing the assignment to
 the `root` variable.
 
 Even though this script sets up all environment variables just like
-the Comsol documentation suggests for Java development from within
-the Eclipse IDE (on page 854 in the Programming Reference Manual of
-Comsol 5.5), it still fails to work unless the user does an explicit
-`export` of the environment variable `LD_LIBRARY_PATH`, for example
-by adding the following lines at the end of the shell configuration
-file `.bashrc`:
+the Comsol documentation suggests for Java development with the
+Eclipse IDE (page 854 in Comsol 5.5's Programming Reference Manual),
+it still fails to work unless the user does an explicit `export` of
+the environment variable `LD_LIBRARY_PATH`, for example by adding the
+following lines at the end of the shell configuration file `.bashrc`:
 ```shell
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
 /usr/local/comsol55/multiphysics/lib/glnxa64:\
@@ -51,13 +50,13 @@ print('Setting environment variables.')
 root = Path('/usr/local/comsol55/multiphysics')
 lib  = str(root/'lib'/'glnxa64')
 ext  = str(root/'ext'/'graphicsmagick'/'glnxa64')
-if 'LD_LIBRARY_PATH' in os.environ:
-    folders = os.environ['LD_LIBRARY_PATH'].split(os.pathsep)
+var  = 'LD_LIBRARY_PATH'
+if var in os.environ:
+    path = os.environ[var].split(os.pathsep)
 else:
-    folders = []
-if lib not in folders:
-    folders = [lib, ext] + folders
-os.environ['LD_LIBRARY_PATH'] = os.pathsep.join(folders)
+    path = []
+if lib not in path:
+    os.environ[var] = os.pathsep.join([lib, gcc, ext, cad] + path)
 variables = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
              'MAGICK_FILTER_MODULE_PATH')
 for variable in variables:
@@ -70,20 +69,17 @@ jpype.startJVM(str(jvm), classpath=str(root/'plugins'/'*'))
 
 print('Inspecting environment from the Java side.')
 path = jpype.java.lang.System.getProperty('java.library.path')
-if path:
-    print('Java library search path is:')
-    for folder in path.split(os.pathsep):
-        print(f'    {folder}')
+print('Java library search path is:')
+for folder in path.split(os.pathsep):
+    print(f'    {folder}')
 path = jpype.java.lang.System.getenv('PATH')
-if path:
-    print('System binary search path is:')
-    for folder in path.split(os.pathsep):
-        print(f'    {folder}')
+print('System binary search path is:')
+for folder in path.split(os.pathsep):
+    print(f'    {folder}')
 path = jpype.java.lang.System.getenv('LD_LIBRARY_PATH')
-if path:
-    print('System library search path is:')
-    for folder in path.split(os.pathsep):
-        print(f'    {folder}')
+print('System library search path is:')
+for folder in path.split(os.pathsep):
+    print(f'    {folder}')
 
 print('Starting stand-alone Comsol client.')
 from com.comsol.model.util import ModelUtil as client
@@ -101,11 +97,9 @@ model = client.load(tag, '../tests/capacitor.mph')
 print('Loading external image.')
 tags  = [str(tag) for tag in model.func().tags()]
 names = [model.func(tag).label() for tag in tags]
-index = names.index('test_function')
-tag   = tags[index]
-file  = Path('../tests/gaussian.tif')
+tag   = tags[names.index('test_function')]
 model.func(tag).discardData()
-model.func(tag).set('filename', f'{file}')
+model.func(tag).set('filename', '../tests/gaussian.tif')
 model.func(tag).importData()
 
 print('Solving model.')

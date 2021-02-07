@@ -80,7 +80,7 @@ class Server:
 
         # Start the Comsol server as an external process.
         backend = discovery.backend(version)
-        command = backend['paths']['server']
+        command = backend['server']
         logger.info('Starting external server process.')
         if cores:
             command += ['-np', str(cores)]
@@ -103,7 +103,7 @@ class Server:
         logger.info(f'Server listening on port {port}.')
 
         # Save useful information in instance attributes.
-        self.version = backend['version']['name']
+        self.version = backend['name']
         self.cores   = cores
         self.port    = port
         self.process = process

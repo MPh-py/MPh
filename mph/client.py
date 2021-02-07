@@ -43,6 +43,8 @@ class Client:
         import mph
         client = mph.Client(cores=1)
         model = client.load('model.mph')
+        model.solve()
+        model.save()
         client.remove(model)
     ```
 
@@ -70,7 +72,7 @@ class Client:
 
     Internally, the client is a wrapper around the `ModelUtil` object
     provided by Comsol's Java API, which may also be accessed directly
-    via the `.java` instance attribute.
+    via the instance attribute `.java`.
     """
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
@@ -86,7 +88,7 @@ class Client:
 
         # Set environment variables for loading external libraries.
         system = platform.system()
-        root = backend['paths']['root']
+        root = backend['root']
         if system == 'Windows':
             var = 'PATH'
             if var in os.environ:
@@ -117,14 +119,14 @@ class Client:
                 os.environ[variable] = ext
             os.environ['LC_NUMERIC'] = 'C'
 
-        # Set environment variable so Comsol will restrict cores at start-up.
+        # Instruct Comsol to limit number of processor cores to use.
         if cores:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
         # Start the Java virtual machine.
         logger.info(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
-        jpype.startJVM(str(backend['paths']['jvm']),
+        jpype.startJVM(str(backend['jvm']),
                        classpath=str(root/'plugins'/'*'),
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
@@ -161,7 +163,7 @@ class Client:
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save useful information in instance attributes.
-        self.version = backend['version']['name']
+        self.version = backend['name']
         self.cores   = cores
         self.host    = host
         self.port    = port

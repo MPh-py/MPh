@@ -47,8 +47,8 @@ class Model:
     model, then evaluate the results. The intention is *not* to create
     the model from scratch or to extensively modify its structure.
     Though if you wish to do that, just use the instance attribute
-    `.java` to access the entire Comsol Java API from Python, and
-    refer to the Comsol programming manual for the details.
+    `.java` to access the entire Comsol Java API from Python and refer
+    to the Comsol Programming Manual for guidance.
     """
 
     def __init__(self, java):
@@ -122,7 +122,7 @@ class Model:
         return [str(self.java.sol(tag).name()) for tag in tags]
 
     def datasets(self):
-        """Returns the names of all data-sets."""
+        """Returns the names of all datasets."""
         tags = [str(tag) for tag in self.java.result().dataset().tags()]
         return [str(self.java.result().dataset(tag).name()) for tag in tags]
 
@@ -260,10 +260,10 @@ class Model:
 
     def _dataset(self, name=None):
         """
-        Returns the Java data-set object.
+        Returns the Java dataset object.
 
-        If `name` is given, returns the data-set object with that name.
-        Otherwise returns the default data-set.
+        If `name` is given, returns the dataset object with that name.
+        Otherwise returns the default dataset.
         """
         if name is not None:
             names = self.datasets()
@@ -293,7 +293,7 @@ class Model:
         These are the solution indices and time values in
         time-dependent studies, returned as a tuple of an integer
         array and a floating-point array. A `dataset` name may be
-        specified. Otherwise the default data-set is used.
+        specified. Otherwise the default dataset is used.
         """
         dataset  = self._dataset(dataset)
         solution = self._solution(dataset.name())
@@ -309,7 +309,7 @@ class Model:
         These are the solution indices and values in parametric sweeps,
         returned as a tuple of an integer array and a floating-point
         array. A `dataset` name may be specified. Otherwise the default
-        data-set is used.
+        dataset is used.
         """
         dataset  = self._dataset(dataset)
         solution = self._solution(dataset.name())
@@ -330,11 +330,11 @@ class Model:
         units are used.
 
         A `dataset` may be specified. Otherwise the expression will
-        be evaluated on the default data-set. If the solution stored in
-        the data-set is time-dependent, one or several `inner`
+        be evaluated on the default dataset. If the solution stored in
+        the dataset is time-dependent, one or several `inner`
         solution(s) can be preselected, either by an index number, a
         sequence of indices, or by passing "first"/"last" to select
-        the very first/last index. If the data-set represents a
+        the very first/last index. If the dataset represents a
         parameter sweep, the `outer` solution(s) can be selected by
         index or sequence of indices.
 
@@ -345,7 +345,7 @@ class Model:
         solution not having been computed.
         """
 
-        # Get data-set and solution (Java) objects.
+        # Get dataset and solution (Java) objects.
         dataset = self._dataset(dataset)
         logger.info(f'Evaluating {expression} on "{dataset.name()}" dataset.')
         solution = self._solution(dataset.name())
@@ -407,10 +407,10 @@ class Model:
         except Exception:
             logger.info('Global evaluation failed.')
 
-        # Find out the type of the data-set.
+        # Find out the type of the dataset.
         dtype = str(dataset.getType()).lower()
 
-        # For particle data-sets, create an EvalPoint node.
+        # For particle datasets, create an EvalPoint node.
         etag = self.java.result().numerical().uniquetag('eval')
         if dtype == 'particle':
             eval = self.java.result().numerical().create(etag, 'EvalPoint')
@@ -424,7 +424,7 @@ class Model:
         else:
             eval = self.java.result().numerical().create(etag, 'Eval')
 
-        # Select the data-set, if specified.
+        # Select the dataset, if specified.
         if dataset is not None:
             eval.set('data', dataset.tag())
 

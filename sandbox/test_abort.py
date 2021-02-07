@@ -2,7 +2,7 @@
 Tests if `KeyboardInterrupt` exception are properly handled.
 
 This test currently fails. That is, trying to interrupt an ongoing
-operation of the Comsol client crashes out of entire Python session
+operation of the Comsol client crashes out of the Python session
 instead of allowing further code execution or a return to the
 interactive prompt.
 

@@ -52,16 +52,16 @@ only lists an object's methods in a more readable way than Python's
 built-in `dir`, but also displays the "properties" possibly defined
 on a model node.
 
-It may equally help to call the returned Python model object something
-like `pymodel` and assign the name `model` to `pymodel.java`. Then you
-can just copy-and-paste Java or Matlab code from the Comsol programming
-manual or as exported from the Comsol front-end. Python will gracefully
-overlook gratuitous semicolons at the end of statements, so this
-approach would even work for entire blocks of code. Keep in mind,
-however, that JPype cannot perform all type conversions silently in
-the background. Occasionally, when there is ambiguity in overloaded
-methods, you will have to cast types explicitly. Refer to the [JPype
-documentation][jpype] for help.
+In that event, it may equally help to call the returned Python model
+object something like `pymodel` and assign the name `model` to
+`pymodel.java`. Then you can just copy-and-paste Java (or even Matlab)
+code from the Comsol Programming Manual or as exported from the Comsol
+front-end. Python will gracefully overlook gratuitous semicolons at
+the end of statements, so this approach would even work for entire
+blocks of code. Keep in mind, however, that JPype cannot perform all
+type conversions silently in the background. Occasionally, when there
+is ambiguity in overloaded methods, you will have to cast types
+explicitly. Refer to the [JPype documentation][jpype] for help.
 
 
 ### Client-server mode
@@ -83,8 +83,9 @@ On Linux, the stand-alone Comsol client (as opposed to a client
 connecting to a server) will fail to start if all you did was install
 MPh. You will also have to add the names of shared-library folders to
 the environment variable `LD_LIBRARY_PATH` and explicitly `export` it.
-Otherwise initialization of the stand-alone client will fail because
-required external libraries cannot be found.
+Otherwise initialization of the stand-alone client will throw a
+`java.lang.UnsatisfiedLinkError` because required external libraries
+cannot be found.
 
 Add the following lines at the end of your shell configuration file,
 such as `.bashrc`:
@@ -95,13 +96,14 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
 ```
 
 Clearly, these paths depend on the installed Comsol version and will
-have to be adapted accordingly. Unfortunately, requiring this variable
-to be set correctly also limits the possibility to dynamically select
-a back-end from within MPh, as adding multiple installations to that
-search path would very likely lead to collisions. Ideally, then,
-starting a stand-alone client should work out of the box, without the
-above manual configuration. However, [this issue][issue8] is currently
-unresolved.
+have to be adapted accordingly.
+
+Requiring this variable to be set correctly limits the possibility
+of selecting a specific back-end from within MPh, as adding multiple
+installations to that search path would very likely lead to name
+collisions. Ideally, starting a stand-alone client would work out of
+the box, without the above manual configuration. However,
+[this issue][issue8] is currently unresolved.
 
 
 ### macOS support

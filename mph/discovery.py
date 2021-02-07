@@ -136,7 +136,7 @@ def search_Windows():
             continue
 
         # Get version information from Comsol server.
-        process = run([str(server), '--version'], stdout=PIPE,
+        process = run([server, '--version'], stdout=PIPE,
                       creationflags=0x08000000)
         if process.returncode != 0:
             logger.error('Querying version information failed.')
@@ -153,8 +153,7 @@ def search_Windows():
         logger.debug(f'Assigned name "{name}" to this installation.')
 
         # Ignore installation if version name is a duplicate.
-        names = [backend['version']['name'] for backend in backends]
-        if name in names:
+        if name in (backend['name'] for backend in backends):
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
@@ -182,18 +181,14 @@ def search_Windows():
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version': {
-                'name':   name,
-                'major':  major,
-                'minor':  minor,
-                'patch':  patch,
-                'build':  build,
-            },
-            'paths': {
-                'root':   root,
-                'jvm':    jvm,
-                'server': [server],
-            },
+            'name':   name,
+            'major':  major,
+            'minor':  minor,
+            'patch':  patch,
+            'build':  build,
+            'root':   root,
+            'jvm':    jvm,
+            'server': [server],
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -225,7 +220,7 @@ def search_Linux():
             continue
 
         # Get version information from Comsol server.
-        process = run([str(comsol), 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'server', '--version'], stdout=PIPE)
         if process.returncode != 0:
             logger.error('Querying version information failed.')
             continue
@@ -241,8 +236,7 @@ def search_Linux():
         logger.debug(f'Assigned name "{name}" to this installation.')
 
         # Ignore installation if version name is a duplicate.
-        names = [backend['version']['name'] for backend in backends]
-        if name in names:
+        if name in (backend['name'] for backend in backends):
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
@@ -274,18 +268,14 @@ def search_Linux():
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version': {
-                'name':   name,
-                'major':  major,
-                'minor':  minor,
-                'patch':  patch,
-                'build':  build,
-            },
-            'paths': {
-                'root':   root,
-                'jvm':    jvm,
-                'server': [comsol, 'server'],
-            },
+            'name':   name,
+            'major':  major,
+            'minor':  minor,
+            'patch':  patch,
+            'build':  build,
+            'root':   root,
+            'jvm':    jvm,
+            'server': [comsol, 'server'],
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -317,7 +307,7 @@ def search_macOS():
             continue
 
         # Get version information from Comsol server.
-        process = run([str(comsol), 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'server', '--version'], stdout=PIPE)
         if process.returncode != 0:
             logger.error('Querying version information failed.')
             continue
@@ -333,8 +323,7 @@ def search_macOS():
         logger.debug(f'Assigned name "{name}" to this installation.')
 
         # Ignore installation if version name is a duplicate.
-        names = [backend['version']['name'] for backend in backends]
-        if name in names:
+        if name in (backend['name'] for backend in backends):
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
@@ -366,18 +355,14 @@ def search_macOS():
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version': {
-                'name':   name,
-                'major':  major,
-                'minor':  minor,
-                'patch':  patch,
-                'build':  build,
-            },
-            'paths': {
-                'root':   root,
-                'jvm':    jvm,
-                'server': [comsol, 'server'],
-            },
+            'name':   name,
+            'major':  major,
+            'minor':  minor,
+            'patch':  patch,
+            'build':  build,
+            'root':   root,
+            'jvm':    jvm,
+            'server': [comsol, 'server'],
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -408,8 +393,8 @@ def backend(version=None):
     """
     Returns information about the Comsol back-end.
 
-    A specific Comsol `version` can be selected if several are
-    installed, for example `version='5.3a'`. Otherwise the latest
+    A specific Comsol `version` can be selected by name if several
+    are installed, for example `version='5.3a'`. Otherwise the latest
     version is used.
     """
     backends = search_system()
@@ -418,10 +403,9 @@ def backend(version=None):
         logger.critical(error)
         raise RuntimeError(error)
     if version is None:
-        versions = [(backend['version']['major'], backend['version']['minor'],
-                     backend['version']['patch'], backend['version']['build'])
-                    for backend in backends]
-        return backends[versions.index(max(versions))]
+        numbers = [(backend['major'], backend['minor'], backend['patch'],
+                   backend['build']) for backend in backends]
+        return backends[numbers.index(max(numbers))]
     else:
-        versions = [backend['version']['name'] for backend in backends]
-        return backends[versions.index(version)]
+        names = [backend['name'] for backend in backends]
+        return backends[names.index(version)]

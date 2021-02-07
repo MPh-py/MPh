@@ -28,8 +28,8 @@ environment to work around this issue. MacOS support is completely
 untested. It may work, but probably won't. Find more details in the
 chapter [Limitations](limitations).
 
-Note how a separate Java run-time environment is in fact not required,
-as Comsol ships with one already built in.
+Note how a separate Java run-time environment is *not* required, as
+Comsol ships with one already built in.
 
 
 [dist]:  https://pypi.python.org/pypi/mph
