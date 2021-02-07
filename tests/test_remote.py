@@ -67,7 +67,7 @@ def test_client_load():
 
 
 def test_model_load():
-    model.load('load.tif', 'test_function')
+    model.load('gaussian.tif', 'test_function')
 
 
 def test_model_build():
