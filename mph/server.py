@@ -72,22 +72,21 @@ class Server:
     Otherwise the latest version is used.
 
     A `timeout` can be set for the server to start up. The default
-    is 60 seconds. Raises `TimeoutError` if the server failed to start
-    within that period.
+    is 60 seconds. `TimeoutError` is raisd if the server failed to
+    start within that period.
     """
 
     def __init__(self, cores=None, version=None, timeout=60):
 
         # Start the Comsol server as an external process.
         backend = discovery.backend(version)
-        executable = backend['paths']['server']
-        arguments  = backend['arguments']['server']
+        command = backend['paths']['server']
         logger.info('Starting external server process.')
         if cores:
-            arguments += ['-np', str(cores)]
+            command += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        process = start([str(executable)] + arguments, stdin=PIPE, stdout=PIPE)
+        process = start(command, stdin=PIPE, stdout=PIPE)
 
         # Wait for it to report the port number.
         t0 = now()
@@ -103,11 +102,11 @@ class Server:
                 raise TimeoutError(error)
         logger.info(f'Server listening on port {port}.')
 
-        # Remember setup in instance attributes.
-        self.port    = port
-        self.cores   = cores
-        self.process = process
+        # Save useful information in instance attributes.
         self.version = backend['version']['name']
+        self.cores   = cores
+        self.port    = port
+        self.process = process
 
     def running(self):
         """Returns whether the server process is still running."""

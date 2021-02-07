@@ -14,6 +14,7 @@ from .model import Model               # model class
 ########################################
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
+import platform                        # platform information
 import os                              # operating system
 import atexit                          # exit handler
 from pathlib import Path               # file-system paths
@@ -49,7 +50,9 @@ class Client:
     library, only one client can be instantiated at a time. This is
     because JPype cannot manage more than one Java virtual machine
     within the same Python session. Separate Python processes would
-    have to be run, or spawned, to work around this limitation.
+    have to be started, or spawned, to work around this limitation.
+    `NotImplementedError` is therefore raised if another client is
+    already running.
 
     The number of `cores` (threads) the client instance uses can
     be restricted by specifying a number. Otherwise all available
@@ -57,18 +60,17 @@ class Client:
 
     A specific Comsol `version` can be selected if several are
     installed, for example `version='5.3a'`. Otherwise the latest
-    version is used.
+    version is used, and reported via the `.version` attribute.
 
     Initializes a stand-alone Comsol session if no `port` number is
-    specified. Otherwise tries to connect to the Comsol server listening
-    at the given port for client connections. The `host` address defaults
-    to `'localhost'`, but could be any domain name or IP address.
-
-    Raises `RuntimeError` if another client is already running.
+    specified. Otherwise tries to connect to the Comsol server
+    listening at the given port for client connections. The `host`
+    address defaults to `'localhost'`, but could be any domain name
+    or IP address.
 
     Internally, the client is a wrapper around the `ModelUtil` object
-    provided by Comsol's Java API, which can be accessed directly via
-    the `.java` instance attribute.
+    provided by Comsol's Java API, which may also be accessed directly
+    via the `.java` instance attribute.
     """
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
@@ -82,9 +84,38 @@ class Client:
         # Discover Comsol back-end.
         backend = discovery.backend(version)
 
-        # Manipulate binary search path to only point to Comsol's Java RE.
-        path_backup = os.environ['PATH']
-        os.environ['PATH'] = str(backend['paths']['java'])
+        # Set environment variables for loading external libraries.
+        system = platform.system()
+        root = backend['paths']['root']
+        if system == 'Windows':
+            var = 'PATH'
+            if var in os.environ:
+                path = os.environ[var].split(os.pathsep)
+            else:
+                path = []
+            lib = str(root/'lib'/'glnxa64')
+            if lib not in path:
+                os.environ[var] = os.pathsep.join([lib] + path)
+        elif system in ('Linux', 'Darwin'):
+            if system == 'Linux':
+                arch = 'glnxa64'
+                var  = 'LD_LIBRARY_PATH'
+            elif system == 'Darwin':
+                arch = 'maci64'
+                var  = 'DYLD_LIBRARY_PATH'
+            if var in os.environ:
+                path = os.environ[var].split(os.pathsep)
+            else:
+                path = []
+            lib = str(root/'lib'/arch)
+            ext = str(root/'ext'/'graphicsmagick'/arch)
+            if lib not in path:
+                os.environ[var] = os.pathsep.join([lib, ext] + path)
+            variables = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
+                         'MAGICK_FILTER_MODULE_PATH')
+            for variable in variables:
+                os.environ[variable] = ext
+            os.environ['LC_NUMERIC'] = 'C'
 
         # Set environment variable so Comsol will restrict cores at start-up.
         if cores:
@@ -94,24 +125,21 @@ class Client:
         logger.info(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
         jpype.startJVM(str(backend['paths']['jvm']),
-                       classpath=str(backend['paths']['api']/'*'),
+                       classpath=str(root/'plugins'/'*'),
                        convertStrings=False)
-        from com.comsol.model.util import ModelUtil as java
         logger.info('Java virtual machine has started.')
 
-        # Restore original binary search path.
-        os.environ['PATH'] = path_backup
-
-        # Connect to a server if requested.
-        if port is not None:
-            logger.info(f'Connecting to server "{host}" at port {port}.')
-            java.connect(host, port)
-        # Otherwise initialize stand-alone session.
-        else:
+        # Initialize a stand-alone client if no server port given.
+        from com.comsol.model.util import ModelUtil as java
+        if port is None:
             logger.info('Initializing stand-alone client.')
             graphics = True
             java.initStandalone(graphics)
             logger.info('Stand-alone client initialized.')
+        # Otherwise skip stand-alone initialization and connect to server.
+        else:
+            logger.info(f'Connecting to server "{host}" at port {port}.')
+            java.connect(host, port)
 
         # Log number of used processor cores as reported by Comsol instance.
         cores = java.getPreference('cluster.processor.numberofprocessors')
@@ -132,9 +160,9 @@ class Client:
             logger.warning('Could not turn off check for recovery files.')
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
-        # Save setup in instance attributes.
-        self.cores   = cores
+        # Save useful information in instance attributes.
         self.version = backend['version']['name']
+        self.cores   = cores
         self.host    = host
         self.port    = port
         self.java    = java

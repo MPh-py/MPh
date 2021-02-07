@@ -3,11 +3,10 @@ Discovers Comsol installations on the local machine.
 
 This is an internal helper module that is not part of the public API.
 It retrieves information about installed Comsol versions, i.e.
-available simulation back-ends, and locates the installation folders
-of Comsol itself and its Java runtime environment.
+available simulation back-ends, and locates the installation folders.
 
 On Windows, the discovery mechanism relies on the Registry to provide
-information about install locations. On Linux and MacOS, Comsol is
+information about install locations. On Linux and macOS, Comsol is
 expected to be installed at its respective default location.
 """
 __license__ = 'MIT'
@@ -40,14 +39,14 @@ def parse(version):
 
     Returns `(name, major, minor, patch, build)` where `name` is a
     string and the rest are numbers. The name is a short-hand based
-    on the major, minor, and patch version numbers, e.g. "5.3a".
+    on the major, minor, and patch version numbers, e.g. `'5.3a'`.
 
-    Raises `ValueError` if the input string `version` deviates from
-    the expected format, i.e., the format in which the Comsol
-    executable returns version information.
+    Raises `ValueError` if the input string deviates from the expected
+    format, i.e., the format in which the Comsol executable returns
+    version information.
     """
 
-    # Separate version number from preceding text.
+    # Separate version number from preceding program name.
     match = re.match(r'(?i)Comsol.*?(\d+(?:\.\d+)*)', version)
     if not match:
         raise ValueError(f'Version info "{version}" has invalid format.')
@@ -95,7 +94,7 @@ def search_Windows():
         logger.critical(error)
         raise OSError(error) from None
 
-    # Parse child nodes to get list of installed Comsol versions.
+    # Parse child nodes to get list of Comsol installations.
     index = 0
     while True:
 
@@ -153,13 +152,13 @@ def search_Windows():
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Ignore version if name is a duplicate.
+        # Ignore installation if version name is a duplicate.
         names = [backend['version']['name'] for backend in backends]
         if name in names:
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
-        # Check existence of required files and folders.
+        # Verify existence of required files and folders.
         jre = root/'java'/'win64'/'jre'
         if not jre.exists():
             logger.error('Did not find Java run-time environment.')
@@ -178,24 +177,23 @@ def search_Windows():
             continue
         lib = root/'lib'/'win64'
         if not lib.exists():
-            logger.error('Did not find Comsol run-time libraries.')
+            logger.error('Did not find Comsol shared libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version':   {'name':   name,
-                          'major':  major,
-                          'minor':  minor,
-                          'patch':  patch,
-                          'build':  build},
-            'paths':     {'root':   root,
-                          'jre':    jre,
-                          'java':   java,
-                          'jvm':    jvm,
-                          'api':    api,
-                          'lib':    lib,
-                          'server': server},
-            'arguments': {'server': []}
+            'version': {
+                'name':   name,
+                'major':  major,
+                'minor':  minor,
+                'patch':  patch,
+                'build':  build,
+            },
+            'paths': {
+                'root':   root,
+                'jvm':    jvm,
+                'server': [server],
+            },
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -242,13 +240,13 @@ def search_Linux():
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Ignore version if name is a duplicate.
+        # Ignore installation if version name is a duplicate.
         names = [backend['version']['name'] for backend in backends]
         if name in names:
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
-        # Check existence of required files and folders.
+        # Verify existence of required files and folders.
         jre = root/'java'/'glnxa64'/'jre'
         if not jre.exists():
             logger.error('Did not find Java run-time environment.')
@@ -267,32 +265,35 @@ def search_Linux():
             continue
         lib = root/'lib'/'glnxa64'
         if not lib.exists():
-            logger.error('Did not find Comsol libraries.')
+            logger.error('Did not find Comsol shared libraries.')
+            continue
+        ext = root/'ext'/'graphicsmagick'/'glnxa64'
+        if not ext.exists():
+            logger.error('Did not find GraphicsMagick libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version':   {'name':   name,
-                          'major':  major,
-                          'minor':  minor,
-                          'patch':  patch,
-                          'build':  build},
-            'paths':     {'root':   root,
-                          'jre':    jre,
-                          'java':   java,
-                          'jvm':    jvm,
-                          'api':    api,
-                          'lib':    lib,
-                          'server': comsol},
-            'arguments': {'server': ['server']}
+            'version': {
+                'name':   name,
+                'major':  major,
+                'minor':  minor,
+                'patch':  patch,
+                'build':  build,
+            },
+            'paths': {
+                'root':   root,
+                'jvm':    jvm,
+                'server': [comsol, 'server'],
+            },
         })
 
     # Return list with information about all installed Comsol back-ends.
     return backends
 
 
-def search_MacOS():
-    """Searches for Comsol installations on a MacOS system."""
+def search_macOS():
+    """Searches for Comsol installations on a macOS system."""
 
     # Collect all information in a list.
     backends = []
@@ -331,13 +332,13 @@ def search_MacOS():
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
-        # Ignore version if name is a duplicate.
+        # Ignore installation if version name is a duplicate.
         names = [backend['version']['name'] for backend in backends]
         if name in names:
             logger.warning(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
-        # Check existence of required files and folders.
+        # Verify existence of required files and folders.
         jre = root/'java'/'maci64'/'jre'
         if not jre.exists():
             logger.error('Did not find Java run-time environment.')
@@ -356,24 +357,27 @@ def search_MacOS():
             continue
         lib = root/'lib'/'maci64'
         if not lib.exists():
-            logger.error('Did not find Comsol libraries.')
+            logger.error('Did not find Comsol shared libraries.')
+            continue
+        ext = root/'ext'/'graphicsmagick'/'maci64'
+        if not ext.exists():
+            logger.error('Did not find GraphicsMagick libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
         backends.append({
-            'version':   {'name':   name,
-                          'major':  major,
-                          'minor':  minor,
-                          'patch':  patch,
-                          'build':  build},
-            'paths':     {'root':   root,
-                          'jre':    jre,
-                          'java':   java,
-                          'jvm':    jvm,
-                          'api':    api,
-                          'lib':    lib,
-                          'server': comsol},
-            'arguments': {'server': ['server']}
+            'version': {
+                'name':   name,
+                'major':  major,
+                'minor':  minor,
+                'patch':  patch,
+                'build':  build,
+            },
+            'paths': {
+                'root':   root,
+                'jvm':    jvm,
+                'server': [comsol, 'server'],
+            },
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -389,7 +393,7 @@ def search_system():
     elif system == 'Linux':
         return search_Linux()
     elif system == 'Darwin':
-        return search_MacOS()
+        return search_macOS()
     else:
         error = f'Unsupported operating system "{system}".'
         logger.critical(error)

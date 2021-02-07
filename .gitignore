@@ -5,4 +5,5 @@
 **/.pytest_cache
 flake8.txt
 *.lnk
+.DS_Store
 Thumbs.db

@@ -30,11 +30,6 @@ class Model:
     class is not intended to be instantiated directly. Rather, the
     model would be loaded from a file by the client.
 
-    The focus of the functionality exposed by this wrapper is to
-    inspect an existing model, possibly change parameters, solve the
-    model, then evaluate the results. The intention is *not* to create
-    the model from scratch or to extensively modify its structure.
-
     Example:
     ```python
         import mph
@@ -47,9 +42,13 @@ class Model:
         print(f'capacitance C = {C:.3f} pF')
     ```
 
-    While only a minimal subset of the functionality is exposed by the
-    class directly, the entire Comsol Java API can be accessed via the
-    instance attribute `.java`.
+    The focus of the functionality exposed by this wrapper is to
+    inspect an existing model, possibly change parameters, solve the
+    model, then evaluate the results. The intention is *not* to create
+    the model from scratch or to extensively modify its structure.
+    Though if you wish to do that, just use the instance attribute
+    `.java` to access the entire Comsol Java API from Python, and
+    refer to the Comsol programming manual for the details.
     """
 
     def __init__(self, java):
