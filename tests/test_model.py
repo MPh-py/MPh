@@ -163,7 +163,7 @@ def test_evaluate():
     index = E.argmax()
     xmax  = x[index]
     ymax  = y[index]
-    assert abs(Emax - 814.8) < 0.1
+    assert abs(Emax - 814.8) < 0.2
     assert abs(abs(xmax) - 1.037) < 0.001
     assert abs(abs(ymax) - 4.270) < 0.001
 
