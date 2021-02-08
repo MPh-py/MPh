@@ -98,26 +98,36 @@ class Client:
             lib = str(root/'lib'/'glnxa64')
             if lib not in path:
                 os.environ[var] = os.pathsep.join([lib] + path)
-        elif system in ('Linux', 'Darwin'):
-            if system == 'Linux':
-                arch = 'glnxa64'
-                var  = 'LD_LIBRARY_PATH'
-            elif system == 'Darwin':
-                arch = 'maci64'
-                var  = 'DYLD_LIBRARY_PATH'
+        elif system == 'Linux':
+            lib = str(root/'lib'/'glnxa64')
+            gcc = str(root/'lib'/'glnxa64'/'gcc')
+            ext = str(root/'ext'/'graphicsmagick'/'glnxa64')
+            cad = str(root/'ext'/'cadimport'/'glnxa64')
+            pre = str(root/'java'/'glnxa64'/'jre'/'lib'/'amd64'/'libjsig.so')
+            var = 'LD_LIBRARY_PATH'
             if var in os.environ:
                 path = os.environ[var].split(os.pathsep)
             else:
                 path = []
-            lib = str(root/'lib'/arch)
-            ext = str(root/'ext'/'graphicsmagick'/arch)
             if lib not in path:
-                os.environ[var] = os.pathsep.join([lib, ext] + path)
-            variables = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
-                         'MAGICK_FILTER_MODULE_PATH')
-            for variable in variables:
-                os.environ[variable] = ext
-            os.environ['LC_NUMERIC'] = 'C'
+                os.environ[var] = os.pathsep.join([lib, gcc, ext, cad] + path)
+            vars = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
+                    'MAGICK_FILTER_MODULE_PATH')
+            for var in vars:
+                os.environ[var] = ext
+            os.environ['LD_PRELOAD'] = pre
+            os.environ['LC_NUMERIC'] = os.environ['LC_ALL'] = 'C'
+        elif system == 'Darwin':
+            var = 'DYLD_LIBRARY_PATH'
+            if var in os.environ:
+                path = os.environ[var].split(os.pathsep)
+            else:
+                path = []
+            lib = str(root/'lib'/'maci64')
+            ext = str(root/'ext'/'graphicsmagick'/'maci64')
+            cad = str(root/'ext'/'cadimport'/'maci64')
+            if lib not in path:
+                os.environ[var] = os.pathsep.join([lib, ext, cad] + path)
 
         # Instruct Comsol to limit number of processor cores to use.
         if cores:

@@ -49,7 +49,10 @@ def shutdown():
 print('Setting environment variables.')
 root = Path('/usr/local/comsol55/multiphysics')
 lib  = str(root/'lib'/'glnxa64')
+gcc  = str(root/'lib'/'glnxa64'/'gcc')
 ext  = str(root/'ext'/'graphicsmagick'/'glnxa64')
+cad  = str(root/'ext'/'cadimport'/'glnxa64')
+pre  = str(root/'java'/'glnxa64'/'jre'/'lib'/'amd64'/'libjsig.so')
 var  = 'LD_LIBRARY_PATH'
 if var in os.environ:
     path = os.environ[var].split(os.pathsep)
@@ -57,11 +60,13 @@ else:
     path = []
 if lib not in path:
     os.environ[var] = os.pathsep.join([lib, gcc, ext, cad] + path)
-variables = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
-             'MAGICK_FILTER_MODULE_PATH')
-for variable in variables:
-    os.environ[variable] = ext
-os.environ['LC_NUMERIC'] = 'C'
+vars = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
+        'MAGICK_FILTER_MODULE_PATH')
+for var in vars:
+    os.environ[var] = ext
+os.environ['LD_PRELOAD'] = pre
+os.environ['LC_NUMERIC'] = os.environ['LC_ALL'] = 'C'
+
 
 print(f'Starting Comsol\'s Java VM via JPype {jpype.__version__}.')
 jvm = root/'java'/'glnxa64'/'jre'/'lib'/'amd64'/'server'/'libjvm.so'
