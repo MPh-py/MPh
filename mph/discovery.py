@@ -332,14 +332,16 @@ def search_macOS():
         if not jre.exists():
             logger.error('Did not find Java run-time environment.')
             continue
-        java = jre/'bin'
+        java = jre/'Contents'/'Home'/'bin'
         if not java.exists():
             logger.error('Did not find Java run-time binaries.')
             continue
-        jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+        jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.so'
         if not jvm.exists():
-            logger.error('Did not find Java virtual machine.')
-            continue
+            jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.dylib'
+            if not jvm.exists():
+                logger.error('Did not find Java virtual machine.')
+                continue
         api = root/'plugins'
         if not api.exists():
             logger.error('Did not find Comsol Java API plug-ins.')
