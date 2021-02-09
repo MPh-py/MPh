@@ -8,3 +8,4 @@ flake8.txt
 *.lnk
 .DS_Store
 Thumbs.db
+.spyproject
