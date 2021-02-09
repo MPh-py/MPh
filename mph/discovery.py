@@ -336,9 +336,9 @@ def search_macOS():
         if not java.exists():
             logger.error('Did not find Java run-time binaries.')
             continue
-        jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.so'
+        jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.dylib'
         if not jvm.exists():
-            jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.dylib'
+            jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.so'
             if not jvm.exists():
                 logger.error('Did not find Java virtual machine.')
                 continue
