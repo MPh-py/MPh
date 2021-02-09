@@ -13,7 +13,7 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 from numpy import array                # numerical arrays
-
+from .model import Model
 
 ########################################
 # Introspection                        #
@@ -34,6 +34,9 @@ def inspect(java):
     common to all objects, are suppressed in the method list further
     down, for the sake of clarity.
     """
+    # If a model is supplied, extract the main java feature from the model
+    if isinstance(java, Model):
+        java = java.java
 
     # Display general information about the feature.
     print(f'name:    {java.name()}')
