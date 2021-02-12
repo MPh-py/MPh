@@ -15,9 +15,10 @@ from .model import Model               # model class
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
 import platform                        # platform information
+import atexit                          # exit handler
 import os                              # operating system
 import sys                             # system specifics
-import atexit                          # exit handler
+import threading                       # multi-threading
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
 
@@ -245,16 +246,40 @@ class Client:
 # Shutdown                             #
 ########################################
 
-def exit_patch(code=0):
+
+def exit_hook(code=None):
     """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
     global exit_code
-    exit_code = code
-    exit_func(code)
+    if isinstance(code, int):
+        exit_code = code
+    exit_function(code)
+
+
+def exception_hook_sys(exc_type, exc_value, exc_traceback):
+    """Sets exit code to 1 if exception raised in main thread."""
+    global exit_code
+    exit_code = 1
+    exception_handler_sys(exc_type, exc_value, exc_traceback)
+
+
+def exception_hook_threads(info):
+    """Sets exit code to 1 if exception raised in any other thread."""
+    global exit_code
+    exit_code = 1
+    exception_handler_threads(info)
 
 
 exit_code = 0
-exit_func = sys.exit
-sys.exit = exit_patch
+exit_function = sys.exit
+sys.exit = exit_hook
+
+exception_handler_sys = sys.excepthook
+sys.excepthook = exception_hook_sys
+
+# Only available as of Python 3.8, see bugs.python.org/issue1230540.
+if hasattr(threading, 'excepthook'):
+    exception_handler_threads = threading.excepthook
+    threading.excepthook = exception_hook_threads
 
 
 @atexit.register
