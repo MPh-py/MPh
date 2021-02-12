@@ -67,21 +67,20 @@ for var in vars:
 os.environ['LD_PRELOAD'] = pre
 os.environ['LC_NUMERIC'] = os.environ['LC_ALL'] = 'C'
 
-
 print(f'Starting Comsol\'s Java VM via JPype {jpype.__version__}.')
 jvm = root/'java'/'glnxa64'/'jre'/'lib'/'amd64'/'server'/'libjvm.so'
 jpype.startJVM(str(jvm), classpath=str(root/'plugins'/'*'))
 
 print('Inspecting environment from the Java side.')
-path = jpype.java.lang.System.getProperty('java.library.path')
+path = jpype.java.lang.System.getProperty('java.library.path') or ''
 print('Java library search path is:')
 for folder in path.split(os.pathsep):
     print(f'    {folder}')
-path = jpype.java.lang.System.getenv('PATH')
+path = jpype.java.lang.System.getenv('PATH') or ''
 print('System binary search path is:')
 for folder in path.split(os.pathsep):
     print(f'    {folder}')
-path = jpype.java.lang.System.getenv('LD_LIBRARY_PATH')
+path = jpype.java.lang.System.getenv('LD_LIBRARY_PATH') or ''
 print('System library search path is:')
 for folder in path.split(os.pathsep):
     print(f'    {folder}')
