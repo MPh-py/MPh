@@ -16,6 +16,7 @@ import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
 import platform                        # platform information
 import os                              # operating system
+import sys                             # system specifics
 import atexit                          # exit handler
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
@@ -251,5 +252,8 @@ def shutdown():
     """
     if jpype.isJVMStarted():
         logger.info('Exiting the Java virtual machine.')
+        sys.stdout.flush()
+        sys.stderr.flush()
         jpype.java.lang.Runtime.getRuntime().exit(0)
-        logger.info('Java virtual machine has shut down.')
+        # No code is reached after this due to the hard exit of the JVM.
+        logger.info('Java virtual machine has exited.')
