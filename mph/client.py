@@ -241,6 +241,22 @@ class Client:
             raise RuntimeError(error)
 
 
+########################################
+# Shutdown                             #
+########################################
+
+def exit_patch(code=0):
+    """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
+    global exit_code
+    exit_code = code
+    exit_func(code)
+
+
+exit_code = 0
+exit_func = sys.exit
+sys.exit = exit_patch
+
+
 @atexit.register
 def shutdown():
     """
@@ -254,6 +270,6 @@ def shutdown():
         logger.info('Exiting the Java virtual machine.')
         sys.stdout.flush()
         sys.stderr.flush()
-        jpype.java.lang.Runtime.getRuntime().exit(0)
+        jpype.java.lang.Runtime.getRuntime().exit(exit_code)
         # No code is reached after this due to the hard exit of the JVM.
         logger.info('Java virtual machine has exited.')
