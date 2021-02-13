@@ -80,17 +80,26 @@ class Server:
 
         # Start the Comsol server as an external process.
         backend = discovery.backend(version)
-        command = backend['server']
+        server  = backend['server']
         logger.info('Starting external server process.')
         if cores:
-            command += ['-np', str(cores)]
+            arguments = ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        process = start(command, stdin=PIPE, stdout=PIPE)
+        else:
+            arguments = []
+        process = start(server + arguments, stdin=PIPE, stdout=PIPE)
 
         # Wait for it to report the port number.
         t0 = now()
         while process.poll() is None:
+            peek = process.stdout.peek().decode()
+            if peek.startswith('Username:'):
+                error = 'User name and password for Comsol server not set.'
+                logger.error(error)
+                logger.error('Start it manually from a system console first:')
+                logger.error(' '.join(str(part) for part in server))
+                raise RuntimeError(error)
             line = process.stdout.readline().decode()
             match = regex(r'^.*listening on port *(\d+)', line)
             if match:
