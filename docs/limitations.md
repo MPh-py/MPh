@@ -12,12 +12,12 @@ maximum speed-up of a parameter sweep, they have to be started as
 separate Python (sub-)processes. This is a feasible work-around, but
 a limitation nonetheless.
 
-For the same reason, it seems, the [unit tests][tests] that
-come with MPh fail when collected and run via the testing framework
-[pyTest][pytest]. They must be run directly from the command line.
-Since they cannot be used for continuous integration testing anyway,
-given that they depend on Comsol being installed on the local machine,
-this is but a minor inconvenience.
+For the same reason, the [unit tests][tests] that come with MPh fail
+when collected and run via the testing framework [pyTest][pytest].
+They must be run directly from the command line. Since they cannot be
+used for continuous integration testing anyway, given that they depend
+on Comsol being installed on the local machine, this is but a minor
+inconvenience.
 
 Furthermore, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Most notably, pressing

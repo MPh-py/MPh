@@ -11,7 +11,7 @@ arguments = argv[1:]
 if 'log' not in arguments:
     arguments.append('log')
 
-for test in ('discovery', 'client', 'model', 'server', 'remote'):
+for test in ('discovery', 'client', 'model', 'server', 'remote', 'processes'):
     print(f'test_{test}')
     if system() in ('Linux', 'Darwin'):
         python = 'python3'
