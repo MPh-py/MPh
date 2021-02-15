@@ -3,20 +3,20 @@ Tests running a stand-alone Comsol client on Linux.
 
 The script does not depend on MPh, but starts the Comsol client
 directly via the Java bridge JPype. Paths to the Comsol installation
-are hard-coded for an installation of Comsol 5.5 at the default
+are hard-coded for an installation of Comsol 5.6 at the default
 location. Other versions can be tested by editing the assignment to
 the `root` variable.
 
 Even though this script sets up all environment variables just like
 the Comsol documentation suggests for Java development with the
-Eclipse IDE (page 854 in Comsol 5.5's Programming Reference Manual),
-it still fails to work unless the user does an explicit `export` of
-the environment variable `LD_LIBRARY_PATH`, for example by adding the
-following lines at the end of the shell configuration file `.bashrc`:
+Eclipse IDE (on pages 23 and 916 in the Programming Reference Manual
+of Comsol 5.6), it still fails to work unless the user exports
+`LD_LIBRARY_PATH` in the shell before starting the script, e.g., by
+adding the following lines at the end of `.bashrc`:
 ```shell
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-/usr/local/comsol55/multiphysics/lib/glnxa64:\
-/usr/local/comsol55/multiphysics/ext/graphicsmagick/glnxa64
+/usr/local/comsol56/multiphysics/lib/glnxa64:\
+/usr/local/comsol56/multiphysics/ext/graphicsmagick/glnxa64
 ```
 
 It is odd that this is necessary because, as this script demonstrates,
@@ -33,21 +33,23 @@ the stand-alone client is concerned.
 
 import jpype
 import jpype.imports
-import os
-import atexit
+from packaging import version
 from pathlib import Path
+import os
 
+if version.parse(jpype.__version__) >= version.parse('1.2.2_dev0'):
+    import jpype.config
+    jpype.config.destroy_jvm = False
+else:
+    import atexit
 
-@atexit.register
-def shutdown():
-    """Force Java Virtual Machine to shut down at end of Python session."""
-    print('Exiting JVM.')
-    if jpype.isJVMStarted():
-        jpype.java.lang.Runtime.getRuntime().exit(0)
-
+    @atexit.register
+    def exit_JVM():
+        if jpype.isJVMStarted():
+            jpype.java.lang.Runtime.getRuntime().exit(0)
 
 print('Setting environment variables.')
-root = Path('/usr/local/comsol55/multiphysics')
+root = Path('/usr/local/comsol56/multiphysics')
 lib  = str(root/'lib'/'glnxa64')
 gcc  = str(root/'lib'/'glnxa64'/'gcc')
 ext  = str(root/'ext'/'graphicsmagick'/'glnxa64')
