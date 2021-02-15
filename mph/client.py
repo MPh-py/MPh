@@ -75,9 +75,20 @@ class Client:
     Internally, the client is a wrapper around the `ModelUtil` object
     provided by Comsol's Java API, which may also be accessed directly
     via the instance attribute `.java`.
+
+    A ModelClass class can be provided at initialization which allows to
+    use a custom model with custom handling methods as long as the model
+    inherits the base `Model`. This allows more versatile configuration
+    of often used tasks in modeling without overloading the initial code base.
     """
 
-    def __init__(self, cores=None, version=None, port=None, host='localhost'):
+    def __init__(self, cores=None, version=None, port=None, host='localhost',
+                 ModelClass=Model):
+        # If ModelClass is invalid, no need to continue anyway
+        if not issubclass(ModelClass, Model):
+            error = 'A Custom ModelClass must be a subclass of the base Model class'
+            logger.error(error)
+            raise TypeError(erro)
 
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
@@ -186,7 +197,7 @@ class Client:
         file = Path(file)
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
-        model = Model(self.java.load(tag, str(file)))
+        model = ModelClass(self.java.load(tag, str(file)))
         logger.info('Finished loading model.')
         return model
 
@@ -206,13 +217,13 @@ class Client:
         """
         java = self.java.createUnique('model')
         logger.debug(f'Created model with tag "{java.tag()}".')
-        model = Model(java)
+        model = ModelClass(java)
         model.rename(name)
         return model
 
     def models(self):
         """Returns all model objects currently held in memory."""
-        return [Model(self.java.model(tag)) for tag in self.java.tags()]
+        return [ModelClass(self.java.model(tag)) for tag in self.java.tags()]
 
     def names(self):
         """Names all models that are currently held in memory."""
