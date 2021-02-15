@@ -3,7 +3,7 @@ __license__ = 'MIT'
 
 from subprocess import run
 from pathlib import Path
-from shutil import move
+from shutil import rmtree
 
 root = Path(__file__).absolute().parent.parent
 
@@ -14,4 +14,8 @@ if process.returncode:
 process = run('flit build --format wheel', cwd=root, shell=True)
 if process.returncode:
     raise RuntimeError('Error while building wheel.')
-move(root/'dist', root/'deploy'/'dist')
+source = root/'dist'
+target = root/'deploy'/'dist'
+if target.exists():
+    rmtree(target)
+source.rename(target)
