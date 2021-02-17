@@ -101,6 +101,13 @@ class Model:
         tags = [str(tag) for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
+    def boundaryConditions(self, node):
+        """Returns boundary conditions under specified physics node"""
+        physicsTags = [str(tag) for tag in self.java.physics().tags()]
+        ptag = physicsTags[self.physics().index(node)]
+        tags = [str(tag) for tag in self.java.physics(ptag).feature().tags()]
+        return [str(self.java.physics(ptag).feature(tag).name()) for tag in tags]
+
     def materials(self):
         """Returns the names of all materials."""
         tags = [str(tag) for tag in self.java.material().tags()]
