@@ -144,7 +144,7 @@ class Model:
         """Assigns a new `name` to the model."""
         self.java.name(name)
 
-    def parameter(self, name, value=None, unit=None):
+    def parameter(self, name, value=None, unit=None, desc=None):
         """
         Returns or sets the parameter of the given `name`.
 
@@ -164,8 +164,11 @@ class Model:
         else:
             value = str(value)
             if unit:
-                value += f'[{unit}]'
-            self.java.param().set(name, value)
+                value += f' [{unit}]'
+            if desc is not None:
+                self.java.param().set(name, value, str(desc))
+            else:
+                self.java.param().set(name, value)
 
     def load(self, file, interpolation):
         """
