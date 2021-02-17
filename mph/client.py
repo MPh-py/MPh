@@ -184,6 +184,12 @@ class Client:
     def load(self, file):
         """Returns the model loaded from the given `file`."""
         file = Path(file)
+
+        # Check if model is already loaded
+        if file in self.modelFiles():
+            logger.info('Found model in memory')
+            return self.models()[self.modelFiles().index(file)]
+
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
         model = Model(self.java.load(tag, str(file)))
@@ -213,6 +219,13 @@ class Client:
     def models(self):
         """Returns all model objects currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
+
+    def modelFiles(self):
+        """
+        Returns the file pathes of all models in memory (abspath). Models without
+        files will return empty path.
+        """
+        return [Path(str(self.java.model(tag).getFilePath())) for tag in self.java.tags()]
 
     def names(self):
         """Names all models that are currently held in memory."""
