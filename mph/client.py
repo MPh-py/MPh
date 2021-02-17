@@ -181,12 +181,12 @@ class Client:
         self.port    = port
         self.java    = java
 
-    def load(self, file):
+    def load(self, file, reload=False):
         """Returns the model loaded from the given `file`."""
         file = Path(file)
 
         # Check if model is already loaded
-        if file in self.modelFiles():
+        if file in self.modelFiles() and not reload:
             logger.info('Found model in memory')
             return self.models()[self.modelFiles().index(file)]
 
