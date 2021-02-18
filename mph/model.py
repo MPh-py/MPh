@@ -144,31 +144,41 @@ class Model:
         """Assigns a new `name` to the model."""
         self.java.name(name)
 
-    def parameter(self, name, value=None, unit=None, desc=None):
+    def parameter(self, name, value=None, unit=None, description=None,
+                  evaluate=False):
         """
         Returns or sets the parameter of the given `name`.
 
         If no `value` is given (the default `None` is passed), returns
         the value of the named parameter. Otherwise sets it.
 
-        Numerical values are accepted, but will be converted to strings.
-        An optional `unit` may be specified, unless it is already part
-        of the value string itself, inside square brackets.
+        Values are accepted as expressions (strings) or as numerical
+        values (referring to default units). An optional `unit` may be
+        specified, unless it is already part of the expression itself,
+        inside square brackets.
 
-        Values are always returned as strings, i.e. the expression as
-        entered in the user interface. That expression may include the
-        unit, again inside brackets.
+        By default, values are always returned as strings, i.e. the
+        expression as entered in the user interface. That expression
+        may include the unit, again inside brackets. If the option
+        `evaluate` is set to `True`, the numerical value that the
+        parameter expression evaluate to is returned.
+
+        A parameter `description` can be supplied and will be set
+        regardless of a value being passed or not.
         """
+        if description is not None:
+            value = self.parameter(name)
+            self.java.param().set(name, value, description)
         if value is None:
-            return str(self.java.param().get(name))
+            if not evaluate:
+                return str(self.java.param().get(name))
+            else:
+                return self.java.param().evaluate(name)
         else:
             value = str(value)
             if unit:
                 value += f' [{unit}]'
-            if desc is not None:
-                self.java.param().set(name, value, str(desc))
-            else:
-                self.java.param().set(name, value)
+            self.java.param().set(name, value)
 
     def load(self, file, interpolation):
         """

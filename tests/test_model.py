@@ -122,13 +122,20 @@ def test_rename():
 
 
 def test_parameter():
-    name = 'U'
-    old_value = model.parameter(name)
-    new_value = '2[V]'
-    model.parameter(name, new_value)
-    assert model.parameter(name) == new_value
-    model.parameter(name, old_value)
-    assert model.parameter(name) == old_value
+    value = model.parameter('U')
+    model.parameter('U', '2[V]')
+    assert model.parameter('U') == '2[V]'
+    model.parameter('U', '2', 'V')
+    assert model.parameter('U') == '2 [V]'
+    model.parameter('U', '2')
+    assert model.parameter('U') == '2'
+    assert model.parameter('U', evaluate=True) == 2
+    model.parameter('U', value)
+    assert model.parameter('U') == value
+    model.parameter('U', description='test')
+    names = [p.name for p in model.parameters()]
+    descriptions = [p.description for p in model.parameters()]
+    assert descriptions[names.index('U')] == 'test'
 
 
 def test_load():
