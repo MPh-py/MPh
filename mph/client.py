@@ -186,9 +186,9 @@ class Client:
         file = Path(file)
 
         # Check if model is already loaded
-        if file in self.modelFiles() and not reload:
-            logger.info('Found model in memory')
-            return self.models()[self.modelFiles().index(file)]
+        if file in self.paths() and not reload:
+            logger.info('Found model in memory, returning model from memory')
+            return self.models()[self.paths().index(file)]
 
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
@@ -220,9 +220,9 @@ class Client:
         """Returns all model objects currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
 
-    def modelFiles(self):
+    def paths(self):
         """
-        Returns the file pathes of all models in memory (abspath). Models without
+        Returns the file paths of all models in memory (abspath). Models without
         files will return empty path.
         """
         return [Path(str(self.java.model(tag).getFilePath())) for tag in self.java.tags()]
