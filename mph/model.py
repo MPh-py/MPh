@@ -105,8 +105,12 @@ class Model:
         tags = [str(tag) for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
-    def boundaryConditions(self, node):
-        """Returns boundary conditions under specified physics node"""
+    def physic_features(self, node):
+        """
+        Returns features for a specified physics node. Those features
+        include initial conditions, boundary conditions and COMSOL specific
+        advanced modeling features connected to the physics type.
+        """
         physicsTags = [str(tag) for tag in self.java.physics().tags()]
         ptag = physicsTags[self.physics().index(node)]
         tags = [str(tag) for tag in self.java.physics(ptag).feature().tags()]
