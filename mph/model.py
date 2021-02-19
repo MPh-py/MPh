@@ -65,6 +65,10 @@ class Model:
             name = name.rsplit('.', maxsplit=1)[0]
         return name
 
+    def path(self):
+        """Returns the abspath of the model's mpf file"""
+        return Path(str(self.java.getFilePath()))
+
     def parameters(self):
         """
         Returns the global model parameters.
