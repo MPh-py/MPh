@@ -78,6 +78,15 @@ def test_physics():
     assert 'electric currents' in physics
 
 
+def test_features():
+    features = model.features('electrostatic')
+    assert 'Laplace equation' in features
+    assert 'zero charge' in features
+    assert 'initial values' in features
+    assert 'anode' in features
+    assert 'cathode' in features
+
+
 def test_materials():
     materials = model.materials()
     assert 'medium 1' in materials
@@ -289,6 +298,7 @@ if __name__ == '__main__':
         test_geometries()
         test_selections()
         test_physics()
+        test_features()
         test_materials()
         test_meshes()
         test_studies()

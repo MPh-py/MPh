@@ -106,16 +106,23 @@ class Model:
         tags = [str(tag) for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
-    def physic_features(self, node):
+    def features(self, physics):
         """
-        Returns features for a specified physics node. Those features
-        include initial conditions, boundary conditions and COMSOL specific
-        advanced modeling features connected to the physics type.
+        Returns the names of all features in the given `physics` interface.
+
+        Features refers to the nodes defined under a physics interface.
+        They define the differential equation, boundary conditions,
+        initial values, etc.
         """
-        physicsTags = [str(tag) for tag in self.java.physics().tags()]
-        ptag = physicsTags[self.physics().index(node)]
+        if physics not in self.physics():
+            error = f'No physics interface named "{physics}".'
+            logger.error(error)
+            raise ValueError(error)
+        tags = [str(tag) for tag in self.java.physics().tags()]
+        ptag = tags[self.physics().index(physics)]
         tags = [str(tag) for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(tag).name()) for tag in tags]
+        return [str(self.java.physics(ptag).feature(ftag).name())
+                for ftag in tags]
 
     def materials(self):
         """Returns the names of all materials."""
