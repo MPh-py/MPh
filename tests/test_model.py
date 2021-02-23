@@ -64,6 +64,14 @@ def test_geometries():
     assert 'geometry' in model.geometries()
 
 
+def test_selections():
+    selections = model.selections()
+    assert 'domains' in selections
+    assert 'exterior' in selections
+    assert 'axis' in selections
+    assert 'center' in selections
+
+
 def test_physics():
     physics = model.physics()
     assert 'electrostatic' in physics
@@ -279,6 +287,7 @@ if __name__ == '__main__':
         test_functions()
         test_components()
         test_geometries()
+        test_selections()
         test_physics()
         test_materials()
         test_meshes()

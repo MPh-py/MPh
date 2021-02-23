@@ -86,10 +86,6 @@ class Model:
         tags = [str(tag) for tag in self.java.func().tags()]
         return [str(self.java.func(tag).name()) for tag in tags]
 
-    def selections(self):
-        tags = tuple(str(tag) for tag in self.java.selection().tags())
-        return [str(self.java.selection(tag).name()) for tag in tags]
-
     def components(self):
         """Returns the names of all model components."""
         tags = [str(tag) for tag in self.java.component().tags()]
@@ -99,6 +95,11 @@ class Model:
         """Returns the names of all geometry sequences."""
         tags = [str(tag) for tag in self.java.geom().tags()]
         return [str(self.java.geom(tag).name()) for tag in tags]
+
+    def selections(self):
+        """Returns the names of all selections."""
+        tags = [str(tag) for tag in self.java.selection().tags()]
+        return [str(self.java.selection(tag).name()) for tag in tags]
 
     def physics(self):
         """Returns the names of all physics interfaces."""
