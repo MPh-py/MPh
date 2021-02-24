@@ -72,8 +72,9 @@ class Server:
     Otherwise the latest version is used.
 
     A `timeout` can be set for the server to start up. The default
-    is 60 seconds. `TimeoutError` is raisd if the server failed to
-    start within that period.
+    is 60 seconds. Raises `TimeoutError` if the server failed to start
+    within that period. Raises `RuntimeError` if user name and password
+    for the server have not been set by the user.
     """
 
     def __init__(self, cores=None, version=None, timeout=60):

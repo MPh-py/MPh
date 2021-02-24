@@ -59,7 +59,8 @@ def parse(version):
     try:
         parts = [int(part) for part in parts]
     except ValueError:
-        raise ValueError(f'Not all parts of version "{number}" are numbers.')
+        error = f'Not all parts of version "{number}" are numbers.'
+        raise ValueError(error) from None
     parts = parts + [0]*(4-len(parts))
     (major, minor, patch, build) = parts
 
@@ -92,7 +93,7 @@ def search_Windows():
     except FileNotFoundError:
         error = 'Did not find Comsol registry entry.'
         logger.critical(error)
-        raise OSError(error) from None
+        raise LookupError(error) from None
 
     # Parse child nodes to get list of Comsol installations.
     index = 0

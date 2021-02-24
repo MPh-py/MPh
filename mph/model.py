@@ -135,7 +135,7 @@ class Model:
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
             logger.error(error)
-            raise ValueError(error)
+            raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         tags = [tag for tag in self.java.physics(ptag).feature().tags()]
@@ -232,7 +232,7 @@ class Model:
         else:
             error = f'Interpolation function "{interpolation}" does not exist.'
             logger.error(error)
-            raise ValueError(error)
+            raise LookupError(error)
         file = Path(file)
         logger.info(f'Loading external data from file "{file.name}".')
         self.java.func(tag).discardData()
@@ -252,14 +252,14 @@ class Model:
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
             logger.error(error)
-            raise ValueError(error)
+            raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         node = self.java.physics(ptag)
         if feature not in self.features(physics):
             error = f'No feature named "{feature}" in physics "{physics}".'
             logger.error(error)
-            raise ValueError(error)
+            raise LookupError(error)
         tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
         node = node.feature(ftag)
@@ -285,7 +285,7 @@ class Model:
             if not index:
                 error = f'Geometry sequence "{geometry}" does not exist.'
                 logger.error(error)
-                raise ValueError(error)
+                raise LookupError(error)
         elif not index:
             error = 'No geometry sequence defined in the model tree.'
             logger.error(error)
@@ -306,7 +306,7 @@ class Model:
             if not index:
                 error = f'Mesh sequence "{mesh}" does not exist.'
                 logger.error(error)
-                raise ValueError(error)
+                raise LookupError(error)
         elif not index:
             error = 'No mesh sequence defined in the model tree.'
             logger.error(error)
@@ -327,7 +327,7 @@ class Model:
             if not index:
                 error = f'Study "{study}" does not exist.'
                 logger.error(error)
-                raise ValueError(error)
+                raise LookupError(error)
         elif not index:
             error = 'No study defined in the model tree.'
             logger.error(error)
@@ -355,7 +355,7 @@ class Model:
                 dtag = tags[names.index(name)]
             except ValueError:
                 error = f'Dataset "{name}" does not exist.'
-                raise ValueError(error) from None
+                raise LookupError(error) from None
         else:
             etag = self.java.result().numerical().uniquetag('eval')
             eval = self.java.result().numerical().create(etag, 'Eval')
@@ -423,9 +423,7 @@ class Model:
 
         Results are returned as NumPy arrays of whichever
         dimensionality they may have. The expression may be a global
-        one, or a scalar field, or particle data. `ValueError`
-        exceptions are raised if anything goes wrong, such as the
-        solution not having been computed.
+        one, or a scalar field, or particle data.
         """
 
         # Get dataset and solution (Java) objects.
@@ -437,7 +435,7 @@ class Model:
         if solution.isEmpty():
             error = 'The solution has not been computed.'
             logger.error(error)
-            raise ValueError(error)
+            raise RuntimeError(error)
 
         # Validate solution arguments.
         if not (inner is None
