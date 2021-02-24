@@ -90,27 +90,27 @@ class Model:
 
     def functions(self):
         """Returns the names of all globally defined functions."""
-        tags = [str(tag) for tag in self.java.func().tags()]
+        tags = [tag for tag in self.java.func().tags()]
         return [str(self.java.func(tag).name()) for tag in tags]
 
     def components(self):
         """Returns the names of all model components."""
-        tags = [str(tag) for tag in self.java.component().tags()]
+        tags = [tag for tag in self.java.component().tags()]
         return [str(self.java.component(tag).name()) for tag in tags]
 
     def geometries(self):
         """Returns the names of all geometry sequences."""
-        tags = [str(tag) for tag in self.java.geom().tags()]
+        tags = [tag for tag in self.java.geom().tags()]
         return [str(self.java.geom(tag).name()) for tag in tags]
 
     def selections(self):
         """Returns the names of all selections."""
-        tags = [str(tag) for tag in self.java.selection().tags()]
+        tags = [tag for tag in self.java.selection().tags()]
         return [str(self.java.selection(tag).name()) for tag in tags]
 
     def physics(self):
         """Returns the names of all physics interfaces."""
-        tags = [str(tag) for tag in self.java.physics().tags()]
+        tags = [tag for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
     def features(self, physics):
@@ -125,45 +125,45 @@ class Model:
             error = f'No physics interface named "{physics}".'
             logger.error(error)
             raise ValueError(error)
-        tags = [str(tag) for tag in self.java.physics().tags()]
+        tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
-        tags = [str(tag) for tag in self.java.physics(ptag).feature().tags()]
+        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
         return [str(self.java.physics(ptag).feature(ftag).name())
                 for ftag in tags]
 
     def materials(self):
         """Returns the names of all materials."""
-        tags = [str(tag) for tag in self.java.material().tags()]
+        tags = [tag for tag in self.java.material().tags()]
         return [str(self.java.material(tag).name()) for tag in tags]
 
     def meshes(self):
         """Returns the names of all mesh sequences."""
-        tags = [str(tag) for tag in self.java.mesh().tags()]
+        tags = [tag for tag in self.java.mesh().tags()]
         return [str(self.java.mesh(tag).name()) for tag in tags]
 
     def studies(self):
         """Returns the names of all studies."""
-        tags = [str(tag) for tag in self.java.study().tags()]
+        tags = [tag for tag in self.java.study().tags()]
         return [str(self.java.study(tag).name()) for tag in tags]
 
     def solutions(self):
         """Returns the names of all solutions."""
-        tags = [str(tag) for tag in self.java.sol().tags()]
+        tags = [tag for tag in self.java.sol().tags()]
         return [str(self.java.sol(tag).name()) for tag in tags]
 
     def datasets(self):
         """Returns the names of all datasets."""
-        tags = [str(tag) for tag in self.java.result().dataset().tags()]
+        tags = [tag for tag in self.java.result().dataset().tags()]
         return [str(self.java.result().dataset(tag).name()) for tag in tags]
 
     def plots(self):
         """Returns the names of all plots."""
-        tags = [str(tag) for tag in self.java.result().tags()]
+        tags = [tag for tag in self.java.result().tags()]
         return [str(self.java.result(tag).name()) for tag in tags]
 
     def exports(self):
         """Returns the names of all exports."""
-        tags = [str(tag) for tag in self.java.result().export().tags()]
+        tags = [tag for tag in self.java.result().export().tags()]
         return [str(self.java.result().export(tag).name()) for tag in tags]
 
     ####################################
@@ -216,7 +216,6 @@ class Model:
         `interpolation` function.
         """
         for tag in self.java.func().tags():
-            tag = str(tag)
             if str(self.java.func(tag).label()) == interpolation:
                 break
         else:
@@ -243,14 +242,14 @@ class Model:
             error = f'No physics interface named "{physics}".'
             logger.error(error)
             raise ValueError(error)
-        tags = [str(tag) for tag in self.java.physics().tags()]
+        tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         node = self.java.physics(ptag)
         if feature not in self.features(physics):
             error = f'No feature named "{feature}" in physics "{physics}".'
             logger.error(error)
             raise ValueError(error)
-        tags = [str(tag) for tag in node.feature().tags()]
+        tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
         node = node.feature(ftag)
         if action == 'flip':
@@ -266,7 +265,7 @@ class Model:
 
     def build(self, geometry=None):
         """Builds the named `geometry`, or all of them if none given."""
-        tags  = [str(tag) for tag in self.java.geom().tags()]
+        tags  = [tag for tag in self.java.geom().tags()]
         names = self.geometries()
         index = {name: tag for (tag, name) in zip(tags, names)}
         if geometry is not None:
@@ -287,7 +286,7 @@ class Model:
 
     def mesh(self, mesh=None):
         """Runs the named `mesh` sequence, or all of them if none given."""
-        tags  = [str(tag) for tag in self.java.mesh().tags()]
+        tags  = [tag for tag in self.java.mesh().tags()]
         names = self.meshes()
         index = {name: tag for (tag, name) in zip(tags, names)}
         if mesh is not None:
@@ -308,7 +307,7 @@ class Model:
 
     def solve(self, study=None):
         """Solves the named `study`, or all of them if none given."""
-        tags  = [str(tag) for tag in self.java.study().tags()]
+        tags  = [tag for tag in self.java.study().tags()]
         names = self.studies()
         index = {name: tag for (tag, name) in zip(tags, names)}
         if study is not None:
@@ -556,7 +555,7 @@ class Model:
         in the export node itself will be used.
         """
         names   = self.exports()
-        tags    = [str(tag) for tag in self.java.result().export().tags()]
+        tags    = [tag for tag in self.java.result().export().tags()]
         tag     = tags[names.index(node)]
         feature = self.java.result().export(tag)
         if file is not None:
