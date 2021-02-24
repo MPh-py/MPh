@@ -128,9 +128,9 @@ class Model:
         """
         Returns the names of all features in the given `physics` interface.
 
-        Features refers to the nodes defined under a physics interface.
-        They define the differential equation, boundary conditions,
-        initial values, etc.
+        The term feature refers to the nodes defined under a physics
+        interface. They define the differential equations, boundary
+        conditions, initial values, etc.
         """
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
@@ -245,9 +245,9 @@ class Model:
         Enables or disables features of a physics interface.
 
         If `action` is `'flip'` (the default), it enables the feature
-        if it is disabled or disables it if enabled. To disregard the
-        Pass `enable` or `on` to enable the feature regardless of its
-        current state. Pass `disable` or `off` to disable it.
+        if it is currently disabled or disables it if enabled. Pass
+        `'enable'` or `'on'` to enable the feature regardless of its
+        current state. Pass `'disable'` or `'off'` to disable it.
         """
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
