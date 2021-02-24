@@ -1,8 +1,5 @@
-﻿"""
-Adds the parent folder to the module search path.
-"""
+﻿"""Adds the parent folder to the module search path."""
 __license__ = 'MIT'
-
 
 import sys
 from pathlib import Path

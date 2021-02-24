@@ -7,16 +7,18 @@ __license__ = 'MIT'
 ########################################
 import parent
 from subprocess import run, PIPE
-import platform
-import logging
+from platform import system
+from pathlib import Path
 from sys import argv
+import logging
 
 
 ########################################
 # Globals                              #
 ########################################
+here   = Path(__file__).parent
+python = 'python' if system() == 'Windows' else 'python3'
 logger = logging.getLogger(__name__)
-python = 'python' if platform.system() == 'Windows' else 'python3'
 
 
 ########################################
@@ -25,7 +27,7 @@ python = 'python' if platform.system() == 'Windows' else 'python3'
 
 def test_exit_sys():
     logger.info('Testing exit code of external process.')
-    process = run([python, 'exit_sys.py'], stdout=PIPE, stderr=PIPE)
+    process = run([python, 'exit_sys.py'], stdout=PIPE, stderr=PIPE, cwd=here)
     exit_code = process.returncode
     logger.info(f'Process exited with code {exit_code}.')
     assert exit_code == 2
@@ -33,7 +35,7 @@ def test_exit_sys():
 
 def test_exit_exc():
     logger.info('Testing external process raising an unhandled exception.')
-    process = run([python, 'exit_exc.py'], stdout=PIPE, stderr=PIPE)
+    process = run([python, 'exit_exc.py'], stdout=PIPE, stderr=PIPE, cwd=here)
     exit_code = process.returncode
     logger.info(f'Process exited with code {exit_code}.')
     assert exit_code == 1

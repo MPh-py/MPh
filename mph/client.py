@@ -88,49 +88,6 @@ class Client:
         # Discover Comsol back-end.
         backend = discovery.backend(version)
 
-        # Set environment variables for loading external libraries.
-        system = platform.system()
-        root = backend['root']
-        if system == 'Windows':
-            var = 'PATH'
-            if var in os.environ:
-                path = os.environ[var].split(os.pathsep)
-            else:
-                path = []
-            lib = str(root/'lib'/'glnxa64')
-            if lib not in path:
-                os.environ[var] = os.pathsep.join([lib] + path)
-        elif system == 'Linux':
-            lib = str(root/'lib'/'glnxa64')
-            gcc = str(root/'lib'/'glnxa64'/'gcc')
-            ext = str(root/'ext'/'graphicsmagick'/'glnxa64')
-            cad = str(root/'ext'/'cadimport'/'glnxa64')
-            pre = str(root/'java'/'glnxa64'/'jre'/'lib'/'amd64'/'libjsig.so')
-            var = 'LD_LIBRARY_PATH'
-            if var in os.environ:
-                path = os.environ[var].split(os.pathsep)
-            else:
-                path = []
-            if lib not in path:
-                os.environ[var] = os.pathsep.join([lib, gcc, ext, cad] + path)
-            vars = ('MAGICK_CONFIGURE_PATH', 'MAGICK_CODER_MODULE_PATH',
-                    'MAGICK_FILTER_MODULE_PATH')
-            for var in vars:
-                os.environ[var] = ext
-            os.environ['LD_PRELOAD'] = pre
-            os.environ['LC_NUMERIC'] = os.environ['LC_ALL'] = 'C'
-        elif system == 'Darwin':
-            var = 'DYLD_LIBRARY_PATH'
-            if var in os.environ:
-                path = os.environ[var].split(os.pathsep)
-            else:
-                path = []
-            lib = str(root/'lib'/'maci64')
-            ext = str(root/'ext'/'graphicsmagick'/'maci64')
-            cad = str(root/'ext'/'cadimport'/'maci64')
-            if lib not in path:
-                os.environ[var] = os.pathsep.join([lib, ext, cad] + path)
-
         # Instruct Comsol to limit number of processor cores to use.
         if cores:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
@@ -139,7 +96,7 @@ class Client:
         logger.info(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
         jpype.startJVM(str(backend['jvm']),
-                       classpath=str(root/'plugins'/'*'),
+                       classpath=str(backend['root']/'plugins'/'*'),
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
 
@@ -147,6 +104,7 @@ class Client:
         from com.comsol.model.util import ModelUtil as java
         if port is None:
             logger.info('Initializing stand-alone client.')
+            check_environment(backend)
             graphics = True
             java.initStandalone(graphics)
             logger.info('Stand-alone client initialized.')
@@ -271,6 +229,65 @@ class Client:
             error = 'A stand-alone client cannot disconnect from a server.'
             logger.error(error)
             raise RuntimeError(error)
+
+
+########################################
+# Environment                          #
+########################################
+
+def check_environment(backend):
+    """Checks the process environment required for a stand-alone client."""
+    system = platform.system()
+    root = backend['root']
+    help = 'Refer to chapter "Limitations" in the documentation for help.'
+    if system == 'Windows':
+        pass
+    elif system == 'Linux':
+        var = 'LD_LIBRARY_PATH'
+        if var not in os.environ:
+            error = f'Library search path {var} not set in environment.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        path = os.environ[var].split(os.pathsep)
+        lib = root/'lib'/'glnxa64'
+        if str(lib) not in path:
+            error = f'Folder "{lib}" missing in library search path.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        gcc = root/'lib'/'glnxa64'/'gcc'
+        if gcc.exists() and str(gcc) not in path:
+            logger.warning(f'Folder "{gcc}" missing in library search path.')
+        gra = str(root/'ext'/'graphicsmagick'/'glnxa64')
+        if str(gra) not in path:
+            error = f'Folder "{gra}" missing in library search path.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        cad = root/'ext'/'cadimport'/'glnxa64'
+        if cad.exists() and str(cad) not in path:
+            logger.warning(f'Folder "{cad}" missing in library search path.')
+    elif system == 'Darwin':
+        var = 'DYLD_LIBRARY_PATH'
+        if var not in os.environ:
+            error = f'Library search path {var} not set in environment.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        if var in os.environ:
+            path = os.environ[var].split(os.pathsep)
+        else:
+            path = []
+        lib = root/'lib'/'maci64'
+        if str(lib) not in path:
+            error = f'Folder "{lib}" missing in library search path.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        gra = root/'ext'/'graphicsmagick'/'maci64'
+        if str(gra) not in path:
+            error = f'Folder "{gra}" missing in library search path.'
+            logger.error(error)
+            raise RuntimeError(error + '\n' + help)
+        cad = root/'ext'/'cadimport'/'maci64'
+        if cad.exists() and str(cad) not in path:
+            logger.warning(f'Folder "{cad}" missing in library search path.')
 
 
 ########################################

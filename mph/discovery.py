@@ -261,9 +261,9 @@ def search_Linux():
         if not lib.exists():
             logger.error('Did not find Comsol shared libraries.')
             continue
-        ext = root/'ext'/'graphicsmagick'/'glnxa64'
-        if not ext.exists():
-            logger.error('Did not find GraphicsMagick libraries.')
+        gra = root/'ext'/'graphicsmagick'/'glnxa64'
+        if not gra.exists():
+            logger.error('Did not find graphics libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
@@ -350,9 +350,9 @@ def search_macOS():
         if not lib.exists():
             logger.error('Did not find Comsol shared libraries.')
             continue
-        ext = root/'ext'/'graphicsmagick'/'maci64'
-        if not ext.exists():
-            logger.error('Did not find GraphicsMagick libraries.')
+        gra = root/'ext'/'graphicsmagick'/'maci64'
+        if not gra.exists():
+            logger.error('Did not find graphics libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.

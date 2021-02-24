@@ -1,4 +1,5 @@
-﻿import parent
+﻿"""Exits the Python session after starting a stand-alone client."""
+import parent
 import mph
 import sys
 

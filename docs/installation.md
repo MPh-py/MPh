@@ -22,11 +22,11 @@ from Comsol 5.3 onward are expected to work. If you want to use the
 client–server mode, make sure to once run `comsolmphserver` from a
 console first to enter the obligatory user name and password.
 
-Support for Linux is limited: stand-alone clients do not work out of
-the box. You have to, once and for all, configure your shell's
-environment to work around this issue. MacOS support is completely
-untested. It may work, but probably won't. Find more details in the
-chapter [Limitations](limitations).
+Support for Linux and macOS is limited: Stand-alone clients do not work
+out of the box. (As opposed to running client–server mode, which does.)
+You have to, once and for all, configure your shell's environment to
+work around this issue. Find more details in the chapter
+[Limitations](limitations).
 
 Note how a separate Java run-time environment is *not* required, as
 Comsol ships with one already built in.
