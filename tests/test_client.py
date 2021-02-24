@@ -50,14 +50,31 @@ def test_load():
     assert model
 
 
+def test_caching():
+    assert not client.caching()
+    copy = client.load(file)
+    assert model != copy
+    client.remove(copy)
+    client.caching(True)
+    assert client.caching()
+    copy = client.load(file)
+    assert model == copy
+    client.caching(False)
+    assert not client.caching()
+
+
 def test_create():
     name = 'test'
     client.create(name)
     assert name in client.names()
 
 
-def test_list():
+def test_names():
     assert model.name() in client.names()
+
+
+def test_files():
+    assert file.resolve() in client.files()
 
 
 def test_remove():
@@ -95,8 +112,10 @@ if __name__ == '__main__':
         test_start()
         test_cores()
         test_load()
+        test_caching()
         test_create()
-        test_list()
+        test_names()
+        test_files()
         test_remove()
         test_clear()
     finally:

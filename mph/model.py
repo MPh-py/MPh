@@ -54,6 +54,9 @@ class Model:
     def __init__(self, java):
         self.java = java
 
+    def __eq__(self, other):
+        return self.java.tag() == other.java.tag()
+
     ####################################
     # Inspection                       #
     ####################################
@@ -65,9 +68,9 @@ class Model:
             name = name.rsplit('.', maxsplit=1)[0]
         return name
 
-    def path(self):
-        """Returns the abspath of the model's mpf file"""
-        return Path(str(self.java.getFilePath()))
+    def file(self):
+        """Returns the absolute path to the file the model was loaded from."""
+        return Path(str(self.java.getFilePath())).resolve()
 
     def parameters(self):
         """

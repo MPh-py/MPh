@@ -181,20 +181,41 @@ class Client:
         self.port    = port
         self.java    = java
 
-    def load(self, file, reload=False):
-        """Returns the model loaded from the given `file`."""
-        file = Path(file)
+        # Deactivate caching of previously loaded models by default.
+        self._caching = False
 
-        # Check if model is already loaded
-        if file in self.paths() and not reload:
-            logger.info('Found model in memory, returning model from memory')
-            return self.models()[self.paths().index(file)]
-
+    def load(self, file):
+        """Loads a model from the given `file` and returns it."""
+        file = Path(file).resolve()
+        if self.caching() and file in self.files():
+            logger.info('Returning previously loaded model from cache.')
+            return self.models()[self.files().index(file)]
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
         model = Model(self.java.load(tag, str(file)))
         logger.info('Finished loading model.')
         return model
+
+    def caching(self, state=None):
+        """
+        Enables or disables caching of previously loaded models.
+
+        Caching means that the `load()` method will check if a model
+        has been previously loaded from the same file-system path and,
+        if so, return the in-memory model object instead of reloading
+        it from disk. By default (at start-up) caching is disabled.
+
+        Pass `True` to enable caching, `False` to disable it. If no
+        argument is passed, the current state is returned.
+        """
+        if state is None:
+            return self._caching
+        elif state in (True, False):
+            self._caching = state
+        else:
+            error = 'Caching state can only be set to either True or False.'
+            logger.error(error)
+            raise ValueError(error)
 
     def create(self, name):
         """
@@ -217,19 +238,16 @@ class Client:
         return model
 
     def models(self):
-        """Returns all model objects currently held in memory."""
+        """Returns all models currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
 
-    def paths(self):
-        """
-        Returns the file paths of all models in memory (abspath). Models without
-        files will return empty path.
-        """
-        return [Path(str(self.java.model(tag).getFilePath())) for tag in self.java.tags()]
-
     def names(self):
-        """Names all models that are currently held in memory."""
+        """Returns the names of all loaded models."""
         return [model.name() for model in self.models()]
+
+    def files(self):
+        """Returns the file-system paths of all loaded models."""
+        return [model.file() for model in self.models()]
 
     def remove(self, model):
         """Removes the given `model` from memory."""
