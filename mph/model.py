@@ -49,10 +49,21 @@ class Model:
     Though if you wish to do that, just use the instance attribute
     `.java` to access the entire Comsol Java API from Python and refer
     to the Comsol Programming Manual for guidance.
+
+    The `parent` argument to the constructor is usually that internal
+    Java object around which this class here is wrapped. But in order
+    to simplify extending the class with custom functionality, the
+    constructor also accepts instances of this class or a child class.
+    In that case, it will preserve the original `.java` object throughout
+    the class hierarchy so that you can simply "type-cast" an existing
+    `Model` instance (as loaded by the client) to a derived child class.
     """
 
-    def __init__(self, java):
-        self.java = java
+    def __init__(self, parent):
+        if isinstance(parent, Model):
+            self.java = parent.java
+        else:
+            self.java = parent
 
     def __eq__(self, other):
         return self.java.tag() == other.java.tag()
