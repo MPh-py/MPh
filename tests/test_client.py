@@ -1,4 +1,4 @@
-﻿"""Tests a stand-alone client session."""
+﻿"""Tests the client instance."""
 __license__ = 'MIT'
 
 
@@ -15,32 +15,44 @@ from pathlib import Path
 ########################################
 # Fixtures                             #
 ########################################
+server = None
 client = None
+cores  = 1
 model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
+mode   = 'client-server'
 
 
 def setup_module():
-    pass
+    if mode == 'client-server':
+        global server
+        server = mph.Server(cores=cores)
+    elif mode == 'stand-alone':
+        pass
+    else:
+        raise ValueError(f'Invalid client mode "{mode}".')
 
 
 def teardown_module():
-    pass
+    if mode == 'client-server':
+        server.stop()
 
 
 ########################################
 # Tests                                #
 ########################################
 
-def test_start():
+
+def test_init():
     global client
-    client = mph.Client(cores=1)
+    if mode == 'client-server':
+        client = mph.Client(cores=cores, port=server.port)
+    elif mode == 'stand-alone':
+        client = mph.Client(cores=cores)
     assert client.java is not None
-
-
-def test_cores():
-    assert client.cores == 1
+    assert not client.models()
+    assert client.cores == cores
 
 
 def test_load():
@@ -69,6 +81,10 @@ def test_create():
     assert name in client.names()
 
 
+def test_models():
+    pass
+
+
 def test_names():
     assert model.name() in client.names()
 
@@ -81,17 +97,31 @@ def test_remove():
     name = model.name()
     client.remove(model)
     assert name not in client.names()
-    message = None
+    message = ''
     try:
         model.java.component()
     except Exception as error:
         message = error.getMessage()
-    assert 'is_removed' in message
+    if mode == 'client-server':
+        assert 'no_longer_in_the_model' in message
+    elif mode == 'stand-alone':
+        assert 'is_removed' in message
 
 
 def test_clear():
     client.clear()
     assert not client.models()
+
+
+def test_disconnect():
+    if mode == 'client-server':
+        client.disconnect()
+        try:
+            client.models()
+            connected = True
+        except Exception:
+            connected = False
+        assert not connected
 
 
 ########################################
@@ -101,6 +131,8 @@ def test_clear():
 if __name__ == '__main__':
 
     arguments = argv[1:]
+    if 'stand-alone' in arguments or 'standalone' in arguments:
+        mode = 'stand-alone'
     if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,
@@ -109,14 +141,15 @@ if __name__ == '__main__':
 
     setup_module()
     try:
-        test_start()
-        test_cores()
+        test_init()
         test_load()
         test_caching()
         test_create()
+        test_models()
         test_names()
         test_files()
         test_remove()
         test_clear()
+        test_disconnect()
     finally:
         teardown_module()

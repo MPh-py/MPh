@@ -1,6 +1,7 @@
-﻿"""Raises an exception after starting a stand-alone client."""
+﻿"""Raises an exception after starting a client."""
 import parent
 import mph
 
-client = mph.Client()
+server = mph.Server()
+client = mph.Client(port=server.port)
 raise RuntimeError

@@ -1,4 +1,4 @@
-﻿"""Tests a server session."""
+﻿"""Tests a server instance."""
 __license__ = 'MIT'
 
 

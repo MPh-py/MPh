@@ -7,25 +7,33 @@ __license__ = 'MIT'
 ########################################
 import parent
 import mph
-import logging
 from sys import argv
 from pathlib import Path
+import logging
 
 
 ########################################
 # Fixtures                             #
 ########################################
 client = None
+server = None
 model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
 saveas = here/'temp.mph'
+mode   = 'client-server'
 
 
 def setup_module():
-    global client, model
-    client = mph.Client()
-    model  = client.load(file)
+    global client, server, model
+    if mode == 'client-server':
+        server = mph.Server()
+        client = mph.Client(port=server.port)
+    elif mode == 'stand-alone':
+        client = mph.Client()
+    else:
+        raise ValueError(f'Invalid client mode "{mode}".')
+    model = client.load(file)
 
 
 def teardown_module():
@@ -301,6 +309,8 @@ def test_save():
 if __name__ == '__main__':
 
     arguments = argv[1:]
+    if 'stand-alone' in arguments or 'standalone' in arguments:
+        mode = 'stand-alone'
     if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,
