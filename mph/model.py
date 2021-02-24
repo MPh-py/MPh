@@ -230,6 +230,36 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
+    def toggle(self, physics, feature, action='flip'):
+        """
+        Enables or disables features of a physics interface.
+
+        If `action` is `'flip'` (the default), it enables the feature
+        if it is disabled or disables it if enabled. To disregard the
+        Pass `enable` or `on` to enable the feature regardless of its
+        current state. Pass `disable` or `off` to disable it.
+        """
+        if physics not in self.physics():
+            error = f'No physics interface named "{physics}".'
+            logger.error(error)
+            raise ValueError(error)
+        tags = [str(tag) for tag in self.java.physics().tags()]
+        ptag = tags[self.physics().index(physics)]
+        node = self.java.physics(ptag)
+        if feature not in self.features(physics):
+            error = f'No feature named "{feature}" in physics "{physics}".'
+            logger.error(error)
+            raise ValueError(error)
+        tags = [str(tag) for tag in node.feature().tags()]
+        ftag = tags[self.features(physics).index(feature)]
+        node = node.feature(ftag)
+        if action == 'flip':
+            node.active(not node.isActive())
+        elif action in ('enable', 'on', 'activate'):
+            node.active(True)
+        elif action in ('disable', 'off', 'deactivate'):
+            node.active(False)
+
     ####################################
     # Solving                          #
     ####################################

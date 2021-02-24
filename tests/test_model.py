@@ -250,6 +250,24 @@ def test_evaluate():
     assert D[-1].max() == Dl.max()
 
 
+def test_toggle():
+    model.solve('static')
+    potential = model.evaluate('V_es')
+    assert abs(potential.mean()) < 0.1
+    model.toggle('electrostatic', 'cathode')
+    model.solve('static')
+    potential = model.evaluate('V_es')
+    assert abs(potential.mean() - 0.5) < 0.1
+    model.toggle('electrostatic', 'cathode', 'on')
+    model.solve('static')
+    potential = model.evaluate('V_es')
+    assert abs(potential.mean()) < 0.1
+    model.toggle('electrostatic', 'cathode', 'off')
+    model.solve('static')
+    potential = model.evaluate('V_es')
+    assert abs(potential.mean() - 0.5) < 0.1
+
+
 def test_export():
     file = Path('field.txt')
     assert not file.exists()
@@ -313,6 +331,7 @@ if __name__ == '__main__':
         test_mesh()
         test_solve()
         test_evaluate()
+        test_toggle()
         test_export()
         test_clear()
         test_reset()
