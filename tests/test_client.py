@@ -1,4 +1,4 @@
-﻿"""Tests the client instance."""
+﻿"""Tests the client class."""
 __license__ = 'MIT'
 
 
@@ -139,9 +139,9 @@ if __name__ == '__main__':
         mode = 'stand-alone'
     elif 'client-server' in arguments:
         mode = 'client-server'
-    if 'log' in arguments or 'debug' in arguments:
+    if 'log' in arguments:
         logging.basicConfig(
-            level   = logging.DEBUG,
+            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',
             datefmt = '%H:%M:%S')
 

@@ -1,4 +1,4 @@
-﻿"""Runs all tests in the intended order, while logging to the console."""
+﻿"""Runs all tests in the intended order."""
 __license__ = 'MIT'
 
 from subprocess import run

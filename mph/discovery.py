@@ -26,7 +26,7 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # package-wide event logger
+logger = getLogger(__package__)        # event logger
 
 
 ########################################

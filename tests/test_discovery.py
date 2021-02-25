@@ -1,4 +1,4 @@
-﻿"""Tests discovering back-end installations."""
+﻿"""Tests discovering Comsol installations."""
 __license__ = 'MIT'
 
 
@@ -37,9 +37,9 @@ def test_backend():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'log' in arguments or 'debug' in arguments:
+    if 'log' in arguments:
         logging.basicConfig(
-            level   = logging.DEBUG,
+            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',
             datefmt = '%H:%M:%S')
 
