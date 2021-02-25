@@ -12,9 +12,10 @@ by this library.
     :toctree: api
     :nosignatures:
 
+    start
     Model
     Client
     Server
-    tools
     discovery
+    tools
 ```

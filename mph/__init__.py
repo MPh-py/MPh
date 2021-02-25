@@ -9,6 +9,7 @@ __copyright__ = 'John Hennig'
 __license__   = 'MIT'
 
 # Public interface
+from .session import start
 from .model   import Model
 from .client  import Client
 from .server  import Server

@@ -15,10 +15,7 @@ from .model import Model               # model class
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
 import platform                        # platform information
-import atexit                          # exit handler
 import os                              # operating system
-import sys                             # system specifics
-import threading                       # multi-threading
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
 
@@ -82,7 +79,7 @@ class Client:
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
-            logger.error(error)
+            logger.critical(error)
             raise NotImplementedError(error)
 
         # Discover Comsol back-end.
@@ -172,7 +169,7 @@ class Client:
             self._caching = state
         else:
             error = 'Caching state can only be set to either True or False.'
-            logger.error(error)
+            logger.critical(error)
             raise ValueError(error)
 
     def create(self, name):
@@ -227,7 +224,7 @@ class Client:
             self.port = None
         else:
             error = 'A stand-alone client cannot disconnect from a server.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error)
 
 
@@ -246,13 +243,13 @@ def check_environment(backend):
         var = 'LD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         path = os.environ[var].split(os.pathsep)
         lib = root/'lib'/'glnxa64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         gcc = root/'lib'/'glnxa64'/'gcc'
         if gcc.exists() and str(gcc) not in path:
@@ -260,7 +257,7 @@ def check_environment(backend):
         gra = str(root/'ext'/'graphicsmagick'/'glnxa64')
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'glnxa64'
         if cad.exists() and str(cad) not in path:
@@ -269,7 +266,7 @@ def check_environment(backend):
         var = 'DYLD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         if var in os.environ:
             path = os.environ[var].split(os.pathsep)
@@ -278,71 +275,13 @@ def check_environment(backend):
         lib = root/'lib'/'maci64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         gra = root/'ext'/'graphicsmagick'/'maci64'
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'maci64'
         if cad.exists() and str(cad) not in path:
             logger.warning(f'Folder "{cad}" missing in library search path.')
-
-
-########################################
-# Shutdown                             #
-########################################
-
-
-def exit_hook(code=None):
-    """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
-    global exit_code
-    if isinstance(code, int):
-        exit_code = code
-    exit_function(code)
-
-
-def exception_hook_sys(exc_type, exc_value, exc_traceback):
-    """Sets exit code to 1 if exception raised in main thread."""
-    global exit_code
-    exit_code = 1
-    exception_handler_sys(exc_type, exc_value, exc_traceback)
-
-
-def exception_hook_threads(info):
-    """Sets exit code to 1 if exception raised in any other thread."""
-    global exit_code
-    exit_code = 1
-    exception_handler_threads(info)
-
-
-exit_code = 0
-exit_function = sys.exit
-sys.exit = exit_hook
-
-exception_handler_sys = sys.excepthook
-sys.excepthook = exception_hook_sys
-
-# Only available as of Python 3.8, see bugs.python.org/issue1230540.
-if hasattr(threading, 'excepthook'):
-    exception_handler_threads = threading.excepthook
-    threading.excepthook = exception_hook_threads
-
-
-@atexit.register
-def shutdown():
-    """
-    Shuts down the Java virtual machine when the Python session ends.
-
-    This function is not part of the public API. It runs automatically
-    at the end of the Python session and should not be called directly
-    from application code.
-    """
-    if jpype.isJVMStarted():
-        logger.info('Exiting the Java virtual machine.')
-        sys.stdout.flush()
-        sys.stderr.flush()
-        jpype.java.lang.Runtime.getRuntime().exit(exit_code)
-        # No code is reached after this due to the hard exit of the JVM.
-        logger.info('Java virtual machine has exited.')

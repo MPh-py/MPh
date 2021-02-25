@@ -21,11 +21,13 @@ cores  = 1
 model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
-mode   = 'client-server'
+mode   = 'session-start'
 
 
 def setup_module():
-    if mode == 'client-server':
+    if mode == 'session-start':
+        pass
+    elif mode == 'client-server':
         global server
         server = mph.Server(cores=cores)
     elif mode == 'stand-alone':
@@ -46,7 +48,9 @@ def teardown_module():
 
 def test_init():
     global client
-    if mode == 'client-server':
+    if mode == 'session-start':
+        client = mph.start(cores=cores)
+    elif mode == 'client-server':
         client = mph.Client(cores=cores, port=server.port)
     elif mode == 'stand-alone':
         client = mph.Client(cores=cores)
@@ -102,7 +106,7 @@ def test_remove():
         model.java.component()
     except Exception as error:
         message = error.getMessage()
-    if mode == 'client-server':
+    if mode in ('session-start', 'client-server'):
         assert 'no_longer_in_the_model' in message
     elif mode == 'stand-alone':
         assert 'is_removed' in message
@@ -131,8 +135,10 @@ def test_disconnect():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'stand-alone' in arguments or 'standalone' in arguments:
+    if 'stand-alone' in arguments:
         mode = 'stand-alone'
+    elif 'client-server' in arguments:
+        mode = 'client-server'
     if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,

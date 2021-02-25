@@ -3,6 +3,5 @@ import parent
 import mph
 import sys
 
-server = mph.Server()
-client = mph.Client(port=server.port)
+client = mph.start()
 sys.exit(2)

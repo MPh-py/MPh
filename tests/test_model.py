@@ -21,12 +21,14 @@ model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
 saveas = here/'temp.mph'
-mode   = 'client-server'
+mode   = 'session-start'
 
 
 def setup_module():
     global client, server, model
-    if mode == 'client-server':
+    if mode == 'session-start':
+        client = mph.start()
+    elif mode == 'client-server':
         server = mph.Server()
         client = mph.Client(port=server.port)
     elif mode == 'stand-alone':
@@ -309,8 +311,10 @@ def test_save():
 if __name__ == '__main__':
 
     arguments = argv[1:]
-    if 'stand-alone' in arguments or 'standalone' in arguments:
+    if 'stand-alone' in arguments:
         mode = 'stand-alone'
+    elif 'client-server' in arguments:
+        mode = 'client-server'
     if 'log' in arguments or 'debug' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG,

@@ -2,6 +2,5 @@
 import parent
 import mph
 
-server = mph.Server()
-client = mph.Client(port=server.port)
+client = mph.start()
 raise RuntimeError
