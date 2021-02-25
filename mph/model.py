@@ -134,7 +134,7 @@ class Model:
         """
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
-            logger.error(error)
+            logger.critical(error)
             raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
@@ -231,7 +231,7 @@ class Model:
                 break
         else:
             error = f'Interpolation function "{interpolation}" does not exist.'
-            logger.error(error)
+            logger.critical(error)
             raise LookupError(error)
         file = Path(file)
         logger.info(f'Loading external data from file "{file.name}".')
@@ -251,14 +251,14 @@ class Model:
         """
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
-            logger.error(error)
+            logger.critical(error)
             raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         node = self.java.physics(ptag)
         if feature not in self.features(physics):
             error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.error(error)
+            logger.critical(error)
             raise LookupError(error)
         tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
@@ -284,11 +284,11 @@ class Model:
                      if name == geometry}
             if not index:
                 error = f'Geometry sequence "{geometry}" does not exist.'
-                logger.error(error)
+                logger.critical(error)
                 raise LookupError(error)
         elif not index:
             error = 'No geometry sequence defined in the model tree.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running geometry sequence "{name}".')
@@ -305,11 +305,11 @@ class Model:
                      if name == mesh}
             if not index:
                 error = f'Mesh sequence "{mesh}" does not exist.'
-                logger.error(error)
+                logger.critical(error)
                 raise LookupError(error)
         elif not index:
             error = 'No mesh sequence defined in the model tree.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running mesh sequence "{name}".')
@@ -326,11 +326,11 @@ class Model:
                      if name == study}
             if not index:
                 error = f'Study "{study}" does not exist.'
-                logger.error(error)
+                logger.critical(error)
                 raise LookupError(error)
         elif not index:
             error = 'No study defined in the model tree.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running study "{name}".')
@@ -434,7 +434,7 @@ class Model:
         # Make sure solution has actually been computed.
         if solution.isEmpty():
             error = 'The solution has not been computed.'
-            logger.error(error)
+            logger.critical(error)
             raise RuntimeError(error)
 
         # Validate solution arguments.
@@ -447,7 +447,7 @@ class Model:
                     and inner.dtype == 'int')):
             error = ('Argument "inner", if specified, must be either '
                      '"first", "last", or a list/array of integers.')
-            logger.error(error)
+            logger.critical(error)
             raise ValueError(error)
         if not (outer is None
                 or isinstance(outer, int)
@@ -455,7 +455,7 @@ class Model:
                     and issubclass(outer.dtype.type, numpy.integer)
                     and not outer.shape)):
             error = 'Argument "outer", if specified, must be an integer index.'
-            logger.error(error)
+            logger.critical(error)
             raise ValueError(error)
 
         # Try to perform a global evaluation, which may fail.

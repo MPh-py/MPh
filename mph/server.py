@@ -97,9 +97,9 @@ class Server:
             peek = process.stdout.peek().decode()
             if peek.startswith('Username:'):
                 error = 'User name and password for Comsol server not set.'
-                logger.error(error)
-                logger.error('Start it manually from a system console first:')
-                logger.error(' '.join(str(part) for part in server))
+                logger.critical(error)
+                logger.info('Start it manually from a system console first:')
+                logger.info(' '.join(str(part) for part in server))
                 raise RuntimeError(error)
             line = process.stdout.readline().decode()
             match = regex(r'^.*listening on port *(\d+)', line)
@@ -108,7 +108,7 @@ class Server:
                 break
             if now() - t0 > timeout:
                 error = 'Sever failed to start within time-out period.'
-                logger.error(error)
+                logger.critical(error)
                 raise TimeoutError(error)
         logger.info(f'Server listening on port {port}.')
 
@@ -141,7 +141,7 @@ class Server:
                     break
                 if now() - t0 > timeout:
                     error = 'Forceful shutdown failed within time-out period.'
-                    logger.error(error)
+                    logger.critical(error)
                     raise TimeoutError(error) from None
                 sleep(0.1)
             logger.info('Server process has been forcefully terminated.')
