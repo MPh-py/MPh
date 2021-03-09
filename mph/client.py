@@ -218,12 +218,12 @@ class Client:
 
     def disconnect(self):
         """Disconnects the client from the server."""
-        if self.port is not None:
+        if self.port:
             self.java.disconnect()
             self.host = None
             self.port = None
         else:
-            error = 'A stand-alone client cannot disconnect from a server.'
+            error = 'The client is not connected to a server.'
             logger.critical(error)
             raise RuntimeError(error)
 

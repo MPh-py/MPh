@@ -151,7 +151,7 @@ def cleanup():
     Stops the local server instance possibly created by `start()` and
     shuts down the Java Virtual Machine hosting the client instance.
     """
-    if client and server:
+    if client and client.port:
         try:
             client.disconnect()
         except Exception:

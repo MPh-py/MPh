@@ -1,4 +1,4 @@
-﻿"""Tests the client class."""
+﻿"""Tests a local Comsol session."""
 __license__ = 'MIT'
 
 
@@ -15,30 +15,19 @@ from pathlib import Path
 ########################################
 # Fixtures                             #
 ########################################
-server = None
 client = None
 cores  = 1
 model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
-mode   = 'session-start'
 
 
 def setup_module():
-    if mode == 'session-start':
-        pass
-    elif mode == 'client-server':
-        global server
-        server = mph.Server(cores=cores)
-    elif mode == 'stand-alone':
-        pass
-    else:
-        raise ValueError(f'Invalid client mode "{mode}".')
+    pass
 
 
 def teardown_module():
-    if mode == 'client-server':
-        server.stop()
+    pass
 
 
 ########################################
@@ -48,12 +37,7 @@ def teardown_module():
 
 def test_init():
     global client
-    if mode == 'session-start':
-        client = mph.start(cores=cores)
-    elif mode == 'client-server':
-        client = mph.Client(cores=cores, port=server.port)
-    elif mode == 'stand-alone':
-        client = mph.Client(cores=cores)
+    client = mph.start(cores=cores)
     assert client.java is not None
     assert not client.models()
     assert client.cores == cores
@@ -106,9 +90,9 @@ def test_remove():
         model.java.component()
     except Exception as error:
         message = error.getMessage()
-    if mode in ('session-start', 'client-server'):
+    if client.port:
         assert 'no_longer_in_the_model' in message
-    elif mode == 'stand-alone':
+    else:
         assert 'is_removed' in message
 
 
@@ -118,7 +102,7 @@ def test_clear():
 
 
 def test_disconnect():
-    if mode == 'client-server':
+    if client.port:
         client.disconnect()
         try:
             client.models()
@@ -136,9 +120,9 @@ if __name__ == '__main__':
 
     arguments = argv[1:]
     if 'stand-alone' in arguments:
-        mode = 'stand-alone'
-    elif 'client-server' in arguments:
-        mode = 'client-server'
+        mph.config.option('session', 'stand-alone')
+    if 'client-server' in arguments:
+        mph.config.option('session', 'client-server')
     if 'log' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG if 'debug' in arguments else logging.INFO,

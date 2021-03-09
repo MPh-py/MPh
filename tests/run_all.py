@@ -6,7 +6,7 @@ from pathlib    import Path
 from platform   import system
 from sys        import argv
 
-tests  = ['discovery', 'server', 'client', 'model', 'processes']
+tests  = ['discovery', 'server', 'session', 'model', 'processes']
 here   = Path(__file__).parent
 python = 'python' if system() == 'Windows' else 'python3'
 for test in tests:
