@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 from . import discovery                # back-end discovery
 from .model import Model               # model class
+from .config import option             # configuration
 
 
 ########################################
@@ -136,14 +137,11 @@ class Client:
         self.port    = port
         self.java    = java
 
-        # Deactivate caching of previously loaded models by default.
-        self._caching = False
-
     def load(self, file):
         """Loads a model from the given `file` and returns it."""
         file = Path(file).resolve()
         if self.caching() and file in self.files():
-            logger.info('Returning previously loaded model from cache.')
+            logger.info(f'Retrieving "{file.name}" from cache.')
             return self.models()[self.files().index(file)]
         tag = self.java.uniquetag('model')
         logger.info(f'Loading model "{file.name}".')
@@ -164,9 +162,9 @@ class Client:
         argument is passed, the current state is returned.
         """
         if state is None:
-            return self._caching
+            return option('caching')
         elif state in (True, False):
-            self._caching = state
+            option('caching', state)
         else:
             error = 'Caching state can only be set to either True or False.'
             logger.critical(error)

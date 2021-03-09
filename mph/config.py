@@ -8,6 +8,7 @@ __license__ = 'MIT'
 
 options = {
     'session': 'platform-dependent',
+    'caching': False,
 }
 """Default values for configuration options."""
 
