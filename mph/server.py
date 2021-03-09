@@ -17,6 +17,7 @@ from subprocess import TimeoutExpired  # communication time-out
 from re import match as regex          # regular expression
 from time import perf_counter as now   # wall-clock time
 from time import sleep                 # execution delay
+from sys import version_info           # Python version
 from logging import getLogger          # event logging
 
 
@@ -89,7 +90,10 @@ class Server:
             logger.info(f'Server restricted to {cores} processor {noun}.')
         else:
             arguments = []
-        process = start(server + arguments, stdin=PIPE, stdout=PIPE)
+        command = server + arguments
+        if version_info < (3, 8):
+            command[0] = str(command[0])
+        process = start(command, stdin=PIPE, stdout=PIPE)
 
         # Wait for it to report the port number.
         t0 = now()

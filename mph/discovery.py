@@ -20,6 +20,7 @@ import re                              # regular expressions
 from subprocess import run, PIPE       # external processes
 from functools import lru_cache        # least-recently-used cache
 from pathlib import Path               # file paths
+from sys import version_info           # Python version
 from logging import getLogger          # event logging
 
 
@@ -137,8 +138,10 @@ def search_Windows():
             continue
 
         # Get version information from Comsol server.
-        process = run([server, '--version'], stdout=PIPE,
-                      creationflags=0x08000000)
+        command = [server, '--version']
+        if version_info < (3, 8):
+            command[0] = str(command[0])
+        process = run(command, stdout=PIPE, creationflags=0x08000000)
         if process.returncode != 0:
             logger.error('Querying version information failed.')
             continue
