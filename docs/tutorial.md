@@ -22,19 +22,20 @@ In the beginning was the client. And the client was with Comsol. And
 the client was Comsol. So let there be a Comsol client.
 ```python
 >>> import mph
->>> client = mph.Client(cores=1)
+>>> client = mph.start(cores=1)
 ```
 
-It takes roughly ten seconds until the client is initialized. In this
-example, the Comsol back-end is instructed to use only one processor
+It takes roughly ten seconds for the client to start up. In this
+example, the Comsol back-end is instructed to use but one processor
 core. If the optional parameter is omitted, it will use all cores
 available on the machine. Restricting this resource is useful when
 running several simulations in parallel. Note, however, that due to
 [limitations](limitations) of this library's underlying Python-to-Java
-bridge, you cannot instantiate the [Client](api/mph.Client) class more
-than once. If you wish to accomplish that, in order to realize the full
-compute power of your simulation hardware, you need to start separate
-Python sessions, one for each client.
+bridge, the [Client](api/mph.Client) can only be instantiated once.
+Subsequent calls to `mph.start()` will therefore raise an error. If
+you wish to work around this limitation, in order to realize the full
+parallelization potential of your simulation hardware, you will need
+to run multiple Python sessions, one for each client.
 
 
 ### Managing models
