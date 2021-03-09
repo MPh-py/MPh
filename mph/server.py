@@ -94,15 +94,15 @@ class Server:
         # Wait for it to report the port number.
         t0 = now()
         while process.poll() is None:
-            peek = process.stdout.peek().decode()
-            if peek.startswith('Username:'):
+            peek = process.stdout.peek().decode(errors='ignore')
+            if peek.endswith(': '):
                 error = 'User name and password for Comsol server not set.'
                 logger.critical(error)
                 logger.info('Start it manually from a system console first:')
                 logger.info(' '.join(str(part) for part in server))
                 raise RuntimeError(error)
-            line = process.stdout.readline().decode()
-            match = regex(r'^.*listening on port *(\d+)', line)
+            line = process.stdout.readline().decode(errors='ignore')
+            match = regex(r'(?i)^Comsol.+?server.+?(\d+)$', line.strip())
             if match:
                 port = int(match.group(1))
                 break
