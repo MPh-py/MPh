@@ -17,5 +17,6 @@ by this library.
     Client
     Server
     discovery
+    config
     tools
 ```

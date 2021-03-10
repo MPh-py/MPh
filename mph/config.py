@@ -1,4 +1,4 @@
-﻿"""Manages global configuration options."""
+﻿"""Manages configuration options."""
 __license__ = 'MIT'
 
 

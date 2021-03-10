@@ -64,24 +64,31 @@ is ambiguity in overloaded methods, you will have to cast types
 explicitly. Refer to the [JPype documentation][jpype] for help.
 
 
-### Stand-alone client
+### Platform differences
 
-Currently, the canonical way to start a Comsol session is to set up
-a "stand-alone" Comsol client, i.e. a client that does not require
-a separate server instance that it needs to connect to. Like so:
-```python
-import mph
-client = mph.Client()
-```
+The Comsol API offers two distinct ways to run a simulation session
+on the local machine. One may either start a "stand-alone" client,
+which does not require a Comsol server. Or one may start a server
+separately and have a "thin" client connect to it via a loop-back
+network socket. The first approach is more lightweight and arguably
+more robust, as it keeps everything inside the same process. The
+second approach is slower to start up and relies on the inter-process
+communication to work, but would also work across the network, i.e.,
+for remote sessions where the client runs locally and delegates the
+heavy lifting to a server running on another machine. If we instantiate
+the `Client` class without providing a value for the `host` address and
+network `port`, it will create a stand-alone client. Otherwise it will
+run in client–server mode.
 
-On Windows, this works out of the box. But on Unix-like systems, namely
-Linux and macOS, it does not. (See GitHub [issue #8][issue8] as to the
-technical reasons why.) On these operating systems, if all you did was
-install MPh, starting the client in stand-alone mode will produce a
-`java.lang.UnsatisfiedLinkError` because required external libraries
-cannot be found. You will have to add the full paths of shared-library
-folders to an environment variable named `LD_LIBRARY_PATH` on Linux
-and `DYLD_LIBRARY_PATH` on macOS.
+On Linux and macOS however, the stand-alone mode does not work out of
+the box. This is due to a limitation of Unix-like operating systems
+and explained in more detail in [GitHub issue #8][issue8]. On these
+platforms, if all you did was install MPh, starting the client in
+stand-alone mode will raise a `java.lang.UnsatisfiedLinkError`
+because required external libraries cannot be found. You would have
+to add the full paths of shared-library folders to an environment
+variable named `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on
+macOS.
 
 For example, for an installation of Comsol 5.6 on Ubuntu Linux, you
 would add the following lines at the end of the shell configuration
@@ -95,36 +102,28 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH\
 :/usr/local/comsol56/multiphysics/ext/cadimport/glnxa64
 ```
 
-On macOS, the root folder would be `/Applications/COMSOL56/Multiphysics`.
-The paths in this example depend on the installed Comsol version and
-will have to be adapted accordingly.
+On macOS, the root folder is `/Applications/COMSOL56/Multiphysics`.
+The folder names in this example depend on the installed Comsol version
+and will have to be adapted accordingly.
 
-Requiring this variable to be set correctly limits the possibility
-of selecting a specific back-end from within MPh, as adding multiple
+Requiring this variable to be set correctly limits the possibility of
+selecting a specific Comsol version from within MPh, as adding multiple
 installations to that search path will lead to name collisions. One
 could work around the issue by wrapping a Python program that uses MPh
 in a shell script that sets the environment variable only for that one
 process. Or have the Python program start the Comsol session in a
 subprocess. However, none of this is ideal. Starting the client should
-work without any of these detours. In a future version of MPh, the
-client–server setup (see next section) may therefore become the norm.
+work without any of these detours.
 
-
-### Client–server mode
-
-In addition to running a stand-alone Comsol client, MPh also supports
-client–server connections. The Comsol session would then be started
-like so:
-```python
-import mph
-server = mph.Server()
-client = mph.Client(port=server.port)
-```
-
-Client and server may either run on the same machine or they may
-communicate across the network. The former scenario is essentially
-equivalent to a stand-alone client. It may (or may not) have benefits
-in terms of memory overhead, but will take longer to initially set up.
+The function `mph.start()` function exists to navigate these platform
+differences. On Windows, it starts a stand-alone client in order to
+profit from the better start-up performance. On Linux and macOS, it
+creates a local session in client–server mode so that no shell
+configuration is required up front. This behavior is reflected in the
+configuration option "session", accessible via `mph.option()`, which is
+set to "platform-dependent" by default. It could also be set to
+"stand-alone" or "client-server" before calling `mph.start()` in order
+to override the default behavior.
 
 
 [repo]:   https://github.com/john-hennig/mph

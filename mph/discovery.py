@@ -1,5 +1,5 @@
 ﻿"""
-Discovers Comsol installations on the local machine.
+Discovers Comsol installations.
 
 This is an internal helper module that is not part of the public API.
 It retrieves information about installed Comsol versions, i.e.

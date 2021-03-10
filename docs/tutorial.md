@@ -25,12 +25,15 @@ the client was Comsol. So let there be a Comsol client.
 >>> client = mph.start(cores=1)
 ```
 
-It takes roughly ten seconds for the client to start up. In this
-example, the Comsol back-end is instructed to use but one processor
-core. If the optional parameter is omitted, it will use all cores
-available on the machine. Restricting this resource is useful when
-running several simulations in parallel. Note, however, that due to
-[limitations](limitations) of this library's underlying Python-to-Java
+The [`start()`](api/mph.start) function returns a client object, i.e.
+an instance of the [`Client`](api/mph.Client) class. It takes roughly
+ten seconds for the client to spin up.
+
+In this example, the Comsol back-end is instructed to use but one
+processor core. If the optional parameter is omitted, it will use all
+cores available on the machine. Restricting this resource is useful
+when running several simulations in parallel. Note, however, that due
+to [limitations](limitations) of this library's underlying Python-to-Java
 bridge, the [Client](api/mph.Client) can only be instantiated once.
 Subsequent calls to `mph.start()` will therefore raise an error. If
 you wish to work around this limitation, in order to realize the full
@@ -46,7 +49,7 @@ model file.
 >>> model = client.load('capacitor.mph')
 ```
 
-It returns a `model` object, i.e. an instance of the
+It returns a model object, i.e. an instance of the
 [`Model`](api/mph.Model) class. We will learn what to do with it
 further down. For now, it was simply loaded into memory. We can
 list the names of all models the client currently manages.
