@@ -5,12 +5,7 @@ MPh is [available on PyPI][dist] and can be readily installed via `pip`:
 ```none
 pip install mph
 ```
-Add `--user` to the above command to make it a per-user installation,
-instead of system-wide, which may or may not be preferable. Run
-```none
-pip uninstall mph
-```
-in order to remove the library from your system.
+Run `pip uninstall mph` in order to remove the library from your system.
 
 Requires [JPype][jpype] for the bridge from Python to [Comsol's
 Java API][japi] and [NumPy][numpy] for returning (fast) numerical arrays.

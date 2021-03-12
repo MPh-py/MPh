@@ -1,13 +1,13 @@
 ﻿MPh
 ===
-Pythonic scripting interface for Comsol Multiphysics®
+Pythonic scripting interface for Comsol Multiphysics
 
 [Comsol][comsol] is a commercial software application that is widely
 used in science and industry for research and development. It excels
 at modeling almost any (multi-)physics problem by solving the governing
 set of partial differential equations via the finite-element method.
 It comes with a modern graphical user interface to set up simulation
-models and can be scripted from Matlab® or via its native Java API.
+models and can be scripted from Matlab or via its native Java API.
 
 This library brings the dearly missing power of Python to the world
 of Comsol. It leverages the universal Python-to-Java bridge provided

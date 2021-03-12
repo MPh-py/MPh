@@ -34,11 +34,11 @@ processor core. If the optional parameter is omitted, it will use all
 cores available on the machine. Restricting this resource is useful
 when running several simulations in parallel. Note, however, that due
 to [limitations](limitations) of this library's underlying Python-to-Java
-bridge, the [Client](api/mph.Client) can only be instantiated once.
-Subsequent calls to `mph.start()` will therefore raise an error. If
-you wish to work around this limitation, in order to realize the full
-parallelization potential of your simulation hardware, you will need
-to run multiple Python sessions, one for each client.
+bridge, the `Client` class can only be instantiated once. Subsequent
+calls to `mph.start()` will therefore raise an error. If you wish to
+work around this limitation, in order to realize the full parallelization
+potential of your simulation hardware, you will need to run multiple
+Python sessions, one for each client.
 
 
 ### Managing models
