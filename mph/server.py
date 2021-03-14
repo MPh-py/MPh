@@ -95,8 +95,10 @@ class Server:
             command[0] = str(command[0])
         process = start(command, stdin=PIPE, stdout=PIPE)
 
-        # Wait for it to report the port number.
+        # Wait for the server to report the port number.
         t0 = now()
+        lines = []
+        port = None
         while process.poll() is None:
             peek = process.stdout.peek().decode(errors='ignore')
             if peek.endswith(': '):
@@ -105,7 +107,9 @@ class Server:
                 logger.info('Start it manually from a system console first:')
                 logger.info(' '.join(str(part) for part in server))
                 raise RuntimeError(error)
-            line = process.stdout.readline().decode(errors='ignore')
+            line = process.stdout.readline().decode(errors='ignore').strip()
+            if line:
+                lines.append(line)
             match = regex(r'(?i)^Comsol.+?server.+?(\d+)$', line.strip())
             if match:
                 port = int(match.group(1))
@@ -114,6 +118,17 @@ class Server:
                 error = 'Sever failed to start within time-out period.'
                 logger.critical(error)
                 raise TimeoutError(error)
+
+        # Bail out if server exited with an error.
+        # We don't use `process.returncode` here, as we would like to,
+        # because on Linux the server executable exits with code 0,
+        # indicating no error, even when an error has occurred.
+        # We assume that the last line in the server's output is the
+        # actual error message.
+        if port is None:
+            error = f'Starting server failed: {lines[-1]}'
+            logger.critical(error)
+            raise RuntimeError(error)
         logger.info(f'Server listening on port {port}.')
 
         # Save useful information in instance attributes.
