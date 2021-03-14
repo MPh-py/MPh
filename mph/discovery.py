@@ -279,7 +279,7 @@ def search_Linux():
             'build':  build,
             'root':   root,
             'jvm':    jvm,
-            'server': [comsol, 'server'],
+            'server': [comsol, 'mphserver'],
         })
 
     # Return list with information about all installed Comsol back-ends.
@@ -368,7 +368,7 @@ def search_macOS():
             'build':  build,
             'root':   root,
             'jvm':    jvm,
-            'server': [comsol, 'server'],
+            'server': [comsol, 'mphserver'],
         })
 
     # Return list with information about all installed Comsol back-ends.

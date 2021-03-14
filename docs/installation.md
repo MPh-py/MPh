@@ -13,7 +13,7 @@ Java API][japi] and [NumPy][numpy] for returning (fast) numerical arrays.
 if missing.
 
 Comsol, obviously, you need to license and install yourself. Versions
-from Comsol 5.3 onward are expected to work. If you want to use the
+from Comsol 5.1 onward are expected to work. If you want to use the
 client–server mode, make sure to once run `comsolmphserver` from a
 console first to enter the obligatory user name and password.
 
