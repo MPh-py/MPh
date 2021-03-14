@@ -90,24 +90,18 @@ class Server:
             logger.info(f'Server restricted to {cores} processor {noun}.')
         else:
             arguments = []
+        arguments += ['-login', 'auto']
         command = server + arguments
         if version_info < (3, 8):
             command[0] = str(command[0])
-        process = start(command, stdin=PIPE, stdout=PIPE)
+        process = start(command, stdin=PIPE, stdout=PIPE, errors='ignore')
 
         # Wait for the server to report the port number.
         t0 = now()
         lines = []
         port = None
         while process.poll() is None:
-            peek = process.stdout.peek().decode(errors='ignore')
-            if peek.endswith(': '):
-                error = 'User name and password for Comsol server not set.'
-                logger.critical(error)
-                logger.info('Start it manually from a system console first:')
-                logger.info(' '.join(str(part) for part in server))
-                raise RuntimeError(error)
-            line = process.stdout.readline().decode(errors='ignore').strip()
+            line = process.stdout.readline().strip()
             if line:
                 lines.append(line)
             match = regex(r'(?i)^Comsol.+?server.+?(\d+)$', line.strip())
@@ -148,7 +142,7 @@ class Server:
             return
         logger.info(f'Telling the server on port {self.port} to shut down.')
         try:
-            self.process.communicate(input=b'close', timeout=timeout)
+            self.process.communicate(input='close', timeout=timeout)
             logger.info(f'Server on port {self.port} has stopped.')
         except TimeoutExpired:
             logger.info('Server did not shut down within time-out period.')
