@@ -65,12 +65,37 @@ class Model:
         else:
             self.java = parent
 
+        # This dict holds the names to access the subgroups in the java object
+        # I chose plural here since it reads better, however comsol chooses
+        # a mix of singular and acronyms
+        self._groups = {'functions': self.java.func(),
+                        'results':   self.java.result()}
+
+    # Internal access
+    def _group(self, name):
+        try:
+            return self._groups[name]
+        except KeyError:
+            logger.error(f'The group {name} is not implemented yet.')
+
     def __eq__(self, other):
         return self.java.tag() == other.java.tag()
 
     ####################################
     # Inspection                       #
     ####################################
+
+    # Public acess list of groups as a property. Should this be a method to
+    # comply with the methods below, e.g. is there a reason against properties?
+    @property
+    def groups(self):
+        return [k for k in self._groups.keys()]
+
+    # Do we need an access to a group as public? This can be useful if adding
+    # features which are not supported yet. However the names are a bit
+    # ambigious. Also this is a method and not a property, thus I added get
+    def get_group(self, name):
+        return self._group(name)
 
     def name(self):
         """Returns the model's name."""
@@ -239,6 +264,16 @@ class Model:
         self.java.func(tag).set('filename', f'{file}')
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
+
+    def create(self, group, type, name):
+        ...
+
+    # Property shadows built-in. I suggest the below
+    def setting(self, group, name, value=None):
+        ...
+
+    def remove(self, group, name):
+        ...
 
     def toggle(self, physics, feature, action='flip'):
         """
