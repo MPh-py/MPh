@@ -9,3 +9,4 @@ flake8.txt
 .DS_Store
 Thumbs.db
 .spyproject
+.idea
