@@ -314,25 +314,42 @@ class Model:
         output = dict()
         for prop, value in kwargs.items():
             if value is None:
-                logger.ingo(f'Reading feature property {prop}')
+                logger.info(f'Reading feature property {prop}')
                 # This is problematic since COMSOL uses get* to typecase. Since
                 # this is only for reading / printing, getString() seems to work
-                # universally
+                # universally if the type is not array. In this case a simple
+                # catch is tried
                 try:
-                    output[prop: feature.getString(prop)]
+                    output[prop] = feature.getString(prop)
                 except Exception:
-                    # Simple error since this is only if prop not available
-                    logger.error(f'Cannot read feature property {prop}')
+                    try:
+                        # A String matrix catches the rest
+                        output[prop] = array(
+                            [[col for col in row]
+                             for row in feature.getStringMatrix(prop)],
+                            dtype=object)
+
+                    except Exception:
+                        logger.exception(f'Cannot read feature property {prop}')
             else:
                 logger.info(f'Setting feature property {prop}')
                 try:
+                    # Some basic typecasting is needed here
+                    if isinstance(value, int):
+                        value = jtypes.JInt(value)
+                    elif isinstance(value, float):
+                        value = jtypes.JDouble(float)
+                    elif isinstance(value, bool):
+                        value = jtypes.JBoolean(value)
+
                     feature.set(prop, value)
+                    output[prop] = feature.getString(prop)
                 except Exception:
                     # more traceback since this might be due to missing
                     # property or more complex type errors
                     logger.exception(f'Cannot set feature property {prop}')
 
-        return ouput
+        return output
 
     def settings(self, groupname, name):
         feature = self._feature(groupname, name)
