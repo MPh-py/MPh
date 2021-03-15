@@ -67,9 +67,10 @@ class Model:
 
         # This dict holds the names to access the subgroups in the java object
         # I chose plural here since it reads better, however comsol chooses
-        # a mix of singular and acronyms
-        self._groups = {'functions': self.java.func(),
-                        'results':   self.java.result()}
+        # a mix of singular and acronyms. By intent, those are the callables
+        # so access to subfeatures is possbile
+        self._groups = {'functions': self.java.func,
+                        'results':   self.java.result}
 
     # Internal access
     def _group(self, name):
@@ -95,7 +96,11 @@ class Model:
     # features which are not supported yet. However the names are a bit
     # ambigious. Also this is a method and not a property, thus I added get
     def get_group(self, name):
-        return self._group(name)
+        try:
+            return self._groups[name]()
+        except KeyError:
+            logger.error(f'The group {name} is not implemented yet.')
+            return None
 
     def name(self):
         """Returns the model's name."""
@@ -265,15 +270,81 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
-    def create(self, group, type, name):
-        ...
+    # Changed type to feature to not shadow internal type
+    def create(self, groupname, feature, name):
+        # This will raise an exception if feature is not possible for given
+        # group. We could hardcode that out or just handle the exception.
+        # Latter is simpler I guess. Using the access method creates a clear
+        # KeyError on missing group
+        group = self._group(groupname)
+        if group is None:
+            return
+
+        utag = group().uniquetag(f'{feature.lower()}')
+        try:
+            group().create(utag, feature)
+            group(utag).label(name)
+        except Exception:
+            # This will say something like "cannot be created in this context"
+            # Is this clear enough?
+            logger.exception(f'Could not create feature {feature} in group {group}')
+
+    # This could replace _dataset and _solution
+    def _feature(self, groupname, name):
+        group = self._group(groupname)
+        if group is None:
+            return None
+
+        tags = [tag for tag in group().tags()]
+        names = [str(group(tag).name()) for tag in tags]
+        try:
+            feature = group(tags[names.index(name)])
+        except ValueError:
+            logger.error(f'Feature {name} does not exist')
+            return None
+
+        return feature
 
     # Property shadows built-in. I suggest the below
-    def setting(self, group, name, value=None):
-        ...
+    def setting(self, groupname, name, **kwargs):
+        feature = self._feature(groupname, name)
+        if feature is None:
+            return
 
-    def remove(self, group, name):
-        ...
+        output = dict()
+        for prop, value in kwargs.items():
+            if value is None:
+                logger.ingo(f'Reading feature property {prop}')
+                # This is problematic since COMSOL uses get* to typecase. Since
+                # this is only for reading / printing, getString() seems to work
+                # universally
+                try:
+                    output[prop: feature.getString(prop)]
+                except Exception:
+                    # Simple error since this is only if prop not available
+                    logger.error(f'Cannot read feature property {prop}')
+            else:
+                logger.info(f'Setting feature property {prop}')
+                try:
+                    feature.set(prop, value)
+                except Exception:
+                    # more traceback since this might be due to missing
+                    # property or more complex type errors
+                    logger.exception(f'Cannot set feature property {prop}')
+
+        return ouput
+
+    def settings(self, groupname, name):
+        feature = self._feature(groupname, name)
+        if feature is None:
+            return
+
+        return [s for s in feature.properties()]
+
+    def remove(self, groupname, name):
+        group = self._group(groupname)()
+        tag = self._feature(groupname, name).tag()
+        group.remove(tag)
 
     def toggle(self, physics, feature, action='flip'):
         """
