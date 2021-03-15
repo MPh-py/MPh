@@ -78,6 +78,7 @@ class Model:
             return self._groups[name]
         except KeyError:
             logger.error(f'The group {name} is not implemented yet.')
+            return None
 
     def __eq__(self, other):
         return self.java.tag() == other.java.tag()
@@ -360,6 +361,9 @@ class Model:
 
     def remove(self, groupname, name):
         group = self._group(groupname)()
+        if group is None:
+            return
+
         tag = self._feature(groupname, name).tag()
         group.remove(tag)
 
