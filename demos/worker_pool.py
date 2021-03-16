@@ -17,7 +17,9 @@ __license__ = 'MIT'
 import mph                             # Comsol interface
 from multiprocessing import Process    # external subprocess
 from multiprocessing import Queue      # inter-process queue
+from multiprocessing import cpu_count  # number of (logical) cores
 from queue import Empty                # queue-is-empty exception
+from platform import system            # operating system
 from numpy import insert               # element insertion into array
 from matplotlib import pyplot          # data plots
 
@@ -68,9 +70,9 @@ def plot_final():
 # Workers                              #
 ########################################
 
-def worker(jobs, results):
+def worker(jobs, results, port=None):
     """Performs jobs and delivers the results."""
-    client = mph.start(cores=1)
+    client = mph.start(cores=1, port=port)
     model = client.load('../tests/capacitor.mph')
     while True:
         try:
@@ -97,9 +99,10 @@ def boss():
     results = Queue()
 
     processes = []
-    workers = 2
-    for _ in range(workers):
-        process = Process(target=worker, args=(jobs, results))
+    workers = cpu_count()
+    for n in range(workers):
+        port = None if system() == 'Windows' else 2036 + n
+        process = Process(target=worker, args=(jobs, results, port))
         processes.append(process)
         process.start()
 
