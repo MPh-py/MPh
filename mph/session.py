@@ -33,13 +33,13 @@ logger = getLogger(__package__)        # event logger
 # Start                                #
 ########################################
 
-def start(cores=None, version=None):
+def start(cores=None, version=None, port=None):
     """
     Starts a local Comsol session.
 
     This convenience function provides for the typical use case of
     running a Comsol session on the local machine, i.e. *not* have a
-    client connect to a remote server.
+    client connect to a remote server elsewhere on the network.
 
     Example:
     ```python
@@ -52,18 +52,21 @@ def start(cores=None, version=None):
     ```
 
     Depending on the platform, this may either be a stand-alone client
-    (Windows) or a client connected to a server running locally (Linux,
-    macOS). The reason for this disparity is that, while stand-alone
-    clients are more lightweight and faster to start up, support for
-    this mode of operation is limited on Unix-like operating systems.
+    (on Windows) or a thin client connected to a server running locally
+    (on Linux and macOS). The reason for this disparity is that, while
+    stand-alone clients are more lightweight and faster to start up,
+    and therefore preferable, support for this mode of operation is
+    somewhat limited on Unix-like operating systems, and thus not the
+    default. Find more details in documentation chapter "Limitations".
 
     Due to limitations of the Java bridge, provided by the JPype
     library, only one client can be instantiated at a time. This is
     because JPype cannot manage more than one Java virtual machine
-    within the same Python session. So `start()` can only be called
-    once. Subsequent calls will raise `NotImplementedError`. Separate
-    Python processes would have to be started, or spawned, to work
-    around this limitation.
+    within the same Python session. Therefore `start()` can only be
+    called once. Subsequent calls will raise `NotImplementedError`.
+    Separate Python processes would have to be started, or spawned,
+    to work around this limitation. Refer to chapter "Demonstrations"
+    in the documentation for an example of how to achieve this.
 
     The number of `cores` (threads) the Comsol instance uses can be
     restricted by specifying a number. Otherwise all available cores
@@ -71,7 +74,15 @@ def start(cores=None, version=None):
 
     A specific Comsol `version` can be selected if several are
     installed, for example `version='5.3a'`. Otherwise the latest
-    version is used, and reported via the `.version` attribute.
+    version is used.
+
+    The server `port` can be specified if client–server mode is used.
+    If omitted, the port number is chosen automatically by the server.
+    Hand-selecting a port is helpful when starting multiple processes
+    in order to run sessions in parallel. Servers started at roughly
+    the same time will all try to reserve the same network port, a
+    collision that will usually produce run-time errors. In stand-alone
+    mode this problem cannot occur and the argument is just ignored.
     """
     global client, server
 
@@ -91,7 +102,7 @@ def start(cores=None, version=None):
     if session == 'stand-alone':
         client = Client(cores=cores, version=version)
     elif session == 'client-server':
-        server = Server(cores=cores, version=version)
+        server = Server(cores=cores, version=version, port=port)
         client = Client(cores=cores, version=version, port=server.port)
     else:
         error = f'Invalid session type "{session}".'
