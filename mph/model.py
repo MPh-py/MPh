@@ -327,12 +327,12 @@ class Model:
                 elif isinstance(value, bool):
                     value = jtypes.JBoolean(value)
 
-                feature.set(prop, value)
+                feature.set(property, value)
 
             except Exception:
                 # more traceback since this might be due to missing
                 # property or more complex type errors
-                logger.exception(f'Cannot set feature property {prop}')
+                logger.exception(f'Cannot set feature property {property}')
 
             return None
 
