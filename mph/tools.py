@@ -12,7 +12,13 @@ __license__ = 'MIT'
 ########################################
 # Dependencies                         #
 ########################################
+from logging import getLogger
 from numpy import array                # numerical arrays
+
+########################################
+# Globals                              #
+########################################
+logger = getLogger(__package__)        # event logger
 
 
 # This can be used in model.py. String typecast removed since its
@@ -40,10 +46,12 @@ def _tpecastProperty(java, name):
     elif dtype == 'String':
         value = java.getString(name)
     elif dtype == 'StringArray':
-        value = [string for string in java.getStringArray(name)]
+        value = array(
+            [string for string in java.getStringArray(name)], dtype=object)
     elif dtype == 'StringMatrix':
-        value = [[string for string in line]
-                 for line in java.getStringMatrix(name)]
+        value = array(
+            [[string for string in line]
+            for line in java.getStringMatrix(name)], dtype=object)
     else:
         logger.error(f'Cannot typecast property {name} of {java.name()}')
         value = '[?]'
