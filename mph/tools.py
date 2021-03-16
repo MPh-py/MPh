@@ -15,6 +15,41 @@ __license__ = 'MIT'
 from numpy import array                # numerical arrays
 
 
+# This can be used in model.py. String typecast removed since its
+# implicitly done
+def _tpecastProperty(java, name):
+    dtype = java.getValueType(name)
+    if dtype == 'Int':
+        value = int(java.getInt(name))
+    elif dtype == 'IntArray':
+        value = array(java.getIntArray(name))
+    elif dtype == 'IntMatrix':
+        value = array([line for line in java.getIntMatrix(name)])
+    elif dtype == 'Boolean':
+        value = java.getBoolean(name)
+    elif dtype == 'BooleanArray':
+        value = array(java.getBooleanArray(name))
+    elif dtype == 'BooleanMatrix':
+        value = array([line for line in java.getBooleanMatrix(name)])
+    elif dtype == 'Double':
+        value = java.getDouble(name)
+    elif dtype == 'DoubleArray':
+        value = array(java.getDoubleArray(name))
+    elif dtype == 'DoubleMatrix':
+        value = array([line for line in java.getDoubleMatrix(name)])
+    elif dtype == 'String':
+        value = java.getString(name)
+    elif dtype == 'StringArray':
+        value = [string for string in java.getStringArray(name)]
+    elif dtype == 'StringMatrix':
+        value = [[string for string in line]
+                 for line in java.getStringMatrix(name)]
+    else:
+        logger.error(f'Cannot typecast property {name} of {java.name()}')
+        value = '[?]'
+
+    return value
+
 ########################################
 # Introspection                        #
 ########################################
@@ -64,34 +99,7 @@ def inspect(java):
         print('properties:')
         names = [str(property) for property in java.properties()]
         for name in names:
-            dtype = str(java.getValueType(name))
-            if dtype == 'Int':
-                value = int(java.getInt(name))
-            elif dtype == 'IntArray':
-                value = array(java.getIntArray(name))
-            elif dtype == 'IntMatrix':
-                value = array([line for line in java.getIntMatrix(name)])
-            elif dtype == 'Boolean':
-                value = java.getBoolean(name)
-            elif dtype == 'BooleanArray':
-                value = array(java.getBooleanArray(name))
-            elif dtype == 'BooleanMatrix':
-                value = array([line for line in java.getBooleanMatrix(name)])
-            elif dtype == 'Double':
-                value = java.getDouble(name)
-            elif dtype == 'DoubleArray':
-                value = array(java.getDoubleArray(name))
-            elif dtype == 'DoubleMatrix':
-                value = array([line for line in java.getDoubleMatrix(name)])
-            elif dtype == 'String':
-                value = str(java.getString(name))
-            elif dtype == 'StringArray':
-                value = [str(string) for string in java.getStringArray(name)]
-            elif dtype == 'StringMatrix':
-                value = [[str(string) for string in line]
-                         for line in java.getStringMatrix(name)]
-            else:
-                value = '[?]'
+            value = _tpecastProperty(java, name)
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.
