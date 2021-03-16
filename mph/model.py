@@ -296,50 +296,43 @@ class Model:
 
         return feature
 
-    def property(self, group, name, **kwargs):
+    def property(self, group, name, property, value=None):
         feature = self._node(group, name)
         if feature is None:
             return
 
-        output = dict()
-        for prop, value in kwargs.items():
-            if value is None:
-                logger.info(f'Reading feature property {prop}')
-                # This is problematic since COMSOL uses get* to typecase. Since
-                # this is only for reading / printing, getString() seems to work
-                # universally if the type is not array. In this case a simple
-                # catch is tried
+        if value is None:
+            logger.info(f'Reading feature property {property}')
+            try:
+                return feature.getString(property)
+            except Exception:
                 try:
-                    output[prop] = feature.getString(prop)
+                    # A String matrix catches the rest
+                    return array([[col for col in row]
+                                 for row in feature.getStringMatrix(property)],
+                                 dtype=object)
                 except Exception:
-                    try:
-                        # A String matrix catches the rest
-                        output[prop] = array(
-                            [[col for col in row]
-                             for row in feature.getStringMatrix(prop)],
-                            dtype=object)
+                    logger.exception(f'Cannot read feature property {property}')
 
-                    except Exception:
-                        logger.exception(f'Cannot read feature property {prop}')
-            else:
-                logger.info(f'Setting feature property {prop}')
-                try:
-                    # Some basic typecasting is needed here
-                    if isinstance(value, int):
-                        value = jtypes.JInt(value)
-                    elif isinstance(value, float):
-                        value = jtypes.JDouble(float)
-                    elif isinstance(value, bool):
-                        value = jtypes.JBoolean(value)
+        else:
+            logger.info(f'Setting feature property {property}')
+            try:
+                # Some basic typecasting is needed here
+                if isinstance(value, int):
+                    value = jtypes.JInt(value)
+                elif isinstance(value, float):
+                    value = jtypes.JDouble(float)
+                elif isinstance(value, bool):
+                    value = jtypes.JBoolean(value)
 
-                    feature.set(prop, value)
-                    output[prop] = feature.getString(prop)
-                except Exception:
-                    # more traceback since this might be due to missing
-                    # property or more complex type errors
-                    logger.exception(f'Cannot set feature property {prop}')
+                feature.set(prop, value)
+                output[prop] = feature.getString(prop)
+            except Exception:
+                # more traceback since this might be due to missing
+                # property or more complex type errors
+                logger.exception(f'Cannot set feature property {prop}')
 
-        return output
+            return None
 
     def properties(self, group, name):
         feature = self._node(group, name)
