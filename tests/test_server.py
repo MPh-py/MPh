@@ -35,8 +35,9 @@ def teardown_module():
 
 def test_start():
     global server
-    server = mph.Server(cores=1)
+    server = mph.Server(cores=1, port=2035)
     assert server.running()
+    assert server.port == 2035
 
 
 def test_stop():

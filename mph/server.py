@@ -47,24 +47,6 @@ class Server:
         server.stop()
     ```
 
-    For this to work, make sure the Comsol server was started at least
-    once from the command line, so that you have had a chance to define
-    a user name and password.
-
-    For client―server connections across the network, the server's
-    host name or IP address has to be known up front by the client. It
-    has to be either hard-coded or managed otherwise. Though if client
-    and server run on the same machine, it is simply `"localhost"`.
-    (However, *in* that situation, you may be better served — pardon
-    the pun — to simply run a stand-alone client.)
-
-    The first server starting on a given computer will typically accept
-    client connections on TCP communication port 2036, as per Comsol's
-    default configuration. Servers started subsequently will use port
-    numbers of increasing value. The actual port number of a server
-    instance can be accessed via its `port` attribute after it has
-    started.
-
     The number of processor `cores` the server makes use of may be
     restricted. If no number is given, all cores are used by default.
 
@@ -72,29 +54,37 @@ class Server:
     several are installed on the machine, for example `version='5.3a'`.
     Otherwise the latest version is used.
 
-    A `timeout` can be set for the server to start up. The default
-    is 60 seconds. Raises `TimeoutError` if the server failed to start
-    within that period. Raises `RuntimeError` if user name and password
-    for the server have not been set by the user.
+    The server can be instructed to use a given network `port`. If
+    omitted, the first server started on the machine will use port
+    2036, servers started subsequently will use port numbers of
+    increasing value. The actual port number of a server instance
+    can be accessed via its `port` attribute once it has started.
+
+    A `timeout` can be set for the server start-up. The default is 60
+    seconds. `TimeoutError` is raised if the server failed to start
+    within that period.
     """
 
-    def __init__(self, cores=None, version=None, timeout=60):
+    def __init__(self, cores=None, version=None, port=None, timeout=60):
 
-        # Start the Comsol server as an external process.
+        # Start Comsol server as an external process.
         backend = discovery.backend(version)
         server  = backend['server']
         logger.info('Starting external server process.')
+        arguments = ['-login', 'auto']
         if cores:
-            arguments = ['-np', str(cores)]
+            arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        else:
-            arguments = []
-        arguments += ['-login', 'auto']
+        if port:
+            arguments += ['-port', str(port)]
         command = server + arguments
         if version_info < (3, 8):
             command[0] = str(command[0])
         process = start(command, stdin=PIPE, stdout=PIPE, errors='ignore')
+
+        # Remember the requested port (if any).
+        requested = port
 
         # Wait for the server to report the port number.
         t0 = now()
@@ -124,6 +114,12 @@ class Server:
             logger.critical(error)
             raise RuntimeError(error)
         logger.info(f'Server listening on port {port}.')
+
+        # Verify port number is correct if a specific one was requested.
+        if requested and port != requested:
+            error = f'Server port is {port}, but {requested} was requested.'
+            logger.critical(error)
+            raise RuntimeError(error)
 
         # Save useful information in instance attributes.
         self.version = backend['name']
