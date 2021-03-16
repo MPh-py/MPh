@@ -90,22 +90,8 @@ class Model:
     ####################################
     # Inspection                       #
     ####################################
-
-    # Public acess list of groups as a property. Should this be a method to
-    # comply with the methods below, e.g. is there a reason against properties?
-    @property
     def groups(self):
         return [k for k in self._groups.keys()]
-
-    # Do we need an access to a group as public? This can be useful if adding
-    # features which are not supported yet. However the names are a bit
-    # ambigious. Also this is a method and not a property, thus I added get
-    def get_group(self, name):
-        try:
-            return self._groups[name]()
-        except KeyError:
-            logger.error(f'The group {name} is not implemented yet.')
-            return None
 
     def name(self):
         """Returns the model's name."""
@@ -276,12 +262,12 @@ class Model:
         logger.info('Finished loading external data.')
 
     # Changed type to feature to not shadow internal type
-    def create(self, groupname, feature, name):
+    def create(self, group, feature, name):
         # This will raise an exception if feature is not possible for given
         # group. We could hardcode that out or just handle the exception.
         # Latter is simpler I guess. Using the access method creates a clear
         # KeyError on missing group
-        group = self._group(groupname)
+        group = self._group(group)
         if group is None:
             return
 
@@ -295,8 +281,8 @@ class Model:
             logger.exception(f'Could not create feature {feature} in group {group}')
 
     # This could replace _dataset and _solution
-    def _feature(self, groupname, name):
-        group = self._group(groupname)
+    def _node(self, group, name):
+        group = self._group(group)
         if group is None:
             return None
 
@@ -310,9 +296,8 @@ class Model:
 
         return feature
 
-    # Property shadows built-in. I suggest the below
-    def setting(self, groupname, name, **kwargs):
-        feature = self._feature(groupname, name)
+    def property(self, group, name, **kwargs):
+        feature = self._node(group, name)
         if feature is None:
             return
 
@@ -356,19 +341,18 @@ class Model:
 
         return output
 
-    def settings(self, groupname, name):
-        feature = self._feature(groupname, name)
+    def properties(self, group, name):
+        feature = self._node(group, name)
         if feature is None:
             return
 
         return [s for s in feature.properties()]
 
-    def remove(self, groupname, name):
-        group = self._group(groupname)()
+    def remove(self, group, name):
+        tag = self._node(group, name).tag()
+        group = self._group(group)()
         if group is None:
             return
-
-        tag = self._feature(groupname, name).tag()
         group.remove(tag)
 
     def toggle(self, physics, feature, action='flip'):
