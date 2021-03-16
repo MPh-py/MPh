@@ -23,7 +23,7 @@ logger = getLogger(__package__)        # event logger
 
 # This can be used in model.py. String typecast removed since its
 # implicitly done
-def _tpecastProperty(java, name):
+def _typecast_property(java, name):
     dtype = java.getValueType(name)
     if dtype == 'Int':
         value = int(java.getInt(name))
@@ -107,7 +107,7 @@ def inspect(java):
         print('properties:')
         names = [str(property) for property in java.properties()]
         for name in names:
-            value = _tpecastProperty(java, name)
+            value = _typecast_property(java, name)
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.
