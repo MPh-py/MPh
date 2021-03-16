@@ -3,6 +3,12 @@ __license__ = 'MIT'
 
 
 ########################################
+# Components                           #
+########################################
+from .tools import _typecast_property  # Typecasting java to python
+
+
+########################################
 # Dependencies                         #
 ########################################
 import numpy                           # fast numerics
@@ -304,20 +310,16 @@ class Model:
         if value is None:
             logger.info(f'Reading feature property {property}')
             try:
-                return feature.getString(property)
+                return _typecast_property(feature, property)
             except Exception:
-                try:
-                    # A String matrix catches the rest
-                    return array([[col for col in row]
-                                 for row in feature.getStringMatrix(property)],
-                                 dtype=object)
-                except Exception:
-                    logger.exception(f'Cannot read feature property {property}')
+                logger.exception(f'Cannot read feature property {property}')
 
         else:
             logger.info(f'Setting feature property {property}')
             try:
                 # Some basic typecasting is needed here
+                # I think it should be possible to change the _typecast_porperty
+                # to work in both direction...I can take a look at that
                 if isinstance(value, int):
                     value = jtypes.JInt(value)
                 elif isinstance(value, float):
@@ -326,7 +328,7 @@ class Model:
                     value = jtypes.JBoolean(value)
 
                 feature.set(prop, value)
-                output[prop] = feature.getString(prop)
+
             except Exception:
                 # more traceback since this might be due to missing
                 # property or more complex type errors
