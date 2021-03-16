@@ -6,7 +6,13 @@ Comsol client can run inside a Python session. It leverages the
 `multiprocessing` module from Python's standard library to create
 several independent subprocesses ("workers") that communicate with
 the parent process ("boss") via inter-process queues to pass job
-instructions and results.
+instructions and results back and forth.
+
+Note that on Linux and macOS, where by default we use client–server
+mode to run the local Comsol session, we must assign fixed and
+mutually exclusive port numbers to the different servers in order
+to avoid collisions at start-up. In stand-alone mode, the default
+on Windows, this is not necessary.
 """
 __license__ = 'MIT'
 
