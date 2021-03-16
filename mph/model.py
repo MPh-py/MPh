@@ -70,7 +70,11 @@ class Model:
         # a mix of singular and acronyms. By intent, those are the callables
         # so access to subfeatures is possbile
         self._groups = {'functions': self.java.func,
-                        'results':   self.java.result}
+                        'solutions': self.java.sol,
+                        'results':   self.java.result,
+                        'datasets':  self.java.result().dataset,
+                        'exports':   self.java.result().export,
+                        }
 
     # Internal access
     def _group(self, name):
