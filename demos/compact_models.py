@@ -1,10 +1,9 @@
 ﻿"""
 Compacts Comsol models in the working directory.
 
-Loads each Comsol model (`.mph` file) in the working directory,
-removes solution and mesh data, resets the modeling history,
-then saves the model file under its original name, effectively
-compacting its size.
+Loads each Comsol model (`.mph` file) in the current folder, removes
+solution and mesh data, resets the modeling history, then saves the
+model file under its original name, effectively compacting its size.
 """
 __license__ = 'MIT'
 
@@ -52,7 +51,7 @@ print('Compacting Comsol models in the current folder.')
 
 # Start Comsol client.
 print('Running Comsol client on single processor core.')
-client = mph.Client(cores=1)
+client = mph.start(cores=1)
 
 # Loop over model files.
 timer = Timer()

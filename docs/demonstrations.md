@@ -31,3 +31,28 @@ You could now sweep the model's parameters, for example the length (`L`) or widt
 
 [busbar]: https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
 [intro]: https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
+
+
+### Compacting models
+
+We usually save models to disk after we have solved them, which includes the solution and mesh data in the file. This is convenient so that we can come back to the model later, but don't have to run the simulation again, which may take a long time. However, the files then require a lot of disk space. After a while, we may want to archive the models, but trim the fat before we do that.
+
+To compact all model files in the current folder, we can do this:
+```python
+import mph
+from pathlib import Path
+
+client = mph.start()
+for file in Path.cwd().glob('*.mph'):
+    print(f'{file}:')
+    model = client.load(file)
+    model.clear()
+    model.save()
+```
+
+The script `compact_models.py` in the [`demos` folder][demos] of the source-code repository is a more refined version of the above code. It displays more status information and also resets the modeling history.
+
+Note that we could easily go through all sub-directories recursively by replacing `glob` with `rglob`. However, this should be used with care so as to not accidentally modify models in folders that were not meant to be included.
+
+
+[demos]: https://github.com/John-Hennig/MPh/tree/master/demos
