@@ -201,3 +201,93 @@ workers would then be a separate module that is run as a script.
 [multi]: https://docs.python.org/3/library/multiprocessing.html
 [tests]: https://github.com/John-Hennig/MPh/tree/master/tests
 [subpr]: https://docs.python.org/3/library/subprocess.html
+
+
+### Creating models
+
+While it is not the primary focus of MPh to create model features
+and edit settings, it is however possible — thanks to [JPype][jpype],
+the Python-to-Java bridge that underpins MPh. All credit to the
+JPype developers for making this possible.
+
+Let's take this Comsol blog entry as an example: [Automate Your
+Modeling Tasks with the Comsol API for use with Java][blog]. It starts
+with the following Java code example:
+```java
+import com.comsol.model.*;
+import com.comsol.model.util.*;
+
+public class HelloWorld {
+
+   public static void main(String[] args) {
+      run();
+   }
+   public static Model run() {
+      Model model = ModelUtil.create("Model");
+      model.modelNode().create("comp1");
+      model.geom().create("geom1", 3);
+      model.geom("geom1").feature().create("blk1", "Block");
+      model.geom("geom1").feature("blk1").set("size", new String[]{"0.1", "0.2", "0.5"});
+      model.geom("geom1").run("fin");
+      return model;
+   }
+}
+```
+
+What it does is, it creates a model, which contains a 3d geometry
+component that is just a block 0.1 by 0.2 by 0.5 meters in size.
+
+In Python, we would achieve the same with this code:
+```python
+import mph
+
+client = mph.start()
+pymodel = client.create('model')
+model = pymodel.java
+
+model.modelNode().create("comp1");
+model.geom().create("geom1", 3);
+model.geom("geom1").feature().create("blk1", "Block");
+model.geom("geom1").feature("blk1").set("size", ["0.1", "0.2", "0.5"]);
+model.geom("geom1").run("fin");
+```
+
+Note how the *functional* Java code (excluding syntax sugar) was
+essentially copied-and-pasted, even the semicolons, which Python
+simply ignores. We had to replace `new String[]{"0.1", "0.2", "0.5"}`.
+That's because Python does not know what `new` means. But there,
+Java expects a list of three strings. So we replaced that with
+`["0.1", "0.2", "0.5"]`, which is the Python equivalent of just that:
+a list of these three strings.
+
+Occasionally, when translating Java (or Matlab) code you find in the
+documentation — or a blog entry, as was the case here —, you will have
+to amend code lines such as the one above. But they are few and far
+between. And the error message you'd receive should at least point you
+in the right direction.
+
+The upside is:
+* You don't really need to know Java. Just a little, to understand that
+occasionally we have to take care of type conversions that JPype cannot
+handle all by itself. Which is rare.
+* You don't need to install Java. It just ships with Comsol. You also
+don't need to worry about "compiling" Java source code to Java "classes",
+via `comsolcompile`.
+* You can use Python "introspection" to understand how Comsol models
+are "created in code". This may be the most productive feature. The
+Comsol documentation explains a lot of things, but not every little
+thing. The function `mph.inspect()` makes introspection even easier,
+as it formats the output more nicely than Python's built-it `dir()`.
+
+Finally, to save the model created in the above example, we can just do
+this:
+```python
+pymodel.save('model')
+```
+
+This stores a file named `model.mph` in the working directory, which
+we can then open in the Comsol GUI. Or use in any other Python, Java,
+or Matlab project, as we please.
+
+[jpype]: https://github.com/jpype-project/jpype
+[blog]: https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
