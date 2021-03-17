@@ -30,9 +30,8 @@ Tmax = 330.42 K at (0.105000, -0.024899, 0.053425)
 Tmin = 322.41 K at (0.063272, 0.000000, 0.000000)
 ```
 
-You could now sweep the model's parameters, for example the length (`L`)
-or width (`wbb`) of the busbar.
-
+You could now sweep the model's parameters, for example the length `L`
+or width `wbb` of the busbar.
 
 [busbar]: https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
 [intro]: https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
@@ -47,7 +46,8 @@ the simulation again, which may take a long time. However, the files
 then require a lot of disk space. After a while, we may want to archive
 the models, but trim the fat before we do that.
 
-To compact all model files in the current folder, we can do this:
+To compact all model files in the current working directory, we can
+do this:
 ```python
 import mph
 from pathlib import Path
@@ -61,15 +61,13 @@ for file in Path.cwd().glob('*.mph'):
 ```
 
 The script `compact_models.py` in the ["demos" folder][demos] of the
-source-code repository is a more refined version of the above code.
-It displays more status information and also resets the modeling
-history.
+source-code repository is a refined version of the above code. It
+displays more status information and also resets the modeling history.
 
 Note that we could easily go through all sub-directories recursively
 by replacing `glob` with `rglob`. However, this should be used with
-care so as to not accidentally modify models in folders that were not
-meant to be included.
-
+caution so as to not accidentally modify models in folders that were
+not meant to be included.
 
 [demos]: https://github.com/John-Hennig/MPh/tree/master/demos
 
@@ -99,10 +97,10 @@ distance, ranging from 0.5 to 5 mm.
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 ```
 
-Next, we define the function that we intend to run in each of the
-separate processes, i.e. in the "workers". It sets up the Comsol session
-when the process starts, then keeps solving the model for each distance
-value that it receives via a `jobs` queue. Each time, it evaluates the
+Next, we define the function that we intend to run in every process,
+i.e. the "worker". The function sets up the Comsol session when the
+process starts, then keeps solving the model for every distance value
+that it receives via a `jobs` queue. Each time, it evaluates the
 solution and returns the capacitance via a `results` queue. It does
 so until the `jobs` queue is exhausted, upon which the function
 terminates, and with it Comsol session and Python process.
@@ -123,27 +121,28 @@ def worker(jobs, results):
 
 Each worker will only use one of the processor cores available on the
 machine, as that's the whole point: We want to achieve maximum speed-up
-of, say, a parameter sweep, where each core works on a separate job
-corresponding to one of the many parameter values.
+of, say, a parameter sweep, by having each core work on a job
+corresponding to one of the many parameter values, which it can do
+independently of work being done for any other value.
 
 We could also solve this sequentially, one parameter value at a time.
 Comsol's solver could then make use of all cores and would also employ
-some parallelization in its internal computation. But the speed-up would
-not usually scale linearly with the number of cores, especially for
-large numbers of them.
+some kind of parallelization in its internal computation. But the
+speed-up would not scale linearly with the number of cores, especially
+for large numbers of them.
 
 We might use a "parametric sweep", a feature that Comsol does offer.
-But here we retain full programmatic control of which parameter is
-solved for and when. The parameter values don't have to be hard-coded,
-they could come from user input or be generated depending on the
-outcome of the simulations themselves. For example, this approach
-lends itself to iterative optimization solvers such as the "genetic
-algorithm", where a batch of simulations would be run for each new
-"generation".
+But by doing this in Python we retain full programmatic control of
+which parameter is solved for and when. The parameter values don't
+have to be hard-coded, they could come from user input or be generated
+depending on the outcome of previous simulations. For example, this
+approach lends itself to iterative optimization schemes such as the
+"genetic algorithm", where a batch of simulations would be run for
+each new "generation".
 
-Note that the returned results also contain the input parameter.
-As processes will be run asynchronously in parallel, we cannot be sure
-that output is returned in the order that input was fed in.
+Note how the returned results also contain the input parameter. As
+the worker processes will run asynchronously in parallel, we cannot
+take for granted that output is returned in input order.
 
 Before we start the computation, we add all parameter values to the
 `jobs` queue:
@@ -155,7 +154,7 @@ for d in values:
 ```
 
 We also have to provide the `results` queue, which is of course empty
-in the beginning.
+at first.
 ```python
 results = multiprocessing.Queue()
 ```
@@ -163,7 +162,7 @@ results = multiprocessing.Queue()
 Then we can start a number of workers, say four:
 ```python
 for _ in range(4):
-    process = Process(target=worker, args=(jobs, results)
+    process = multiprocessing.Process(target=worker, args=(jobs, results)
     process.start()
 ```
 
@@ -171,9 +170,9 @@ It may be a good idea to hold on to the `process` objects and add them
 to a list `processes`, just so that Python's garbage collection won't
 accidentally delete them while the external processes are running.
 
-Finally, still in the main process that starts all the workers, we
-can collect the results. We use a `for` loop and exploit the fact
-that there will be as many results as there were jobs to begin with.
+Finally, still in the main process that starts all the workers, we can
+collect the results. We use a `for` loop and exploit the fact that
+there will be as many results as there were jobs to begin with.
 ```python
 for _ in values:
     (d, C) = results.get()
@@ -183,9 +182,12 @@ We would then display them, plot them, save them to a file, or whatever
 it is we do with simulation results.
 
 The complete script `worker_pool.py`, which implements all of the above
-and also works around a few issues not covered here for the sake of
+and also irons out some wrinkles not covered here for the sake of
 brevity, can be found in the ["demos" folder][demos] of the source-code
-repository. As it runs, it displays a live plot such as this one:
+repository. As it runs, it displays a live plot such as the one that
+follows. It is reproduced here preserving the real time from a run with
+two workers. Observe how the first two data points do in fact come in
+out of order.
 
 ![](images/worker_pool.gif)
 
@@ -195,8 +197,8 @@ store jobs and results on disk, rather than in memory, so that the
 execution of the queue may be resumed after a possible interruption.
 In that case, one may, or may not, find the [subprocess][subpr]
 module more convenient for starting the external processes. The
-workers would then be a separate module that is run as a script.
-
+worker implementation would then be in a separate module that is run
+as a script.
 
 [multi]: https://docs.python.org/3/library/multiprocessing.html
 [tests]: https://github.com/John-Hennig/MPh/tree/master/tests
@@ -206,7 +208,7 @@ workers would then be a separate module that is run as a script.
 ### Creating models
 
 While it is not the primary focus of MPh to create model features
-and edit settings, it is however possible — thanks to [JPype][jpype],
+and change settings, it is however possible — thanks to [JPype][jpype],
 the Python-to-Java bridge that underpins MPh. All credit to the
 JPype developers for making this possible.
 
@@ -222,6 +224,7 @@ public class HelloWorld {
    public static void main(String[] args) {
       run();
    }
+
    public static Model run() {
       Model model = ModelUtil.create("Model");
       model.modelNode().create("comp1");
@@ -237,7 +240,9 @@ public class HelloWorld {
 What it does is, it creates a model, which contains a 3d geometry
 component that is just a block 0.1 by 0.2 by 0.5 meters in size.
 
-In Python, we would achieve the same with this code:
+In Python, we would achieve the same with the code that follows. It
+uses the `.java` attribute of the Python wrapper to access the model's
+Java API directly.
 ```python
 import mph
 
@@ -253,41 +258,41 @@ model.geom("geom1").run("fin");
 ```
 
 Note how the *functional* Java code (excluding syntax sugar) was
-essentially copied-and-pasted, even the semicolons, which Python
-simply ignores. We had to replace `new String[]{"0.1", "0.2", "0.5"}`.
-That's because Python does not know what `new` means. But there,
-Java expects a list of three strings. So we replaced that with
-`["0.1", "0.2", "0.5"]`, which is the Python equivalent of just that:
-a list of these three strings.
+essentially copied and pasted, even the semicolons, which Python
+simply ignores. We had to replace `new String[]{"0.1", "0.2", "0.5"}`
+because Python does not know what `new` means. There, Java expects a
+list of three strings. So we replaced the expression with
+`["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
+of these three strings.
 
 Occasionally, when translating Java (or Matlab) code you find in the
-documentation — or a blog entry, as was the case here —, you will have
+documentation — or a blog entry, as the case was here —, you will have
 to amend code lines such as the one above. But they are few and far
-between. And the error message you'd receive should at least point you
-in the right direction.
+between. And the error messages you might receive would point you in
+the right direction.
 
-The upside is:
+The upside of using the Python interface is:
 * You don't really need to know Java. Just a little, to understand that
 occasionally we have to take care of type conversions that JPype cannot
 handle all by itself. Which is rare.
 * You don't need to install Java. It just ships with Comsol. You also
-don't need to worry about "compiling" Java source code to Java "classes",
+don't need to bother with compiling Java source code to Java classes
 via `comsolcompile`.
-* You can use Python "introspection" to understand how Comsol models
+* You can use Python introspection to understand how Comsol models
 are "created in code". This may be the most productive feature. The
 Comsol documentation explains a lot of things, but not every little
-thing. The function `mph.inspect()` makes introspection even easier,
-as it formats the output more nicely than Python's built-it `dir()`.
+detail. The function `mph.inspect()` makes introspection even easier,
+as it formats the output more nicely than Python's built-in `dir()`.
 
-Finally, to save the model created in the above example, we can just do
-this:
+Finally, to save the model created in the above example, we can just
+do this:
 ```python
 pymodel.save('model')
 ```
 
 This stores a file named `model.mph` in the working directory, which
-we can then open in the Comsol GUI. Or use in any other Python, Java,
-or Matlab project, as we please.
+we can then open in the Comsol GUI or use in any other Python, Java,
+or Matlab project.
 
 [jpype]: https://github.com/jpype-project/jpype
 [blog]: https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java

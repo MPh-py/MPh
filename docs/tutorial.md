@@ -318,7 +318,8 @@ that record.
 
 Most functionality that the library offers is covered in this tutorial.
 The few things that were left out can be gleaned from the [API
-documentation](api).
+documentation](api). A number of use-case examples are showcased in
+chapter [Demonstrations](demonstrations).
 
 
 [demo]: https://github.com/John-Hennig/mph/blob/master/tests/capacitor.mph

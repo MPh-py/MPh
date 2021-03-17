@@ -76,7 +76,7 @@ def plot_final():
 # Workers                              #
 ########################################
 
-def worker(jobs, results, port=None):
+def worker(jobs, results, port):
     """Performs jobs and delivers the results."""
     client = mph.start(cores=1, port=port)
     model = client.load('../tests/capacitor.mph')
@@ -107,7 +107,7 @@ def boss():
     processes = []
     workers = cpu_count()
     for n in range(workers):
-        port = None if system() == 'Windows' else 2036 + n
+        port = None if system() == 'Windows' else 2036+n
         process = Process(target=worker, args=(jobs, results, port))
         processes.append(process)
         process.start()
