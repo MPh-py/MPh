@@ -267,9 +267,8 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
-    # Changed type to feature to not shadow internal type
-    def create(self, group, feature, name):
-        # This will raise an exception if feature is not possible for given
+    def create(self, group, type, name):
+        # This will raise an exception if type is not possible for given
         # group. We could hardcode that out or just handle the exception.
         # Latter is simpler I guess. Using the access method creates a clear
         # KeyError on missing group
@@ -277,14 +276,14 @@ class Model:
         if group is None:
             return
 
-        utag = group().uniquetag(f'{feature.lower()}')
+        utag = group().uniquetag(f'{type.lower()}')
         try:
-            group().create(utag, feature)
+            group().create(utag, type)
             group(utag).label(name)
         except Exception:
             # This will say something like "cannot be created in this context"
             # Is this clear enough?
-            logger.exception(f'Could not create feature {feature} in group {group}')
+            logger.exception(f'Could not create type {type} in group {group}')
 
     # This could replace _dataset and _solution
     def _node(self, group, name):
@@ -295,27 +294,27 @@ class Model:
         tags = [tag for tag in group().tags()]
         names = [str(group(tag).name()) for tag in tags]
         try:
-            feature = group(tags[names.index(name)])
+            node = group(tags[names.index(name)])
         except ValueError:
             logger.error(f'Feature {name} does not exist')
             return None
 
-        return feature
+        return node
 
     def property(self, group, name, property, value=None):
-        feature = self._node(group, name)
-        if feature is None:
+        node = self._node(group, name)
+        if node is None:
             return
 
         if value is None:
-            logger.info(f'Reading feature property {property}')
+            logger.info(f'Reading node property {property}')
             try:
-                return _typecast_property(feature, property)
+                return _typecast_property(node, property)
             except Exception:
-                logger.exception(f'Cannot read feature property {property}')
+                logger.exception(f'Cannot read node property {property}')
 
         else:
-            logger.info(f'Setting feature property {property}')
+            logger.info(f'Setting node property {property}')
             try:
                 # Some basic typecasting is needed here
                 # I think it should be possible to change the _typecast_porperty
@@ -327,7 +326,7 @@ class Model:
                 elif isinstance(value, bool):
                     value = jtypes.JBoolean(value)
 
-                feature.set(property, value)
+                node.set(property, value)
 
             except Exception:
                 # more traceback since this might be due to missing
@@ -337,11 +336,11 @@ class Model:
             return None
 
     def properties(self, group, name):
-        feature = self._node(group, name)
-        if feature is None:
+        node = self._node(group, name)
+        if node is None:
             return
 
-        return [s for s in feature.properties()]
+        return [s for s in node.properties()]
 
     def remove(self, group, name):
         tag = self._node(group, name).tag()
