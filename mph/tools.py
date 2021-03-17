@@ -13,50 +13,70 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 from logging import getLogger
-from numpy import array                # numerical arrays
-
+from numpy import array, ndarray               # numerical arrays
+import jpype.types as jtypes
 ########################################
 # Globals                              #
 ########################################
 logger = getLogger(__package__)        # event logger
 
 
-# This can be used in model.py. String typecast removed since its
-# implicitly done
-def _typecast_property(java, name):
-    dtype = java.getValueType(name)
-    if dtype == 'Int':
-        value = int(java.getInt(name))
-    elif dtype == 'IntArray':
-        value = array(java.getIntArray(name))
-    elif dtype == 'IntMatrix':
-        value = array([line for line in java.getIntMatrix(name)])
-    elif dtype == 'Boolean':
-        value = java.getBoolean(name)
-    elif dtype == 'BooleanArray':
-        value = array(java.getBooleanArray(name))
-    elif dtype == 'BooleanMatrix':
-        value = array([line for line in java.getBooleanMatrix(name)])
-    elif dtype == 'Double':
-        value = java.getDouble(name)
-    elif dtype == 'DoubleArray':
-        value = array(java.getDoubleArray(name))
-    elif dtype == 'DoubleMatrix':
-        value = array([line for line in java.getDoubleMatrix(name)])
-    elif dtype == 'String':
-        value = java.getString(name)
-    elif dtype == 'StringArray':
-        value = array(
-            [string for string in java.getStringArray(name)], dtype=object)
-    elif dtype == 'StringMatrix':
-        value = array(
-            [[string for string in line]
-            for line in java.getStringMatrix(name)], dtype=object)
-    else:
-        logger.error(f'Cannot typecast property {name} of {java.name()}')
-        value = '[?]'
+def _typecast_property(java, name, value=None):
+    if value is None:
+        dtype = java.getValueType(name)
+        if dtype == 'Int':
+            value = int(java.getInt(name))
+        elif dtype == 'IntArray':
+            value = array(java.getIntArray(name))
+        elif dtype == 'IntMatrix':
+            value = array([line for line in java.getIntMatrix(name)])
+        elif dtype == 'Boolean':
+            value = java.getBoolean(name)
+        elif dtype == 'BooleanArray':
+            value = array(java.getBooleanArray(name))
+        elif dtype == 'BooleanMatrix':
+            value = array([line for line in java.getBooleanMatrix(name)])
+        elif dtype == 'Double':
+            value = java.getDouble(name)
+        elif dtype == 'DoubleArray':
+            value = array(java.getDoubleArray(name))
+        elif dtype == 'DoubleMatrix':
+            value = array([line for line in java.getDoubleMatrix(name)])
+        elif dtype == 'String':
+            value = str(java.getString(name))
+        elif dtype == 'StringArray':
+            value = array(
+                [str(string) for string in java.getStringArray(name)], dtype=object)
+        elif dtype == 'StringMatrix':
+            value = array(
+                [[str(string) for string in line]
+                for line in java.getStringMatrix(name)], dtype=object)
+        else:
+            logger.error(f'Cannot typecast property {name} of {java.name()}')
+            value = '[?]'
 
-    return value
+        return value
+
+    else:
+        if isinstance(value, ndarray):
+            logger.warning('Arrays are a todo')
+
+        else:
+            if isinstance(value, int):
+                value = jtypes.JInt(value)
+            elif isinstance(value, float):
+                value = jtypes.JDouble(value)
+            elif isinstance(value, bool):
+                value = jtypes.JBoolean(value)
+            elif isinstance(value, str):
+                value = jtypes.JString(value)
+            else:
+                logger.error(f'Unrecognized data type for {name}')
+                return None
+
+            java.set(name, value)
+
+        return None
 
 ########################################
 # Introspection                        #
