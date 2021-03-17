@@ -316,17 +316,7 @@ class Model:
         else:
             logger.info(f'Setting node property {property}')
             try:
-                # Some basic typecasting is needed here
-                # I think it should be possible to change the _typecast_porperty
-                # to work in both direction...I can take a look at that
-                if isinstance(value, int):
-                    value = jtypes.JInt(value)
-                elif isinstance(value, float):
-                    value = jtypes.JDouble(float)
-                elif isinstance(value, bool):
-                    value = jtypes.JBoolean(value)
-
-                node.set(property, value)
+                _typecast_property(node, property, value)
 
             except Exception:
                 # more traceback since this might be due to missing
