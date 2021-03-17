@@ -15,9 +15,6 @@ jpype.startJVM(str(backend['jvm']),
                classpath=str(backend['root']/'plugins'/'*'),
                convertStrings=False)
 
-# default namespace
-import java.lang as jlang
-
 # 0-D
 test_int = 1
 test_float = 1.
