@@ -22,6 +22,19 @@ logger = getLogger(__package__)        # event logger
 
 
 def _typecast_property(java, name, value=None):
+    """
+    Typecasts and, if asked, sets a property of a jave node.
+
+    This function handles the interaction with properties of java nodes. Two
+    different modes are avaiable - either not specifying a value which then
+    reads a property node and typecast its value to python or when specifying a
+    value which then typecasts the value to the best fit java object and
+    subsequently setting the property.
+
+    Since datatypes need to be converted to and from java to avoid exceptions
+    with loosely typed variables in python, this function tries to find the
+    closest fit for each conversion direction and converts the value.
+    """
     if value is None:
         dtype = java.getValueType(name)
         if dtype == 'Int':
@@ -46,11 +59,11 @@ def _typecast_property(java, name, value=None):
             value = str(java.getString(name))
         elif dtype == 'StringArray':
             value = array(
-                [str(string) for string in java.getStringArray(name)], dtype=object)
+                [str(string) for string in java.getStringArray(name)])
         elif dtype == 'StringMatrix':
             value = array(
                 [[str(string) for string in line]
-                for line in java.getStringMatrix(name)], dtype=object)
+                for line in java.getStringMatrix(name)])
         else:
             logger.error(f'Cannot typecast property {name} of {java.name()}')
             value = '[?]'
@@ -59,7 +72,35 @@ def _typecast_property(java, name, value=None):
 
     else:
         if isinstance(value, ndarray):
-            logger.warning('Arrays are a todo')
+            dtype_ident = str(value.dtype)
+            if value.ndim == 1:
+                if 'int' in dtype_ident:
+                    value = jtypes.JArray(jtypes.JInt)(value)
+                elif 'float' in dtype_ident:
+                    value = jtypes.JArray(jtypes.JDouble)(value)
+                elif 'bool' in dtype_ident:
+                    value = jtypes.JArray(jtypes.JBoolean)(value)
+                elif 'object' in dtype_ident or dtype_ident.startswith('<U'):
+                    value = jtypes.JArray(jtypes.JString)(value)
+                else:
+                    logger.error(f'Invalid array datatype (python) for {name}')
+                    value = None
+
+            elif value.ndim == 2:
+                if 'int' in dtype_ident or 'float' in dtype_ident or 'bool' in dtype_ident:
+                    value = jtypes.JArray.of(value)
+                elif 'object' in dtype_ident or dtype_ident.startswith('<U'):
+                    java_value = jtypes.JString[value.shape]
+                    for i, row in enumerate(value):
+                        for j, col in enumerate(row):
+                            java_value[i][j] = col
+                    value = java_value
+                else:
+                    logger.error(f'Invalid array datatype (python) for {name}')
+                    value = None
+            else:
+                logger.error(f'Invalid array dimension for typecast (>2) of {name}')
+                value = None
 
         else:
             if isinstance(value, int):
@@ -72,8 +113,10 @@ def _typecast_property(java, name, value=None):
                 value = jtypes.JString(value)
             else:
                 logger.error(f'Unrecognized data type for {name}')
-                return None
+                value is None
 
+        if value is not None:
+            logger.debug(f'Type conversion sucess - setting property {name}')
             java.set(name, value)
 
         return None
