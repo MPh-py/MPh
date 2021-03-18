@@ -204,6 +204,14 @@ class Model:
         tags = [tag for tag in self.java.result().export().tags()]
         return [str(self.java.result().export(tag).name()) for tag in tags]
 
+    def properties(self, group, name):
+        """Returns available properties of a feature"""
+        node = self._node(group, name)
+        if node is None:
+            return
+
+        return [s for s in node.properties()]
+
     ####################################
     # Interaction                      #
     ####################################
@@ -268,6 +276,13 @@ class Model:
         logger.info('Finished loading external data.')
 
     def create(self, group, type, name):
+        """
+        Creates a feature of type under a given group, assiging the name to it.
+
+        Possible types differ for each group and are specified by a string.
+        Each feature type then has different properties. Please refer to the
+        COMSOL reference guide for all available options.
+        """
         # This will raise an exception if type is not possible for given
         # group. We could hardcode that out or just handle the exception.
         # Latter is simpler I guess. Using the access method creates a clear
@@ -287,6 +302,7 @@ class Model:
 
     # This could replace _dataset and _solution
     def _node(self, group, name):
+        """Retrieves the java object of a feature name under group."""
         group = self._group(group)
         if group is None:
             return None
@@ -302,6 +318,10 @@ class Model:
         return node
 
     def property(self, group, name, property, value=None):
+        """
+        Either retrieves or sets a property of a feature with name under a given
+        group. Typecasts java objects.
+        """
         node = self._node(group, name)
         if node is None:
             return
@@ -325,14 +345,8 @@ class Model:
 
             return None
 
-    def properties(self, group, name):
-        node = self._node(group, name)
-        if node is None:
-            return
-
-        return [s for s in node.properties()]
-
     def remove(self, group, name):
+        """Removes feature name under group from the model."""
         tag = self._node(group, name).tag()
         group = self._group(group)()
         if group is None:
