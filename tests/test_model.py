@@ -33,6 +33,9 @@ def teardown_module():
     client.clear()
     if saveas.exists():
         saveas.unlink()
+    for type in ['m', 'vba', 'java']:
+        if saveas.with_suffix(f'.{type}').exists():
+            saveas.with_suffix(f'.{type}').unlink()
 
 
 ########################################
@@ -293,7 +296,12 @@ def test_reset():
 def test_save():
     model.save(saveas)
     assert saveas.exists()
-
+    model.save(saveas, type='m')
+    assert saveas.with_suffix('.m').exists()
+    model.save(saveas, type='java')
+    assert saveas.with_suffix('.java').exists()
+    model.save(saveas, type='vba')
+    assert saveas.with_suffix('.vba').exists()
 
 ########################################
 # Main                                 #
