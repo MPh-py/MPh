@@ -41,76 +41,106 @@ passed = True
 
 # typecast 0D
 try:
-    print(jtypes.JInt(test_int))
+    _ = jtypes.JInt(test_int)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JDouble(test_float))
+    _ = jtypes.JDouble(test_float)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JBoolean(test_bool))
+    _ = jtypes.JBoolean(test_bool)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JString(test_string))
+    _ = jtypes.JString(test_string)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 
 #typecast 1D
 try:
-    print(jtypes.JArray(jtypes.JInt)(test_int_array))
+    _ = jtypes.JArray(jtypes.JInt)(test_int_array)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray(jtypes.JDouble)(test_float_array))
+    _ = jtypes.JArray(jtypes.JDouble)(test_float_array)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray(jtypes.JBoolean)(test_bool_array))
+    _ = jtypes.JArray(jtypes.JBoolean)(test_bool_array)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray(jtypes.JString)(test_string_array))
+    test_string_array_java = jtypes.JArray(jtypes.JString)(test_string_array)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray(jtypes.JString)(test_string_object_array))
+    _ = jtypes.JArray(jtypes.JString)(test_string_object_array)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 
+logger.info('Testing 2D arrays')
 #typecast 2D
 try:
-    print(jtypes.JArray.of(test_int_matrix))
+    _ = jtypes.JArray.of(test_int_matrix)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray.of(test_float_matrix))
+    _ = jtypes.JArray.of(test_float_matrix)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray.of(test_bool_matrix))
+    _ = jtypes.JArray.of(test_bool_matrix)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+
+# JStrings work with object and numpy str dtype
+try:
+    test_string_matrix_java = jtypes.JString[test_string_matrix.shape]
+    for i, row in enumerate(test_string_matrix):
+        for j, col in enumerate(row):
+            test_string_matrix_java[i][j] = col
+    logger.debug(test_string_matrix_java.length)
+    logger.debug(test_string_matrix_java[5].length)
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
 try:
-    print(jtypes.JArray.of(test_string_matrix, dtype=jtypes.JByte))
+    res = jtypes.JString[test_string_object_matrix.shape]
+    for i, row in enumerate(test_string_object_matrix):
+        for j, col in enumerate(row):
+            res[i][j] = col
+    logger.debug(res.length)
+    logger.debug(res[5].length)
+    logger.debug(res[5][5])
 except Exception as e:
     logger.exception(f'Test failed with: {e}')
     passed = False
+
+# Test vice versa for problematic string arrays
+
+test_string_array_vv = np.array(
+    [str(string) for string in test_string_array_java])
+
+test_string_matrix_vv = np.array(
+    [[str(string) for string in line]
+     for line in test_string_matrix_java])
+
 try:
-    print(jtypes.JArray.of(test_string_object_matrix, dtype=jtypes.JObject))
-except Exception as e:
-    logger.exception(f'Test failed with: {e}')
+    assert np.array_equal(test_string_array, test_string_array_vv), "ViceVersa comparison failed for str array"
+    assert np.array_equal(test_string_matrix, test_string_matrix_vv), "ViceVersa comparison failed for str array"
+except AssertionError:
+    logger.exception()
     passed = False
