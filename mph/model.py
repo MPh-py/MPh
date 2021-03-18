@@ -591,7 +591,7 @@ class Model:
         self.java.resetHist()
         logger.info('Finished resetting history.')
 
-    def save(self, path=None):
+    def save(self, path=None, type=None):
         """
         Saves the model at the given file-system `path`.
 
@@ -601,20 +601,41 @@ class Model:
         (working directory) is used. If `path` points to a directory,
         the model name is used to name the file inside that directory.
 
-        Overwrites existing files. Imposes a `.mph` file ending.
+        A type can be specified as either m, java, vba which will save the model
+        in one of the converted formats. If no type is specified (default), the
+        mph format is used.
+
+        Overwrites existing files. Imposes the correct ending depending on type.
         """
+        if type is not None:
+            if type not in ('m', 'java', 'vba'):
+                logger.error(f'Invalid model file type {type}, using mph file.')
+                type = None
+
         if path is None:
             logger.info(f'Saving model "{self.name()}".')
-            self.java.save()
+            if type is None:
+                self.java.save()
+            else:
+                self.java.save(str(self.file().with_suffix('')), type)
         else:
             name = self.name()
             if isinstance(path, str):
                 path = Path.cwd()/path
             if path.is_dir():
                 path = path/name
-            if not path.name.endswith('.mph'):
-                path = path.with_name(path.name + '.mph')
-            logger.info(f'Saving model as "{path}".')
-            self.java.save(str(path))
+
+            # Strip suffix so files have the right ending (let COMSOL handle that)
+            path = path.with_suffix('')
+
+            # .mph is default, but the message should be as clear as possible
+            if type is None: loc = path.with_suffix('.mph')
+            else: loc = path.with_suffix(f'.{type}')
+            logger.info(f'Saving model as "{loc}".')
+
+            if type is None:
+                self.java.save(str(path))
+            else:
+                self.java.save(str(path), type)
             self.rename(name)
         logger.info('Finished saving model.')
