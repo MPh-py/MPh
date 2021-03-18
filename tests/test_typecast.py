@@ -140,7 +140,7 @@ test_string_matrix_vv = np.array(
 
 try:
     assert np.array_equal(test_string_array, test_string_array_vv), "ViceVersa comparison failed for str array"
-    assert np.array_equal(test_string_matrix, test_string_matrix_vv), "ViceVersa comparison failed for str array"
+    assert np.array_equal(test_string_matrix, test_string_matrix_vv), "ViceVersa comparison failed for str matrix"
 except AssertionError:
     logger.exception()
     passed = False
