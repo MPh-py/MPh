@@ -300,6 +300,8 @@ class Model:
             # Is this clear enough?
             logger.exception(f'Could not create type {type} in group {group}')
 
+        logger.debug(f'Created {type} with name {name} under group {group}')
+
     # This could replace _dataset and _solution
     def _node(self, group, name):
         """Retrieves the java object of a feature name under group."""
@@ -344,6 +346,33 @@ class Model:
                 logger.exception(f'Cannot set feature property {property}')
 
             return None
+
+    def apply_interpolation(self, physics, feature, parameter, function):
+        """
+        Applies an interpolation to a feature parameter.
+
+        This will apply an interpolation function to a feature parameter, to
+        set up e.g. field data boundary conditions. Function needs to be str
+        referencing the interpolation function - *that is not the name of the
+        node itself but one of the names used under the property funcs* defining
+        the column position in the file. The units have to match!"""
+        if physics not in self.physics():
+            error = f'No physics interface named "{physics}".'
+            logger.critical(error)
+            raise LookupError(error)
+        tags = [tag for tag in self.java.physics().tags()]
+        ptag = tags[self.physics().index(physics)]
+        node = self.java.physics(ptag)
+        if feature not in self.features(physics):
+            error = f'No feature named "{feature}" in physics "{physics}".'
+            logger.critical(error)
+            raise LookupError(error)
+        tags = [tag for tag in node.feature().tags()]
+        ftag = tags[self.features(physics).index(feature)]
+        node = node.feature(ftag)
+
+        node.set(parameter, function)
+
 
     def remove(self, group, name):
         """Removes feature name under group from the model."""
