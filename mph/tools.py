@@ -111,6 +111,9 @@ def _typecast_property(java, name, value=None):
                 value = jtypes.JBoolean(value)
             elif isinstance(value, str):
                 value = jtypes.JString(value)
+            elif isinstance(value, (list, tuple)):
+                # Interestingly, those are working quite well...
+                ...
             else:
                 logger.error(f'Unrecognized data type for {name}')
                 value = None
