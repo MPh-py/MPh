@@ -113,7 +113,7 @@ def _typecast_property(java, name, value=None):
                 value = jtypes.JString(value)
             else:
                 logger.error(f'Unrecognized data type for {name}')
-                value is None
+                value = None
 
         if value is not None:
             logger.debug(f'Type conversion sucess - setting property {name}')
