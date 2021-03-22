@@ -10,6 +10,7 @@ import mph
 from sys import argv
 from pathlib import Path
 import logging
+from numpy import array
 
 
 ########################################
@@ -156,6 +157,55 @@ def test_parameter():
     names = [p.name for p in model.parameters()]
     descriptions = [p.description for p in model.parameters()]
     assert descriptions[names.index('U')] == 'test'
+
+
+def test_create():
+    model.create('functions', 'Interpolation', 'test_interpolation')
+    model.create('exports', 'Data', 'test_export')
+    assert 'test_interpolation' in model.functions()
+    assert 'test_export' in model.exports()
+
+
+def test_property():
+    interpolation_setup = {
+        'source': 'file',
+        'scaledata': 'off',
+        'interp': 'cubicspline',
+        'nargs': 1,
+        'funcs': array(['interpolation1', '1']),
+    }
+
+    export_setup = {
+        'expr': ('es.Ex', 'es.Ey', 'es.Ez'),
+        'descr': ('Ex', 'Ey', 'Ez'),
+        'exporttype': 'vtu',
+    }
+
+    # set up interpolation
+    for prop, val in interpolation_setup.items():
+        model.property('functions', 'test_interpolation', prop, val)
+    model.load('interpolation_test.txt', 'test_interpolation')
+
+    # and apply to feature
+    model.apply_interpolation('electrostatic', 'anode', 'V0',
+                              '(interpolation1(y/l)) * (+U/2)')
+
+    # solve
+    model.solve('static')
+
+    # export new result as two types
+    for prop, val in export_setup.items():
+        model.property('exports', 'test_export', prop, val)
+    model.export('test_export', file='test_export_file_vtu.vtu')
+    model.property('exports', 'test_export', 'exporttype', 'text')
+    model.export('test_export', file='test_export_file_txt.txt')
+
+    # reset
+    model.apply_interpolation('electrostatic', 'anode', 'V0', '(+U/2)')
+
+def test_remove():
+    model.remove('functions', 'test_interpolation')
+    model.remove('exports', 'test_export')
 
 
 def test_load():
@@ -347,6 +397,9 @@ if __name__ == '__main__':
         test_exports()
         test_rename()
         test_parameter()
+        test_create()
+        test_property()
+        test_remove()  # This will be moved to the end once test_property is working
         test_load()
         test_build()
         test_mesh()
