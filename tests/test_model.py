@@ -390,7 +390,7 @@ if __name__ == '__main__':
         test_parameter()
         test_create()
         test_property()
-        test_remove()  # This will be moved to the end once test_property is working
+        test_remove()
         test_load()
         test_build()
         test_mesh()
