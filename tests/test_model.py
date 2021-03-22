@@ -203,6 +203,13 @@ def test_property():
     # reset
     model.apply_interpolation('electrostatic', 'anode', 'V0', '(+U/2)')
 
+    # remove exported files if this was successful
+    assert Path('test_export_file_vtu.vtu').exists()
+    assert Path('test_export_file_txt.txt').exists()
+    Path('test_export_file_vtu.vtu').unlink()
+    Path('test_export_file_txt.txt').unlink()
+
+
 def test_remove():
     model.remove('functions', 'test_interpolation')
     model.remove('exports', 'test_export')
