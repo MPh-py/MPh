@@ -118,7 +118,7 @@ def search_Windows():
         try:
             node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, node_path)
         except FileNotFoundError:
-            logger.error(f'Could not open registry node "{node_name}".')
+            logger.debug(f'Could not open registry node "{node_name}".')
             continue
 
         # Get installation folder from corresponding key.
@@ -126,7 +126,7 @@ def search_Windows():
         try:
             value = winreg.QueryValueEx(node, key)
         except FileNotFoundError:
-            logger.error(f'Key "{key}" missing in node "{node_name}".')
+            logger.debug(f'Key "{key}" missing in node "{node_name}".')
             continue
         root = Path(value[0])
         logger.debug(f'Checking installation folder "{root}".')
@@ -134,7 +134,7 @@ def search_Windows():
         # Check that Comsol server executable exists.
         server = root/'bin'/'win64'/'comsolmphserver.exe'
         if not server.exists():
-            logger.error('Did not find Comsol server executable.')
+            logger.debug('Did not find Comsol server executable.')
             continue
 
         # Get version information from Comsol server.
@@ -143,7 +143,7 @@ def search_Windows():
             command[0] = str(command[0])
         process = run(command, stdout=PIPE, creationflags=0x08000000)
         if process.returncode != 0:
-            logger.error('Querying version information failed.')
+            logger.debug('Querying version information failed.')
             continue
         version = process.stdout.decode('ascii', errors='ignore').strip()
         logger.debug(f'Reported version info is "{version}".')
@@ -152,7 +152,7 @@ def search_Windows():
         try:
             (name, major, minor, patch, build) = parse(version)
         except ValueError as error:
-            logger.error(error)
+            logger.debug(error)
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
@@ -164,23 +164,23 @@ def search_Windows():
         # Verify existence of required files and folders.
         jre = root/'java'/'win64'/'jre'
         if not jre.exists():
-            logger.error('Did not find Java run-time environment.')
+            logger.debug('Did not find Java run-time environment.')
             continue
         java = jre/'bin'
         if not java.exists():
-            logger.error('Did not find Java run-time binaries.')
+            logger.debug('Did not find Java run-time binaries.')
             continue
         jvm = java/'server'/'jvm.dll'
         if not jvm.exists():
-            logger.error('Did not find Java virtual machine.')
+            logger.debug('Did not find Java virtual machine.')
             continue
         api = root/'plugins'
         if not api.exists():
-            logger.error('Did not find Comsol Java API plug-ins.')
+            logger.debug('Did not find Comsol Java API plug-ins.')
             continue
         lib = root/'lib'/'win64'
         if not lib.exists():
-            logger.error('Did not find Comsol shared libraries.')
+            logger.debug('Did not find Comsol shared libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
@@ -220,13 +220,13 @@ def search_Linux():
         # Check that Comsol executable exists.
         comsol = root/'bin'/'glnxa64'/'comsol'
         if not comsol.exists():
-            logger.error('Did not find Comsol executable.')
+            logger.debug('Did not find Comsol executable.')
             continue
 
         # Get version information from Comsol server.
         process = run([comsol, 'server', '--version'], stdout=PIPE)
         if process.returncode != 0:
-            logger.error('Querying version information failed.')
+            logger.debug('Querying version information failed.')
             continue
         version = process.stdout.decode('ascii', errors='ignore').strip()
         logger.debug(f'Reported version info is "{version}".')
@@ -235,7 +235,7 @@ def search_Linux():
         try:
             (name, major, minor, patch, build) = parse(version)
         except ValueError as error:
-            logger.error(error)
+            logger.debug(error)
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
@@ -247,27 +247,27 @@ def search_Linux():
         # Verify existence of required files and folders.
         jre = root/'java'/'glnxa64'/'jre'
         if not jre.exists():
-            logger.error('Did not find Java run-time environment.')
+            logger.debug('Did not find Java run-time environment.')
             continue
         java = jre/'bin'
         if not java.exists():
-            logger.error('Did not find Java run-time binaries.')
+            logger.debug('Did not find Java run-time binaries.')
             continue
         jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
         if not jvm.exists():
-            logger.error('Did not find Java virtual machine.')
+            logger.debug('Did not find Java virtual machine.')
             continue
         api = root/'plugins'
         if not api.exists():
-            logger.error('Did not find Comsol Java API plug-ins.')
+            logger.debug('Did not find Comsol Java API plug-ins.')
             continue
         lib = root/'lib'/'glnxa64'
         if not lib.exists():
-            logger.error('Did not find Comsol shared libraries.')
+            logger.debug('Did not find Comsol shared libraries.')
             continue
         gra = root/'ext'/'graphicsmagick'/'glnxa64'
         if not gra.exists():
-            logger.error('Did not find graphics libraries.')
+            logger.debug('Did not find graphics libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
@@ -307,13 +307,13 @@ def search_macOS():
         # Check that Comsol executable exists.
         comsol = root/'bin'/'maci64'/'comsol'
         if not comsol.exists():
-            logger.error('Did not find Comsol executable.')
+            logger.debug('Did not find Comsol executable.')
             continue
 
         # Get version information from Comsol server.
         process = run([comsol, 'server', '--version'], stdout=PIPE)
         if process.returncode != 0:
-            logger.error('Querying version information failed.')
+            logger.debug('Querying version information failed.')
             continue
         version = process.stdout.decode('ascii', errors='ignore').strip()
         logger.debug(f'Reported version info is "{version}".')
@@ -322,7 +322,7 @@ def search_macOS():
         try:
             (name, major, minor, patch, build) = parse(version)
         except ValueError as error:
-            logger.error(error)
+            logger.debug(error)
             continue
         logger.debug(f'Assigned name "{name}" to this installation.')
 
@@ -334,29 +334,29 @@ def search_macOS():
         # Verify existence of required files and folders.
         jre = root/'java'/'maci64'/'jre'
         if not jre.exists():
-            logger.error('Did not find Java run-time environment.')
+            logger.debug('Did not find Java run-time environment.')
             continue
         java = jre/'Contents'/'Home'/'bin'
         if not java.exists():
-            logger.error('Did not find Java run-time binaries.')
+            logger.debug('Did not find Java run-time binaries.')
             continue
         jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.dylib'
         if not jvm.exists():
             jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.so'
             if not jvm.exists():
-                logger.error('Did not find Java virtual machine.')
+                logger.debug('Did not find Java virtual machine.')
                 continue
         api = root/'plugins'
         if not api.exists():
-            logger.error('Did not find Comsol Java API plug-ins.')
+            logger.debug('Did not find Comsol Java API plug-ins.')
             continue
         lib = root/'lib'/'maci64'
         if not lib.exists():
-            logger.error('Did not find Comsol shared libraries.')
+            logger.debug('Did not find Comsol shared libraries.')
             continue
         gra = root/'ext'/'graphicsmagick'/'maci64'
         if not gra.exists():
-            logger.error('Did not find graphics libraries.')
+            logger.debug('Did not find graphics libraries.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
