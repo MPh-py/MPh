@@ -120,9 +120,9 @@ if __name__ == '__main__':
 
     arguments = argv[1:]
     if 'stand-alone' in arguments:
-        mph.config.option('session', 'stand-alone')
+        mph.option('session', 'stand-alone')
     if 'client-server' in arguments:
-        mph.config.option('session', 'client-server')
+        mph.option('session', 'client-server')
     if 'log' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG if 'debug' in arguments else logging.INFO,

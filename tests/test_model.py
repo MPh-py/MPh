@@ -20,7 +20,7 @@ server = None
 model  = None
 here   = Path(__file__).parent
 file   = here/'capacitor.mph'
-saveas = here/'temp.mph'
+saveas = here/'temp'
 
 
 def setup_module():
@@ -31,11 +31,10 @@ def setup_module():
 
 def teardown_module():
     client.clear()
-    if saveas.exists():
-        saveas.unlink()
-    for type in ['m', 'vba', 'java']:
-        if saveas.with_suffix(f'.{type}').exists():
-            saveas.with_suffix(f'.{type}').unlink()
+    for suffix in ['.mph', '.java', '.m', '.vba']:
+        file = saveas.with_suffix(suffix)
+        if file.exists():
+            file.unlink()
 
 
 ########################################
@@ -295,13 +294,22 @@ def test_reset():
 
 def test_save():
     model.save(saveas)
-    assert saveas.exists()
-    model.save(saveas, type='m')
-    assert saveas.with_suffix('.m').exists()
-    model.save(saveas, type='java')
+    assert saveas.with_suffix('.mph').exists()
+    comsol = saveas.with_suffix('.mph').read_text(errors='ignore')
+    assert comsol.startswith('PK')
+    model.save(saveas.with_suffix('.java'))
     assert saveas.with_suffix('.java').exists()
-    model.save(saveas, type='vba')
+    java = saveas.with_suffix('.java').read_text(errors='ignore')
+    assert 'public static void main' in java
+    model.save(saveas.with_suffix('.m'))
+    assert saveas.with_suffix('.m').exists()
+    matlab = saveas.with_suffix('.m').read_text(errors='ignore')
+    assert 'function out = model' in matlab
+    model.save(saveas.with_suffix('.vba'))
     assert saveas.with_suffix('.vba').exists()
+    vba = saveas.with_suffix('.vba').read_text(errors='ignore')
+    assert 'Sub run()' in vba
+
 
 ########################################
 # Main                                 #
@@ -311,9 +319,9 @@ if __name__ == '__main__':
 
     arguments = argv[1:]
     if 'stand-alone' in arguments:
-        mph.config.option('session', 'stand-alone')
+        mph.option('session', 'stand-alone')
     if 'client-server' in arguments:
-        mph.config.option('session', 'client-server')
+        mph.option('session', 'client-server')
     if 'log' in arguments:
         logging.basicConfig(
             level   = logging.DEBUG if 'debug' in arguments else logging.INFO,

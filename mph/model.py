@@ -591,51 +591,73 @@ class Model:
         self.java.resetHist()
         logger.info('Finished resetting history.')
 
-    def save(self, path=None, type=None):
+    def save(self, path=None, format=None):
         """
         Saves the model at the given file-system `path`.
 
         If `path` is not given, the original file name is used, i.e.
         the one from which the model was loaded to begin with. If
-        `path` contains no directory information, the current folder
-        (working directory) is used. If `path` points to a directory,
-        the model name is used to name the file inside that directory.
+        the path contains no folder information, the current folder
+        (working directory) is used. If the path points to a folder,
+        the model name is used to name the file inside that folder.
 
-        A type can be specified as either m, java, vba which will save the model
-        in one of the converted formats. If no type is specified (default), the
-        mph format is used.
+        A `format` can be specified as either "Comsol", "Java",
+        "Matlab", or "VBA". If no format is given, it will be deduced
+        from the file's ending, being either `.mph`, `.java`, `.m`, or
+        `.vba`, respectively. No file ending implies "Comsol" format.
 
-        Overwrites existing files. Imposes the correct ending depending on type.
+        Imposes the correct file ending for the format. Overwrites
+        existing files.
         """
-        if type is not None:
-            if type not in ('m', 'java', 'vba'):
-                logger.error(f'Invalid model file type {type}, using mph file.')
-                type = None
 
+        # Possibly deduce format from file ending.
+        if format is None:
+            suffix = path.suffix if path else '.mph'
+            if suffix in ('.mph', ''):
+                format = 'Comsol'
+            elif suffix == '.java':
+                format = 'Java'
+            elif suffix == '.m':
+                format = 'Matlab'
+            elif suffix == '.vba':
+                format = 'VBA'
+            else:
+                error = f'Cannot deduce file format from ending "{suffix}".'
+                logger.critical(error)
+                raise ValueError(error)
+
+        # Disambiguate format strings and map to Comsol's file type.
+        if format in ('Comsol', 'mph', '.mph'):
+            (format, type) = ('Comsol', 'mph')
+        elif format in ('Java', 'java', '.java'):
+            (format, type) = ('Java', 'java')
+        elif format in ('Matlab', 'm', '.m'):
+            (format, type) = ('Matlab', 'm')
+        elif format in ('VBA', 'vba', '.vba'):
+            (format, type) = ('VBA', 'vba')
+
+        # Use model name if no file name specified.
         if path is None:
-            logger.info(f'Saving model "{self.name()}".')
-            if type is None:
+            if format == 'Comsol':
+                logger.info(f'Saving model "{self.name()}".')
                 self.java.save()
             else:
-                self.java.save(str(self.file().with_suffix('')), type)
+                file = self.name() + '.' + type
+                logger.info(f'Saving model as "{file.name}".')
+                self.java.save(str(file), type)
+
+        # Otherwise save at given path.
         else:
-            name = self.name()
             if isinstance(path, str):
                 path = Path.cwd()/path
             if path.is_dir():
-                path = path/name
-
-            # Strip suffix so files have the right ending (let COMSOL handle that)
-            path = path.with_suffix('')
-
-            # .mph is default, but the message should be as clear as possible
-            if type is None: loc = path.with_suffix('.mph')
-            else: loc = path.with_suffix(f'.{type}')
-            logger.info(f'Saving model as "{loc}".')
-
-            if type is None:
-                self.java.save(str(path))
+                file = (path/self.name()).with_suffix(f'.{type}')
             else:
-                self.java.save(str(path), type)
-            self.rename(name)
+                file = path.with_suffix(f'.{type}')
+            logger.info(f'Saving model as "{file.name}".')
+            if format == 'Comsol':
+                self.java.save(str(file))
+            else:
+                self.java.save(str(file), type)
+
         logger.info('Finished saving model.')
