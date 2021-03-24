@@ -22,7 +22,8 @@ inconvenience.
 Furthermore, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Most notably, pressing
 <kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
-the entire Python session. So do not rely on that to work.
+out of the Python session. So do not rely on catching
+`KeyboardInterrupt` exceptions in application code.
 
 (There is an alternative Java bridge, [pyJNIus][jnius], which is
 not limited to one virtual machine, but then fails in another regard:
@@ -42,7 +43,9 @@ is out of scope.
 Though users who do want to dig deeper may access the "pythonized"
 Java layer directly, via the `.java` attribute of `Client` instances
 (mapping to Comsol's `ModelUtil`) as well as `Model` (mapping to
-Comsol's `model`). Refer to Comsol's programming manual for details.
+Comsol's `model`). Refer to section "Creating models" in chapter
+[Demonstrations](demonstrations) for an example and to Comsol's
+Programming Reference Manual for further details.
 
 This might even be worthwhile for Java developers of Comsol
 applications, as the interactive Python prompt provides easy
@@ -115,7 +118,7 @@ process. Or have the Python program start the Comsol session in a
 subprocess. However, none of this is ideal. Starting the client should
 work without any of these detours.
 
-The function `mph.start()` function exists to navigate these platform
+The function `mph.start()` exists to navigate these platform
 differences. On Windows, it starts a stand-alone client in order to
 profit from the better start-up performance. On Linux and macOS, it
 creates a local session in client–server mode so that no shell

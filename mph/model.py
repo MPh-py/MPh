@@ -33,7 +33,7 @@ class Model:
     Example:
     ```python
         import mph
-        client = mph.Client()
+        client = mph.start()
         model = client.load('capacitor.mph')
         model.parameter('U', '1', 'V')
         model.parameter('d', '1', 'mm')
