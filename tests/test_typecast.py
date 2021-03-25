@@ -1,15 +1,32 @@
-# jpype typecast tester for arrays
-from sys import argv
-import logging
-import numpy as np
+"""Tests type-casting between Python and Java."""
+
+
+########################################
+# Dependencies                         #
+########################################
+import parent
+import mph
 import jpype
 import jpype.types as jtypes
+import numpy as np
+import logging
+from sys import argv
 
+
+########################################
+# Globals                              #
+########################################
 logger = logging.getLogger(__name__)
 
+
+########################################
+# Tests                                #
+########################################
+
 def test_typecast():
-    # Start the Java virtual machine needed for typecasting
-    jpype.startJVM(convertStrings=False)
+
+    # Start Comsol's Java VM.
+    client = mph.start()
 
     # 0-D
     test_int = 1
@@ -140,7 +157,13 @@ def test_typecast():
     logger.info('All typecast tests passed')
 
 
+
+########################################
+# Main                                 #
+########################################
+
 if __name__ == '__main__':
+
     arguments = argv[1:]
     if 'log' in arguments:
         logging.basicConfig(
