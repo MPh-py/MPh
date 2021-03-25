@@ -626,7 +626,7 @@ class Model:
                 logger.critical(error)
                 raise ValueError(error)
 
-        # Disambiguate format strings and map to Comsol's file type.
+        # Allow synonyms for format and map to Comsol's file type.
         if format in ('Comsol', 'mph', '.mph'):
             (format, type) = ('Comsol', 'mph')
         elif format in ('Java', 'java', '.java'):
@@ -635,6 +635,10 @@ class Model:
             (format, type) = ('Matlab', 'm')
         elif format in ('VBA', 'vba', '.vba'):
             (format, type) = ('VBA', 'vba')
+        else:
+            error = f'Invalid file format "{format}".'
+            logger.critical(error)
+            raise ValueError(error)
 
         # Use model name if no file name specified.
         if path is None:
@@ -645,7 +649,6 @@ class Model:
                 file = self.name() + '.' + type
                 logger.info(f'Saving model as "{file.name}".')
                 self.java.save(str(file), type)
-
         # Otherwise save at given path.
         else:
             if isinstance(path, str):
@@ -659,5 +662,4 @@ class Model:
                 self.java.save(str(file))
             else:
                 self.java.save(str(file), type)
-
         logger.info('Finished saving model.')

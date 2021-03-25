@@ -192,7 +192,7 @@ out of order.
 ![](images/worker_pool.gif)
 
 A more advanced implementation may use a class derived from `multiprocessing.Process` instead of a mere function, just to be able
-so save state. For long-running simulations it would make sense to
+to save state. For long-running simulations it would make sense to
 store jobs and results on disk, rather than in memory, so that the
 execution of the queue may be resumed after a possible interruption.
 In that case, one may, or may not, find the [subprocess][subpr]
