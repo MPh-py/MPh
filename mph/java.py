@@ -6,15 +6,12 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 import jpype.types as jtypes           # Java types
-from numpy import array, ndarray       # numerical arrays
-from logging import getLogger
+import numpy                           # fast numerics
 
 
 ########################################
-# Globals                              #
+# Properties                           #
 ########################################
-logger = getLogger(__package__)        # event logger
-
 
 def property(node, name, value=None):
     """
@@ -25,94 +22,85 @@ def property(node, name, value=None):
     Python data type. Otherwise changes the property after casting the
     received value to the appropriate Java data type.
     """
+
     if value is None:
         dtype = node.getValueType(name)
         if dtype == 'Int':
             value = int(node.getInt(name))
         elif dtype == 'IntArray':
-            value = array(node.getIntArray(name))
+            value = numpy.array(node.getIntArray(name))
         elif dtype == 'IntMatrix':
-            value = array([line for line in node.getIntMatrix(name)])
+            value = numpy.array([line for line in node.getIntMatrix(name)])
         elif dtype == 'Boolean':
             value = node.getBoolean(name)
         elif dtype == 'BooleanArray':
-            value = array(node.getBooleanArray(name))
+            value = numpy.array(node.getBooleanArray(name))
         elif dtype == 'BooleanMatrix':
-            value = array([line for line in node.getBooleanMatrix(name)])
+            value = numpy.array([line for line in node.getBooleanMatrix(name)])
         elif dtype == 'Double':
             value = node.getDouble(name)
         elif dtype == 'DoubleArray':
-            value = array(node.getDoubleArray(name))
+            value = numpy.array(node.getDoubleArray(name))
         elif dtype == 'DoubleMatrix':
-            value = array([line for line in node.getDoubleMatrix(name)])
+            value = numpy.array([line for line in node.getDoubleMatrix(name)])
         elif dtype == 'String':
             value = str(node.getString(name))
         elif dtype == 'StringArray':
-            value = array(
+            value = numpy.array(
                 [str(string) for string in node.getStringArray(name)])
         elif dtype == 'StringMatrix':
-            value = array(
+            value = numpy.array(
                 [[str(string) for string in line]
                 for line in node.getStringMatrix(name)])
         else:
-            logger.error(f'Cannot typecast property {name} of {node.name()}')
-            value = '[?]'
-
+            raise TypeError(f'Cannot convert Java data type "{dtype}".')
         return value
 
     else:
-        if isinstance(value, ndarray):
-            dtype_ident = str(value.dtype)
+        if isinstance(value, numpy.ndarray):
+            dtype = str(value.dtype)
             if value.ndim == 1:
-                if 'int' in dtype_ident:
+                if 'int' in dtype:
                     value = jtypes.JArray(jtypes.JInt)(value)
-                elif 'float' in dtype_ident:
+                elif 'float' in dtype:
                     value = jtypes.JArray(jtypes.JDouble)(value)
-                elif 'bool' in dtype_ident:
+                elif 'bool' in dtype:
                     value = jtypes.JArray(jtypes.JBoolean)(value)
-                elif 'object' in dtype_ident or dtype_ident.startswith('<U'):
+                elif 'object' in dtype or dtype.startswith('<U'):
                     value = jtypes.JArray(jtypes.JString)(value)
                 else:
-                    logger.error(f'Invalid array datatype (python) for {name}')
-                    value = None
-
+                    raise TypeError(f'Cannot convert 1d NumPy arrays of '
+                                    f'data type "{dtype}".')
             elif value.ndim == 2:
-                if 'int' in dtype_ident or 'float' in dtype_ident or 'bool' in dtype_ident:
+                if 'int' in dtype or 'float' in dtype or 'bool' in dtype:
                     value = jtypes.JArray.of(value)
-                elif 'object' in dtype_ident or dtype_ident.startswith('<U'):
+                elif 'object' in dtype or dtype.startswith('<U'):
                     java_value = jtypes.JString[value.shape]
                     for i, row in enumerate(value):
                         for j, col in enumerate(row):
                             java_value[i][j] = col
                     value = java_value
                 else:
-                    logger.error(f'Invalid array datatype (python) for {name}')
-                    value = None
+                    raise TypeError(f'Cannot convert 2d NumPy arrays of data '
+                                    f'type "{dtype}".')
             else:
-                logger.error(f'Invalid array dimension for typecast (>2) of {name}')
-                value = None
-
+                raise TypeError('Cannot convert NumPy arrays of dimension '
+                                'higher than 2.')
+        elif isinstance(value, int):
+            value = jtypes.JInt(value)
+        elif isinstance(value, float):
+            value = jtypes.JDouble(value)
+        elif isinstance(value, bool):
+            value = jtypes.JBoolean(value)
+        elif isinstance(value, str):
+            value = jtypes.JString(value)
+        elif isinstance(value, (list, tuple)):
+            pass
         else:
-            if isinstance(value, int):
-                value = jtypes.JInt(value)
-            elif isinstance(value, float):
-                value = jtypes.JDouble(value)
-            elif isinstance(value, bool):
-                value = jtypes.JBoolean(value)
-            elif isinstance(value, str):
-                value = jtypes.JString(value)
-            elif isinstance(value, (list, tuple)):
-                # Interestingly, those are working quite well...
-                ...
-            else:
-                logger.error(f'Unrecognized data type for {name}')
-                value = None
+            raise TypeError(f'Cannot convert values of Python data type '
+                            f'"{type(value).__name__}".')
+        node.set(name, value)
 
-        if value is not None:
-            logger.debug(f'Type conversion sucess - setting property {name}')
-            node.set(name, value)
-
-        return None
 
 ########################################
 # Introspection                        #
@@ -125,7 +113,7 @@ def inspect(node):
     This is basically a "pretty-fied" version of the output from the
     built-in `dir` command. It displays (prints to the console) the
     methods of a model node (as given by the Comsol API) as well as
-    the node's "properties" (if any are defined).
+    the node's properties (if any are defined).
 
     The node's name, tag, and documentation reference marker are
     listed first. These access methods and a few others, which are
@@ -163,7 +151,10 @@ def inspect(node):
         print('properties:')
         names = [str(property) for property in node.properties()]
         for name in names:
-            value = property(node, name)
+            try:
+                value = property(node, name)
+            except TypeError:
+                value = '[?]'
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.
