@@ -6,7 +6,7 @@
 ["Electrical Heating in a Busbar"][busbar] is an example model used
 in the tutorial in ["Introduction to Comsol Multiphysics"][intro] and
 explained there in great detail. The section "Getting the Maximum and
-Minimum Temperature" demonstrates how two obtain the two temperature
+Minimum Temperature" demonstrates how to obtain the two temperature
 extremes within the Comsol GUI.
 
 The following Python code does the same thing programmatically:
@@ -148,7 +148,6 @@ Before we start the computation, we add all parameter values to the
 `jobs` queue:
 ```python
 jobs = multiprocessing.Queue()
-values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 for d in values:
     jobs.put(d)
 ```
@@ -265,13 +264,13 @@ list of three strings. So we replaced the expression with
 `["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
 of these three strings.
 
-Occasionally, when translating Java (or Matlab) code you find in the
+Occasionally when translating Java (or Matlab) code you find in the
 documentation — or a blog entry, as the case was here —, you will have
 to amend code lines such as the one above. But they are few and far
 between. And the error messages you might receive would point you in
 the right direction.
 
-The upside of using the Python interface is:
+The upside of using the Python interface, rather than Java, is:
 * You don't really need to know Java. Just a little, to understand that
 occasionally we have to take care of type conversions that JPype cannot
 handle all by itself. Which is rare.

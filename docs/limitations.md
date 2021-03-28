@@ -47,25 +47,6 @@ Comsol's `model`). Refer to section "Creating models" in chapter
 [Demonstrations](demonstrations) for an example and to Comsol's
 Programming Reference Manual for further details.
 
-This might even be worthwhile for Java developers of Comsol
-applications, as the interactive Python prompt provides easy
-introspection of the object hierarchy. In these circumstances, one
-might find the convenience function `mph.inspect` helpful, as it not
-only lists an object's methods in a more readable way than Python's
-built-in `dir`, but also displays the "properties" possibly defined
-on a model node.
-
-In that event, it may equally help to call the returned Python model
-object something like `pymodel` and assign the name `model` to
-`pymodel.java`. Then you can just copy-and-paste Java (or even Matlab)
-code from the Comsol Programming Manual or as exported from the Comsol
-front-end. Python will gracefully overlook gratuitous semicolons at
-the end of statements, so this approach would even work for entire
-blocks of code. Keep in mind, however, that JPype cannot perform all
-type conversions silently in the background. Occasionally, when there
-is ambiguity in overloaded methods, you will have to cast types
-explicitly. Refer to the [JPype documentation][jpype] for help.
-
 
 ### Platform differences
 
