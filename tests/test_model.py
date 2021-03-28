@@ -10,7 +10,7 @@ import mph
 from sys import argv
 from pathlib import Path
 import logging
-from numpy import array
+from numpy import array, isclose
 
 
 ########################################
@@ -134,6 +134,14 @@ def test_exports():
     assert 'field' in model.exports()
 
 
+def test_groups():
+    assert 'functions' in model.groups()
+
+
+def test_properties():
+    assert 'flipx' in model.properties('functions', 'test_function')
+
+
 def test_rename():
     name = model.name()
     model.rename('test')
@@ -160,63 +168,102 @@ def test_parameter():
 
 
 def test_create():
-    model.create('functions', 'Interpolation', 'test_interpolation')
-    model.create('exports', 'Data', 'test_export')
-    assert 'test_interpolation' in model.functions()
-    assert 'test_export' in model.exports()
+    model.create('functions', 'Interpolation', 'interpolation')
+    assert 'interpolation' in model.functions()
+    model.create('exports', 'Data', 'vector')
+    assert 'vector' in model.exports()
 
 
 def test_property():
-    interpolation_setup = {
-        'source': 'file',
-        'scaledata': 'off',
-        'interp': 'cubicspline',
-        'nargs': 1,
-        'funcs': array(['interpolation1', '1']),
-    }
-
-    export_setup = {
-        'expr': ('es.Ex', 'es.Ey', 'es.Ez'),
-        'descr': ('Ex', 'Ey', 'Ez'),
-        'exporttype': 'vtu',
-    }
-
-    # set up interpolation
-    for prop, val in interpolation_setup.items():
-        model.property('functions', 'test_interpolation', prop, val)
-    model.load('interpolation_test.txt', 'test_interpolation')
-
-    # and apply to feature
-    model.apply_interpolation('electrostatic', 'anode', 'V0',
-                              '(interpolation1(y/l)) * (+U/2)')
-
-    # solve
+    # Customize newly created features.
+    model.property('functions', 'interpolation', 'source', 'file')
+    model.property('functions', 'interpolation', 'scaledata', 'off')
+    model.property('functions', 'interpolation', 'interp', 'cubicspline')
+    model.property('functions', 'interpolation', 'nargs', 1)
+    model.property('functions', 'interpolation', 'funcs', ['f', '1'])
+    model.property('exports', 'vector', 'expr', ('es.Ex', 'es.Ey', 'es.Ez'))
+    model.property('exports', 'vector', 'descr', ('Ex', 'Ey', 'Ez'))
+    # Test applying interpolation.
+    model.load('table.txt', 'interpolation')
+    model.apply_interpolation('electrostatic', 'anode', 'V0', '+U/2 * f(y/l)')
     model.solve('static')
-
-    # export new result as two types
-    for prop, val in export_setup.items():
-        model.property('exports', 'test_export', prop, val)
-    model.export('test_export', file='test_export_file_vtu.vtu')
-    model.property('exports', 'test_export', 'exporttype', 'text')
-    model.export('test_export', file='test_export_file_txt.txt')
-
-    # reset
-    model.apply_interpolation('electrostatic', 'anode', 'V0', '(+U/2)')
-
-    # remove exported files if this was successful
-    assert Path('test_export_file_vtu.vtu').exists()
-    assert Path('test_export_file_txt.txt').exists()
-    Path('test_export_file_vtu.vtu').unlink()
-    Path('test_export_file_txt.txt').unlink()
-
-
-def test_remove():
-    model.remove('functions', 'test_interpolation')
-    model.remove('exports', 'test_export')
+    model.apply_interpolation('electrostatic', 'anode', 'V0', '+U/2')
+    model.solve('static')
+    # Test conversion to and from 'Boolean'.
+    old = model.property('functions', 'test_function', 'flipx')
+    model.property('functions', 'test_function', 'flipx', False)
+    assert model.property('functions', 'test_function', 'flipx') is False
+    model.property('functions', 'test_function', 'flipx', old)
+    assert model.property('functions', 'test_function', 'flipx') == old
+    # Test conversion to and from 'Double'.
+    old = model.property('functions', 'test_function', 'xmin')
+    new = -10.0
+    model.property('functions', 'test_function', 'xmin', -10)
+    assert isclose(model.property('functions', 'test_function', 'xmin'), new)
+    model.property('functions', 'test_function', 'xmin', old)
+    assert isclose(model.property('functions', 'test_function', 'xmin'), old)
+    # Test conversion to and from 'DoubleArray'.
+    old = model.property('exports', 'field', 'outersolnumindices')
+    new = array([1.0, 2.0, 3.0])
+    model.property('exports', 'field', 'outersolnumindices', new)
+    assert isclose(model.property('exports', 'field', 'outersolnumindices'),
+                   new).all()
+    model.property('exports', 'field', 'outersolnumindices', old)
+    assert isclose(model.property('exports', 'field', 'outersolnumindices'),
+                   old).all()
+    # Test conversion to and from 'File'.
+    old = model.property('functions', 'test_function', 'filename')
+    new = Path('gaussian.tif')
+    model.property('functions', 'test_function', 'filename', new)
+    assert model.property('functions', 'test_function', 'filename') == new
+    model.property('functions', 'test_function', 'filename', old)
+    assert model.property('functions', 'test_function', 'filename') == old
+    # Test conversion to and from 'Int'.
+    old = model.property('functions', 'test_function', 'refreshcount')
+    new = 1
+    model.property('functions', 'test_function', 'refreshcount', new)
+    assert model.property('functions', 'test_function', 'refreshcount') == new
+    model.property('functions', 'test_function', 'refreshcount', old)
+    assert model.property('functions', 'test_function', 'refreshcount') == old
+    # Test conversion to and from 'IntArray'.
+    old = model.property('plots', 'evolution', 'solnum')
+    new = array([1, 2, 3])
+    model.property('plots', 'evolution', 'solnum', new)
+    assert (model.property('plots', 'evolution', 'solnum') == new).all()
+    model.property('plots', 'evolution', 'solnum', old)
+    assert (model.property('plots', 'evolution', 'solnum') == old).all()
+    # Test conversion from 'None'.
+    none = model.property('functions', 'test_function', 'exportfilename')
+    assert none is None
+    # Test conversion to and from 'String'.
+    old = model.property('functions', 'test_function', 'funcname')
+    model.property('functions', 'test_function', 'funcname', 'new')
+    assert model.property('functions', 'test_function', 'funcname') == 'new'
+    model.property('functions', 'test_function', 'funcname', old)
+    assert model.property('functions', 'test_function', 'funcname') == old
+    # Test conversion to and from 'StringArray'.
+    old = model.property('exports', 'vector', 'descr')
+    new = ['x-component', 'y-component', 'z-component']
+    model.property('exports', 'vector', 'descr', new)
+    assert model.property('exports', 'vector', 'descr') == new
+    model.property('exports', 'vector', 'descr', old)
+    assert model.property('exports', 'vector', 'descr') == old
+    # Test conversion to and from 'StringMatrix'.
+    old = model.property('plots', 'evolution', 'plotonsecyaxis')
+    new = [['medium 1', 'on', 'ptgr1'], ['medium 2', 'on', 'ptgr2']]
+    model.property('plots', 'evolution', 'plotonsecyaxis', new)
+    assert model.property('plots', 'evolution', 'plotonsecyaxis') == new
+    model.property('plots', 'evolution', 'plotonsecyaxis', old)
+    assert model.property('plots', 'evolution', 'plotonsecyaxis') == old
 
 
 def test_load():
     model.load('gaussian.tif', 'test_function')
+
+
+def test_remove():
+    model.remove('functions', 'interpolation')
+    model.remove('exports', 'vector')
 
 
 def test_build():
@@ -339,6 +386,18 @@ def test_export():
     model.export('field', file)
     assert file.exists()
     file.unlink()
+    file = Path('vector.txt')
+    assert not file.exists()
+    model.property('exports', 'vector', 'exporttype', 'text')
+    model.export('vector', file=file)
+    assert file.exists()
+    file.unlink()
+    file = Path('vector.vtu')
+    assert not file.exists()
+    model.property('exports', 'vector', 'exporttype', 'vtu')
+    model.export('vector', file=file)
+    assert file.exists()
+    file.unlink()
 
 
 def test_clear():
@@ -402,18 +461,20 @@ if __name__ == '__main__':
         test_datasets()
         test_plots()
         test_exports()
+        test_groups()
+        test_properties()
         test_rename()
         test_parameter()
-        test_create()
-        test_property()
-        test_remove()
         test_load()
         test_build()
         test_mesh()
         test_solve()
         test_evaluate()
         test_toggle()
+        test_create()
+        test_property()
         test_export()
+        test_remove()
         test_clear()
         test_reset()
         test_save()
