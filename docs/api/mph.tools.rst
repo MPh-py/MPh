@@ -1,4 +1,0 @@
-tools
-=====
-
-.. automodule:: mph.tools

@@ -1,4 +1,4 @@
-﻿"""Manages the local Comsol session."""
+﻿"""Starts and stops the local Comsol session."""
 __license__ = 'MIT'
 
 

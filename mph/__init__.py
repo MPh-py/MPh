@@ -14,4 +14,4 @@ from .model   import Model
 from .client  import Client
 from .server  import Server
 from .config  import option
-from .tools   import inspect
+from .java    import inspect

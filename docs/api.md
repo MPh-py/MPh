@@ -18,5 +18,5 @@ by this library.
     Server
     discovery
     config
-    tools
+    java
 ```

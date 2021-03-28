@@ -1,20 +1,15 @@
-﻿"""
-Tools for software development.
-
-This module provides functionality that a user might find helpful
-when extending this very package or when developing applications
-of their own. It is strictly a helper module for the user. None
-of the other modules in this package depend on it.
-"""
+﻿"""Facilitates access to the Java layer."""
 __license__ = 'MIT'
 
 
 ########################################
 # Dependencies                         #
 ########################################
+import jpype.types as jtypes           # Java types
+from numpy import array, ndarray       # numerical arrays
 from logging import getLogger
-from numpy import array, ndarray               # numerical arrays
-import jpype.types as jtypes
+
+
 ########################################
 # Globals                              #
 ########################################

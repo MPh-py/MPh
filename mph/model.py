@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Components                           #
 ########################################
-from .tools import _typecast_property  # Typecasting java to python
+from . import java                     # Java layer
 
 
 ########################################
@@ -331,14 +331,14 @@ class Model:
         if value is None:
             logger.info(f'Reading node property {property}')
             try:
-                return _typecast_property(node, property)
+                return java._typecast_property(node, property)
             except Exception:
                 logger.exception(f'Cannot read node property {property}')
 
         else:
             logger.info(f'Setting node property {property}')
             try:
-                _typecast_property(node, property, value)
+                java._typecast_property(node, property, value)
 
             except Exception:
                 # more traceback since this might be due to missing
