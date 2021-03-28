@@ -4,9 +4,7 @@
 ########################################
 # Dependencies                         #
 ########################################
-import parent
 import mph
-import jpype
 import jpype.types as jtypes
 import numpy as np
 import logging
@@ -26,7 +24,7 @@ logger = logging.getLogger(__name__)
 def test_typecast():
 
     # Start Comsol's Java VM.
-    client = mph.start()
+    mph.start()
 
     # 0-D
     test_int = 1
@@ -49,6 +47,7 @@ def test_typecast():
     test_string_matrix = np.array([
         f'string_{i}' for i in range(100)]).reshape((10, 10))
     test_string_object_matrix = test_string_matrix.astype(object)
+
     # Start the tests
     passed = True
 
@@ -74,7 +73,7 @@ def test_typecast():
         logger.exception(f'Test failed with: {e}')
         passed = False
 
-    #typecast 1D
+    # typecast 1D
     try:
         _ = jtypes.JArray(jtypes.JInt)(test_int_array)
     except Exception as e:
@@ -102,7 +101,7 @@ def test_typecast():
         passed = False
 
     logger.info('Testing 2D arrays')
-    #typecast 2D
+    # typecast 2D
     try:
         _ = jtypes.JArray.of(test_int_matrix)
     except Exception as e:
@@ -152,10 +151,11 @@ def test_typecast():
          for line in test_string_matrix_java])
 
     assert passed, "Some tests in test_typecast failed"
-    assert np.array_equal(test_string_array, test_string_array_vv), "ViceVersa comparison failed for str array"
-    assert np.array_equal(test_string_matrix, test_string_matrix_vv), "ViceVersa comparison failed for str matrix"
+    assert np.array_equal(test_string_array, test_string_array_vv), \
+           "ViceVersa comparison failed for str array"
+    assert np.array_equal(test_string_matrix, test_string_matrix_vv), \
+           "ViceVersa comparison failed for str matrix"
     logger.info('All typecast tests passed')
-
 
 
 ########################################
