@@ -1,5 +1,5 @@
-tools
-=====
+java
+====
 
 .. automodule:: mph.java
 
