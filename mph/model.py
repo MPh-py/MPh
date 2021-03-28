@@ -70,14 +70,9 @@ class Model:
             self.java = parent.java
         else:
             self.java = parent
-
-        # This dict holds the names to access the subgroups in the java object
-        # I chose plural here since it reads better, however comsol chooses
-        # a mix of singular and acronyms. By intent, those are the callables
-        # so access to subfeatures is possbile
         self._groups = {'functions': self.java.func,
                         'solutions': self.java.sol,
-                        'results':   self.java.result,
+                        'plots':     self.java.result,
                         'datasets':  self.java.result().dataset,
                         'exports':   self.java.result().export,
                         }
