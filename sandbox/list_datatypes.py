@@ -17,19 +17,21 @@ client = mph.start()
 model = client.load('../tests/capacitor.mph')
 
 groups = {
-    'functions':  model.java.func,
-    'components': model.java.component,
-    'geometries': model.java.geom,
-    'selections': model.java.selection,
-    'views':      model.java.view,
-    'physics':    model.java.physics,
-    'materials':  model.java.material,
-    'meshes':     model.java.mesh,
-    'studies':    model.java.study,
-    'solutions':  model.java.sol,
-    'plots':      model.java.result,
-    'datasets':   model.java.result().dataset,
-    'exports':    model.java.result().export,
+    'functions':    model.java.func,
+    'components':   model.java.component,
+    'geometries':   model.java.geom,
+    'views':        model.java.view,
+    'selections':   model.java.selection,
+    'variables':    model.java.variable,
+    'physics':      model.java.physics,
+    'multiphysics': model.java.multiphysics,
+    'materials':    model.java.material,
+    'meshes':       model.java.mesh,
+    'studies':      model.java.study,
+    'solutions':    model.java.sol,
+    'plots':        model.java.result,
+    'datasets':     model.java.result().dataset,
+    'exports':      model.java.result().export,
 }
 
 dtypes = {}
