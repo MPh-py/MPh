@@ -65,6 +65,10 @@ class Model:
     `Model` instance (as loaded by the client) to a derived child class.
     """
 
+    ####################################
+    # Internal                         #
+    ####################################
+
     def __init__(self, parent):
         if isinstance(parent, Model):
             self.java = parent.java
@@ -88,22 +92,58 @@ class Model:
             'exports':      self.java.result().export,
         }
 
-    # Internal access
-    def _group(self, name):
-        try:
-            return self._groups[name]
-        except KeyError:
-            logger.error(f'The group {name} is not implemented yet.')
-            return None
-
     def __eq__(self, other):
         return self.java.tag() == other.java.tag()
+
+    def _group(self, name):
+        # Returns the named group node.
+        if name not in self._groups:
+            error = f'Invalid group "{name}".'
+            logger.critical(error)
+            raise ValueError(error)
+        return self._groups[name]
+
+    def _node(self, group, name):
+        # Returns the named model node inside a given group.
+        parent = self._group(group)
+        tags = [tag for tag in parent().tags()]
+        names = [str(parent(tag).name()) for tag in tags]
+        try:
+            node = parent(tags[names.index(name)])
+        except ValueError:
+            error = f'No node named "{name}" in group "{group}".'
+            logger.critical(error)
+            raise LookupError(error) from None
+        return node
+
+    def _dataset(self, name=None):
+        # Returns the Java dataset object.
+        # If `name` is given, returns the dataset object with that name.
+        # Otherwise returns the default dataset.
+        if name is not None:
+            names = self.datasets()
+            tags  = [tag for tag in self.java.result().dataset().tags()]
+            try:
+                dtag = tags[names.index(name)]
+            except ValueError:
+                error = f'Dataset "{name}" does not exist.'
+                raise LookupError(error) from None
+        else:
+            etag = self.java.result().numerical().uniquetag('eval')
+            eval = self.java.result().numerical().create(etag, 'Eval')
+            dtag = eval.getString('data')
+            self.java.result().numerical().remove(etag)
+        return self.java.result().dataset(dtag)
+
+    def _solution(self, dataset=None):
+        # Returns the Java solution object the named `dataset` is based on.
+        dset = self._dataset(dataset)
+        stag = dset.getString('solution')
+        return self.java.sol(stag)
 
     ####################################
     # Inspection                       #
     ####################################
-    def groups(self):
-        return [k for k in self._groups.keys()]
 
     def name(self):
         """Returns the model's name."""
@@ -210,13 +250,13 @@ class Model:
         tags = [tag for tag in self.java.result().export().tags()]
         return [str(self.java.result().export(tag).name()) for tag in tags]
 
-    def properties(self, group, name):
-        """Returns available properties of a feature"""
-        node = self._node(group, name)
-        if node is None:
-            return
+    def groups(self):
+        """Returns the names of all feature groups."""
+        return list(self._groups.keys())
 
-        return [s for s in node.properties()]
+    def properties(self, group, node):
+        """Returns the names of all properties defined on a node."""
+        return [str(name) for name in self._node(group, node).properties()]
 
     ####################################
     # Interaction                      #
@@ -283,75 +323,33 @@ class Model:
 
     def create(self, group, type, name):
         """
-        Creates a feature of type under a given group, assiging the name to it.
+        Creates a new model node inside the given feature group.
 
-        Possible types differ for each group and are specified by a string.
-        Each feature type then has different properties. Please refer to the
-        COMSOL reference guide for all available options.
+        The node `type` is denoted by a string. Its allowed values
+        depend on the feature `group`. Refer to the Comsol documentation
+        for available options. Once created, the node is referred to by
+        `name` when changing its properties.
         """
-        # This will raise an exception if type is not possible for given
-        # group. We could hardcode that out or just handle the exception.
-        # Latter is simpler I guess. Using the access method creates a clear
-        # KeyError on missing group
-        group = self._group(group)
-        if group is None:
-            return
-
-        utag = group().uniquetag(f'{type.lower()}')
+        parent = self._group(group)
+        tag = parent().uniquetag(f'{type.lower()}')
         try:
-            group().create(utag, type)
-            group(utag).label(name)
+            parent().create(tag, type)
+            parent(tag).label(name)
         except Exception:
-            # This will say something like "cannot be created in this context"
-            # Is this clear enough?
-            logger.exception(f'Could not create type {type} in group {group}')
+            error = f'Could not create node type "{type}" in group "{group}".'
+            logger.exception()
+            raise ValueError(error)
 
-        logger.debug(f'Created {type} with name {name} under group {group}')
-
-    # This could replace _dataset and _solution
-    def _node(self, group, name):
-        """Retrieves the java object of a feature name under group."""
-        group = self._group(group)
-        if group is None:
-            return None
-
-        tags = [tag for tag in group().tags()]
-        names = [str(group(tag).name()) for tag in tags]
-        try:
-            node = group(tags[names.index(name)])
-        except ValueError:
-            logger.error(f'Feature {name} does not exist')
-            return None
-
-        return node
-
-    def property(self, group, name, property, value=None):
+    def property(self, group, node, name, value=None):
         """
-        Either retrieves or sets a property of a feature with name under a given
-        group. Typecasts java objects.
+        Returns or changes the value of the named property.
+
+        If no `value` is given, returns the property `name` defined on
+        the named model `node` inside the specified `group`. Otherwise
+        sets the property to the given value.
         """
-        node = self._node(group, name)
-        if node is None:
-            return
-
-        if value is None:
-            logger.info(f'Reading node property {property}')
-            try:
-                return java.property(node, property)
-            except Exception:
-                logger.exception(f'Cannot read node property {property}')
-
-        else:
-            logger.info(f'Setting node property {property}')
-            try:
-                java.property(node, property, value)
-
-            except Exception:
-                # more traceback since this might be due to missing
-                # property or more complex type errors
-                logger.exception(f'Cannot set feature property {property}')
-
-            return None
+        node = self._node(group, node)
+        return java.property(node, name, value)
 
     def apply_interpolation(self, physics, feature, parameter, function):
         """
@@ -376,17 +374,7 @@ class Model:
         tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
         node = node.feature(ftag)
-
         node.set(parameter, function)
-
-
-    def remove(self, group, name):
-        """Removes feature name under group from the model."""
-        tag = self._node(group, name).tag()
-        group = self._group(group)()
-        if group is None:
-            return
-        group.remove(tag)
 
     def toggle(self, physics, feature, action='flip'):
         """
@@ -417,6 +405,12 @@ class Model:
             node.active(True)
         elif action in ('disable', 'off', 'deactivate'):
             node.active(False)
+
+    def remove(self, group, node):
+        """Removes the named `node` from the feature `group`."""
+        tag = self._node(group, node).tag()
+        parent = self._group(group)()
+        parent.remove(tag)
 
     ####################################
     # Solving                          #
@@ -488,34 +482,6 @@ class Model:
     ####################################
     # Evaluation                       #
     ####################################
-
-    def _dataset(self, name=None):
-        """
-        Returns the Java dataset object.
-
-        If `name` is given, returns the dataset object with that name.
-        Otherwise returns the default dataset.
-        """
-        if name is not None:
-            names = self.datasets()
-            tags  = [tag for tag in self.java.result().dataset().tags()]
-            try:
-                dtag = tags[names.index(name)]
-            except ValueError:
-                error = f'Dataset "{name}" does not exist.'
-                raise LookupError(error) from None
-        else:
-            etag = self.java.result().numerical().uniquetag('eval')
-            eval = self.java.result().numerical().create(etag, 'Eval')
-            dtag = eval.getString('data')
-            self.java.result().numerical().remove(etag)
-        return self.java.result().dataset(dtag)
-
-    def _solution(self, dataset=None):
-        """Returns the Java solution object the named `dataset` is based on."""
-        dset = self._dataset(dataset)
-        stag = dset.getString('solution')
-        return self.java.sol(stag)
 
     def inner(self, dataset=None):
         """
