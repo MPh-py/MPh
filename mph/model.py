@@ -70,12 +70,23 @@ class Model:
             self.java = parent.java
         else:
             self.java = parent
-        self._groups = {'functions': self.java.func,
-                        'solutions': self.java.sol,
-                        'plots':     self.java.result,
-                        'datasets':  self.java.result().dataset,
-                        'exports':   self.java.result().export,
-                        }
+        self._groups = {
+            'functions':    self.java.func,
+            'components':   self.java.component,
+            'geometries':   self.java.geom,
+            'views':        self.java.view,
+            'selections':   self.java.selection,
+            'variables':    self.java.variable,
+            'physics':      self.java.physics,
+            'multiphysics': self.java.multiphysics,
+            'materials':    self.java.material,
+            'meshes':       self.java.mesh,
+            'studies':      self.java.study,
+            'solutions':    self.java.sol,
+            'plots':        self.java.result,
+            'datasets':     self.java.result().dataset,
+            'exports':      self.java.result().export,
+        }
 
     # Internal access
     def _group(self, name):
