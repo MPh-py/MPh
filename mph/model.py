@@ -331,14 +331,14 @@ class Model:
         if value is None:
             logger.info(f'Reading node property {property}')
             try:
-                return java._typecast_property(node, property)
+                return java.property(node, property)
             except Exception:
                 logger.exception(f'Cannot read node property {property}')
 
         else:
             logger.info(f'Setting node property {property}')
             try:
-                java._typecast_property(node, property, value)
+                java.property(node, property, value)
 
             except Exception:
                 # more traceback since this might be due to missing
