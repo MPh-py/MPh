@@ -46,12 +46,10 @@ def property(node, name, value=None):
         elif dtype == 'String':
             value = str(node.getString(name))
         elif dtype == 'StringArray':
-            value = numpy.array(
-                [str(string) for string in node.getStringArray(name)])
+            value = [str(string) for string in node.getStringArray(name)]
         elif dtype == 'StringMatrix':
-            value = numpy.array(
-                [[str(string) for string in line]
-                for line in node.getStringMatrix(name)])
+            value = [[str(string) for string in line]
+                     for line in node.getStringMatrix(name)]
         else:
             raise TypeError(f'Cannot convert Java data type "{dtype}".')
         return value
