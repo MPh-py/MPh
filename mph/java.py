@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import jpype.types as jtypes           # Java types
 import numpy                           # fast numerics
+from pathlib import Path               # file-system paths
 
 
 ########################################
@@ -26,33 +27,36 @@ def property(node, name, value=None):
     if value is None:
         dtype = node.getValueType(name)
         if dtype == 'Boolean':
-            value = node.getBoolean(name)
+            return node.getBoolean(name)
         elif dtype == 'BooleanArray':
-            value = numpy.array(node.getBooleanArray(name))
+            return numpy.array(node.getBooleanArray(name))
         elif dtype == 'BooleanMatrix':
-            value = numpy.array([line for line in node.getBooleanMatrix(name)])
+            return numpy.array([line for line in node.getBooleanMatrix(name)])
         elif dtype == 'Double':
-            value = node.getDouble(name)
+            return node.getDouble(name)
         elif dtype == 'DoubleArray':
-            value = numpy.array(node.getDoubleArray(name))
+            return numpy.array(node.getDoubleArray(name))
         elif dtype == 'DoubleMatrix':
-            value = numpy.array([line for line in node.getDoubleMatrix(name)])
+            return numpy.array([line for line in node.getDoubleMatrix(name)])
+        elif dtype == 'File':
+            return Path(str(node.getString(name)))
         elif dtype == 'Int':
-            value = int(node.getInt(name))
+            return int(node.getInt(name))
         elif dtype == 'IntArray':
-            value = numpy.array(node.getIntArray(name))
+            return numpy.array(node.getIntArray(name))
         elif dtype == 'IntMatrix':
-            value = numpy.array([line for line in node.getIntMatrix(name)])
+            return numpy.array([line for line in node.getIntMatrix(name)])
+        elif dtype == 'None':
+            return None
         elif dtype == 'String':
-            value = str(node.getString(name))
+            return str(node.getString(name))
         elif dtype == 'StringArray':
-            value = [str(string) for string in node.getStringArray(name)]
+            return [str(string) for string in node.getStringArray(name)]
         elif dtype == 'StringMatrix':
-            value = [[str(string) for string in line]
-                     for line in node.getStringMatrix(name)]
+            return [[str(string) for string in line]
+                    for line in node.getStringMatrix(name)]
         else:
             raise TypeError(f'Cannot convert Java data type "{dtype}".')
-        return value
 
     else:
         if isinstance(value, bool):
@@ -63,6 +67,8 @@ def property(node, name, value=None):
             value = jtypes.JDouble(value)
         elif isinstance(value, str):
             value = jtypes.JString(value)
+        elif isinstance(value, Path):
+            value = jtypes.JString(str(value))
         elif isinstance(value, (list, tuple)):
             pass
         elif isinstance(value, numpy.ndarray):
