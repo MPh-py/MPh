@@ -25,13 +25,7 @@ def property(node, name, value=None):
 
     if value is None:
         dtype = node.getValueType(name)
-        if dtype == 'Int':
-            value = int(node.getInt(name))
-        elif dtype == 'IntArray':
-            value = numpy.array(node.getIntArray(name))
-        elif dtype == 'IntMatrix':
-            value = numpy.array([line for line in node.getIntMatrix(name)])
-        elif dtype == 'Boolean':
+        if dtype == 'Boolean':
             value = node.getBoolean(name)
         elif dtype == 'BooleanArray':
             value = numpy.array(node.getBooleanArray(name))
@@ -43,6 +37,12 @@ def property(node, name, value=None):
             value = numpy.array(node.getDoubleArray(name))
         elif dtype == 'DoubleMatrix':
             value = numpy.array([line for line in node.getDoubleMatrix(name)])
+        elif dtype == 'Int':
+            value = int(node.getInt(name))
+        elif dtype == 'IntArray':
+            value = numpy.array(node.getIntArray(name))
+        elif dtype == 'IntMatrix':
+            value = numpy.array([line for line in node.getIntMatrix(name)])
         elif dtype == 'String':
             value = str(node.getString(name))
         elif dtype == 'StringArray':
@@ -55,7 +55,17 @@ def property(node, name, value=None):
         return value
 
     else:
-        if isinstance(value, numpy.ndarray):
+        if isinstance(value, bool):
+            value = jtypes.JBoolean(value)
+        elif isinstance(value, int):
+            value = jtypes.JInt(value)
+        elif isinstance(value, float):
+            value = jtypes.JDouble(value)
+        elif isinstance(value, str):
+            value = jtypes.JString(value)
+        elif isinstance(value, (list, tuple)):
+            pass
+        elif isinstance(value, numpy.ndarray):
             dtype = str(value.dtype)
             if value.ndim == 1:
                 if 'int' in dtype:
@@ -84,16 +94,6 @@ def property(node, name, value=None):
             else:
                 raise TypeError('Cannot convert NumPy arrays of dimension '
                                 'higher than 2.')
-        elif isinstance(value, int):
-            value = jtypes.JInt(value)
-        elif isinstance(value, float):
-            value = jtypes.JDouble(value)
-        elif isinstance(value, bool):
-            value = jtypes.JBoolean(value)
-        elif isinstance(value, str):
-            value = jtypes.JString(value)
-        elif isinstance(value, (list, tuple)):
-            pass
         else:
             raise TypeError(f'Cannot convert values of Python data type '
                             f'"{type(value).__name__}".')
