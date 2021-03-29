@@ -135,6 +135,10 @@ class Model:
             return subnode
 
         identifier = identifier.split('->')
+        if len(identifier) < 2:
+            logger.debug('To select root groups, please use the _group method')
+            return None
+
         root, path, name = identifier[0], identifier[1:-1], identifier[-1]
 
         if path:
@@ -232,12 +236,19 @@ class Model:
         return [str(self.java.physics(tag).name()) for tag in tags]
 
     def features(self, identifier):
+        """Returns features of an object in the model tree"""
         node = self._traverse(identifier)
-        if node is None:
+
+        if node is None:  # roots have no features
             node = self._group(identifier)()
-        tags = [tag for tag in node.feature().tags()]
-        return [str(node.feature(ftag).name())
-                for ftag in tags]
+            tags = [tag for tag in node.tags()]
+            return [self._group(identifier)(ftag).name()
+                    for ftag in tags]
+
+        else:  # subgroups have features
+            tags = [tag for tag in node.feature().tags()]
+            return [str(node.feature(ftag).name())
+                    for ftag in tags]
 
     def materials(self):
         """Returns the names of all materials."""
