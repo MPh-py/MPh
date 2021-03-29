@@ -289,9 +289,9 @@ class Model:
         """Returns the names of all feature groups."""
         return list(self._groups.keys())
 
-    def properties(self, group, node):
+    def properties(self, identifier):
         """Returns the names of all properties defined on a node."""
-        return [str(name) for name in self._node(group, node).properties()]
+        return [str(name) for name in self._traverse(identifier).properties()]
 
     ####################################
     # Interaction                      #
@@ -375,7 +375,7 @@ class Model:
             logger.exception()
             raise ValueError(error)
 
-    def property(self, group, node, name, value=None):
+    def property(self, identifier, name, value=None):
         """
         Returns or changes the value of the named property.
 
@@ -383,7 +383,7 @@ class Model:
         the named model `node` inside the specified `group`. Otherwise
         sets the property to the given value.
         """
-        node = self._node(group, node)
+        node = self._traverse(identifier)
         return java.property(node, name, value)
 
     def apply_interpolation(self, physics, feature, parameter, function):
@@ -441,11 +441,22 @@ class Model:
         elif action in ('disable', 'off', 'deactivate'):
             node.active(False)
 
-    def remove(self, group, node):
-        """Removes the named `node` from the feature `group`."""
-        tag = self._node(group, node).tag()
-        parent = self._group(group)()
-        parent.remove(tag)
+    def remove(self, identifier):
+        """Removes the identified node from the model."""
+        identifier_split = identifier.split('->')
+        if len(identifier_split) < 2:
+            logger.error('Can not remove root group')
+            return None
+
+        root, path, name = identifier_split[0], identifier_split[1:-1], identifier_split[-1]
+
+        if not path:  # root groups have remove
+            parent = self._group(root)()
+            parent.remove(self._node(root, name).tag())
+
+        else:  # subgroups dont. the container has remove then
+            node = self._traverse(identifier)
+            node.getContainer().remove(node.tag())
 
     ####################################
     # Solving                          #
