@@ -231,22 +231,12 @@ class Model:
         tags = [tag for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
-    def features(self, physics):
-        """
-        Returns the names of all features in the given `physics` interface.
-
-        The term feature refers to the nodes defined under a physics
-        interface. They define the differential equations, boundary
-        conditions, initial values, etc.
-        """
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(ftag).name())
+    def features(self, identifier):
+        node = self._traverse(identifier)
+        if node is None:
+            node = self._group(identifier)()
+        tags = [tag for tag in node.feature().tags()]
+        return [str(node.feature(ftag).name())
                 for ftag in tags]
 
     def materials(self):
