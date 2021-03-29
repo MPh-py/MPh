@@ -116,6 +116,40 @@ class Model:
             raise LookupError(error) from None
         return node
 
+    def _traverse(self, identifier):
+        """
+        Retuns a node specified using the group string notation where a
+        hirarchy is defined using the -> operator. The first object must
+        be an element in _groups
+        """
+        def _subnode(level, name):
+            # Returns a node from a subgroup
+            tags = [tag for tag in level.feature().tags()]
+            names = [str(level.feature(tag).name()) for tag in tags]
+            try:
+                subnode = level.feature(tags[names.index(name)])
+            except ValueError:
+                error = f'No node named "{name}" in level "{level}".'
+                logger.critical(error)
+                raise LookupError(error) from None
+            return subnode
+
+        identifier = identifier.split('->')
+        root, path, name = identifier[0], identifier[1:-1], identifier[-1]
+
+        if path:
+            # traverse into the tree
+            level = self._node(root, path[0])
+            for path_level in path[1:]:
+                level = _subnode(level, path_level)
+            node = _subnode(level, name)
+
+        else:
+            # get the root node and return
+            node = self._node(root, name)
+
+        return node
+
     def _dataset(self, name=None):
         # Returns the Java dataset object.
         # If `name` is given, returns the dataset object with that name.
