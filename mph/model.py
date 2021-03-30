@@ -33,7 +33,7 @@ def _subnode(level, name):
         subnode = level.feature(tags[names.index(name)])
     except ValueError:
         error = f'No node named "{name}" in level "{level}".'
-        logger.critical(error)
+        logger.debug(error)
         raise LookupError(error) from None
     return subnode
 
@@ -125,7 +125,7 @@ class Node:
             node = parent.get(tags[names.index(name)])
         except ValueError:
             error = f'No node named "{name}" in group "{group}".'
-            logger.critical(error)
+            logger.debug(error)
             raise LookupError(error) from None
         return node
 
