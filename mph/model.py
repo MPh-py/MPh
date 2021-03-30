@@ -724,6 +724,10 @@ class Model:
         existing files.
         """
 
+        # Coerce paths given as string to Path objects.
+        if isinstance(path, str):
+            path = Path.cwd()/path
+
         # Possibly deduce format from file ending.
         if format is None:
             suffix = path.suffix if path else '.mph'
@@ -765,8 +769,6 @@ class Model:
                 self.java.save(str(file), type)
         # Otherwise save at given path.
         else:
-            if isinstance(path, str):
-                path = Path.cwd()/path
             if path.is_dir():
                 file = (path/self.name()).with_suffix(f'.{type}')
             else:
