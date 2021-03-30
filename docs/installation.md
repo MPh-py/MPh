@@ -1,11 +1,11 @@
 ﻿Installation
 ------------
 
-MPh is [available on PyPI][dist] and can be readily installed via `pip`:
+MPh is [available on PyPI][pypi] and can be readily installed via
 ```none
-pip install mph
+pip install MPh
 ```
-Run `pip uninstall mph` in order to remove the library from your system.
+Run `pip uninstall MPh` in order to remove the package from your system.
 
 Requires [JPype][jpype] for the bridge from Python to [Comsol's
 Java API][japi] and [NumPy][numpy] for returning (fast) numerical arrays.
@@ -13,12 +13,15 @@ Java API][japi] and [NumPy][numpy] for returning (fast) numerical arrays.
 if missing.
 
 Comsol, obviously, you need to license and install yourself. Versions
-from Comsol 5.1 onward are expected to work. Note how a separate Java
-run-time environment is *not* required, as Comsol ships with one
-already built in.
+from Comsol 5.1 onward are expected to work. A separate Java run-time
+environment is *not* required as Comsol ships with one already built in.
+
+On Linux and macOS, Comsol is expected to be found in its respective
+default location. On Windows, any custom install location is supported,
+as the installer stores that information in the central registry.
 
 
-[dist]:  https://pypi.python.org/pypi/mph
+[pypi]:  https://pypi.python.org/pypi/mph
 [jpype]: https://jpype.readthedocs.io
 [japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [numpy]: https://numpy.org

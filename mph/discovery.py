@@ -206,8 +206,9 @@ def search_Linux():
     backends = []
 
     # Loop over Comsol folders in /usr/local.
-    folders = [item for item in Path('/usr/local').glob('comsol*')
-               if item.is_dir()]
+    pattern = re.compile('(?i)Comsol')
+    folders = [item for item in Path('/usr/local').iterdir()
+               if item.is_dir() and pattern.match(item.name)]
     for folder in folders:
 
         # Root folder is the sub-directory "multiphysics".
@@ -293,8 +294,9 @@ def search_macOS():
     backends = []
 
     # Loop over Comsol folders in /Applications.
-    folders = [item for item in Path('/Applications').glob('COMSOL*')
-               if item.is_dir()]
+    pattern = re.compile('(?i)Comsol')
+    folders = [item for item in Path('/Applications').iterdir()
+               if item.is_dir() and pattern.match(item.name)]
     for folder in folders:
 
         # Root folder is the sub-directory "Multiphysics".
