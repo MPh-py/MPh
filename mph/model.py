@@ -338,19 +338,22 @@ class Model:
         tags = [tag for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
-    def features(self, identifier):
+    def features(self, node):
         """Returns features of an object in the model tree"""
-        node = self._traverse(identifier)
+        if not isinstance(node, Node):
+            node = self._node(node)
+        if not node.exists():
+            logger.warning('Invalid node')
+            return []
 
-        if node is None:  # roots have no features
-            node = self._group(identifier)()
-            tags = [tag for tag in node.tags()]
-            return [self._group(identifier)(ftag).name()
+        if node._rootnode:  # roots have no features
+            tags = [tag for tag in node.java.tags()]
+            return [node.java.get(ftag).name()
                     for ftag in tags]
 
         else:  # subgroups have features
-            tags = [tag for tag in node.feature().tags()]
-            return [str(node.feature(ftag).name())
+            tags = [tag for tag in node.java.feature().tags()]
+            return [str(node.java.feature(ftag).name())
                     for ftag in tags]
 
     def materials(self):
@@ -399,7 +402,6 @@ class Model:
         if not node.exists():
             logger.warning('Invalid node')
             return []
-
         return [str(name) for name in node.java.properties()]
 
     ####################################
