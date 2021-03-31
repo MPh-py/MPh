@@ -367,13 +367,15 @@ class Model:
                 tag_blueprint = arguments[
                     [isinstance(arg, str) for arg in arguments].index(True)
                 ].strip().replace(' ', '_').lower()[:3]
-        tag = group.uniquetag(tag_blueprint)
+            tag = group.uniquetag(tag_blueprint)
 
-        if not arguments:
-            group.create(tag)
-        else:
             arguments = [java.typecast_to_java(arg) for arg in arguments]
             group.create(tag, *arguments)
+            node.comsol_arguments = arguments
+
+        else:
+            tag = group.uniquetag(tag_blueprint)
+            group.create(tag)
 
         if name is not None:
             group.get(tag).label(name)

@@ -61,6 +61,10 @@ class Node:
             logger.error(error)
             raise RuntimeError(error)
 
+        # Node arguments as defined by COMSOL - this is needed for
+        # graceful delete
+        self.comsol_arguments = None
+
         # Model reference
         self._model = model
 
@@ -113,6 +117,9 @@ class Node:
         if self.exists():
             self.java.label(str(name))
         self._path = self._path[:-1] + (name,)
+
+    def name(self):
+        return self._path[-1]
 
     def path_elements(self):
         return self._path[0], self._path[1:-1], self._path[-1]
