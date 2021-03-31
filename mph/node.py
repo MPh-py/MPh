@@ -6,6 +6,7 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 from logging import getLogger          # event logging
+from pathlib import Path
 
 ########################################
 # Globals                              #
@@ -90,6 +91,26 @@ class Node:
     def __repr__(self):
         exist_string = 'exists' if self.exists() else 'does not exist'
         return f'Node instance at {self.__str__()}, java {exist_string} ({hex(id(self))})'
+
+    def __truediv__(self, other):
+        """Returns absolute pathes from concatenation, as pathlib.Path does"""
+        if not isinstance(other, (Node, str)):
+            raise ValueError('Invalid concatenation types')
+
+        # To facilitate th rather complex truediv, we tread nodes as what they
+        # are: pathes.
+        path_1 = '/' + '/'.join(self.path())
+        if isinstance(other, Node):
+            if self._model != other._model:
+                raise ValueError('Node concatenation can only be performed with '
+                                 'nodes in the same model.')
+            path_2 = Path('/' + '/'.join(other.path()))
+        elif isinstance(other, str):
+            path_2 = Path(other)
+
+        concat = str(Path(path_1) / path_2)[1:]
+
+        return Node(self._model, concat)
 
     def _traverse(self):
         """
