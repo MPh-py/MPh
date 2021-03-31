@@ -110,11 +110,14 @@ class Node:
 
         return node
 
+    def path_elements(self):
+        return self._path[0], self._path[1:-1], self._path[-1]
+
     def is_root(self):
         return self._rootnode
 
     def path(self):
-        return self.__str__()
+        return self._path
 
     def exists(self):
         # Test down to the node if this is (still) a valid one
@@ -127,6 +130,11 @@ class Node:
             except LookupError:
                 return False
 
+    def rename(self, name):
+        if self.exists():
+            self.java.label(str(name))
+        self._path = self._path[:-1] + (name,)
+
     def parent(self):
         # returns the parent node level which is implicitly defined by
         # getContainer(). Not useful for root nodes, raise warning there
@@ -136,3 +144,25 @@ class Node:
                 return self.java
             else:
                 return self.java.getContainer()
+
+        # If the node does not exist a traverse into the tree is needed stopping
+        # one level above
+        else:
+            root, path = self._path[0], self._path[1:-1]
+
+            if path:
+                # traverse into the tree
+                level = self._node(root, path[0])
+                for path_level in path[1:]:
+                    level = _subnode(level, path_level)
+                return level
+
+            else:
+                # get the root node and return
+                return self._model._group(root)
+
+    def update_java(self):
+        try:
+            self.java = self._traverse()
+        except LookupError:
+            logger.warning('Cannot update java since node does not exist.')
