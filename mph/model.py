@@ -331,9 +331,9 @@ class Model:
             return None
 
         if name is None:
-            node_target = group.path + ('none',)
+            node_target = '/'.join(group.path() + ('none',))
         else:
-            node_target = group.path + (name,)
+            node_target = '/'.join(group.path() + (name,))
 
         node = self._node(node_target)
 
@@ -364,10 +364,10 @@ class Model:
         if not arguments:
             group.create(tag)
         else:
-            arguments = [java.typecast(arg) for arg in arguments]
+            arguments = [java.typecast_to_java(arg) for arg in arguments]
             group.create(tag, *arguments)
 
-        if name != 'none':
+        if name is not None:
             group.get(tag).label(name)
         else:
             name = str(group.get(tag).name())
@@ -393,13 +393,11 @@ class Model:
             return []
 
         if value is None:
-            return java.typecast(node, node.getValueType(name))
+            java.typecast_to_python(node.java, name)
 
         else:
-            value = java.typecast(value)
+            value = java.typecast_to_java(value)
             node.java.set(name, value)
-
-        return node
 
     def toggle(self, physics, feature, action='flip'):
         """
