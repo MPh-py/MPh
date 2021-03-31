@@ -350,8 +350,17 @@ class Model:
         else:
             group = node.parent().feature()
 
-        # TODO: Diversify tag names. Use feature type if possible.
-        tag = group.uniquetag('tag')
+        # This is a bit implicit but is very paractical - get the first string
+        # in args which ususally defines what is created and build a tag
+        # blueprint from it
+        tag_blueprint = 'tag'
+        if arguments:
+            if any([isinstance(arg, str) for arg in arguments]):
+                tag_blueprint = arguments[
+                    [isinstance(arg, str) for arg in arguments].index(True)
+                ].strip().replace(' ', '_').lower()[:3]
+        tag = group.uniquetag(tag_blueprint)
+
         if not arguments:
             group.create(tag)
         else:
