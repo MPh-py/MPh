@@ -364,7 +364,7 @@ class Model:
         if not arguments:
             group.create(tag)
         else:
-            # TODO: Arguments should be type-cast from Python to Java.
+            arguments = [java.typecast(arg) for arg in arguments]
             group.create(tag, *arguments)
 
         if name != 'none':
@@ -387,7 +387,18 @@ class Model:
         """
         if not isinstance(node, Node):
             node = self._node(node)
-        java.property(node.java, name, value)
+
+        if not node.exists()
+            logger.warning('Node does not exists')
+            return []
+
+        if value is None:
+            return java.typecast(node, node.getValueType(name))
+
+        else:
+            value = java.typecast(value)
+            node.java.set(name, value)
+
         return node
 
     def toggle(self, physics, feature, action='flip'):

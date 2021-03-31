@@ -13,19 +13,65 @@ from pathlib import Path               # file-system paths
 ########################################
 # Properties                           #
 ########################################
-
-def property(node, name, value=None):
+def typecast(input, dtype=None):
     """
-    Sets or gets the value of the named property defined on a model node.
+    This function handles the basic typecast when not connected to
+    a java object. This is needed in node creation when the object does not
+    exists yet.
 
-    If no `value` is given, returns the property `name` defined on the
-    model `node` (a Java object) after converting it to the appropriate
-    Python data type. Otherwise changes the property after casting the
-    received value to the appropriate Java data type.
+    If dtype is supplied, the function typecasts a java object of node and
+    of dtype to the closest fit python object. If no dtype is supplied,
+    assumes a python object as input and typecasts this to the closest
+    java fit.
     """
+    if dtype is None:
+        if isinstance(input, bool):
+            value = jtypes.JBoolean(input)
+        elif isinstance(input, int):
+            value = jtypes.JInt(input)
+        elif isinstance(input, float):
+            value = jtypes.JDouble(input)
+        elif isinstance(input, str):
+            value = jtypes.JString(input)
+        elif isinstance(input, Path):
+            value = jtypes.JString(str(input))
+        elif isinstance(input, (list, tuple)):
+            pass
+        elif isinstance(input, numpy.ndarray):
+            dtype = str(input.dtype)
+            if input.ndim == 1:
+                if 'int' in dtype:
+                    value = jtypes.JArray(jtypes.JInt)(input)
+                elif 'float' in dtype:
+                    value = jtypes.JArray(jtypes.JDouble)(input)
+                elif 'bool' in dtype:
+                    value = jtypes.JArray(jtypes.JBoolean)(input)
+                elif 'object' in dtype or dtype.startswith('<U'):
+                    value = jtypes.JArray(jtypes.JString)(input)
+                else:
+                    raise TypeError(f'Cannot convert 1d NumPy arrays of '
+                                    f'data type "{dtype}".')
+            elif input.ndim == 2:
+                if 'int' in dtype or 'float' in dtype or 'bool' in dtype:
+                    value = jtypes.JArray.of(input)
+                elif 'object' in dtype or dtype.startswith('<U'):
+                    java_value = jtypes.JString[input.shape]
+                    for i, row in enumerate(input):
+                        for j, col in enumerate(row):
+                            java_value[i][j] = col
+                    value = java_value
+                else:
+                    raise TypeError(f'Cannot convert 2d NumPy arrays of data '
+                                    f'type "{dtype}".')
+            else:
+                raise TypeError('Cannot convert NumPy arrays of dimension '
+                                'higher than 2.')
+        else:
+            raise TypeError(f'Cannot convert values of Python data type '
+                            f'"{type(value).__name__}".')
+        return value
 
-    if value is None:
-        dtype = node.getValueType(name)
+    else:
         if dtype == 'Boolean':
             return node.getBoolean(name)
         elif dtype == 'BooleanArray':
@@ -57,53 +103,6 @@ def property(node, name, value=None):
                     for line in node.getStringMatrix(name)]
         else:
             raise TypeError(f'Cannot convert Java data type "{dtype}".')
-
-    else:
-        if isinstance(value, bool):
-            value = jtypes.JBoolean(value)
-        elif isinstance(value, int):
-            value = jtypes.JInt(value)
-        elif isinstance(value, float):
-            value = jtypes.JDouble(value)
-        elif isinstance(value, str):
-            value = jtypes.JString(value)
-        elif isinstance(value, Path):
-            value = jtypes.JString(str(value))
-        elif isinstance(value, (list, tuple)):
-            pass
-        elif isinstance(value, numpy.ndarray):
-            dtype = str(value.dtype)
-            if value.ndim == 1:
-                if 'int' in dtype:
-                    value = jtypes.JArray(jtypes.JInt)(value)
-                elif 'float' in dtype:
-                    value = jtypes.JArray(jtypes.JDouble)(value)
-                elif 'bool' in dtype:
-                    value = jtypes.JArray(jtypes.JBoolean)(value)
-                elif 'object' in dtype or dtype.startswith('<U'):
-                    value = jtypes.JArray(jtypes.JString)(value)
-                else:
-                    raise TypeError(f'Cannot convert 1d NumPy arrays of '
-                                    f'data type "{dtype}".')
-            elif value.ndim == 2:
-                if 'int' in dtype or 'float' in dtype or 'bool' in dtype:
-                    value = jtypes.JArray.of(value)
-                elif 'object' in dtype or dtype.startswith('<U'):
-                    java_value = jtypes.JString[value.shape]
-                    for i, row in enumerate(value):
-                        for j, col in enumerate(row):
-                            java_value[i][j] = col
-                    value = java_value
-                else:
-                    raise TypeError(f'Cannot convert 2d NumPy arrays of data '
-                                    f'type "{dtype}".')
-            else:
-                raise TypeError('Cannot convert NumPy arrays of dimension '
-                                'higher than 2.')
-        else:
-            raise TypeError(f'Cannot convert values of Python data type '
-                            f'"{type(value).__name__}".')
-        node.set(name, value)
 
 
 ########################################
