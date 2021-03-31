@@ -41,6 +41,6 @@ print('Container inspection has remove: ')
 mph.inspect(block.java.getContainer())
 
 # Test removing nodes.
-# model.remove(block)
-# model.remove(geometry)
-# model.remove(component)
+model.remove(block)
+model.remove(geometry)
+model.remove(component)

@@ -458,8 +458,10 @@ class Model:
 
         # A simple call to parent is not good here since there are parents
         # that are not Containers. This can be easily tested with the Block
-        # element, e.g. adapted version of test_create
-        node.parent().java.remove(node.java.tag())
+        # element, e.g. adapted version of test_create. Thus, get the java
+        # container and not the parent node
+        # node.parent().java.remove(node.java.tag())
+        node.java.getContainer().remove(node.java.tag())
 
     ####################################
     # Solving                          #
