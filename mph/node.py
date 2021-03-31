@@ -64,7 +64,7 @@ class Node:
 
         # Node arguments as defined by COMSOL - this is needed for
         # graceful delete
-        self.comsol_arguments = None
+        self.comsol_arguments = []
 
         # Model reference
         self._model = model

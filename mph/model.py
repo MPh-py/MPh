@@ -323,27 +323,24 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
-    def create(self, group, *arguments, name=None):
+    def create(self, node, *arguments, auto_name=True):
         """
         Creates a new model node inside the given feature group.
 
         The node `type` is denoted by a string, a tuple or directly via a node
         isntance.
         """
-        if not isinstance(group, Node):
-            group = self._node(group)
+        if not isinstance(node, Node):
+            node = self._node(node)
 
-        if not group.exists():
-            error = 'Specified group does not exist'
+        if auto_name:
+            node = node / 'none'
+
+        if not node.parent().exists():
+            error = ('Specified node parent does not exist. Please create '
+                     'manually - recursive creation is not supported!')
             logger.error(error)
             return None
-
-        if name is None:
-            node_target = '/'.join(group.path() + ('none',))
-        else:
-            node_target = '/'.join(group.path() + (name,))
-
-        node = self._node(node_target)
 
         if node.exists():
             logger.info('Node already exists in model tree')
@@ -353,10 +350,17 @@ class Model:
             logger.error('Cannot create root nodes')
             return None
 
-        if group.is_root():
-            group = group.java
+        if node.parent().is_root():
+            group = node.parent().java
         else:
-            group = node.parent().feature()
+            group = node.parent().java.feature()
+
+        # concatenation of arguments if this was a supplied node which has
+        # arguments
+        if arguments:
+            arguments = list(set(arguments).union(set(node.comsol_arguments)))
+        else:
+            arguments = node.comsol_arguments
 
         # This is a bit implicit but is very paractical - get the first string
         # in args which ususally defines what is created and build a tag
@@ -377,11 +381,11 @@ class Model:
             tag = group.uniquetag(tag_blueprint)
             group.create(tag)
 
-        if name is not None:
-            group.get(tag).label(name)
-        else:
+        if auto_name:
             name = str(group.get(tag).name())
             node._rename(name)
+        else:
+            group.get(tag).label(node.name())
 
         node.update_java()
 
@@ -452,7 +456,7 @@ class Model:
             logger.warning('Can not remove root group')
             return
 
-        node.parent().remove(node.java.tag())
+        node.parent().java.remove(node.java.tag())
 
     ####################################
     # Solving                          #
