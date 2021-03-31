@@ -333,22 +333,15 @@ class Model:
         if not isinstance(node, Node):
             node = self._node(node)
 
-        if auto_name:
+        if node.exists():
             node = node / 'none'
 
-        if not node.parent().exists():
-            error = ('Specified node parent does not exist. Please create '
-                     'manually - recursive creation is not supported!')
-            logger.error(error)
-            return None
-
-        if node.exists():
-            logger.info('Node already exists in model tree')
-            return node.java
-
-        if node.is_root():
-            logger.error('Cannot create root nodes')
-            return None
+        else:
+            if not node.parent().exists():
+                error = ('Specified node parent does not exist. Please create '
+                         'manually - recursive creation is not supported!')
+                logger.error(error)
+                return None
 
         if node.parent().is_root():
             group = node.parent().java
@@ -381,13 +374,13 @@ class Model:
             tag = group.uniquetag(tag_blueprint)
             group.create(tag)
 
-        if auto_name:
+        if node.name() == 'none':
             name = str(group.get(tag).name())
-            node._rename(name)
+            self.rename_node(node, name)
         else:
             group.get(tag).label(node.name())
 
-        node.update_java()
+        node.java = node._traverse()
 
         return node
 

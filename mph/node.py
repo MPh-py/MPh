@@ -167,9 +167,3 @@ class Node:
             return self
 
         return Node(self._model, '/'.join(self.path()[:-1]))
-
-    def update_java(self):
-        try:
-            self.java = self._traverse()
-        except LookupError:
-            logger.warning('Cannot update java since node does not exist.')
