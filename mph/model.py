@@ -260,6 +260,13 @@ class Model:
         """Assigns a new `name` to the model."""
         self.java.name(name)
 
+    def rename_node(self, node, name):
+        if not isinstance(node, Node):
+            node = self._node(node)
+        node.rename(name)
+
+        return node
+
     def parameter(self, name, value=None, unit=None, description=None,
                   evaluate=False):
         """

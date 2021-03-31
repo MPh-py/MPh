@@ -109,6 +109,11 @@ class Node:
 
         return node
 
+    def _rename(self, name):
+        if self.exists():
+            self.java.label(str(name))
+        self._path = self._path[:-1] + (name,)
+
     def path_elements(self):
         return self._path[0], self._path[1:-1], self._path[-1]
 
@@ -128,11 +133,6 @@ class Node:
                 return True
             except LookupError:
                 return False
-
-    def rename(self, name):
-        if self.exists():
-            self.java.label(str(name))
-        self._path = self._path[:-1] + (name,)
 
     def parent(self):
         # returns the parent node level which is implicitly defined by
