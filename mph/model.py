@@ -393,7 +393,7 @@ class Model:
             return []
 
         if value is None:
-            java.typecast_to_python(node.java, name)
+           return java.typecast_to_python(node.java, name)
 
         else:
             value = java.typecast_to_java(value)

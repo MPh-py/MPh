@@ -13,6 +13,18 @@ from logging import getLogger          # event logging
 logger = getLogger(__package__)        # event logger
 
 
+def _node(parent, name):
+    # Returns the named model node inside a given group.
+    tags = [tag for tag in parent.tags()]
+    names = [str(parent.get(tag).name()) for tag in tags]
+    try:
+        node = parent.get(tags[names.index(name)])
+    except ValueError:
+        error = f'No node named "{name}" in group "{parent.name()}".'
+        logger.debug(error)
+        raise LookupError(error) from None
+    return node
+
 def _subnode(level, name):
     # Returns a node from a subgroup
     tags = [tag for tag in level.feature().tags()]
@@ -75,19 +87,6 @@ class Node:
         exist_string = 'exists' if self.exists() else 'does not exist'
         return f'Node instance at {self.__str__()}, java {exist_string} ({hex(id(self))})'
 
-    def _node(self, group, name):
-        # Returns the named model node inside a given group.
-        parent = self._model._group(group)
-        tags = [tag for tag in parent.tags()]
-        names = [str(parent.get(tag).name()) for tag in tags]
-        try:
-            node = parent.get(tags[names.index(name)])
-        except ValueError:
-            error = f'No node named "{name}" in group "{group}".'
-            logger.debug(error)
-            raise LookupError(error) from None
-        return node
-
     def _traverse(self):
         """
         Retuns a node java specified via the path member.
@@ -99,14 +98,14 @@ class Node:
 
         if path:
             # traverse into the tree
-            level = self._node(root, path[0])
+            level = _node(self._model._group(root), path[0])
             for path_level in path[1:]:
                 level = _subnode(level, path_level)
             node = _subnode(level, name)
 
         else:
             # get the root node and return
-            node = self._node(root, name)
+            node = _node(self._model._group(root), name)
 
         return node
 
@@ -152,7 +151,7 @@ class Node:
 
             if path:
                 # traverse into the tree
-                level = self._node(root, path[0])
+                level = _node(self._model._group(root), path[0])
                 for path_level in path[1:]:
                     level = _subnode(level, path_level)
                 return level
