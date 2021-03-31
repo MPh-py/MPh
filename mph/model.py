@@ -6,7 +6,7 @@ __license__ = 'MIT'
 # Components                           #
 ########################################
 from . import java                     # Java layer
-from . import node
+from .node import Node
 
 ########################################
 # Dependencies                         #
@@ -103,7 +103,7 @@ class Model:
         return self._groups[name]
 
     def _node(self, identifier):
-        return node.Node(self, identifier)
+        return Node(self, identifier)
 
     def _dataset(self, name=None):
         # Returns the Java dataset object.
@@ -188,7 +188,7 @@ class Model:
 
     def features(self, node):
         """Returns features of an object in the model tree"""
-        if not isinstance(node, node.Node):
+        if not isinstance(node, Node):
             node = self._node(node)
 
         if not node.exists():
@@ -245,7 +245,7 @@ class Model:
 
     def properties(self, node):
         """Returns the names of all properties defined on a node."""
-        if not isinstance(node, node.Node):
+        if not isinstance(node, Node):
             node = self._node(node)
         if not node.exists():
             logger.warning('Invalid node')
@@ -322,7 +322,7 @@ class Model:
         The node `type` is denoted by a string, a tuple or directly via a node
         isntance.
         """
-        if not isinstance(group, node.Node):
+        if not isinstance(group, Node):
             group = self._node(group)
 
         if not group.exists():
@@ -385,7 +385,7 @@ class Model:
         the named model `node` inside the specified `group`. Otherwise
         sets the property to the given value.
         """
-        if not isinstance(node, node.Node):
+        if not isinstance(node, Node):
             node = self._node(node)
 
         if not node.exists():
