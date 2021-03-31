@@ -331,12 +331,40 @@ class Model:
             return None
 
         if name is None:
-            node_target = group._path + ('none',)
+            node_target = group.path + ('none',)
         else:
-            node_target = group._path + (name,)
+            node_target = group.path + (name,)
 
         node = self._node(node_target)
-        node.createJava(*arguments)
+
+        if node.exists():
+            logger.info('Node already exists in model tree')
+            return node.java
+
+        if node.is_root():
+            logger.error('Cannot create root nodes')
+            return None
+
+        if group.is_root():
+            group = group.java
+        else:
+            group = node.parent().feature()
+
+        # TODO: Diversify tag names. Use feature type if possible.
+        tag = group.uniquetag('tag')
+        if not arguments:
+            group.create(tag)
+        else:
+            # TODO: Arguments should be type-cast from Python to Java.
+            group.create(tag, *arguments)
+
+        if name != 'none':
+            group.get(tag).label(name)
+        else:
+            name = str(group.get(tag).name())
+            node.rename(name)
+
+        node.update_java()
 
         return node
 

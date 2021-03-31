@@ -75,44 +75,6 @@ class Node:
         exist_string = 'exists' if self.exists() else 'does not exist'
         return f'Node instance at {self.__str__()}, java {exist_string} ({hex(id(self))})'
 
-    def createJava(self, *arguments):
-        if self.exists():
-            logger.info('Node already exists in model tree')
-            return self.java
-
-        else:
-            if self._rootnode:
-                logger.error('Cannot create root nodes')
-                return None
-
-            root, path, name = self._path[0], self._path[1:-1], self._path[-1]
-
-            if path:
-                # traverse into the tree
-                group = self._node(root, path[0])
-                for path_level in path[1:]:
-                    group = _subnode(group, path_level)
-                group = group.feature()
-
-            else:
-                group = self._model._group(root)
-
-            # To do: Diversify tag names. Use feature type if possible.
-            tag = group.uniquetag('tag')
-            if not arguments:
-                group.create(tag)
-            else:
-                # To do: Arguments should be type-cast from Python to Java.
-                group.create(tag, *arguments)
-
-            if name != 'none':
-                group.get(tag).label(name)
-            else:
-                name = str(group.get(tag).name())
-                self._path = self._path[:-1] + (name,)
-
-            self.java = self._traverse()
-
     def _node(self, group, name):
         # Returns the named model node inside a given group.
         parent = self._model._group(group)
