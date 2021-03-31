@@ -22,7 +22,7 @@ model = client.create('my model')
 # Create features using pythonic syntax.
 component = model.create('components')
 geometry = model.create('geometries', 3)
-block = model.create(geometry / 'big block', 'Block', auto_name=False)
+block = model.create(geometry / 'big block', 'Block')
 model.property(block, 'size', ('0.1', '0.2', '0.5'))
 model.build(geometry.name())
 

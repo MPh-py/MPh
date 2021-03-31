@@ -323,7 +323,7 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
-    def create(self, node, *arguments, auto_name=True):
+    def create(self, node, *arguments):
         """
         Creates a new model node inside the given feature group.
 
