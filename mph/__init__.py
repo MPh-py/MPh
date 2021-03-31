@@ -10,7 +10,8 @@ __license__   = 'MIT'
 
 # Public interface
 from .session import start
-from .model   import Model, Node
+from .model   import Model
+from .node    import Node
 from .client  import Client
 from .server  import Server
 from .config  import option
