@@ -456,6 +456,9 @@ class Model:
             logger.warning('Can not remove root group')
             return
 
+        # A simple call to parent is not good here since there are parents
+        # that are not Containers. This can be easily tested with the Block
+        # element, e.g. adapted version of test_create
         node.parent().java.remove(node.java.tag())
 
     ####################################
