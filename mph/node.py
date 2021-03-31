@@ -72,7 +72,8 @@ class Node:
         return '/'.join(self._path)
 
     def __repr__(self):
-        return f'Node instance at {self.__str__()} ({hex(id(self))})'
+        exist_string = 'exists' if self.exists() else 'does not exist'
+        return f'Node instance at {self.__str__()}, java {exist_string} ({hex(id(self))})'
 
     def createJava(self, *arguments):
         if self.exists():
