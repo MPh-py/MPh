@@ -163,30 +163,10 @@ class Node:
                 return False
 
     def parent(self):
-        # returns the parent node level which is implicitly defined by
-        # getContainer(). Not useful for root nodes, raise warning there
-        if self.exists():
-            if self._rootnode:
-                logger.debug('Root parent would be model which is useless here')
-                return self.java
-            else:
-                return self.java.getContainer()
+        if self.is_root():
+            return self
 
-        # If the node does not exist a traverse into the tree is needed stopping
-        # one level above
-        else:
-            root, path = self._path[0], self._path[1:-1]
-
-            if path:
-                # traverse into the tree
-                level = _node(self._model._group(root), path[0])
-                for path_level in path[1:]:
-                    level = _subnode(level, path_level)
-                return level
-
-            else:
-                # get the root node and return
-                return self._model._group(root)
+        return Node(self._model, '/'.join(self.path()[:-1]))
 
     def update_java(self):
         try:
