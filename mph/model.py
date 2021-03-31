@@ -261,9 +261,10 @@ class Model:
         self.java.name(name)
 
     def rename_node(self, node, name):
+        """Assigns a new name `name` to a model node"""
         if not isinstance(node, Node):
             node = self._node(node)
-        node.rename(name)
+        node._rename(name)
 
         return node
 
@@ -378,7 +379,7 @@ class Model:
             group.get(tag).label(name)
         else:
             name = str(group.get(tag).name())
-            node.rename(name)
+            node._rename(name)
 
         node.update_java()
 
@@ -436,22 +437,20 @@ class Model:
         elif action in ('disable', 'off', 'deactivate'):
             node.active(False)
 
-    def remove(self, identifier):
+    def remove(self, node):
         """Removes the identified node from the model."""
-        identifier_split = identifier.split('->')
-        if len(identifier_split) < 2:
-            logger.error('Can not remove root group')
-            return None
+        if not isinstance(node, Node):
+            node = self._node(node)
 
-        root, path, name = identifier_split[0], identifier_split[1:-1], identifier_split[-1]
+        if not node.exists():
+            logger.warning('Node does not exists')
+            return
 
-        if not path:  # root groups have remove
-            parent = self._group(root)()
-            parent.remove(self._node(root, name).tag())
+        if node.is_root():
+            logger.warning('Can not remove root group')
+            return
 
-        else:  # subgroups dont. the container has remove then
-            node = self._traverse(identifier)
-            node.getContainer().remove(node.tag())
+        node.parent().remove(node.java.tag())
 
     ####################################
     # Solving                          #

@@ -65,7 +65,7 @@ def typecast_to_java(input):
                             'higher than 2.')
     else:
         raise TypeError(f'Cannot convert values of Python data type '
-                        f'"{type(value).__name__}".')
+                        f'"{type(input).__name__}".')
     return value
 
 def typecast_to_python(node, name):
