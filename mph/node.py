@@ -144,6 +144,9 @@ class Node:
 
         return node
 
+    def is_root(self):
+        return self._rootnode
+
     def path(self):
         return self.__str__()
 

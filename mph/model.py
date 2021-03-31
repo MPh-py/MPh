@@ -190,15 +190,15 @@ class Model:
         """Returns features of an object in the model tree"""
         if not isinstance(node, Node):
             node = self._node(node)
+
         if not node.exists():
             logger.warning('Invalid node')
             return []
 
-        if node._rootnode:  # roots have no features
+        if node.is_root():  # roots have no features
             tags = [tag for tag in node.java.tags()]
             return [node.java.get(ftag).name()
                     for ftag in tags]
-
         else:  # subgroups have features
             tags = [tag for tag in node.java.feature().tags()]
             return [str(node.java.feature(ftag).name())
