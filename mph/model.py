@@ -388,7 +388,7 @@ class Model:
         if not isinstance(node, Node):
             node = self._node(node)
 
-        if not node.exists()
+        if not node.exists():
             logger.warning('Node does not exists')
             return []
 
