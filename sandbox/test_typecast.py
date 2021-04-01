@@ -1,174 +1,150 @@
 """Tests type-casting between Python and Java."""
 
-
-########################################
-# Dependencies                         #
-########################################
 import mph
 import jpype.types as jtypes
 import numpy as np
 import logging
-from sys import argv
+import sys
 
 
-########################################
-# Globals                              #
-########################################
+# Configure logging.
+if 'log' in sys.argv[1:]:
+    logging.basicConfig(
+        level   = 'DEBUG' if 'debug' in sys.argv[1:] else 'INFO',
+        format  = '[%(asctime)s.%(msecs)03d] %(message)s',
+        datefmt = '%H:%M:%S')
 logger = logging.getLogger(__name__)
 
+# Start Comsol's Java VM.
+mph.start()
 
-########################################
-# Tests                                #
-########################################
+# 0-D
+test_int = 1
+test_float = 1.
+test_bool = True
+test_string = 'valid'
 
-def test_typecast():
+# 1-D
+test_int_array = np.ones((10,), dtype=int)
+test_float_array = np.ones((10,), dtype=float)
+test_bool_array = np.ones((10,), dtype=bool)
+test_string_array = np.array([
+    f'string_{i}' for i in range(10)])
+test_string_object_array = test_string_array.astype(object)
 
-    # Start Comsol's Java VM.
-    mph.start()
+# 2-D
+test_int_matrix = np.ones((10, 10), dtype=int)
+test_float_matrix = np.ones((10, 10), dtype=float)
+test_bool_matrix = np.ones((10, 10), dtype=bool)
+test_string_matrix = np.array([
+    f'string_{i}' for i in range(100)]).reshape((10, 10))
+test_string_object_matrix = test_string_matrix.astype(object)
 
-    # 0-D
-    test_int = 1
-    test_float = 1.
-    test_bool = True
-    test_string = 'valid'
+# Start the tests
+passed = True
 
-    # 1-D
-    test_int_array = np.ones((10,), dtype=int)
-    test_float_array = np.ones((10,), dtype=float)
-    test_bool_array = np.ones((10,), dtype=bool)
-    test_string_array = np.array([
-        f'string_{i}' for i in range(10)])
-    test_string_object_array = test_string_array.astype(object)
+# typecast 0D
+try:
+    _ = jtypes.JInt(test_int)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JDouble(test_float)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JBoolean(test_bool)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JString(test_string)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
 
-    # 2-D
-    test_int_matrix = np.ones((10, 10), dtype=int)
-    test_float_matrix = np.ones((10, 10), dtype=float)
-    test_bool_matrix = np.ones((10, 10), dtype=bool)
-    test_string_matrix = np.array([
-        f'string_{i}' for i in range(100)]).reshape((10, 10))
-    test_string_object_matrix = test_string_matrix.astype(object)
+# typecast 1D
+try:
+    _ = jtypes.JArray(jtypes.JInt)(test_int_array)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JArray(jtypes.JDouble)(test_float_array)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JArray(jtypes.JBoolean)(test_bool_array)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    test_string_array_java = jtypes.JArray(jtypes.JString)(test_string_array)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JArray(jtypes.JString)(test_string_object_array)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
 
-    # Start the tests
-    passed = True
+logger.info('Testing 2D arrays')
+# typecast 2D
+try:
+    _ = jtypes.JArray.of(test_int_matrix)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JArray.of(test_float_matrix)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    _ = jtypes.JArray.of(test_bool_matrix)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
 
-    # typecast 0D
-    try:
-        _ = jtypes.JInt(test_int)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JDouble(test_float)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JBoolean(test_bool)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JString(test_string)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
+# JStrings work with object and numpy str dtype
+try:
+    test_string_matrix_java = jtypes.JString[test_string_matrix.shape]
+    for i, row in enumerate(test_string_matrix):
+        for j, col in enumerate(row):
+            test_string_matrix_java[i][j] = col
+    logger.debug(test_string_matrix_java.length)
+    logger.debug(test_string_matrix_java[5].length)
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
+try:
+    res = jtypes.JString[test_string_object_matrix.shape]
+    for i, row in enumerate(test_string_object_matrix):
+        for j, col in enumerate(row):
+            res[i][j] = col
+    logger.debug(res.length)
+    logger.debug(res[5].length)
+    logger.debug(res[5][5])
+except Exception as e:
+    logger.exception(f'Test failed with: {e}')
+    passed = False
 
-    # typecast 1D
-    try:
-        _ = jtypes.JArray(jtypes.JInt)(test_int_array)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JArray(jtypes.JDouble)(test_float_array)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JArray(jtypes.JBoolean)(test_bool_array)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        test_string_array_java = jtypes.JArray(jtypes.JString)(test_string_array)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JArray(jtypes.JString)(test_string_object_array)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
+# Test vice versa for problematic string arrays
 
-    logger.info('Testing 2D arrays')
-    # typecast 2D
-    try:
-        _ = jtypes.JArray.of(test_int_matrix)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JArray.of(test_float_matrix)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        _ = jtypes.JArray.of(test_bool_matrix)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
+test_string_array_vv = np.array(
+    [str(string) for string in test_string_array_java])
 
-    # JStrings work with object and numpy str dtype
-    try:
-        test_string_matrix_java = jtypes.JString[test_string_matrix.shape]
-        for i, row in enumerate(test_string_matrix):
-            for j, col in enumerate(row):
-                test_string_matrix_java[i][j] = col
-        logger.debug(test_string_matrix_java.length)
-        logger.debug(test_string_matrix_java[5].length)
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
-    try:
-        res = jtypes.JString[test_string_object_matrix.shape]
-        for i, row in enumerate(test_string_object_matrix):
-            for j, col in enumerate(row):
-                res[i][j] = col
-        logger.debug(res.length)
-        logger.debug(res[5].length)
-        logger.debug(res[5][5])
-    except Exception as e:
-        logger.exception(f'Test failed with: {e}')
-        passed = False
+test_string_matrix_vv = np.array(
+    [[str(string) for string in line]
+     for line in test_string_matrix_java])
 
-    # Test vice versa for problematic string arrays
-
-    test_string_array_vv = np.array(
-        [str(string) for string in test_string_array_java])
-
-    test_string_matrix_vv = np.array(
-        [[str(string) for string in line]
-         for line in test_string_matrix_java])
-
-    assert passed, "Some tests in test_typecast failed"
-    assert np.array_equal(test_string_array, test_string_array_vv), \
-           "ViceVersa comparison failed for str array"
-    assert np.array_equal(test_string_matrix, test_string_matrix_vv), \
-           "ViceVersa comparison failed for str matrix"
-    logger.info('All typecast tests passed')
-
-
-########################################
-# Main                                 #
-########################################
-
-if __name__ == '__main__':
-
-    arguments = argv[1:]
-    if 'log' in arguments:
-        logging.basicConfig(
-            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
-            format  = '[%(asctime)s.%(msecs)03d] %(message)s',
-            datefmt = '%H:%M:%S')
-
-    test_typecast()
+assert passed, "Some tests in test_typecast failed"
+assert np.array_equal(test_string_array, test_string_array_vv), \
+       "ViceVersa comparison failed for str array"
+assert np.array_equal(test_string_matrix, test_string_matrix_vv), \
+       "ViceVersa comparison failed for str matrix"
+logger.info('All typecast tests passed')

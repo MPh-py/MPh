@@ -1,4 +1,4 @@
-﻿"""Lists all top-level groups / feature collections defined in a model."""
+﻿"""Discovers all top-level groups defined in a model."""
 
 import mph
 import inspect
@@ -9,9 +9,9 @@ model = client.load('../tests/capacitor.mph')
 
 groups = []
 members = inspect.getmembers(model.java, predicate=inspect.isfunction)
-exclude = ('save', 'change', 'reset', 'notify', 'set', 'wait')
+exclude = ('notify', 'notifyAll', 'resetHist', 'save', 'wait')
 for (name, object) in members:
-    if object.__name__.startswith(exclude):
+    if object.__name__ in exclude:
         continue
     try:
         children = inspect.getmembers(object(), predicate=inspect.isfunction)

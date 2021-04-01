@@ -1,15 +1,15 @@
-﻿"""Lists all Java data types used in node properties of the demo model."""
+﻿"""Lists Java data types used in node properties of the demo model."""
 
 import mph
 
 
-def list_dtypes():
-    for dtype in sorted(dtypes):
-        print(f'• {dtype}')
+def list_datatypes():
+    for datatype in sorted(datatypes):
+        print(f'• {datatype}')
 
 
-def list_properties(dtype):
-    for (group, node, property) in dtypes[dtype]:
+def list_properties(datatype):
+    for (group, node, property) in datatypes[datatype]:
         print(f'  {group:10} -> {str(node.name()):20} -> {property}')
 
 
@@ -34,17 +34,17 @@ groups = {
     'exports':      model.java.result().export,
 }
 
-dtypes = {}
+datatypes = {}
 for (group, node) in groups.items():
     nodes = [node(tag) for tag in node().tags()]
     for node in nodes:
         if not hasattr(node, 'properties'):
             continue
         for property in node.properties():
-            dtype = str(node.getValueType(property))
-            if dtype not in dtypes:
-                dtypes[dtype] = []
-            dtypes[dtype].append((group, node, str(property)))
+            datatype = str(node.getValueType(property))
+            if datatype not in datatypes:
+                datatypes[datatype] = []
+            datatypes[datatype].append((group, node, str(property)))
 
-print(f'Found {len(dtypes)} different data types.')
-list_dtypes()
+print(f'Found {len(datatypes)} different data types.')
+list_datatypes()
