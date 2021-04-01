@@ -144,7 +144,7 @@ class Node:
 
     def tag(self):
         if self.exists():
-            return self.java.tag()
+            return str(self.java.tag())
         else:
             return None
 
