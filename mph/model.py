@@ -721,10 +721,11 @@ class Model:
         A `file` name can be specified. Otherwise the file name defined
         in the export node itself will be used.
         """
-        names   = self.exports()
-        tags    = [tag for tag in self.java.result().export().tags()]
-        tag     = tags[names.index(node)]
-        feature = self.java.result().export(tag)
+        if not node.exists():
+            logger.warning('Node does not exist in model tree')
+            return
+
+        feature = node.java
         if file is not None:
             feature.set('filename', str(file))
         feature.run()
