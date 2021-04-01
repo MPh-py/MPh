@@ -142,6 +142,12 @@ class Node:
     def name(self):
         return self._path[-1]
 
+    def tag(self):
+        if self.exists():
+            return self.java.tag()
+        else:
+            return None
+
     def path_elements(self):
         return self._path[0], self._path[1:-1], self._path[-1]
 
