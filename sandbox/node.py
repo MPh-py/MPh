@@ -38,10 +38,9 @@ class Node:
         elif isinstance(path, Node):
             self.path = path.path
         else:
-            error = f'Node path {path!r} is not a string or Node object.'
+            error = f'Node path {path!r} is not a string or Node instance.'
             logger.error(error)
             raise TypeError(error)
-        self.model = model
         self.alias = {
             'function':  'functions',
             'component': 'components',
@@ -62,31 +61,32 @@ class Node:
         if not self.is_root() and self.path[0] in self.alias:
             self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
-            'functions':    self.model.java.func(),
-            'components':   self.model.java.component(),
-            'geometries':   self.model.java.geom(),
-            'views':        self.model.java.view(),
-            'selections':   self.model.java.selection(),
-            'variables':    self.model.java.variable(),
-            'physics':      self.model.java.physics(),
-            'multiphysics': self.model.java.multiphysics(),
-            'materials':    self.model.java.material(),
-            'meshes':       self.model.java.mesh(),
-            'studies':      self.model.java.study(),
-            'solutions':    self.model.java.sol(),
-            'plots':        self.model.java.result(),
-            'datasets':     self.model.java.result().dataset(),
-            'exports':      self.model.java.result().export(),
+            'functions':    model.java.func(),
+            'components':   model.java.component(),
+            'geometries':   model.java.geom(),
+            'views':        model.java.view(),
+            'selections':   model.java.selection(),
+            'variables':    model.java.variable(),
+            'physics':      model.java.physics(),
+            'multiphysics': model.java.multiphysics(),
+            'materials':    model.java.material(),
+            'meshes':       model.java.mesh(),
+            'studies':      model.java.study(),
+            'solutions':    model.java.sol(),
+            'plots':        model.java.result(),
+            'datasets':     model.java.result().dataset(),
+            'exports':      model.java.result().export(),
         }
-
-    def __eq__(self, other):
-        return (self.path == other.path and self.model == other.model)
+        self.model = model
 
     def __str__(self):
         return '/' + '/'.join(self.path)
 
     def __repr__(self):
         return f'{self.__class__.__name__}([{self.model.name()}]{self})'
+
+    def __eq__(self, other):
+        return (self.path == other.path and self.model == other.model)
 
     def __truediv__(self, other):
         if isinstance(other, str):
@@ -96,30 +96,25 @@ class Node:
 
     @property
     def java(self):
-        """Returns the corresponding Java object for the node."""
+        """Returns the Java object this node maps to."""
         if self.is_root():
             return self.model.java
         name = self.name()
         if self.is_group():
             if name in self.groups:
                 return self.groups[name]
-            else:
-                error = f'No top-level group named "{name}".'
-                logger.error(error)
-                raise LookupError(error)
+            error = f'No top-level group named "{name}".'
+            logger.error(error)
+            raise LookupError(error)
         parent = self.parent()
-        if parent.is_group():
-            container = parent.java
-        else:
-            container = parent.java.feature()
+        container = parent.java if parent.is_group() else parent.java.feature()
         for tag in container.tags():
             member = container.get(tag)
             if name == str(member.name()):
                 return member
-        else:
-            error = f'Node "{self}" does not exist.'
-            logger.error(error)
-            raise LookupError(error)
+        error = f'Node "{self}" does not exist.'
+        logger.error(error)
+        raise LookupError(error)
 
     ####################################
     # Navigation                       #
@@ -127,18 +122,7 @@ class Node:
 
     def name(self):
         """Returns the node's name."""
-        if self.is_root():
-            return '/'
-        else:
-            return self.path[-1]
-
-    def exists(self):
-        """Checks if the node exists in the model."""
-        try:
-            self.java
-            return True
-        except LookupError:
-            return False
+        return '/' if self.is_root() else self.path[-1]
 
     def parent(self):
         """Returns the parent node."""
@@ -152,19 +136,13 @@ class Node:
         if self.is_root():
             return [Node(self.model, group) for group in self.groups]
         elif self.is_group():
-            tags  = [tag for tag in self.java.tags()]
-            names = [str(self.java.get(tag).name()) for tag in tags]
-            paths = [self.path + (name,) for name in names]
-            nodes = [Node(self.model, '/'.join(path)) for path in paths]
-            return nodes
+            return [self/str(self.java.get(tag).name())
+                    for tag in self.java.tags()]
+        elif hasattr(self.java, 'feature'):
+            return [self/str(self.java.feature(tag).name())
+                    for tag in self.java.feature().tags()]
         else:
-            if not hasattr(self.java, 'feature'):
-                return []
-            tags  = [tag for tag in self.java.feature().tags()]
-            names = [str(self.java.feature(tag).name()) for tag in tags]
-            paths = [self.path + (name,) for name in names]
-            nodes = [Node(self.model, '/'.join(path)) for path in paths]
-            return nodes
+            return []
 
     def is_root(self):
         """Checks if node is the model's root."""
@@ -173,6 +151,14 @@ class Node:
     def is_group(self):
         """Checks if node is a top-level group."""
         return bool(len(self.path) == 1 and self.path[0])
+
+    def exists(self):
+        """Checks if the node exists in the model."""
+        try:
+            self.java
+            return True
+        except LookupError:
+            return False
 
     ####################################
     # Interaction                      #
@@ -209,20 +195,18 @@ class Node:
         Creates a new child node.
 
         Refer to the Comsol documentation for the values of valid
-        arguments. It is often just the type of the child node to be
-        created, but may include other options.
+        arguments. It is often just the feature type of the child node
+        to be created, given as a string such as "Block", but may also
+        require different or more arguments.
 
-        If `name` is not given, a unique name/label will automatically
-        be assigned.
+        If `name` is not given, a unique name/label will be assigned
+        automatically.
         """
         if self.is_root():
             error = 'Cannot create nodes at root of model tree.'
             logger.error(error)
             raise PermissionError(error)
-        if self.is_group():
-            container = self.java
-        else:
-            container = self.java.feature()
+        container = self.java if self.is_group() else self.java.feature()
         # To do: Diversify tag names. Use feature type if possible.
         tag = container.uniquetag('tag')
         if not arguments:
@@ -246,8 +230,6 @@ class Node:
             error = 'Cannot remove a top-level group.'
             logger.error(error)
             raise PermissionError(error)
-        if self.parent().is_group():
-            container = self.parent().java
-        else:
-            container = self.parent().java.feature()
+        parent = self.parent()
+        container = parent.java if parent.is_group() else parent.java.feature()
         container.remove(self.java.tag())
