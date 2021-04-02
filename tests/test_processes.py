@@ -18,7 +18,6 @@ import logging
 ########################################
 here   = Path(__file__).parent
 python = 'python' if system() == 'Windows' else 'python3'
-logger = logging.getLogger(__name__)
 
 
 ########################################
@@ -26,23 +25,18 @@ logger = logging.getLogger(__name__)
 ########################################
 
 def test_exit_sys():
-    logger.info('Testing exit code of external process.')
     process = run([python, 'exit_sys.py'], stdout=PIPE, stderr=PIPE, cwd=here)
     exit_code = process.returncode
-    logger.info(f'Process exited with code {exit_code}.')
     assert exit_code == 2
 
 
 def test_exit_exc():
-    logger.info('Testing external process raising an unhandled exception.')
     process = run([python, 'exit_exc.py'], stdout=PIPE, stderr=PIPE, cwd=here)
     exit_code = process.returncode
-    logger.info(f'Process exited with code {exit_code}.')
     assert exit_code == 1
     stderr = process.stderr.decode().strip()
     assert stderr.startswith('Traceback')
     assert stderr.endswith('RuntimeError')
-    logger.info('Error traceback is as expected.')
 
 
 ########################################
