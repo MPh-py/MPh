@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Dependencies                         #
 ########################################
-import parent
+import parent # noqa F401
 from subprocess import run, PIPE
 from platform import system
 from pathlib import Path
