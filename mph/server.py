@@ -100,7 +100,7 @@ class Server:
                 break
             if now() - t0 > timeout:
                 error = 'Sever failed to start within time-out period.'
-                logger.critical(error)
+                logger.error(error)
                 raise TimeoutError(error)
 
         # Bail out if server exited with an error.
@@ -111,14 +111,14 @@ class Server:
         # actual error message.
         if port is None:
             error = f'Starting server failed: {lines[-1]}'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
         logger.info(f'Server listening on port {port}.')
 
         # Verify port number is correct if a specific one was requested.
         if requested and port != requested:
             error = f'Server port is {port}, but {requested} was requested.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
 
         # Save useful information in instance attributes.
@@ -141,7 +141,7 @@ class Server:
             self.process.communicate(input='close', timeout=timeout)
             logger.info(f'Server on port {self.port} has stopped.')
         except TimeoutExpired:
-            logger.info('Server did not shut down within time-out period.')
+            logger.warning('Server did not shut down within time-out period.')
             logger.info('Forcefully terminating external server process.')
             self.process.kill()
             t0 = now()
@@ -150,7 +150,7 @@ class Server:
                     break
                 if now() - t0 > timeout:
                     error = 'Forceful shutdown failed within time-out period.'
-                    logger.critical(error)
+                    logger.error(error)
                     raise TimeoutError(error) from None
                 sleep(0.1)
             logger.info('Server process has been forcefully terminated.')

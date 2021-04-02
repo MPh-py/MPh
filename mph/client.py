@@ -80,7 +80,7 @@ class Client:
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
-            logger.critical(error)
+            logger.error(error)
             raise NotImplementedError(error)
 
         # Discover Comsol back-end.
@@ -91,7 +91,7 @@ class Client:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
         # Start the Java virtual machine.
-        logger.info(f'JPype version is {jpype.__version__}.')
+        logger.debug(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
         jpype.startJVM(str(backend['jvm']),
                        classpath=str(backend['root']/'plugins'/'*'),
@@ -124,10 +124,7 @@ class Client:
         java.setPreference('updates.update.check', 'off')
         java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
         java.setPreference('tempfiles.recovery.autosave', 'off')
-        try:
-            java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
-        except Exception:
-            logger.warning('Could not turn off check for recovery files.')
+        java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save useful information in instance attributes.
@@ -167,7 +164,7 @@ class Client:
             option('caching', state)
         else:
             error = 'Caching state can only be set to either True or False.'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
 
     def create(self, name):
@@ -222,7 +219,7 @@ class Client:
             self.port = None
         else:
             error = 'The client is not connected to a server.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
 
 
@@ -241,13 +238,13 @@ def check_environment(backend):
         var = 'LD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         path = os.environ[var].split(os.pathsep)
         lib = root/'lib'/'glnxa64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         gcc = root/'lib'/'glnxa64'/'gcc'
         if gcc.exists() and str(gcc) not in path:
@@ -255,7 +252,7 @@ def check_environment(backend):
         gra = str(root/'ext'/'graphicsmagick'/'glnxa64')
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'glnxa64'
         if cad.exists() and str(cad) not in path:
@@ -264,7 +261,7 @@ def check_environment(backend):
         var = 'DYLD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         if var in os.environ:
             path = os.environ[var].split(os.pathsep)
@@ -273,12 +270,12 @@ def check_environment(backend):
         lib = root/'lib'/'maci64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         gra = root/'ext'/'graphicsmagick'/'maci64'
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'maci64'
         if cad.exists() and str(cad) not in path:

@@ -98,7 +98,7 @@ class Model:
         # Returns the named group node.
         if name not in self._groups:
             error = f'Invalid group "{name}".'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
         return self._groups[name]
 
@@ -314,7 +314,7 @@ class Model:
                 break
         else:
             error = f'Interpolation function "{interpolation}" does not exist.'
-            logger.critical(error)
+            logger.error(error)
             raise LookupError(error)
         file = Path(file)
         logger.info(f'Loading external data from file "{file.name}".')
@@ -417,14 +417,14 @@ class Model:
         """
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
-            logger.critical(error)
+            logger.error(error)
             raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         node = self.java.physics(ptag)
         if feature not in self.features(physics):
             error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.critical(error)
+            logger.error(error)
             raise LookupError(error)
         tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
@@ -470,11 +470,11 @@ class Model:
                      if name == geometry}
             if not index:
                 error = f'Geometry sequence "{geometry}" does not exist.'
-                logger.critical(error)
+                logger.error(error)
                 raise LookupError(error)
         elif not index:
             error = 'No geometry sequence defined in the model tree.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running geometry sequence "{name}".')
@@ -491,11 +491,11 @@ class Model:
                      if name == mesh}
             if not index:
                 error = f'Mesh sequence "{mesh}" does not exist.'
-                logger.critical(error)
+                logger.error(error)
                 raise LookupError(error)
         elif not index:
             error = 'No mesh sequence defined in the model tree.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running mesh sequence "{name}".')
@@ -512,11 +512,11 @@ class Model:
                      if name == study}
             if not index:
                 error = f'Study "{study}" does not exist.'
-                logger.critical(error)
+                logger.error(error)
                 raise LookupError(error)
         elif not index:
             error = 'No study defined in the model tree.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
         for (name, tag) in index.items():
             logger.info(f'Running study "{name}".')
@@ -592,7 +592,7 @@ class Model:
         # Make sure solution has actually been computed.
         if solution.isEmpty():
             error = 'The solution has not been computed.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
 
         # Validate solution arguments.
@@ -605,7 +605,7 @@ class Model:
                     and inner.dtype == 'int')):
             error = ('Argument "inner", if specified, must be either '
                      '"first", "last", or a list/array of integers.')
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
         if not (outer is None
                 or isinstance(outer, int)
@@ -613,7 +613,7 @@ class Model:
                     and issubclass(outer.dtype.type, numpy.integer)
                     and not outer.shape)):
             error = 'Argument "outer", if specified, must be an integer index.'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
 
         # Try to perform a global evaluation, which may fail.
@@ -627,12 +627,12 @@ class Model:
         if outer is not None:
             eval.set('outersolnum', jtypes.JInt(outer))
         try:
-            logger.info('Trying global evaluation.')
+            logger.debug('Trying global evaluation.')
             results = array(eval.getData())
             if eval.isComplex():
                 results += 1j * array(eval.getImagData())
             self.java.result().numerical().remove(etag)
-            logger.info('Finished global evaluation.')
+            logger.debug('Finished global evaluation.')
             if inner is None:
                 pass
             elif inner == 'first':
@@ -644,7 +644,7 @@ class Model:
             return results.squeeze()
         # Move on if this fails. It seems to not be a global expression then.
         except Exception:
-            logger.info('Global evaluation failed.')
+            logger.debug('Global evaluation failed.')
 
         # Find out the type of the dataset.
         dtype = str(dataset.getType()).lower()
@@ -786,7 +786,7 @@ class Model:
                 format = 'VBA'
             else:
                 error = f'Cannot deduce file format from ending "{suffix}".'
-                logger.critical(error)
+                logger.error(error)
                 raise ValueError(error)
 
         # Allow synonyms for format and map to Comsol's file type.
@@ -800,7 +800,7 @@ class Model:
             (format, type) = ('VBA', 'vba')
         else:
             error = f'Invalid file format "{format}".'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
 
         # Use model name if no file name specified.
@@ -824,6 +824,3 @@ class Model:
             else:
                 self.java.save(str(file), type)
         logger.info('Finished saving model.')
-
-
-
