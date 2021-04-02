@@ -34,6 +34,8 @@ size.property('hminactive', False)
 size.property('hgrad', 1.5)
 size.property('hgradactive', True)
 model.mesh(mesh.name())
+size.toggle()
+mesh.run()
 size.remove()
 triangular.remove()
 

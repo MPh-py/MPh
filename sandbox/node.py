@@ -25,7 +25,35 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Node:
     """
-    Represents a node in the model tree.
+    Refers to a node in the model tree.
+
+    Nodes works similarly to `pathlib.Path` objects from Python's
+    standard library. They support string concatenation with the '/'
+    operator on the right in order to reference child nodes:
+    ```python
+    >>> node = model/'functions'
+    >>> node
+    Node(//capacitor/functions)
+    >>> node/'step'
+    Node(//capacitor/functions/step)
+    ```
+
+    This example uses the demo model `capacitor` from the Tutorial.
+    Note how the `model` object itself also supports the `/` operator
+    and its name is listed first in the node's representation.
+
+    Node objects are mere references to a location in the model tree.
+    The node they refer to must not necessarily exist:
+    ```python
+    >>> node.exists()
+    >>> (node/'new function').exists()
+    ```
+
+    This class allows inspecting the node, such as its properties and
+    child nodes, as well as manipulating it to some extent, like
+    toggling it on/off, creating child nodes, or "running" it. Not all
+    possible actions are exposed through this class directly. But those
+    missing could be accessed via the `.java` attribute.
     """
 
     ####################################
@@ -34,6 +62,8 @@ class Node:
 
     def __init__(self, model, path='/'):
         if isinstance(path, str):
+            # Force-cast str subclasses to str, just like `pathlib` does.
+            # See bugs.python.org/issue21127 for the rationale.
             self.path = tuple(str(path).lstrip('/').rstrip('/').split('/'))
         elif isinstance(path, Node):
             self.path = path.path
@@ -58,7 +88,7 @@ class Node:
             'dataset':   'datasets',
             'export':    'exports',
         }
-        if not self.is_root() and self.path[0] in self.alias:
+        if self.path[0] in self.alias:
             self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
             'functions':    model.java.func(),
@@ -83,7 +113,7 @@ class Node:
         return '/' + '/'.join(self.path)
 
     def __repr__(self):
-        return f'{self.__class__.__name__}([{self.model.name()}]{self})'
+        return f'{self.__class__.__name__}(//{self.model.name()}{self})'
 
     def __eq__(self, other):
         return (self.path == other.path and self.model == other.model)
@@ -117,6 +147,10 @@ class Node:
         """Returns the node's name."""
         return '/' if self.is_root() else self.path[-1]
 
+    def tag(self):
+        """Returns the node's tag."""
+        return str(self.java.tag()) if self.exists() else None
+
     def parent(self):
         """Returns the parent node."""
         if self.is_root():
@@ -142,11 +176,11 @@ class Node:
         return bool(len(self.path) == 1 and not self.path[0])
 
     def is_group(self):
-        """Checks if node is a top-level group."""
+        """Checks if the node refers to a built-in top-level group."""
         return bool(len(self.path) == 1 and self.path[0])
 
     def exists(self):
-        """Checks if the node exists in the model."""
+        """Checks if the node exists in the model tree."""
         return (self.java is not None)
 
     ####################################
@@ -178,6 +212,35 @@ class Node:
         Otherwise sets the property to the given value.
         """
         return java.property(self.java, name, value)
+
+    def toggle(self, action='flip'):
+        """
+        Enables or disables the node.
+
+        If `action` is `'flip'` (the default), it enables the feature
+        node in the model tree if it is currently disabled or disables
+        it if enabled. Pass `'enable'` or `'on'` to enable the feature
+        regardless of its current state. Pass `'disable'` or `'off'`
+        to disable it.
+        """
+        if not self.exists():
+            error = f'Node {self} does not exist in model tree.'
+            logger.error(error)
+            raise LookupError(error)
+        if action == 'flip':
+            self.java.active(not self.java.isActive())
+        elif action in ('enable', 'on', 'activate'):
+            self.java.active(True)
+        elif action in ('disable', 'off', 'deactivate'):
+            self.java.active(False)
+
+    def run(self, geometry=None):
+        """Performs "run" if the node implements it."""
+        if not hasattr(self.java, 'run'):
+            error = 'Node "{self}" does not implement "run" operation.'
+            logger.error(error)
+            raise RuntimeError(error)
+        self.java.run()
 
     def create(self, *arguments, name=None):
         """
@@ -219,6 +282,10 @@ class Node:
             error = 'Cannot remove a top-level group.'
             logger.error(error)
             raise PermissionError(error)
+        if not self.exists():
+            error = 'Node does not exist in model tree.'
+            logger.error(error)
+            raise LookupError(error)
         parent = self.parent()
         container = parent.java if parent.is_group() else parent.java.feature()
         container.remove(self.java.tag())
