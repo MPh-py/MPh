@@ -6,7 +6,7 @@ __license__ = 'MIT'
 # Components                           #
 ########################################
 from . import java                     # Java layer
-
+from .node import Node
 
 ########################################
 # Dependencies                         #
@@ -17,7 +17,6 @@ from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #
@@ -75,21 +74,21 @@ class Model:
         else:
             self.java = parent
         self._groups = {
-            'functions':    self.java.func,
-            'components':   self.java.component,
-            'geometries':   self.java.geom,
-            'views':        self.java.view,
-            'selections':   self.java.selection,
-            'variables':    self.java.variable,
-            'physics':      self.java.physics,
-            'multiphysics': self.java.multiphysics,
-            'materials':    self.java.material,
-            'meshes':       self.java.mesh,
-            'studies':      self.java.study,
-            'solutions':    self.java.sol,
-            'plots':        self.java.result,
-            'datasets':     self.java.result().dataset,
-            'exports':      self.java.result().export,
+            'functions':    self.java.func(),
+            'components':   self.java.component(),
+            'geometries':   self.java.geom(),
+            'views':        self.java.view(),
+            'selections':   self.java.selection(),
+            'variables':    self.java.variable(),
+            'physics':      self.java.physics(),
+            'multiphysics': self.java.multiphysics(),
+            'materials':    self.java.material(),
+            'meshes':       self.java.mesh(),
+            'studies':      self.java.study(),
+            'solutions':    self.java.sol(),
+            'plots':        self.java.result(),
+            'datasets':     self.java.result().dataset(),
+            'exports':      self.java.result().export(),
         }
 
     def __eq__(self, other):
@@ -103,18 +102,8 @@ class Model:
             raise ValueError(error)
         return self._groups[name]
 
-    def _node(self, group, name):
-        # Returns the named model node inside a given group.
-        parent = self._group(group)
-        tags = [tag for tag in parent().tags()]
-        names = [str(parent(tag).name()) for tag in tags]
-        try:
-            node = parent(tags[names.index(name)])
-        except ValueError:
-            error = f'No node named "{name}" in group "{group}".'
-            logger.critical(error)
-            raise LookupError(error) from None
-        return node
+    def _node(self, identifier):
+        return Node(self, identifier)
 
     def _dataset(self, name=None):
         # Returns the Java dataset object.
@@ -197,23 +186,23 @@ class Model:
         tags = [tag for tag in self.java.physics().tags()]
         return [str(self.java.physics(tag).name()) for tag in tags]
 
-    def features(self, physics):
-        """
-        Returns the names of all features in the given `physics` interface.
+    def features(self, node):
+        """Returns features of an object in the model tree"""
+        if not isinstance(node, Node):
+            node = self._node(node)
 
-        The term feature refers to the nodes defined under a physics
-        interface. They define the differential equations, boundary
-        conditions, initial values, etc.
-        """
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(ftag).name())
-                for ftag in tags]
+        if not node.exists():
+            logger.warning('Invalid node')
+            return []
+
+        if node.is_root():  # roots have no features
+            tags = [tag for tag in node.java.tags()]
+            return [node.java.get(ftag).name()
+                    for ftag in tags]
+        else:  # subgroups have features
+            tags = [tag for tag in node.java.feature().tags()]
+            return [str(node.java.feature(ftag).name())
+                    for ftag in tags]
 
     def materials(self):
         """Returns the names of all materials."""
@@ -254,9 +243,14 @@ class Model:
         """Returns the names of all feature groups."""
         return list(self._groups.keys())
 
-    def properties(self, group, node):
+    def properties(self, node):
         """Returns the names of all properties defined on a node."""
-        return [str(name) for name in self._node(group, node).properties()]
+        if not isinstance(node, Node):
+            node = self._node(node)
+        if not node.exists():
+            logger.warning('Invalid node')
+            return []
+        return [str(name) for name in node.java.properties()]
 
     ####################################
     # Interaction                      #
@@ -265,6 +259,14 @@ class Model:
     def rename(self, name):
         """Assigns a new `name` to the model."""
         self.java.name(name)
+
+    def rename_node(self, node, name):
+        """Assigns a new name `name` to a model node"""
+        if not isinstance(node, Node):
+            node = self._node(node)
+        node._rename(name)
+
+        return node
 
     def parameter(self, name, value=None, unit=None, description=None,
                   evaluate=False):
@@ -321,26 +323,68 @@ class Model:
         self.java.func(tag).importData()
         logger.info('Finished loading external data.')
 
-    def create(self, group, type, name):
+    def create(self, node, *arguments):
         """
         Creates a new model node inside the given feature group.
 
-        The node `type` is denoted by a string. Its allowed values
-        depend on the feature `group`. Refer to the Comsol documentation
-        for available options. Once created, the node is referred to by
-        `name` when changing its properties.
+        The node `type` is denoted by a string, a tuple or directly via a node
+        isntance.
         """
-        parent = self._group(group)
-        tag = parent().uniquetag(f'{type.lower()}')
-        try:
-            parent().create(tag, type)
-            parent(tag).label(name)
-        except Exception:
-            error = f'Could not create node type "{type}" in group "{group}".'
-            logger.exception()
-            raise ValueError(error)
+        if not isinstance(node, Node):
+            node = self._node(node)
 
-    def property(self, group, node, name, value=None):
+        if node.exists():
+            node = node / 'none'
+
+        else:
+            if not node.parent().exists():
+                error = ('Specified node parent does not exist. Please create '
+                         'manually - recursive creation is not supported!')
+                logger.error(error)
+                return None
+
+        if node.parent().is_root():
+            group = node.parent().java
+        else:
+            group = node.parent().java.feature()
+
+        # concatenation of arguments if this was a supplied node which has
+        # arguments
+        if arguments:
+            arguments = list(set(arguments).union(set(node.comsol_arguments)))
+        else:
+            arguments = node.comsol_arguments
+
+        # This is a bit implicit but is very paractical - get the first string
+        # in args which ususally defines what is created and build a tag
+        # blueprint from it
+        tag_blueprint = 'tag'
+        if arguments:
+            if any([isinstance(arg, str) for arg in arguments]):
+                tag_blueprint = arguments[
+                    [isinstance(arg, str) for arg in arguments].index(True)
+                ].strip().replace(' ', '_').lower()[:3]
+            tag = group.uniquetag(tag_blueprint)
+
+            arguments = [java.typecast_to_java(arg) for arg in arguments]
+            group.create(tag, *arguments)
+            node.comsol_arguments = arguments
+
+        else:
+            tag = group.uniquetag(tag_blueprint)
+            group.create(tag)
+
+        if node.name() == 'none':
+            name = str(group.get(tag).name())
+            self.rename_node(node, name)
+        else:
+            group.get(tag).label(node.name())
+
+        node.java = node._traverse()
+
+        return node
+
+    def property(self, node, name, value=None):
         """
         Returns or changes the value of the named property.
 
@@ -348,33 +392,19 @@ class Model:
         the named model `node` inside the specified `group`. Otherwise
         sets the property to the given value.
         """
-        node = self._node(group, node)
-        return java.property(node, name, value)
+        if not isinstance(node, Node):
+            node = self._node(node)
 
-    def apply_interpolation(self, physics, feature, parameter, function):
-        """
-        Applies an interpolation to a feature parameter.
+        if not node.exists():
+            logger.warning('Node does not exists')
+            return []
 
-        This will apply an interpolation function to a feature parameter, to
-        set up e.g. field data boundary conditions. Function needs to be str
-        referencing the interpolation function - *that is not the name of the
-        node itself but one of the names used under the property funcs* defining
-        the column position in the file. The units have to match!"""
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        node = self.java.physics(ptag)
-        if feature not in self.features(physics):
-            error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in node.feature().tags()]
-        ftag = tags[self.features(physics).index(feature)]
-        node = node.feature(ftag)
-        node.set(parameter, function)
+        if value is None:
+           return java.typecast_to_python(node.java, name)
+
+        else:
+            value = java.typecast_to_java(value)
+            node.java.set(name, value)
 
     def toggle(self, physics, feature, action='flip'):
         """
@@ -406,11 +436,25 @@ class Model:
         elif action in ('disable', 'off', 'deactivate'):
             node.active(False)
 
-    def remove(self, group, node):
-        """Removes the named `node` from the feature `group`."""
-        tag = self._node(group, node).tag()
-        parent = self._group(group)()
-        parent.remove(tag)
+    def remove(self, node):
+        """Removes the identified node from the model."""
+        if not isinstance(node, Node):
+            node = self._node(node)
+
+        if not node.exists():
+            logger.warning('Node does not exists')
+            return
+
+        if node.is_root():
+            logger.warning('Can not remove root group')
+            return
+
+        # A simple call to parent is not good here since there are parents
+        # that are not Containers. This can be easily tested with the Block
+        # element, e.g. adapted version of test_create. Thus, get the java
+        # container and not the parent node
+        # node.parent().java.remove(node.java.tag())
+        node.java.getContainer().remove(node.java.tag())
 
     ####################################
     # Solving                          #
@@ -677,10 +721,11 @@ class Model:
         A `file` name can be specified. Otherwise the file name defined
         in the export node itself will be used.
         """
-        names   = self.exports()
-        tags    = [tag for tag in self.java.result().export().tags()]
-        tag     = tags[names.index(node)]
-        feature = self.java.result().export(tag)
+        if not node.exists():
+            logger.warning('Node does not exist in model tree')
+            return
+
+        feature = node.java
         if file is not None:
             feature.set('filename', str(file))
         feature.run()
@@ -779,3 +824,6 @@ class Model:
             else:
                 self.java.save(str(file), type)
         logger.info('Finished saving model.')
+
+
+
