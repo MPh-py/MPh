@@ -8,7 +8,7 @@ model = client.load('../tests/capacitor.mph')
 
 node = Node(model, '/functions')
 print(f'name:     {node.name()}')
-print(f'string    {node}')
+print(f'string:   {node}')
 print(f'repr:     {node!r}')
 print(f'root:     {node.is_root()}')
 print(f'group:    {node.is_group()}')

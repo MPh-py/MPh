@@ -101,20 +101,13 @@ class Node:
             return self.model.java
         name = self.name()
         if self.is_group():
-            if name in self.groups:
-                return self.groups[name]
-            error = f'No top-level group named "{name}".'
-            logger.error(error)
-            raise LookupError(error)
+            return self.groups.get(name, None)
         parent = self.parent()
         container = parent.java if parent.is_group() else parent.java.feature()
         for tag in container.tags():
             member = container.get(tag)
             if name == str(member.name()):
                 return member
-        error = f'Node "{self}" does not exist.'
-        logger.error(error)
-        raise LookupError(error)
 
     ####################################
     # Navigation                       #
@@ -154,11 +147,7 @@ class Node:
 
     def exists(self):
         """Checks if the node exists in the model."""
-        try:
-            self.java
-            return True
-        except LookupError:
-            return False
+        return (self.java is not None)
 
     ####################################
     # Interaction                      #
