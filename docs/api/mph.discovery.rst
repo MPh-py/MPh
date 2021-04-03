@@ -1,4 +1,4 @@
-discovery
+﻿discovery
 =========
 
 .. automodule:: mph.discovery

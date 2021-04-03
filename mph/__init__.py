@@ -15,4 +15,4 @@ from .client  import Client
 from .server  import Server
 from .model   import Model
 from .node    import Node
-from .java    import inspect
+from .node    import inspect
