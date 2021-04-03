@@ -33,9 +33,9 @@ class Node:
     ```python
     >>> node = model/'functions'
     >>> node
-    Node(//capacitor/functions)
+    Node('/functions')
     >>> node/'step'
-    Node(//capacitor/functions/step)
+    Node('/functions/step')
     ```
 
     This example uses the demo model `capacitor` from the Tutorial.
@@ -53,7 +53,7 @@ class Node:
     child nodes, as well as manipulating it to some extent, like
     toggling it on/off, creating child nodes, or "running" it. Not all
     available actions are exposed through this class directly. Those
-    missing could be triggered from the Java layer which is accessible
+    missing could be triggered from the Java layer, which is accessible
     via the `.java` attribute.
     """
 
@@ -114,7 +114,7 @@ class Node:
         return '/' + '/'.join(self.path)
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(//{self.model.name()}{self})'
+        return f"{self.__class__.__name__}('{self}')"
 
     def __eq__(self, other):
         return (self.path == other.path and self.model == other.model)

@@ -49,11 +49,11 @@ def test_str():
 
 
 def test_repr():
-    assert repr(Node(model, 'functions')) == 'Node(//capacitor/functions)'
+    assert repr(Node(model, 'functions/step')) == "Node('/functions/step')"
 
 
 def test_eq():
-    assert Node(model, 'function') == Node(model, 'functions')
+    assert Node(model, 'function/step') == Node(model, '/functions/step/')
 
 
 def test_truediv():

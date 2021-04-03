@@ -17,23 +17,28 @@ from numpy import array, isclose
 # Fixtures                             #
 ########################################
 client = None
-server = None
 model  = None
-here   = Path(__file__).parent
-file   = here/'capacitor.mph'
-saveas = here/'temp'
 
 
 def setup_module():
     global client, model
     client = mph.start()
-    model = client.load(file)
+    here = Path(__file__).parent
+    model = client.load(here/'capacitor.mph')
 
 
 def teardown_module():
     client.clear()
-    for suffix in ['.mph', '.java', '.m', '.vba']:
-        file = saveas.with_suffix(suffix)
+    here = Path(__file__).parent
+    for suffix in ('mph', 'java', 'm', 'vba'):
+        file = here/f'model.{suffix}'
+        if file.exists():
+            file.unlink()
+    file = here/'model2.mph'
+    if file.exists():
+        file.unlink()
+    for name in ('field.txt', 'field2.txt', 'vector.txt', 'vector.vtu'):
+        file = here/name
         if file.exists():
             file.unlink()
 
@@ -42,22 +47,37 @@ def teardown_module():
 # Tests                                #
 ########################################
 
+def test_str():
+    assert str(model) == 'capacitor'
+
+
+def test_repr():
+    assert repr(model) == "Model('capacitor')"
+
+
+def test_eq():
+    assert model == model
+
+
+def test_truediv():
+    assert (model/'functions').name() == 'functions'
+    node = model/'functions'/'step'
+    assert (model/node).name() == 'step'
+    assert (model/None).is_root()
+
+
 def test_name():
     assert model.name() == 'capacitor'
 
 
-def test_parameters():
-    parameters = model.parameters()
-    names = [parameter.name for parameter in parameters]
-    assert 'U' in names
-    assert 'd' in names
-    assert 'l' in names
-    assert 'w' in names
+def test_file():
+    assert model.file().name == 'capacitor.mph'
 
 
 def test_functions():
-    functions = model.functions()
-    assert 'test_function' in functions
+    assert 'step'  in model.functions()
+    assert 'image' in model.functions()
+    assert 'table' in model.functions()
 
 
 def test_components():
@@ -69,26 +89,19 @@ def test_geometries():
 
 
 def test_selections():
-    selections = model.selections()
-    assert 'domains' in selections
-    assert 'exterior' in selections
-    assert 'axis' in selections
-    assert 'center' in selections
+    assert 'domains'  in model.selections()
+    assert 'exterior' in model.selections()
+    assert 'axis'     in model.selections()
+    assert 'center'   in model.selections()
 
 
 def test_physics():
-    physics = model.physics()
-    assert 'electrostatic' in physics
-    assert 'electric currents' in physics
+    assert 'electrostatic'     in model.physics()
+    assert 'electric currents' in model.physics()
 
 
-def test_features():
-    features = model.features('electrostatic')
-    assert 'Laplace equation' in features
-    assert 'zero charge' in features
-    assert 'initial values' in features
-    assert 'anode' in features
-    assert 'cathode' in features
+def test_multiphysics():
+    assert model.multiphysics() == []
 
 
 def test_materials():
@@ -102,44 +115,104 @@ def test_meshes():
 
 
 def test_studies():
-    studies = model.studies()
-    assert 'static' in studies
-    assert 'relaxation' in studies
-    assert 'sweep' in studies
+    assert 'static'     in model.studies()
+    assert 'relaxation' in model.studies()
+    assert 'sweep'      in model.studies()
 
 
 def test_solutions():
-    solutions = model.solutions()
-    assert 'electrostatic solution' in solutions
-    assert 'time-dependent solution' in solutions
-    assert 'parametric solutions' in solutions
+    assert 'electrostatic solution'  in model.solutions()
+    assert 'time-dependent solution' in model.solutions()
+    assert 'parametric solutions'    in model.solutions()
 
 
 def test_datasets():
-    datasets = model.datasets()
-    assert 'electrostatic' in datasets
-    assert 'time-dependent' in datasets
-    assert 'parametric sweep' in datasets
+    assert 'electrostatic'    in model.datasets()
+    assert 'time-dependent'   in model.datasets()
+    assert 'parametric sweep' in model.datasets()
 
 
 def test_plots():
-    plots = model.plots()
-    assert 'electrostatic field' in plots
-    assert 'time-dependent field' in plots
-    assert 'evolution' in plots
-    assert 'sweep' in plots
+    assert 'electrostatic field'  in model.plots()
+    assert 'time-dependent field' in model.plots()
+    assert 'evolution'            in model.plots()
+    assert 'sweep'                in model.plots()
 
 
 def test_exports():
     assert 'field' in model.exports()
 
 
-def test_groups():
-    assert 'functions' in model.groups()
+def test_build():
+    model.build()
 
 
-def test_properties():
-    assert 'flipx' in model.properties('functions', 'test_function')
+def test_mesh():
+    model.mesh()
+
+
+def test_solve():
+    model.solve()
+
+
+def test_evaluate():
+    # Test global evaluation of stationary solution.
+    C = model.evaluate('2*es.intWe/U^2', 'pF')
+    assert abs(C - 0.74) < 0.01
+    # Test local evaluation of stationary solution.
+    (x, y, E) = model.evaluate(['x', 'y', 'es.normE'], ['mm', 'mm', 'V/m'])
+    (Emax, xmax, ymax) = (E.max(), x[E.argmax()], y[E.argmax()])
+    assert abs(Emax - 818) < 5
+    assert abs(abs(xmax) - 1.04) < 0.01
+    assert abs(abs(ymax) - 4.27) < 0.01
+    # Test global evaluation of time-dependent solution.
+    (dataset, expression, unit) = ('time-dependent', '2*ec.intWe/U^2', 'pF')
+    (indices, values) = model.inner(dataset)
+    assert values[0] == 0
+    assert values[-1] == 1
+    Cf = model.evaluate(expression, unit, dataset, 'first')
+    assert abs(Cf - 0.74) < 0.01
+    Cl = model.evaluate(expression, unit, dataset, 'last')
+    assert abs(Cl - 0.83) < 0.01
+    C = model.evaluate(expression, unit, dataset)
+    assert C[0] == Cf
+    assert C[-1] == Cl
+    # Test local evaluation of time-dependent solution.
+    (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
+    Df = model.evaluate(expression, unit, dataset, 'first')
+    assert abs(Df.max() -  7.2) < 0.1
+    Dl = model.evaluate(expression, unit, dataset, 'last')
+    assert abs(Dl.max() - 10.8) < 0.1
+    D = model.evaluate(expression, unit, dataset)
+    assert D[0].max()  == Df.max()
+    assert D[-1].max() == Dl.max()
+    # Test global evaluation of parameter sweep.
+    (dataset, expression, unit) = ('parametric sweep', '2*ec.intWe/U^2', 'pF')
+    (indices, values) = model.outer(dataset)
+    for (index, value) in zip(indices, values):
+        C = model.evaluate(expression, unit, dataset, 'first', index)
+        if value == 1:
+            assert abs(C - 1.32) < 0.01
+        elif value == 2:
+            assert abs(C - 0.74) < 0.01
+        elif value == 3:
+            assert abs(C - 0.53) < 0.01
+        else:
+            raise ValueError(f'Unexpected value {value} for parameter d."')
+    # Test local evaluation of parameter sweep.
+    for (index, value) in zip(indices, values):
+        if value == 2:
+            break
+    else:
+        raise ValueError('Could not find solution for d = 2 mm."')
+    (dataset, expression, unit) = ('parametric sweep', 'ec.normD', 'nC/m^2')
+    Df = model.evaluate(expression, unit, dataset, 'first', index)
+    assert abs(Df.max() -  7.2) < 0.1
+    Dl = model.evaluate(expression, unit, dataset, 'last', index)
+    assert abs(Dl.max() - 10.8) < 0.1
+    D = model.evaluate(expression, unit, dataset, outer=index)
+    assert D[0].max()  == Df.max()
+    assert D[-1].max() == Dl.max()
 
 
 def test_rename():
@@ -148,6 +221,15 @@ def test_rename():
     assert model.name() == 'test'
     model.rename(name)
     assert model.name() == name
+
+
+def test_parameters():
+    parameters = model.parameters()
+    names = [parameter.name for parameter in parameters]
+    assert 'U' in names
+    assert 'd' in names
+    assert 'l' in names
+    assert 'w' in names
 
 
 def test_parameter():
@@ -167,237 +249,160 @@ def test_parameter():
     assert descriptions[names.index('U')] == 'test'
 
 
-def test_create():
-    model.create('functions', 'Interpolation', 'interpolation')
-    assert 'interpolation' in model.functions()
-    model.create('exports', 'Data', 'vector')
-    assert 'vector' in model.exports()
+def test_properties():
+    assert 'flipx' in model.properties('functions/image')
 
 
 def test_property():
-    # Customize newly created features.
-    model.property('functions', 'interpolation', 'source', 'file')
-    model.property('functions', 'interpolation', 'scaledata', 'off')
-    model.property('functions', 'interpolation', 'interp', 'cubicspline')
-    model.property('functions', 'interpolation', 'nargs', 1)
-    model.property('functions', 'interpolation', 'funcs', ['f', '1'])
-    model.property('exports', 'vector', 'expr', ('es.Ex', 'es.Ey', 'es.Ez'))
-    model.property('exports', 'vector', 'descr', ('Ex', 'Ey', 'Ez'))
-    # Test applying interpolation.
-    model.load('table.txt', 'interpolation')
-    model.apply_interpolation('electrostatic', 'anode', 'V0', '+U/2 * f(y/l)')
-    model.solve('static')
-    model.apply_interpolation('electrostatic', 'anode', 'V0', '+U/2')
-    model.solve('static')
     # Test conversion to and from 'Boolean'.
-    old = model.property('functions', 'test_function', 'flipx')
-    model.property('functions', 'test_function', 'flipx', False)
-    assert model.property('functions', 'test_function', 'flipx') is False
-    model.property('functions', 'test_function', 'flipx', old)
-    assert model.property('functions', 'test_function', 'flipx') == old
+    old = model.property('functions/image', 'flipx')
+    model.property('functions/image', 'flipx', False)
+    assert model.property('functions/image', 'flipx') is False
+    model.property('functions/image', 'flipx', old)
+    assert model.property('functions/image', 'flipx') == old
     # Test conversion to and from 'Double'.
-    old = model.property('functions', 'test_function', 'xmin')
-    new = -10.0
-    model.property('functions', 'test_function', 'xmin', -10)
-    assert isclose(model.property('functions', 'test_function', 'xmin'), new)
-    model.property('functions', 'test_function', 'xmin', old)
-    assert isclose(model.property('functions', 'test_function', 'xmin'), old)
+    old = model.property('functions/image', 'xmin')
+    model.property('functions/image', 'xmin', -10.0)
+    assert isclose(model.property('functions/image', 'xmin'), -10)
+    model.property('functions/image', 'xmin', old)
+    assert isclose(model.property('functions/image', 'xmin'), old)
     # Test conversion to and from 'DoubleArray'.
-    old = model.property('exports', 'field', 'outersolnumindices')
+    old = model.property('exports/field', 'outersolnumindices')
     new = array([1.0, 2.0, 3.0])
-    model.property('exports', 'field', 'outersolnumindices', new)
-    assert isclose(model.property('exports', 'field', 'outersolnumindices'),
+    model.property('exports/field', 'outersolnumindices', new)
+    assert isclose(model.property('exports/field', 'outersolnumindices'),
                    new).all()
-    model.property('exports', 'field', 'outersolnumindices', old)
-    assert isclose(model.property('exports', 'field', 'outersolnumindices'),
+    model.property('exports/field', 'outersolnumindices', old)
+    assert isclose(model.property('exports/field', 'outersolnumindices'),
                    old).all()
     # Test conversion to and from 'File'.
-    old = model.property('functions', 'test_function', 'filename')
-    new = Path('gaussian.tif')
-    model.property('functions', 'test_function', 'filename', new)
-    assert model.property('functions', 'test_function', 'filename') == new
-    model.property('functions', 'test_function', 'filename', old)
-    assert model.property('functions', 'test_function', 'filename') == old
+    old = model.property('functions/image', 'filename')
+    model.property('functions/image', 'filename', Path('new.tif'))
+    assert model.property('functions/image', 'filename') == Path('new.tif')
+    model.property('functions/image', 'filename', old)
+    assert model.property('functions/image', 'filename') == old
     # Test conversion to and from 'Int'.
-    old = model.property('functions', 'test_function', 'refreshcount')
-    new = 1
-    model.property('functions', 'test_function', 'refreshcount', new)
-    assert model.property('functions', 'test_function', 'refreshcount') == new
-    model.property('functions', 'test_function', 'refreshcount', old)
-    assert model.property('functions', 'test_function', 'refreshcount') == old
+    old = model.property('functions/image', 'refreshcount')
+    model.property('functions/image', 'refreshcount', 1)
+    assert model.property('functions/image', 'refreshcount') == 1
+    model.property('functions/image', 'refreshcount', old)
+    assert model.property('functions/image', 'refreshcount') == old
     # Test conversion to and from 'IntArray'.
-    old = model.property('plots', 'evolution', 'solnum')
+    old = model.property('plots/evolution', 'solnum')
     new = array([1, 2, 3])
-    model.property('plots', 'evolution', 'solnum', new)
-    assert (model.property('plots', 'evolution', 'solnum') == new).all()
-    model.property('plots', 'evolution', 'solnum', old)
-    assert (model.property('plots', 'evolution', 'solnum') == old).all()
+    model.property('plots/evolution', 'solnum', new)
+    assert (model.property('plots/evolution', 'solnum') == new).all()
+    model.property('plots/evolution', 'solnum', old)
+    assert (model.property('plots/evolution', 'solnum') == old).all()
     # Test conversion from 'None'.
-    none = model.property('functions', 'test_function', 'exportfilename')
+    none = model.property('functions/image', 'exportfilename')
     assert none is None
     # Test conversion to and from 'String'.
-    old = model.property('functions', 'test_function', 'funcname')
-    model.property('functions', 'test_function', 'funcname', 'new')
-    assert model.property('functions', 'test_function', 'funcname') == 'new'
-    model.property('functions', 'test_function', 'funcname', old)
-    assert model.property('functions', 'test_function', 'funcname') == old
+    old = model.property('functions/image', 'funcname')
+    model.property('functions/image', 'funcname', 'new')
+    assert model.property('functions/image', 'funcname') == 'new'
+    model.property('functions/image', 'funcname', old)
+    assert model.property('functions/image', 'funcname') == old
     # Test conversion to and from 'StringArray'.
-    old = model.property('exports', 'vector', 'descr')
-    new = ['x-component', 'y-component', 'z-component']
-    model.property('exports', 'vector', 'descr', new)
-    assert model.property('exports', 'vector', 'descr') == new
-    model.property('exports', 'vector', 'descr', old)
-    assert model.property('exports', 'vector', 'descr') == old
+    old = model.property('exports/vector', 'descr')
+    model.property('exports/vector', 'descr', ['x', 'y', 'z'])
+    assert model.property('exports/vector', 'descr') == ['x', 'y', 'z']
+    model.property('exports/vector', 'descr', old)
+    assert model.property('exports/vector', 'descr') == old
     # Test conversion to and from 'StringMatrix'.
-    old = model.property('plots', 'evolution', 'plotonsecyaxis')
+    old = model.property('plots/evolution', 'plotonsecyaxis')
     new = [['medium 1', 'on', 'ptgr1'], ['medium 2', 'on', 'ptgr2']]
-    model.property('plots', 'evolution', 'plotonsecyaxis', new)
-    assert model.property('plots', 'evolution', 'plotonsecyaxis') == new
-    model.property('plots', 'evolution', 'plotonsecyaxis', old)
-    assert model.property('plots', 'evolution', 'plotonsecyaxis') == old
+    model.property('plots/evolution', 'plotonsecyaxis', new)
+    assert model.property('plots/evolution', 'plotonsecyaxis') == new
+    model.property('plots/evolution', 'plotonsecyaxis', old)
+    assert model.property('plots/evolution', 'plotonsecyaxis') == old
 
 
-def test_load():
-    model.load('gaussian.tif', 'test_function')
+def test_create():
+    model.create('functions/interpolation', 'Interpolation')
+    assert 'interpolation' in model.functions()
+    model.property('functions/interpolation', 'source', 'file')
+    model.property('functions/interpolation', 'scaledata', 'off')
+    model.property('functions/interpolation', 'interp', 'cubicspline')
+    model.property('functions/interpolation', 'nargs', 1)
+    model.property('functions/interpolation', 'funcs', ['g', '1'])
+    model.load('table.txt', 'interpolation')
 
 
 def test_remove():
-    model.remove('functions', 'interpolation')
-    model.remove('exports', 'vector')
+    model.remove('functions/interpolation')
+    assert 'interpolation' not in model.functions()
 
 
-def test_build():
-    model.build()
-
-
-def test_mesh():
-    model.mesh()
-
-
-def test_solve():
-    model.solve()
-
-
-def test_evaluate():
-
-    # Test global evaluation of stationary solution.
-    expr = '2*es.intWe/U^2'
-    unit = 'pF'
-    C = model.evaluate(expr, unit)
-    assert abs(C - 0.737) < 0.01
-
-    # Test local evaluation of stationary solution.
-    expr = ['x', 'y', 'es.normE']
-    unit = ['mm', 'mm', 'V/m']
-    (x, y, E) = model.evaluate(expr, unit)
-    Emax  = E.max()
-    index = E.argmax()
-    xmax  = x[index]
-    ymax  = y[index]
-    assert abs(Emax - 814.8) < 0.2
-    assert abs(abs(xmax) - 1.037) < 0.001
-    assert abs(abs(ymax) - 4.270) < 0.001
-
-    # Test global evaluation of time-dependent solution.
-    dset = 'time-dependent'
-    expr = '2*ec.intWe/U^2'
-    unit = 'pF'
-    (indices, values) = model.inner(dset)
-    assert values[0] == 0
-    assert values[-1] == 1
-    Cf = model.evaluate(expr, unit, dset, 'first')
-    assert abs(Cf - 0.737) < 0.01
-    Cl = model.evaluate(expr, unit, dset, 'last')
-    assert abs(Cl - 0.828) < 0.01
-    C = model.evaluate(expr, unit, dset)
-    assert C[0] == Cf
-    assert C[-1] == Cl
-
-    # Test local evaluation of time-dependent solution.
-    expr = 'ec.normD'
-    unit = 'nC/m^2'
-    Df = model.evaluate(expr, unit, dset, 'first')
-    assert abs(Df.max() -  7.22) < 0.1
-    Dl = model.evaluate(expr, unit, dset, 'last')
-    assert abs(Dl.max() - 10.82) < 0.1
-    D = model.evaluate(expr, unit, dset)
-    assert D[0].max()  == Df.max()
-    assert D[-1].max() == Dl.max()
-
-    # Test global evaluation of parameter sweep.
-    dset = 'parametric sweep'
-    expr = '2*ec.intWe/U^2'
-    unit = 'pF'
-    (indices, values) = model.outer(dset)
-    for (index, value) in zip(indices, values):
-        C = model.evaluate(expr, unit, dset, 'first', index)
-        if value == 1:
-            assert abs(C - 1.319) < 0.01
-        elif value == 2:
-            assert abs(C - 0.737) < 0.01
-        elif value == 3:
-            assert abs(C - 0.529) < 0.01
-        else:
-            raise ValueError(f'Unexpected value {value} for parameter d."')
-
-    # Test local evaluation of parameter sweep.
-    for (index, value) in zip(indices, values):
-        if value == 2:
-            break
-    else:
-        raise ValueError('Could not find solution for d = 2 mm."')
-    expr = 'ec.normD'
-    unit = 'nC/m^2'
-    Df = model.evaluate(expr, unit, dset, 'first', index)
-    assert abs(Df.max() -  7.22) < 0.1
-    Dl = model.evaluate(expr, unit, dset, 'last', index)
-    assert abs(Dl.max() - 10.82) < 0.1
-    D = model.evaluate(expr, unit, dset, outer=index)
-    assert D[0].max()  == Df.max()
-    assert D[-1].max() == Dl.max()
-
-
-def test_toggle():
+def test_import():
+    # Import image with file name specified as string and Path.
+    here = Path(__file__).parent
+    image = model/'functions'/'image'
+    assert image.property('sourcetype') == 'model'
+    image.java.discardData()
+    assert image.property('sourcetype') == 'user'
+    model.import_(image, 'gaussian.tif')
+    assert image.property('sourcetype') == 'model'
+    image.java.discardData()
+    assert image.property('sourcetype') == 'user'
+    model.import_(image, here/'gaussian.tif')
+    assert image.property('sourcetype') == 'model'
+    # Solve with pre-defined boundary condition.
     model.solve('static')
-    potential = model.evaluate('V_es')
-    assert abs(potential.mean()) < 0.1
-    model.toggle('electrostatic', 'cathode')
+    table = model/'functions'/'table'
+    assert table.property('table')[0] == ['+1', '+2']
+    assert table.property('funcname') == 'f'
+    old_table = table.property('table')
+    old_V0 = model.property('physics/electrostatic/anode', 'V0')
+    (y, E) = model.evaluate(['y', 'es.normE'])
+    (E_pre, y_pre) = (E.max(), y[E.argmax()])
+    # Apply interpolation table defined in model.
+    model.property('physics/electrostatic/anode', 'V0', 'U/2 * f(y/l)')
     model.solve('static')
-    potential = model.evaluate('V_es')
-    assert abs(potential.mean() - 0.5) < 0.1
-    model.toggle('electrostatic', 'cathode', 'on')
+    (y, E) = model.evaluate(['y', 'es.normE'])
+    (E_up, y_up) = (E.max(), y[E.argmax()])
+    # Import interpolation table with data flipped upside down.
+    model.import_(table, here/'table.txt')
+    assert table.property('table')[0] == ['+1', '-2']
+    table.property('funcname', 'f')
     model.solve('static')
-    potential = model.evaluate('V_es')
-    assert abs(potential.mean()) < 0.1
-    model.toggle('electrostatic', 'cathode', 'off')
+    (y, E) = model.evaluate(['y', 'es.normE'])
+    (E_down, y_down) = (E.max(), y[E.argmax()])
+    assert E_up - E_down < (E_up + E_down)/1000
+    assert y_up + y_down < (y_up - y_down)/1000
+    # Re-apply original boundary condition.
+    model.property('physics/electrostatic/anode', 'V0', old_V0)
+    assert model.property('physics/electrostatic/anode', 'V0') == old_V0
+    table.property('table', old_table)
+    assert table.property('table') == old_table
+    assert table.property('funcname') == 'f'
     model.solve('static')
-    potential = model.evaluate('V_es')
-    assert abs(potential.mean() - 0.5) < 0.1
+    (y, E) = model.evaluate(['y', 'es.normE'])
+    (E_re, y_re) = (E.max(), y[E.argmax()])
+    assert (E_re - E_pre) < 1
+    assert (y_re - y_pre) < 0.001
 
 
 def test_export():
-    file = Path('field.txt')
-    assert not file.exists()
+    here = Path(__file__).parent
+    assert not (here/'field.txt').exists()
     model.export('field')
-    assert file.exists()
-    file.unlink()
-    file = Path('field2.txt')
-    assert not file.exists()
-    model.export('field', file)
-    assert file.exists()
-    file.unlink()
-    file = Path('vector.txt')
-    assert not file.exists()
-    model.property('exports', 'vector', 'exporttype', 'text')
-    model.export('vector', file=file)
-    assert file.exists()
-    file.unlink()
-    file = Path('vector.vtu')
-    assert not file.exists()
-    model.property('exports', 'vector', 'exporttype', 'vtu')
-    model.export('vector', file=file)
-    assert file.exists()
-    file.unlink()
+    assert (here/'field.txt').exists()
+    (here/'field.txt').unlink()
+    assert not (here/'field2.txt').exists()
+    model.export('exports/field', here/'field2.txt')
+    assert (here/'field2.txt').exists()
+    (here/'field2.txt').unlink()
+    assert not (here/'vector.txt').exists()
+    model.property('exports/vector', 'exporttype', 'text')
+    model.export('exports/vector', here/'vector.txt')
+    assert (here/'vector.txt').exists()
+    (here/'vector.txt').unlink()
+    assert not (here/'vector.vtu').exists()
+    model.property('exports/vector', 'exporttype', 'vtu')
+    model.export('exports/vector', here/'vector.vtu')
+    assert (here/'vector.vtu').exists()
+    (here/'vector.vtu').unlink()
 
 
 def test_clear():
@@ -409,22 +414,47 @@ def test_reset():
 
 
 def test_save():
-    model.save(saveas)
-    assert saveas.with_suffix('.mph').exists()
-    comsol = saveas.with_suffix('.mph').read_text(errors='ignore')
-    assert comsol.startswith('PK')
-    model.save(saveas.with_suffix('.java'))
-    assert saveas.with_suffix('.java').exists()
-    java = saveas.with_suffix('.java').read_text(errors='ignore')
-    assert 'public static void main' in java
-    model.save(saveas.with_suffix('.m'))
-    assert saveas.with_suffix('.m').exists()
-    matlab = saveas.with_suffix('.m').read_text(errors='ignore')
-    assert 'function out = model' in matlab
-    model.save(saveas.with_suffix('.vba'))
-    assert saveas.with_suffix('.vba').exists()
-    vba = saveas.with_suffix('.vba').read_text(errors='ignore')
-    assert 'Sub run()' in vba
+    here = Path(__file__).parent
+    model.save(here/'model.mph')
+    assert (here/'model.mph').exists()
+    model.save(str(here/'model2.mph'))
+    assert (here/'model2.mph').exists()
+    assert (here/'model.mph').read_text(errors='ignore').startswith('PK')
+    model.save(here/'model.java')
+    assert (here/'model.java').exists()
+    assert 'public static void main' in (here/'model.java').read_text()
+    model.save(here/'model.m')
+    assert (here/'model.m').exists()
+    assert 'function out = model' in (here/'model.m').read_text()
+    model.save(here/'model.vba')
+    assert (here/'model.vba').exists()
+    assert 'Sub run()' in (here/'model.vba').read_text()
+
+
+def test_features():
+    assert 'Laplace equation' in model.features('electrostatic')
+    assert 'zero charge'      in model.features('electrostatic')
+    assert 'initial values'   in model.features('electrostatic')
+    assert 'anode'            in model.features('electrostatic')
+    assert 'cathode'          in model.features('electrostatic')
+
+
+def test_toggle():
+    model.solve('static')
+    assert abs(model.evaluate('V_es').mean()) < 0.1
+    model.toggle('electrostatic', 'cathode')
+    model.solve('static')
+    assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
+    model.toggle('electrostatic', 'cathode', 'on')
+    model.solve('static')
+    assert abs(model.evaluate('V_es').mean()) < 0.1
+    model.toggle('electrostatic', 'cathode', 'off')
+    model.solve('static')
+    assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
+
+
+def test_load():
+    model.load('gaussian.tif', 'image')
 
 
 ########################################
@@ -446,14 +476,20 @@ if __name__ == '__main__':
 
     setup_module()
     try:
+
+        test_str()
+        test_repr()
+        test_eq()
+        test_truediv()
+
         test_name()
-        test_parameters()
+        test_file()
         test_functions()
         test_components()
         test_geometries()
         test_selections()
         test_physics()
-        test_features()
+        test_multiphysics()
         test_materials()
         test_meshes()
         test_studies()
@@ -461,22 +497,30 @@ if __name__ == '__main__':
         test_datasets()
         test_plots()
         test_exports()
-        test_groups()
-        test_properties()
-        test_rename()
-        test_parameter()
-        test_load()
+
         test_build()
         test_mesh()
         test_solve()
+
         test_evaluate()
-        test_toggle()
-        test_create()
+
+        test_rename()
+        test_parameters()
+        test_parameter()
+        test_properties()
         test_property()
-        test_export()
+        test_create()
         test_remove()
+
+        test_import()
+        test_export()
         test_clear()
         test_reset()
         test_save()
+
+        test_features()
+        test_toggle()
+        test_load()
+
     finally:
         teardown_module()
