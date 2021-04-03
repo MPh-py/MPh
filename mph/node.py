@@ -12,6 +12,7 @@ from jpype.types import JDouble        # Java float
 from jpype.types import JString        # Java string
 from jpype.types import JArray         # Java array
 from pathlib import Path               # file-system path
+from re import split                   # string splitting
 from logging import getLogger          # event logging
 
 
@@ -47,12 +48,26 @@ class Node:
     False
     ```
 
+    In rare cases, the node name itself might contain a forward slash,
+    such as the dataset "sweep/solution" that happens to exist in the
+    demo model. (It was omitted in the list shown in the Tutorial
+    as Comsol generates it automatically and it serves little practical
+    purpose.) These literal forward slashes can be escaped
+    by doubling the character:
+    ```python
+    >>> node = model/'datasets/sweep//solution'
+    >>> node.name()
+    'sweep//solution'
+    >>> node.parent()
+    Node('/datasets')
+    ```
+
     This class allows inspecting a node, such as its properties and
     child nodes, as well as manipulating it to some extent, like
     toggling it on/off, creating child nodes, or "running" it. Not all
-    actions made available by Comsol are exposed through this class.
-    Those missing could be triggered from the Java layer, which is
-    accessible via the `.java` property.
+    actions made available by Comsol are exposed here. Those missing can
+    however be triggered in the Java layer, which is accessible via the
+    `.java` property.
     """
 
     ####################################
@@ -61,9 +76,7 @@ class Node:
 
     def __init__(self, model, path='/'):
         if isinstance(path, str):
-            # Force-cast str subclasses to str, just like `pathlib` does.
-            # See bugs.python.org/issue21127 for the rationale.
-            self.path = tuple(str(path).lstrip('/').rstrip('/').split('/'))
+            self.path = parse(path)
         elif isinstance(path, Node):
             self.path = path.path
         else:
@@ -109,7 +122,7 @@ class Node:
         self.model = model
 
     def __str__(self):
-        return '/' + '/'.join(self.path)
+        return join(self.path)
 
     def __repr__(self):
         return f"{self.__class__.__name__}('{self}')"
@@ -119,7 +132,8 @@ class Node:
 
     def __truediv__(self, other):
         if isinstance(other, str):
-            return Node(self.model, str(self) + '/' + str(other).lstrip('/'))
+            other = other.lstrip('/')
+            return Node(self.model, join(parse(f'{self}/{other}')))
         else:
             return NotImplemented
 
@@ -132,10 +146,12 @@ class Node:
         if self.is_group():
             return self.groups.get(name, None)
         parent = self.parent()
+        if not parent.exists():
+            return
         container = parent.java if parent.is_group() else parent.java.feature()
         for tag in container.tags():
             member = container.get(tag)
-            if name == str(member.name()):
+            if name == escape(member.name()):
                 return member
 
     ####################################
@@ -144,7 +160,7 @@ class Node:
 
     def name(self):
         """Returns the node's name."""
-        return '/' if self.is_root() else self.path[-1]
+        return '/' if self.is_root() else escape(self.path[-1])
 
     def tag(self):
         """Returns the node's tag."""
@@ -155,17 +171,17 @@ class Node:
         if self.is_root():
             return None
         else:
-            return Node(self.model, '/'.join(self.path[:-1]))
+            return Node(self.model, join(self.path[:-1]))
 
     def children(self):
         """Returns all child nodes."""
         if self.is_root():
             return [Node(self.model, group) for group in self.groups]
         elif self.is_group():
-            return [self/str(self.java.get(tag).name())
+            return [self/escape(self.java.get(tag).name())
                     for tag in self.java.tags()]
         elif hasattr(self.java, 'feature'):
-            return [self/str(self.java.feature(tag).name())
+            return [self/escape(self.java.feature(tag).name())
                     for tag in self.java.feature().tags()]
         else:
             return []
@@ -295,6 +311,37 @@ class Node:
         parent = self.parent()
         container = parent.java if parent.is_group() else parent.java.feature()
         container.remove(self.java.tag())
+
+
+########################################
+# Name parsing                         #
+########################################
+
+def parse(string):
+    """Parses a node path given as string to a tuple."""
+    # Force-cast str subclasses to str, just like `pathlib` does.
+    # See bugs.python.org/issue21127 for the rationale.
+    string = str(string)
+    # Remove all leading and trailing forward slashes.
+    string = string.lstrip('/').rstrip('/')
+    return tuple(unescape(name) for name in split(r'(?<!/)/(?!/)', string))
+
+
+def join(path):
+    """Joins a node path given as tuple into a string."""
+    return '/' + '/'.join(escape(name) for name in path)
+
+
+def escape(name):
+    """Escapes forward slashes in a node name."""
+    # Also accept Java strings, but always return Python string.
+    name = str(name)
+    return name.replace('/', '//')
+
+
+def unescape(name):
+    """Reverses escaping of forward slashes in a node name."""
+    return name.replace('//', '/')
 
 
 ########################################

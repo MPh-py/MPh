@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
+from mph import node
 from mph.node import Node
 from sys import argv
 from pathlib import Path
@@ -36,6 +37,38 @@ def teardown_module():
 ########################################
 # Tests                                #
 ########################################
+
+def test_parse():
+    assert node.parse('a/b')        == ('a', 'b')
+    assert node.parse('/a/b')       == ('a', 'b')
+    assert node.parse('a/b/')       == ('a', 'b')
+    assert node.parse('/a/b/')      == ('a', 'b')
+    assert node.parse('a/b/c')      == ('a', 'b', 'c')
+    assert node.parse('a/b//c')     == ('a', 'b/c')
+    assert node.parse('a//b/c')     == ('a/b', 'c')
+    assert node.parse('//a//b/c//') == ('a/b', 'c')
+    assert node.parse('a//b/c//d')  == ('a/b', 'c/d')
+
+
+def test_join():
+    assert node.join(('a', 'b'))      == '/a/b'
+    assert node.join(('a', 'b', 'c')) == '/a/b/c'
+    assert node.join(('a', 'b/c'))    == '/a/b//c'
+    assert node.join(('a/b', 'c'))    == '/a//b/c'
+    assert node.join(('a/b', 'c/d'))  == '/a//b/c//d'
+
+
+def test_escape():
+    assert node.escape('a/b')   == 'a//b'
+    assert node.escape('a//b')  == 'a////b'
+    assert node.escape('a/b/c') == 'a//b//c'
+
+
+def test_unescape():
+    assert node.unescape('a//b')    == 'a/b'
+    assert node.unescape('a////b')  == 'a//b'
+    assert node.unescape('a//b//c') == 'a/b/c'
+
 
 def test_init():
     node = Node(model, 'functions')
@@ -80,6 +113,10 @@ def test_parent():
 
 def test_children():
     assert Node(model, 'functions/step') in Node(model, 'functions').children()
+    datasets = Node(model, 'datasets').children()
+    assert Node(model, 'datasets/sweep//solution') in datasets
+    assert Node(model, 'datasets/sweep//solution').exists()
+    assert not Node(model, 'datasets/sweep/solution').exists()
 
 
 def test_is_root():
@@ -185,12 +222,19 @@ if __name__ == '__main__':
 
     setup_module()
     try:
+
+        test_parse()
+        test_join()
+        test_escape()
+        test_unescape()
+
         test_init()
         test_str()
         test_repr()
         test_eq()
         test_truediv()
         test_java()
+
         test_name()
         test_tag()
         test_parent()
@@ -198,6 +242,7 @@ if __name__ == '__main__':
         test_is_root()
         test_is_group()
         test_exists()
+
         test_rename()
         test_properties()
         test_property()
@@ -205,5 +250,6 @@ if __name__ == '__main__':
         test_run()
         test_create()
         test_remove()
+
     finally:
         teardown_module()
