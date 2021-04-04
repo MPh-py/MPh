@@ -487,3 +487,25 @@ def inspect(java):
         if name.startswith('_') or name in suppress:
             continue
         print(f'  {name}')
+
+
+def tree(node, levels=[], max_depth=None):
+    """
+    Displays the model tree.
+
+    This function displays a representation of the model tree in the
+    console. `node` would typically be the model's root node. `levels`
+    is used internally when traversing the model tree recursively.
+    Specify `max_depth` to possibly limit the number of lower branches.
+    """
+    if not isinstance(node, Node):
+        node = node/None
+    if max_depth and len(levels) > max_depth:
+        return
+    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
+    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
+    print(f'{markers}{node.name()}')
+    children = node.children()
+    last = len(children) - 1
+    for (index, child) in enumerate(children):
+        tree(child, levels + [index == last], max_depth)

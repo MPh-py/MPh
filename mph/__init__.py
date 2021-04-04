@@ -16,3 +16,4 @@ from .server  import Server
 from .model   import Model
 from .node    import Node
 from .node    import inspect
+from .node    import tree

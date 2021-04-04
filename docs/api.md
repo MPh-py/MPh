@@ -19,5 +19,6 @@ by this library.
     Model
     Node
     discovery
+    tree
     inspect
 ```
