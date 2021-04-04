@@ -3,13 +3,13 @@
 
 ### Java bridge
 
-MPh is built in top of the Python-to-Java bridge [JPype][jpype].
+MPh is built on top of the Python-to-Java bridge [JPype][jpype].
 It is JPype that allows us to look at Comsol's Java API and run the
 same commands from Python. All credit to the JPype developers for
 making this possible.
 
 MPh therefore also inherits JPype's limitation, in that only one Java
-virtual machine can be managed within the same Python session, and thus
+virtual machine can be managed within the same Python process, and thus
 only one Comsol client at a time. If several simulations are to be run
 in parallel, distributed over independent processor cores in an effort
 to achieve maximum speed-up of a parameter sweep, they have to be
@@ -99,7 +99,7 @@ to override the default behavior.
 
 
 [tests]:  https://github.com/John-Hennig/mph/tree/master/tests
-[jpype]:  https://jpype.readthedocs.io
+[jpype]:  https://github.com/jpype-project/jpype
 [jnius]:  https://pyjnius.readthedocs.io
 [pytest]: https://docs.pytest.org
 [issue8]: https://github.com/John-Hennig/MPh/issues/8

@@ -49,7 +49,7 @@ class Node:
     ```
 
     In rare cases, the node name itself might contain a forward slash,
-    such as the dataset "sweep/solution" that happens to exist in the
+    such as the dataset `sweep/solution` that happens to exist in the
     demo model. These literal forward slashes can be escaped by doubling
     the character:
     ```python
