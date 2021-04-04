@@ -361,8 +361,12 @@ def cast(value):
     elif isinstance(value, (list, tuple)):
         return value
     elif isinstance(value, ndarray):
-        if value.dtype in (int, float, bool):
-            return JArray.of(value)
+        if value.dtype.kind == 'i':
+            return JArray(JInt, value.ndim)(value)
+        elif value.dtype.kind == 'f':
+            return JArray(JDouble, value.ndim)(value)
+        elif value.dtype.kind == 'b':
+            return JArray(JBoolean, value.ndim)(value)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
             logger.error(error)
