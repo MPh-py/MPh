@@ -16,6 +16,7 @@ from numpy import array                # numerical array
 from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
 from pathlib import Path               # file-system paths
+from warnings import warn              # user warning
 from logging import getLogger          # event logging
 
 
@@ -722,11 +723,11 @@ class Model:
         interface. They define the differential equations, boundary
         conditions, initial values, etc.
 
-        *Warning*: This method is deprecated and will be removed in
-        release 1.0. Use `Node` to retrieve child nodes of a physics
+        *Warning*: This method is deprecated and will be removed in a
+        future release. Use `Node` to retrieve child nodes of a physics
         interface.
         """
-        # To do: Issue deprecation warning.
+        warn('Model.features() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
             logger.error(error)
@@ -747,9 +748,9 @@ class Model:
         current state. Pass `'disable'` or `'off'` to disable it.
 
         *Warning*: This method is deprecated and will be removed in
-        release 1.0. Use `Node` to toggle nodes in the model tree.
+        a future release. Use `Node` to toggle nodes in the model tree.
         """
-        # To do: Issue deprecation warning.
+        warn('Model.toggle() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
             logger.error(error)
@@ -778,7 +779,7 @@ class Model:
         *Warning*: This method is deprecated and may be removed in a
         future release. Use the `import_` method instead.
         """
-        # To do: Issue deprecation warning.
+        warn('Model.load() is deprecated. Use Model.import_() instead.')
         for tag in self.java.func().tags():
             if str(self.java.func(tag).label()) == interpolation:
                 break

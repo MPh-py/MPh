@@ -7,10 +7,11 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
-from sys import argv
 from pathlib import Path
-import logging
 from numpy import array, isclose
+from sys import argv
+import logging
+import warnings
 
 
 ########################################
@@ -321,12 +322,6 @@ def test_property():
 def test_create():
     model.create('functions/interpolation', 'Interpolation')
     assert 'interpolation' in model.functions()
-    model.property('functions/interpolation', 'source', 'file')
-    model.property('functions/interpolation', 'scaledata', 'off')
-    model.property('functions/interpolation', 'interp', 'cubicspline')
-    model.property('functions/interpolation', 'nargs', 1)
-    model.property('functions/interpolation', 'funcs', ['g', '1'])
-    model.load('table.txt', 'interpolation')
 
 
 def test_remove():
@@ -518,6 +513,7 @@ if __name__ == '__main__':
         test_reset()
         test_save()
 
+        warnings.simplefilter('ignore')
         test_features()
         test_toggle()
         test_load()
