@@ -167,24 +167,18 @@ class Client:
             logger.error(error)
             raise ValueError(error)
 
-    def create(self, name):
+    def create(self, name=None):
         """
-        Creates and returns a new, empty model with the given `name`.
+        Creates a new model and returns it as a `Model` instance.
 
-        This is not particularly useful unless you are prepared to
-        drop down to the Java layer and add model features on your
-        own. It may help to call the returned (Python) model object
-        something like `pymodel` and assign the name `model` to
-        `pymodel.java`. Then you can just copy-and-paste Java or
-        Matlab code from the Comsol programming manual or as exported
-        from the Comsol front-end. Python will gracefully overlook
-        gratuitous semicolons at the end of statements, so this
-        approach would even work for entire blocks of code.
+        An optional `name` can be supplied. Otherwise the model will
+        retain its automatically generated name, like "Model 1".
         """
         java = self.java.createUnique('model')
         logger.debug(f'Created model with tag "{java.tag()}".')
         model = Model(java)
-        model.rename(name)
+        if name:
+            model.rename(name)
         return model
 
     def models(self):
