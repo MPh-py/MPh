@@ -50,10 +50,8 @@ class Node:
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset "sweep/solution" that happens to exist in the
-    demo model. (It was omitted in the list shown in the Tutorial
-    as Comsol generates it automatically and it serves little practical
-    purpose.) These literal forward slashes can be escaped
-    by doubling the character:
+    demo model. These literal forward slashes can be escaped by doubling
+    the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()

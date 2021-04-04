@@ -204,16 +204,22 @@ as a script.
 [subpr]: https://docs.python.org/3/library/subprocess.html
 
 
-### Creating models
+### Creating models: Java style
 
-While it is not the primary focus of MPh to create model features
-and change settings, it is however possible — thanks to [JPype][jpype],
-the Python-to-Java bridge that underpins MPh. All credit to the
-JPype developers for making this possible.
+The primary focus of MPh is to automate the simulation workflow, like
+running parameter sweeps or optimization routines with customized,
+Python-powered post-processing. Creating and altering models is
+possible (see next section), but has some limitations.
 
-Let's take this Comsol blog entry as an example: [Automate Your
-Modeling Tasks with the Comsol API for use with Java][blog]. It starts
-with the following Java code example:
+However, any and functionality offered by the [Comsol Java API][japi]
+is accessible via the "pythonized" Java layer provided by JPype, which
+is exposed as the `.java` attribute of `Client` instances (mapping to
+Comsol's `ModelUtil`) as well as `Model` instances (mapping to Comsol's
+`model`).
+
+Let's take this Comsol blog post as an example: ["Automate Your Modeling
+Tasks with the Comsol API for use with Java"][blog]. It starts with the
+following Java code example:
 ```java
 import com.comsol.model.*;
 import com.comsol.model.util.*;
@@ -239,14 +245,12 @@ public class HelloWorld {
 What it does is, it creates a model, which contains a 3d geometry
 component that is just a block 0.1 by 0.2 by 0.5 meters in size.
 
-In Python, we would achieve the same with the code that follows. It
-uses the `.java` attribute of the Python wrapper to access the model's
-Java API directly.
+In Python, we would achieve the same like so:
 ```python
 import mph
 
 client = mph.start()
-pymodel = client.create('model')
+pymodel = client.create('Model')
 model = pymodel.java
 
 model.modelNode().create("comp1");
@@ -267,31 +271,115 @@ of these three strings.
 Occasionally when translating Java (or Matlab) code you find in the
 documentation — or a blog entry, as the case was here —, you will have
 to amend code lines such as the one above. But they are few and far
-between. And the error messages you might receive would point you in
-the right direction.
+between. The error messages you might receive would point you in the
+right direction and the [JPype][jpype] documentation would offer help
+on type conversion.
 
-The upside of using the Python interface, rather than Java, is:
+The advantage of using Python over Java is:
 * You don't really need to know Java. Just a little, to understand that
-occasionally we have to take care of type conversions that JPype cannot
-handle all by itself. Which is rare.
+  occasionally we have to take care of type conversions that JPype
+  cannot handle all by itself. Which is rare.
 * You don't need to install Java. It just ships with Comsol. You also
-don't need to bother with compiling Java source code to Java classes
-via `comsolcompile`.
+  don't need to bother with compiling Java source code to Java classes
+  via `comsolcompile`.
 * You can use Python introspection to understand how Comsol models
-are "created in code". This may be the most productive feature. The
-Comsol documentation explains a lot of things, but not every little
-detail. The function `mph.inspect()` makes introspection even easier,
-as it formats the output more nicely than Python's built-in `dir()`.
+  are "created in code". This may be the most productive feature. The
+  Comsol documentation explains a lot of things, but not every little
+  detail. The function [`mph.inspect()`](api/mph.inspect) makes
+  introspection even easier, as it formats the output more nicely than
+  Python's built-in `dir()`.
 
-Finally, to save the model created in the above example, we can just
-do this:
+To save the model created in the above example, we do:
 ```python
 pymodel.save('model')
 ```
 
 This stores a file named `model.mph` in the working directory, which
-we can then open in the Comsol GUI or use in any other Python, Java,
-or Matlab project.
+may then be opened in the Comsol GUI or be used in any other Python,
+Java, or Matlab project.
 
+[japi]: https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [jpype]: https://github.com/jpype-project/jpype
 [blog]: https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
+
+
+### Creating models: Python style
+
+The example from the previous section can also be expressed in more
+"pythonic" syntax if we ignore the Java layer and just use the methods
+`.create()` and `.property()` from the [`Model`](api/mph.Model) class.
+```python
+import mph
+client = mph.start()
+model = client.create()
+model.create('geometries', 3)
+model.create('geometries/Geometry 1', 'Block')
+model.property('geometries/Geometry 1/Block 1', 'size', ('0.1', '0.2', '0.5'))
+model.build('Geometry 1')
+```
+
+This, again, hides all tags from the code. Instead we refer to nodes in
+the model tree by name. In the example, the names were generated
+automatically, in the same way the Comsol GUI does it. We could also
+supply our own names.
+```python
+import mph
+client = mph.start()
+model = client.create('block of ice')
+model.create('geometries/geometry', 3)
+model.create('geometries/geometry/ice block', 'Block')
+model.property('geometries/geometry/ice block', 'size', ('0.1', '0.2', '0.5'))
+model.build('geometry')
+```
+
+If `model.create()` receives a reference to a node that does not exist
+yet (such as `'geometries/geometry'` in the example), it creates that
+node in its parent group (the built-in top-level group `geometries`)
+and gives it the supplied name  (here `'geometry'`).
+
+So far we used strings to refer to nodes. We could also the
+[`Node`](api/mph.Node) class, which offers more flexibility and additional
+functionality. Instances of that class are returned by `model.create()`
+for convenience. But they can also be generated by string
+concatenation with the division operator `/` (much like `pathlib.Path`
+objects from Python's standard library).
+```python
+import mph
+client = mph.start()
+model = client.create('block of ice')
+geometries = model/'geometries'
+geometry = geometries.create(3, name='geometry')
+block = geometry.create('Block', name='ice block')
+block.property('size', ('0.1', '0.2', '0.5'))
+model.build(geometry)
+```
+
+All three code examples produce the following model tree:
+```python
+>>> mph.tree(model)
+/
+├─ functions
+├─ components
+│  └─ Component 1
+├─ geometries
+│  └─ geometry
+│     ├─ ice block
+│     └─ Form Union
+├─ views
+│  └─ View 1
+├─ selections
+├─ variables
+├─ physics
+├─ multiphysics
+├─ materials
+├─ meshes
+├─ studies
+├─ solutions
+├─ plots
+├─ datasets
+└─ exports
+```
+
+The one component and default view were created by Comsol automatically.
+Most built-in top-level groups are still empty, waiting for nodes to be
+created.
