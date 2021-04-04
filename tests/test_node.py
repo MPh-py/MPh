@@ -51,11 +51,11 @@ def test_parse():
 
 
 def test_join():
-    assert node.join(('a', 'b'))      == '/a/b'
-    assert node.join(('a', 'b', 'c')) == '/a/b/c'
-    assert node.join(('a', 'b/c'))    == '/a/b//c'
-    assert node.join(('a/b', 'c'))    == '/a//b/c'
-    assert node.join(('a/b', 'c/d'))  == '/a//b/c//d'
+    assert node.join(('a', 'b'))      == 'a/b'
+    assert node.join(('a', 'b', 'c')) == 'a/b/c'
+    assert node.join(('a', 'b/c'))    == 'a/b//c'
+    assert node.join(('a/b', 'c'))    == 'a//b/c'
+    assert node.join(('a/b', 'c/d'))  == 'a//b/c//d'
 
 
 def test_escape():
@@ -78,11 +78,11 @@ def test_init():
 
 
 def test_str():
-    assert str(Node(model, 'functions/step')) == '/functions/step'
+    assert str(Node(model, 'functions/step')) == 'functions/step'
 
 
 def test_repr():
-    assert repr(Node(model, 'functions/step')) == "Node('/functions/step')"
+    assert repr(Node(model, 'functions/step')) == "Node('functions/step')"
 
 
 def test_eq():
@@ -120,6 +120,8 @@ def test_children():
 
 
 def test_is_root():
+    assert Node(model, None).is_root()
+    assert Node(model, '').is_root()
     assert Node(model, '/').is_root()
 
 

@@ -35,9 +35,9 @@ class Node:
     ```python
     >>> node = model/'functions'
     >>> node
-    Node('/functions')
+    Node('functions')
     >>> node/'step'
-    Node('/functions/step')
+    Node('functions/step')
     ```
 
     Note how the `model` object also supports the `/` operator in
@@ -57,7 +57,7 @@ class Node:
     >>> node.name()
     'sweep//solution'
     >>> node.parent()
-    Node('/datasets')
+    Node('datasets')
     ```
 
     This class allows inspecting a node, such as its properties and
@@ -72,8 +72,10 @@ class Node:
     # Internal                         #
     ####################################
 
-    def __init__(self, model, path='/'):
-        if isinstance(path, str):
+    def __init__(self, model, path=None):
+        if path is None:
+            self.path = ('',)
+        elif isinstance(path, str):
             self.path = parse(path)
         elif isinstance(path, Node):
             self.path = path.path
@@ -132,8 +134,7 @@ class Node:
         if isinstance(other, str):
             other = other.lstrip('/')
             return Node(self.model, join(parse(f'{self}/{other}')))
-        else:
-            return NotImplemented
+        return NotImplemented
 
     @property
     def java(self):
@@ -158,7 +159,7 @@ class Node:
 
     def name(self):
         """Returns the node's name."""
-        return '/' if self.is_root() else escape(self.path[-1])
+        return f'{self.model}' if self.is_root() else escape(self.path[-1])
 
     def tag(self):
         """Returns the node's tag."""
@@ -327,7 +328,7 @@ def parse(string):
 
 def join(path):
     """Joins a node path given as tuple into a string."""
-    return '/' + '/'.join(escape(name) for name in path)
+    return '/'.join(escape(name) for name in path)
 
 
 def escape(name):
@@ -501,6 +502,7 @@ def tree(node, levels=[], max_depth=None):
     Specify `max_depth` to possibly limit the number of lower branches.
     """
     if not isinstance(node, Node):
+        # Support passing the model directly instead of a node.
         node = node/None
     if max_depth and len(levels) > max_depth:
         return

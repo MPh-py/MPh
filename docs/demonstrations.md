@@ -354,10 +354,10 @@ block.property('size', ('0.1', '0.2', '0.5'))
 model.build(geometry)
 ```
 
-All three code examples produce the following model tree:
+The latter two code examples produce the following model tree:
 ```python
 >>> mph.tree(model)
-/
+block of ice
 ├─ functions
 ├─ components
 │  └─ Component 1

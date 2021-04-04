@@ -94,9 +94,8 @@ class Model:
         if isinstance(other, Node):
             return Node(self, str(other))
         if other is None:
-            return Node(self, '/')
-        else:
-            return NotImplemented
+            return Node(self, None)
+        return NotImplemented
 
     def _dataset(self, name=None):
         """
