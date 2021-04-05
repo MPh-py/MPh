@@ -1,5 +1,4 @@
-﻿Tutorial
---------
+﻿# Tutorial
 
 To follow along with this tutorial in an interactive Python session,
 if you wish to do so, make sure you have downloaded the [demonstration
@@ -16,7 +15,7 @@ Comsol platform, but not for any add-on module beyond that.
 ![](images/capacitor.png)
 
 
-### Starting Comsol
+## Starting Comsol
 
 In the beginning was the client. And the client was with Comsol. And
 the client was Comsol. So let there be a Comsol client.
@@ -41,7 +40,7 @@ potential of your simulation hardware, you will need to run multiple
 Python sessions, one for each client.
 
 
-### Managing models
+## Managing models
 
 Now that we have the client up and running, we can tell it to load a
 model file.
@@ -81,7 +80,7 @@ Or we could remove all models at once — restart from a clean slate.
 ```
 
 
-### Inspecting models
+## Inspecting models
 
 Let's have a look at the parameters defined in the model.
 ```python
@@ -133,7 +132,7 @@ may also set up different models to be automated by the same script.
 No problem, as long as your naming scheme is consistent throughout.
 
 
-### Modifying parameters
+## Modifying parameters
 
 As we have learned from the list above, the model defines a parameter
 named `d` that denotes the electrode spacing. If we know a parameter's
@@ -165,7 +164,7 @@ away.
 >>> model.build()
 ```
 
-### Running simulations
+## Running simulations
 
 To solve the model, we need to create a mesh. This would also be taken
 care of automatically, but let's make sure this critical step passes
@@ -196,7 +195,7 @@ studies at once, or rather, all of the studies defined in the model.
 ```
 
 
-### Evaluating results
+## Evaluating results
 
 Let's see what we found out and evaluate the electrostatic capacitance,
 i.e. at zero time or infinite frequency.
@@ -287,7 +286,7 @@ of this library does not start with a 1 —, just to keep things simple
 and clean.
 
 
-### Saving results
+## Saving results
 
 To save the model we just solved, along with its solution, just do:
 ```python

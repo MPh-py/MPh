@@ -1,7 +1,6 @@
-﻿Limitations
------------
+﻿# Limitations
 
-### Java bridge
+## Java bridge
 
 MPh is built on top of the Python-to-Java bridge [JPype][jpype].
 It is JPype that allows us to look at Comsol's Java API and run the
@@ -15,7 +14,7 @@ in parallel, distributed over independent processor cores in an effort
 to achieve maximum speed-up of a parameter sweep, they have to be
 started as separate Python (sub-)processes. This is a feasible
 work-around, but a limitation nonetheless. Refer to section  ["Multiple
-processes"](demonstrations#multiple-process) for a demonstration.
+processes"](demonstrations.md#multiple-processes) for a demonstration.
 
 For the same reason, the [test suite][tests] that comes with MPh fails
 when collected and run via the testing framework [pyTest][pytest].
@@ -36,7 +35,7 @@ A number of Java methods exposed by Comsol are inexplicably missing
 from the Python encapsulation.)
 
 
-### Platform differences
+## Platform differences
 
 The Comsol API offers two distinct ways to run a simulation session
 on the local machine. One may either start a "stand-alone" client,

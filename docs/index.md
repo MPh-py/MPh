@@ -1,5 +1,4 @@
-﻿MPh
-===
+﻿# MPh
 Pythonic scripting interface for Comsol Multiphysics
 
 [Comsol][comsol] is a commercial software application that is widely
@@ -26,13 +25,12 @@ and sells the simulation software.
 [jpype]:  https://pypi.org/project/JPype1
 
 
-```eval_rst
-.. toctree::
-    :hidden:
+```{toctree}
+:hidden:
 
-    installation
-    tutorial
-    limitations
-    demonstrations
-    api
+installation
+tutorial
+limitations
+demonstrations
+api
 ```

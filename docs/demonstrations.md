@@ -1,7 +1,6 @@
-﻿Demonstrations
---------------
+﻿# Demonstrations
 
-### Busbar
+## Busbar
 
 ["Electrical Heating in a Busbar"][busbar] is an example model used
 in the tutorial in ["Introduction to Comsol Multiphysics"][intro] and
@@ -37,7 +36,7 @@ or width `wbb` of the busbar.
 [intro]: https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
 
 
-### Compacting models
+## Compacting models
 
 We usually save models to disk after we have solved them, which
 includes the solution and mesh data in the file. This is convenient
@@ -72,7 +71,7 @@ not meant to be included.
 [demos]: https://github.com/John-Hennig/MPh/tree/master/demos
 
 
-### Multiple processes
+## Multiple processes
 
 As explained in [Limitations](limitations), we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
@@ -204,7 +203,7 @@ as a script.
 [subpr]: https://docs.python.org/3/library/subprocess.html
 
 
-### Creating models: Java style
+## Creating models: Java style
 
 The primary focus of MPh is to automate the simulation workflow, like
 running parameter sweeps or optimization routines with customized,
@@ -303,7 +302,7 @@ Java, or Matlab project.
 [blog]: https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
 
-### Creating models: Python style
+## Creating models: Python style
 
 The example from the previous section can be expressed in more
 "pythonic" syntax if we ignore the Java layer and only use methods
