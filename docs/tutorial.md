@@ -1,9 +1,9 @@
 ﻿# Tutorial
 
 To follow along with this tutorial in an interactive Python session,
-if you wish to do so, make sure you have downloaded the [demonstration
-model "capacitor.mph"][demo] from this library's GitHub repository,
-and saved it in the same folder from which you run Python.
+if you wish to do so, make sure you have downloaded the demonstration
+model [`capacitor.mph`][capa] (file is linked) from MPh's source-code
+repository. Save it in the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -33,11 +33,12 @@ processor core. If the optional parameter is omitted, it will use all
 cores available on the machine. Restricting this resource is useful
 when running several simulations in parallel. Note, however, that due
 to [limitations](limitations) of this library's underlying Python-to-Java
-bridge, the `Client` class can only be instantiated once. Subsequent
-calls to `mph.start()` will therefore raise an error. If you wish to
-work around this limitation, in order to realize the full parallelization
-potential of your simulation hardware, you will need to run multiple
-Python sessions, one for each client.
+bridge, the [`Client`](api/mph.Client) class can only be instantiated
+once. Subsequent calls to [`mph.start()`](api/mph.start) will therefore
+raise an error. If you wish to work around this limitation, in order to
+realize the full parallelization potential of your simulation hardware,
+you will need to [run multiple Python
+sessions](demonstrations.md#multiple-processes), one for each client.
 
 
 ## Managing models
@@ -205,7 +206,7 @@ array(1.31948342)
 ```
 
 All results are returned as NumPy arrays. Though scalars such as this
-one could be readily cast to a (regular Python) `float`.
+one could be readily cast to a (regular Python) [`float`][float].
 
 We could also ask where the electric field is strongest.
 ```python
@@ -321,4 +322,5 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[demo]: https://github.com/John-Hennig/mph/blob/master/tests/capacitor.mph
+[capa]:  https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
+[float]: https://docs.python.org/3/library/functions.html#float

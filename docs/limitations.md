@@ -7,12 +7,12 @@ It is JPype that allows us to look at Comsol's Java API and run the
 same commands from Python. All credit to the JPype developers for
 making this possible.
 
-MPh therefore also inherits JPype's limitation, in that only one Java
-virtual machine can be managed within the same Python process, and thus
-only one Comsol client at a time. If several simulations are to be run
-in parallel, distributed over independent processor cores in an effort
-to achieve maximum speed-up of a parameter sweep, they have to be
-started as separate Python (sub-)processes. This is a feasible
+However, MPh therefore inherits JPype's limitation in that only one
+Java virtual machine can be managed within the same Python process,
+and thus only one Comsol client at a time. If several simulations are
+to be run in parallel, distributed over independent processor cores in
+an effort to achieve maximum speed-up of a parameter sweep, they have
+to be started as separate Python subprocesses. This is a feasible
 work-around, but a limitation nonetheless. Refer to section  ["Multiple
 processes"](demonstrations.md#multiple-processes) for a demonstration.
 
@@ -26,7 +26,7 @@ inconvenience.
 Furthermore, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Most notably, pressing
 <kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
-the Python session. So do not rely on catching `KeyboardInterrupt`
+the Python session. So do not rely on catching [`KeyboardInterrupt`][kbint]
 exceptions in application code.
 
 (There is an alternative Java bridge, [pyJNIus][jnius], which is
@@ -44,12 +44,12 @@ separately and have a "thin" client connect to it via a loop-back
 network socket. The first approach is more lightweight and arguably
 more robust, as it keeps everything inside the same process. The
 second approach is slower to start up and relies on the inter-process
-communication to work, but would also work across the network, i.e.,
-for remote sessions where the client runs locally and delegates the
-heavy lifting to a server running on another machine. If we instantiate
-the `Client` class without providing a value for the `host` address and
-network `port`, it will create a stand-alone client. Otherwise it will
-run in client–server mode.
+communication to be robust, but would also work across the network,
+i.e., for remote sessions where the client runs locally and delegates
+the heavy lifting to a server running on another machine. If we
+instantiate the [`Client`](api/mph.Client) class without providing a
+value for the host address and network port, it will create a
+stand-alone client. Otherwise it will run in client–server mode.
 
 On Linux and macOS however, the stand-alone mode does not work out of
 the box. This is due to a limitation of Unix-like operating systems
@@ -80,25 +80,27 @@ and will have to be adapted accordingly.
 Requiring this variable to be set correctly limits the possibility of
 selecting a specific Comsol version from within MPh, as adding multiple
 installations to that search path will lead to name collisions. One
-could work around the issue by wrapping a Python program that uses MPh
-in a shell script that sets the environment variable only for that one
+could work around the issue by wrapping a Python program using MPh in
+a shell script that sets the environment variable only for that one
 process. Or have the Python program start the Comsol session in a
 subprocess. However, none of this is ideal. Starting the client should
 work without any of these detours.
 
-The function `mph.start()` exists to navigate these platform
-differences. On Windows, it starts a stand-alone client in order to
-profit from the better start-up performance. On Linux and macOS, it
-creates a local session in client–server mode so that no shell
-configuration is required up front. This behavior is reflected in the
-configuration option "session", accessible via `mph.option()`, which is
-set to "platform-dependent" by default. It could also be set to
-"stand-alone" or "client-server" before calling `mph.start()` in order
-to override the default behavior.
+The function [`mph.start()`](api/mph.start) exists to navigate these
+platform differences. On Windows, it starts a stand-alone client in
+order to profit from the better start-up performance. On Linux and
+macOS, it creates a local session in client–server mode so that no
+shell configuration is required up front. This behavior is reflected
+in the configuration option "session", accessible via
+[`mph.option()`](api/mph.config), which is set to `'platform-dependent'`
+by default. It could also be set to `'stand-alone'` or `'client-server'`
+before calling [`start()`](api/mph.start) in order to override the
+default behavior.
 
 
 [tests]:  https://github.com/John-Hennig/mph/tree/master/tests
 [jpype]:  https://github.com/jpype-project/jpype
-[jnius]:  https://pyjnius.readthedocs.io
 [pytest]: https://docs.pytest.org
+[kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
+[jnius]:  https://pyjnius.readthedocs.io
 [issue8]: https://github.com/John-Hennig/MPh/issues/8

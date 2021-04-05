@@ -27,7 +27,7 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Node:
     """
-    Refers to a node in the model tree.
+    Represents a model mode.
 
     Nodes work similarly to `pathlib.Path` objects from Python's
     standard library. They support string concatenation to the right
@@ -50,8 +50,8 @@ class Node:
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
-    demo model. These literal forward slashes can be escaped by doubling
-    the character:
+    demo model from the Tutorial. These literal forward slashes can be
+    escaped by doubling the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()
@@ -186,11 +186,11 @@ class Node:
             return []
 
     def is_root(self):
-        """Checks if node is the model's root."""
+        """Checks if the node is the model's root node."""
         return bool(len(self.path) == 1 and not self.path[0])
 
     def is_group(self):
-        """Checks if the node refers to a built-in top-level group."""
+        """Checks if the node refers to a built-in group."""
         return bool(len(self.path) == 1 and self.path[0])
 
     def exists(self):
@@ -208,7 +208,7 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         if self.is_group():
-            error = 'Cannot rename a top-level group.'
+            error = 'Cannot rename a built-in group.'
             logger.error(error)
             raise PermissionError(error)
         self.java.name(name)
@@ -264,9 +264,9 @@ class Node:
         Creates a new child node.
 
         Refer to the Comsol documentation for the values of valid
-        arguments. It is often just the feature type of the child node
-        to be created, given as a string such as `'Block'`, but may
-        also require different or more arguments.
+        `arguments`. It is often just the feature type of the child
+        node to be created, given as a string such as `'Block'`, but
+        may also require different or more arguments.
 
         If `name` is not given, a unique name/label will be assigned
         automatically.
@@ -300,7 +300,7 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         if self.is_group():
-            error = 'Cannot remove a top-level group.'
+            error = 'Cannot remove a built-in group.'
             logger.error(error)
             raise PermissionError(error)
         if not self.exists():
@@ -344,7 +344,7 @@ def unescape(name):
 
 
 ########################################
-# Type-casting                         #
+# Type casting                         #
 ########################################
 
 def cast(value):
