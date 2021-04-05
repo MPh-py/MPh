@@ -63,7 +63,7 @@ the above simply displays the names of the models. The actual model
 objects can be recalled as follows:
 ```python
 >>> client.models()
-[<mph.model.Model object at 0x000002CAF6C0BE80>]
+[Model('capacitor')]
 ```
 
 We will generally not need to bother with these lists, as we would
@@ -202,7 +202,7 @@ Let's see what we found out and evaluate the electrostatic capacitance,
 i.e. at zero time or infinite frequency.
 ```python
 >>> model.evaluate('2*es.intWe/U^2', 'pF')
-array(1.31947349)
+array(1.31948342)
 ```
 
 All results are returned as NumPy arrays. Though scalars such as this
@@ -212,10 +212,10 @@ We could also ask where the electric field is strongest.
 ```python
 >>> (x, y, E) = model.evaluate(['x', 'y', 'es.normE'])
 >>> E.max()
-1455.5010798501924
+1480.2743893783063
 >>> imax = E.argmax()
 >>> x[imax], y[imax]
-(-0.0005161744830262844, 0.004178390490229011)
+(-0.000503768636204733, -0.004088126064370979)
 ```
 
 Note how this time we did not specify any units. When left out, values
@@ -230,7 +230,7 @@ The default dataset is the one resulting from that study, here —
 inconsistently — named "electrostatic".
 ```python
 >>> model.datasets()
-['electrostatic', 'time-dependent', 'parametric sweep']
+['electrostatic', 'time-dependent', 'parametric sweep', 'sweep//solution']
 ```
 
 Now let's look at the time dependence. The two media in this model
@@ -242,9 +242,9 @@ time. We can tell that from its value at the first and last time step.
 ```python
 >>> C = '2*ec.intWe/U^2'
 >>> model.evaluate(C, 'pF', 'time-dependent', 'first')
-array(1.31947349)
+array(1.31948342)
 >>> model.evaluate(C, 'pF', 'time-dependent', 'last')
-array(1.48410629)
+array(1.48410283)
 ```
 
 The "first" and "last" time step defined in that study are 0 and 1
@@ -269,11 +269,11 @@ array([1, 2, 3], dtype=int32)
 >>> values
 array([1., 2., 3.]
 >>> model.evaluate(C, 'pF', 'parametric sweep', 'first', 1)
-array(1.31947349)
+array(1.31948342)
 >>> model.evaluate(C, 'pF', 'parametric sweep', 'first', 2)
-array(0.73678503)
+array(0.73678535)
 >>> model.evaluate(C, 'pF', 'parametric sweep', 'first', 3)
-array(0.52865545)
+array(0.52865775)
 ```
 
 Then again, with a scripting interface such as this one, we may as

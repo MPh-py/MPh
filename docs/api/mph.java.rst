@@ -1,5 +1,0 @@
-java
-====
-
-.. automodule:: mph.java
-

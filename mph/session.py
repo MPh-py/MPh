@@ -88,7 +88,7 @@ def start(cores=None, version=None, port=None):
 
     if client or server:
         error = 'Only one Comsol session can be started in the same process.'
-        logger.critical(error)
+        logger.error(error)
         raise NotImplementedError(error)
 
     session = option('session')
@@ -106,7 +106,7 @@ def start(cores=None, version=None, port=None):
         client = Client(cores=cores, version=version, port=server.port)
     else:
         error = f'Invalid session type "{session}".'
-        logger.critical(error)
+        logger.error(error)
         raise ValueError(error)
     return client
 
@@ -167,7 +167,7 @@ def cleanup():
             client.disconnect()
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
-            logger.error(error, exc_info=True)
+            logger.exception(error)
     if server and server.running():
         server.stop()
     if jpype.isJVMStarted():

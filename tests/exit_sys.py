@@ -1,7 +1,7 @@
 ﻿"""Exits the Python session right after starting a client."""
 __license__ = 'MIT'
 
-import parent
+import parent # noqa F401
 import mph
 import sys
 

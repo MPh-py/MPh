@@ -3,16 +3,21 @@
 
 ### Java bridge
 
-This library depends on the Python-to-Java bridge [JPype][jpype].
-It therefore inherits its limitation, in that only one Java virtual
-machine can be managed within the same Python session, and thus only
-one Comsol client. If several simulations are to be run in parallel,
-distributed over independent processor cores in an effort to achieve
-maximum speed-up of a parameter sweep, they have to be started as
-separate Python (sub-)processes. This is a feasible work-around, but
-a limitation nonetheless.
+MPh is built on top of the Python-to-Java bridge [JPype][jpype].
+It is JPype that allows us to look at Comsol's Java API and run the
+same commands from Python. All credit to the JPype developers for
+making this possible.
 
-For the same reason, the [unit tests][tests] that come with MPh fail
+MPh therefore also inherits JPype's limitation, in that only one Java
+virtual machine can be managed within the same Python process, and thus
+only one Comsol client at a time. If several simulations are to be run
+in parallel, distributed over independent processor cores in an effort
+to achieve maximum speed-up of a parameter sweep, they have to be
+started as separate Python (sub-)processes. This is a feasible
+work-around, but a limitation nonetheless. Refer to section  ["Multiple
+processes"](demonstrations#multiple-process) for a demonstration.
+
+For the same reason, the [test suite][tests] that comes with MPh fails
 when collected and run via the testing framework [pyTest][pytest].
 They must be run directly from the command line. Since they cannot be
 used for continuous integration testing anyway, given that they depend
@@ -22,30 +27,13 @@ inconvenience.
 Furthermore, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Most notably, pressing
 <kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
-out of the Python session. So do not rely on catching
-`KeyboardInterrupt` exceptions in application code.
+the Python session. So do not rely on catching `KeyboardInterrupt`
+exceptions in application code.
 
 (There is an alternative Java bridge, [pyJNIus][jnius], which is
 not limited to one virtual machine, but then fails in another regard:
 A number of Java methods exposed by Comsol are inexplicably missing
 from the Python encapsulation.)
-
-
-### Creating models
-
-The API is intentionally scope-limited to automating the simulation
-workflow, such as running parameter sweeps or optimization routines
-with customized, Python-powered post-processing. Exposing any and all
-Comsol features to create or alter every aspect of a model, and thus
-replicating the [entire Java API][japi], albeit in a more pythonic way,
-is out of scope.
-
-Though users who do want to dig deeper may access the "pythonized"
-Java layer directly, via the `.java` attribute of `Client` instances
-(mapping to Comsol's `ModelUtil`) as well as `Model` (mapping to
-Comsol's `model`). Refer to section "Creating models" in chapter
-[Demonstrations](demonstrations) for an example and to Comsol's
-Programming Reference Manual for further details.
 
 
 ### Platform differences
@@ -110,11 +98,8 @@ set to "platform-dependent" by default. It could also be set to
 to override the default behavior.
 
 
-[repo]:   https://github.com/john-hennig/mph
 [tests]:  https://github.com/John-Hennig/mph/tree/master/tests
-[jpype]:  https://jpype.readthedocs.io
+[jpype]:  https://github.com/jpype-project/jpype
 [jnius]:  https://pyjnius.readthedocs.io
 [pytest]: https://docs.pytest.org
-[japi]:   https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[issues]: https://github.com/John-Hennig/MPh/issues
 [issue8]: https://github.com/John-Hennig/MPh/issues/8

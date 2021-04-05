@@ -13,10 +13,12 @@ by this library.
     :nosignatures:
 
     start
-    Model
+    config
     Client
     Server
+    Model
+    Node
     discovery
-    config
-    java
+    tree
+    inspect
 ```

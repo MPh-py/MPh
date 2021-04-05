@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Dependencies                         #
 ########################################
-import parent
+import parent # noqa F401
 import mph
 import logging
 from sys import argv

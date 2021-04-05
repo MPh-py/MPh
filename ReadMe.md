@@ -10,11 +10,9 @@ models and can be scripted from Matlab or via its native Java API.
 This library brings the dearly missing power of Python to the world
 of Comsol. It leverages the universal Python-to-Java bridge provided
 by [JPype][jpype] to access the native API, and wraps it in a layer
-of pythonic ease-of-use. The Python wrapper only covers common
-scripting tasks, such as loading a model from a file, modifying some
-parameters, running the simulation, to then evaluate the results.
-Though the full functionality is available to those willing to drop
-down to the pythonized Java layer underneath.
+of pythonic ease-of-use. The Python wrapper covers common scripting
+tasks, such as loading a model from a file, modifying parameters,
+importing data, to then run the simulation and evaluate the results.
 
 Comsol models are marked by their `.mph` file extension, which stands
 for multi-physics. Hence the name of this library. It is open-source

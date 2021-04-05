@@ -1,4 +1,4 @@
-start
+﻿start
 =====
 
 .. autofunction:: mph.start

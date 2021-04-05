@@ -93,7 +93,7 @@ def search_Windows():
         main_node = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, main_path)
     except FileNotFoundError:
         error = 'Did not find Comsol registry entry.'
-        logger.critical(error)
+        logger.error(error)
         raise LookupError(error) from None
 
     # Parse child nodes to get list of Comsol installations.
@@ -389,7 +389,7 @@ def search_system():
         return search_macOS()
     else:
         error = f'Unsupported operating system "{system}".'
-        logger.critical(error)
+        logger.error(error)
         raise NotImplementedError(error)
 
 
@@ -408,7 +408,7 @@ def backend(version=None):
     backends = search_system()
     if not backends:
         error = 'Could not locate any Comsol installation.'
-        logger.critical(error)
+        logger.error(error)
         raise RuntimeError(error)
     if version is None:
         numbers = [(backend['major'], backend['minor'], backend['patch'],

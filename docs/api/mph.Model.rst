@@ -1,4 +1,4 @@
-Model
+﻿Model
 =====
 
 .. autoclass:: mph.Model

@@ -5,7 +5,7 @@ __license__ = 'MIT'
 ########################################
 # Components                           #
 ########################################
-from . import java                     # Java layer
+from .node import Node                 # model node
 
 
 ########################################
@@ -16,6 +16,7 @@ from numpy import array                # numerical array
 from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
 from pathlib import Path               # file-system paths
+from warnings import warn              # user warning
 from logging import getLogger          # event logging
 
 
@@ -48,12 +49,15 @@ class Model:
         print(f'capacitance C = {C:.3f} pF')
     ```
 
-    The focus of the functionality exposed by this wrapper is to
+    The focus of the functionality exposed by this class is to
     inspect an existing model, possibly change parameters, solve the
-    model, then evaluate the results. The intention is *not* to create
-    the model from scratch or to extensively modify its structure.
-    Though if you wish to do that, just use the instance attribute
-    `.java` to access the entire Comsol Java API from Python and refer
+    model, then evaluate the results. The intention is not *per se*
+    to create the model from scratch or to extensively modify its
+    structure, though some such functionality is offered here, and
+    even more of it through the `Node` class.
+
+    The full set of features offered by the Comsol Java API can however
+    be accessed indirectly, via the instance attribute `.java`. Refer
     to the Comsol Programming Manual for guidance.
 
     The `parent` argument to the constructor is usually that internal
@@ -74,52 +78,33 @@ class Model:
             self.java = parent.java
         else:
             self.java = parent
-        self._groups = {
-            'functions':    self.java.func,
-            'components':   self.java.component,
-            'geometries':   self.java.geom,
-            'views':        self.java.view,
-            'selections':   self.java.selection,
-            'variables':    self.java.variable,
-            'physics':      self.java.physics,
-            'multiphysics': self.java.multiphysics,
-            'materials':    self.java.material,
-            'meshes':       self.java.mesh,
-            'studies':      self.java.study,
-            'solutions':    self.java.sol,
-            'plots':        self.java.result,
-            'datasets':     self.java.result().dataset,
-            'exports':      self.java.result().export,
-        }
+
+    def __str__(self):
+        return self.name()
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}('{self}')"
 
     def __eq__(self, other):
         return self.java.tag() == other.java.tag()
 
-    def _group(self, name):
-        # Returns the named group node.
-        if name not in self._groups:
-            error = f'Invalid group "{name}".'
-            logger.critical(error)
-            raise ValueError(error)
-        return self._groups[name]
-
-    def _node(self, group, name):
-        # Returns the named model node inside a given group.
-        parent = self._group(group)
-        tags = [tag for tag in parent().tags()]
-        names = [str(parent(tag).name()) for tag in tags]
-        try:
-            node = parent(tags[names.index(name)])
-        except ValueError:
-            error = f'No node named "{name}" in group "{group}".'
-            logger.critical(error)
-            raise LookupError(error) from None
-        return node
+    def __truediv__(self, other):
+        if isinstance(other, str):
+            return Node(self, other)
+        if isinstance(other, Node):
+            return Node(self, str(other))
+        if other is None:
+            return Node(self, None)
+        return NotImplemented
 
     def _dataset(self, name=None):
-        # Returns the Java dataset object.
-        # If `name` is given, returns the dataset object with that name.
-        # Otherwise returns the default dataset.
+        """
+        Returns the dataset as a Java object.
+
+        If `name` is given, returns the dataset object with that name.
+        Otherwise returns the default dataset.
+        """
+        # To do: Refactor this method, maybe eliminate it entirely.
         if name is not None:
             names = self.datasets()
             tags  = [tag for tag in self.java.result().dataset().tags()]
@@ -136,7 +121,8 @@ class Model:
         return self.java.result().dataset(dtag)
 
     def _solution(self, dataset=None):
-        # Returns the Java solution object the named `dataset` is based on.
+        """Returns the Java solution object the named dataset is based on."""
+        # To do: Refactor this method, maybe eliminate it entirely.
         dset = self._dataset(dataset)
         stag = dset.getString('solution')
         return self.java.sol(stag)
@@ -156,327 +142,147 @@ class Model:
         """Returns the absolute path to the file the model was loaded from."""
         return Path(str(self.java.getFilePath())).resolve()
 
-    def parameters(self):
-        """
-        Returns the global model parameters.
-
-        The parameters are returned as a list of tuples holding name,
-        value, and description for each of them.
-        """
-        Parameter = namedtuple('parameter', ('name', 'value', 'description'))
-        parameters = []
-        for name in self.java.param().varnames():
-            name  = str(name)
-            value = str(self.java.param().get(name))
-            descr = str(self.java.param().descr(name))
-            parameters.append(Parameter(name, value, descr))
-        return parameters
-
     def functions(self):
         """Returns the names of all globally defined functions."""
-        tags = [tag for tag in self.java.func().tags()]
-        return [str(self.java.func(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'functions').children()]
 
     def components(self):
         """Returns the names of all model components."""
-        tags = [tag for tag in self.java.component().tags()]
-        return [str(self.java.component(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'components').children()]
 
     def geometries(self):
         """Returns the names of all geometry sequences."""
-        tags = [tag for tag in self.java.geom().tags()]
-        return [str(self.java.geom(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'geometries').children()]
 
     def selections(self):
         """Returns the names of all selections."""
-        tags = [tag for tag in self.java.selection().tags()]
-        return [str(self.java.selection(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'selections').children()]
 
     def physics(self):
         """Returns the names of all physics interfaces."""
-        tags = [tag for tag in self.java.physics().tags()]
-        return [str(self.java.physics(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'physics').children()]
 
-    def features(self, physics):
-        """
-        Returns the names of all features in the given `physics` interface.
-
-        The term feature refers to the nodes defined under a physics
-        interface. They define the differential equations, boundary
-        conditions, initial values, etc.
-        """
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(ftag).name())
-                for ftag in tags]
+    def multiphysics(self):
+        """Returns the names of all multiphysics interfaces."""
+        return [child.name() for child in (self/'multiphysics').children()]
 
     def materials(self):
         """Returns the names of all materials."""
-        tags = [tag for tag in self.java.material().tags()]
-        return [str(self.java.material(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'materials').children()]
 
     def meshes(self):
         """Returns the names of all mesh sequences."""
-        tags = [tag for tag in self.java.mesh().tags()]
-        return [str(self.java.mesh(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'meshes').children()]
 
     def studies(self):
         """Returns the names of all studies."""
-        tags = [tag for tag in self.java.study().tags()]
-        return [str(self.java.study(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'studies').children()]
 
     def solutions(self):
         """Returns the names of all solutions."""
-        tags = [tag for tag in self.java.sol().tags()]
-        return [str(self.java.sol(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'solutions').children()]
 
     def datasets(self):
         """Returns the names of all datasets."""
-        tags = [tag for tag in self.java.result().dataset().tags()]
-        return [str(self.java.result().dataset(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'datasets').children()]
 
     def plots(self):
         """Returns the names of all plots."""
-        tags = [tag for tag in self.java.result().tags()]
-        return [str(self.java.result(tag).name()) for tag in tags]
+        return [child.name() for child in (self/'plots').children()]
 
     def exports(self):
         """Returns the names of all exports."""
-        tags = [tag for tag in self.java.result().export().tags()]
-        return [str(self.java.result().export(tag).name()) for tag in tags]
-
-    def groups(self):
-        """Returns the names of all feature groups."""
-        return list(self._groups.keys())
-
-    def properties(self, group, node):
-        """Returns the names of all properties defined on a node."""
-        return [str(name) for name in self._node(group, node).properties()]
-
-    ####################################
-    # Interaction                      #
-    ####################################
-
-    def rename(self, name):
-        """Assigns a new `name` to the model."""
-        self.java.name(name)
-
-    def parameter(self, name, value=None, unit=None, description=None,
-                  evaluate=False):
-        """
-        Returns or sets the parameter of the given `name`.
-
-        If no `value` is given (the default `None` is passed), returns
-        the value of the named parameter. Otherwise sets it.
-
-        Values are accepted as expressions (strings) or as numerical
-        values (referring to default units). An optional `unit` may be
-        specified, unless it is already part of the expression itself,
-        inside square brackets.
-
-        By default, values are always returned as strings, i.e. the
-        expression as entered in the user interface. That expression
-        may include the unit, again inside brackets. If the option
-        `evaluate` is set to `True`, the numerical value that the
-        parameter expression evaluate to is returned.
-
-        A parameter `description` can be supplied and will be set
-        regardless of a value being passed or not.
-        """
-        if description is not None:
-            value = self.parameter(name)
-            self.java.param().set(name, value, description)
-        if value is None:
-            if not evaluate:
-                return str(self.java.param().get(name))
-            else:
-                return self.java.param().evaluate(name)
-        else:
-            value = str(value)
-            if unit:
-                value += f' [{unit}]'
-            self.java.param().set(name, value)
-
-    def load(self, file, interpolation):
-        """
-        Loads an external `file` and assigns its data to the named
-        `interpolation` function.
-        """
-        for tag in self.java.func().tags():
-            if str(self.java.func(tag).label()) == interpolation:
-                break
-        else:
-            error = f'Interpolation function "{interpolation}" does not exist.'
-            logger.critical(error)
-            raise LookupError(error)
-        file = Path(file)
-        logger.info(f'Loading external data from file "{file.name}".')
-        self.java.func(tag).discardData()
-        self.java.func(tag).set('filename', f'{file}')
-        self.java.func(tag).importData()
-        logger.info('Finished loading external data.')
-
-    def create(self, group, type, name):
-        """
-        Creates a new model node inside the given feature group.
-
-        The node `type` is denoted by a string. Its allowed values
-        depend on the feature `group`. Refer to the Comsol documentation
-        for available options. Once created, the node is referred to by
-        `name` when changing its properties.
-        """
-        parent = self._group(group)
-        tag = parent().uniquetag(f'{type.lower()}')
-        try:
-            parent().create(tag, type)
-            parent(tag).label(name)
-        except Exception:
-            error = f'Could not create node type "{type}" in group "{group}".'
-            logger.exception()
-            raise ValueError(error)
-
-    def property(self, group, node, name, value=None):
-        """
-        Returns or changes the value of the named property.
-
-        If no `value` is given, returns the property `name` defined on
-        the named model `node` inside the specified `group`. Otherwise
-        sets the property to the given value.
-        """
-        node = self._node(group, node)
-        return java.property(node, name, value)
-
-    def apply_interpolation(self, physics, feature, parameter, function):
-        """
-        Applies an interpolation to a feature parameter.
-
-        This will apply an interpolation function to a feature parameter, to
-        set up e.g. field data boundary conditions. Function needs to be str
-        referencing the interpolation function - *that is not the name of the
-        node itself but one of the names used under the property funcs* defining
-        the column position in the file. The units have to match!"""
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        node = self.java.physics(ptag)
-        if feature not in self.features(physics):
-            error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in node.feature().tags()]
-        ftag = tags[self.features(physics).index(feature)]
-        node = node.feature(ftag)
-        node.set(parameter, function)
-
-    def toggle(self, physics, feature, action='flip'):
-        """
-        Enables or disables features of a physics interface.
-
-        If `action` is `'flip'` (the default), it enables the feature
-        if it is currently disabled or disables it if enabled. Pass
-        `'enable'` or `'on'` to enable the feature regardless of its
-        current state. Pass `'disable'` or `'off'` to disable it.
-        """
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        node = self.java.physics(ptag)
-        if feature not in self.features(physics):
-            error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.critical(error)
-            raise LookupError(error)
-        tags = [tag for tag in node.feature().tags()]
-        ftag = tags[self.features(physics).index(feature)]
-        node = node.feature(ftag)
-        if action == 'flip':
-            node.active(not node.isActive())
-        elif action in ('enable', 'on', 'activate'):
-            node.active(True)
-        elif action in ('disable', 'off', 'deactivate'):
-            node.active(False)
-
-    def remove(self, group, node):
-        """Removes the named `node` from the feature `group`."""
-        tag = self._node(group, node).tag()
-        parent = self._group(group)()
-        parent.remove(tag)
+        return [child.name() for child in (self/'exports').children()]
 
     ####################################
     # Solving                          #
     ####################################
 
     def build(self, geometry=None):
-        """Builds the named `geometry`, or all of them if none given."""
-        tags  = [tag for tag in self.java.geom().tags()]
-        names = self.geometries()
-        index = {name: tag for (tag, name) in zip(tags, names)}
-        if geometry is not None:
-            index = {name: tag for (name, tag) in index.items()
-                     if name == geometry}
-            if not index:
-                error = f'Geometry sequence "{geometry}" does not exist.'
-                logger.critical(error)
-                raise LookupError(error)
-        elif not index:
-            error = 'No geometry sequence defined in the model tree.'
-            logger.critical(error)
-            raise RuntimeError(error)
-        for (name, tag) in index.items():
-            logger.info(f'Running geometry sequence "{name}".')
-            self.java.geom(tag).run()
+        """Builds the named geometry, or all of them if none given."""
+        geometries = self/'geometries'
+        if geometry is None:
+            if not geometries.children():
+                error = 'No geometry sequence defined in the model.'
+                logger.error(error)
+                raise RuntimeError(error)
+        elif isinstance(geometry, str):
+            geometry = geometries/geometry
+        elif isinstance(geometry, Node):
+            if not geometry.parent() == self/'geometries':
+                error = f'Node "{geometry}" is not a geometry node.'
+                logger.error(error)
+                raise ValueError(error)
+        else:
+            error = f'Geometry {geometry!r} is neither string nor node.'
+            logger.error(error)
+            raise TypeError(error)
+        if geometry and not geometry.exists():
+            error = f'Geometry sequence "{geometry.name()}" does not exist.'
+            logger.error(error)
+            raise LookupError(error)
+        nodes = [geometry] if geometry else geometries.children()
+        for node in nodes:
+            logger.info(f'Running geometry sequence "{node.name()}".')
+            node.run()
             logger.info('Finished geometry sequence.')
 
     def mesh(self, mesh=None):
-        """Runs the named `mesh` sequence, or all of them if none given."""
-        tags  = [tag for tag in self.java.mesh().tags()]
-        names = self.meshes()
-        index = {name: tag for (tag, name) in zip(tags, names)}
-        if mesh is not None:
-            index = {name: tag for (name, tag) in index.items()
-                     if name == mesh}
-            if not index:
-                error = f'Mesh sequence "{mesh}" does not exist.'
-                logger.critical(error)
-                raise LookupError(error)
-        elif not index:
-            error = 'No mesh sequence defined in the model tree.'
-            logger.critical(error)
-            raise RuntimeError(error)
-        for (name, tag) in index.items():
-            logger.info(f'Running mesh sequence "{name}".')
-            self.java.mesh(tag).run()
+        """Runs the named mesh sequence, or all of them if none given."""
+        meshes = self/'meshes'
+        if mesh is None:
+            if not meshes.children():
+                error = 'No mesh sequences defined in the model.'
+                logger.error(error)
+                raise RuntimeError(error)
+        elif isinstance(mesh, str):
+            mesh = meshes/mesh
+        elif isinstance(mesh, Node):
+            if not mesh.parent() == self/'meshes':
+                error = f'Node "{mesh}" is not a mesh node.'
+                logger.error(error)
+                raise ValueError(error)
+        else:
+            error = f'Mesh {mesh!r} is neither string nor node.'
+            logger.error(error)
+            raise TypeError(error)
+        if mesh and not mesh.exists():
+            error = f'Mesh sequence "{mesh.name()}" does not exist.'
+            logger.error(error)
+            raise LookupError(error)
+        nodes = [mesh] if mesh else meshes.children()
+        for node in nodes:
+            logger.info(f'Running mesh sequence "{node.name()}".')
+            node.run()
             logger.info('Finished mesh sequence.')
 
     def solve(self, study=None):
-        """Solves the named `study`, or all of them if none given."""
-        tags  = [tag for tag in self.java.study().tags()]
-        names = self.studies()
-        index = {name: tag for (tag, name) in zip(tags, names)}
-        if study is not None:
-            index = {name: tag for (name, tag) in index.items()
-                     if name == study}
-            if not index:
-                error = f'Study "{study}" does not exist.'
-                logger.critical(error)
-                raise LookupError(error)
-        elif not index:
-            error = 'No study defined in the model tree.'
-            logger.critical(error)
-            raise RuntimeError(error)
-        for (name, tag) in index.items():
-            logger.info(f'Running study "{name}".')
-            self.java.study(tag).run()
+        """Solves the named study, or all of them if none given."""
+        studies = self/'studies'
+        if study is None:
+            if not studies.children():
+                error = 'No studies defined in the model.'
+                logger.error(error)
+                raise RuntimeError(error)
+        elif isinstance(study, str):
+            study = studies/study
+        elif isinstance(study, Node):
+            if not study.parent() == self/'studies':
+                error = f'Node "{study}" is not a study node.'
+                logger.error(error)
+                raise ValueError(error)
+        else:
+            error = f'Study {study!r} is neither string nor node.'
+            logger.error(error)
+            raise TypeError(error)
+        if study and not study.exists():
+            error = f'Study "{study.name()}" does not exist.'
+            logger.error(error)
+            raise LookupError(error)
+        nodes = [study] if study else studies.children()
+        for node in nodes:
+            logger.info(f'Running study "{node.name()}".')
+            node.run()
             logger.info('Finished solving study.')
 
     ####################################
@@ -539,6 +345,7 @@ class Model:
         dimensionality they may have. The expression may be a global
         one, or a scalar field, or particle data.
         """
+        # To do: Refactor this method using the Node API.
 
         # Get dataset and solution (Java) objects.
         dataset = self._dataset(dataset)
@@ -548,7 +355,7 @@ class Model:
         # Make sure solution has actually been computed.
         if solution.isEmpty():
             error = 'The solution has not been computed.'
-            logger.critical(error)
+            logger.error(error)
             raise RuntimeError(error)
 
         # Validate solution arguments.
@@ -561,7 +368,7 @@ class Model:
                     and inner.dtype == 'int')):
             error = ('Argument "inner", if specified, must be either '
                      '"first", "last", or a list/array of integers.')
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
         if not (outer is None
                 or isinstance(outer, int)
@@ -569,7 +376,7 @@ class Model:
                     and issubclass(outer.dtype.type, numpy.integer)
                     and not outer.shape)):
             error = 'Argument "outer", if specified, must be an integer index.'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
 
         # Try to perform a global evaluation, which may fail.
@@ -667,36 +474,159 @@ class Model:
         return results
 
     ####################################
+    # Interaction                      #
+    ####################################
+
+    def rename(self, name):
+        """Assigns a new name to the model."""
+        self.java.name(name)
+
+    def parameters(self):
+        """
+        Returns the global model parameters.
+
+        The parameters are returned as a list of tuples holding name,
+        value, and description for each of them.
+        """
+        Parameter = namedtuple('parameter', ('name', 'value', 'description'))
+        parameters = []
+        for name in self.java.param().varnames():
+            name  = str(name)
+            value = str(self.java.param().get(name))
+            descr = str(self.java.param().descr(name))
+            parameters.append(Parameter(name, value, descr))
+        return parameters
+
+    def parameter(self, name, value=None, unit=None, description=None,
+                        evaluate=False):
+        """
+        Returns or sets the parameter of the given name.
+
+        If no `value` is given (the default `None` is passed), returns
+        the value of parameter `name`. Otherwise sets it.
+
+        Values are accepted as expressions (strings) or as numerical
+        values (referring to default units). An optional `unit` may be
+        specified, unless it is already part of the expression itself,
+        inside square brackets.
+
+        By default, values are always returned as strings, i.e. the
+        expression as entered in the user interface. That expression
+        may include the unit, again inside brackets. If the option
+        `evaluate` is set to `True`, the numerical value that the
+        parameter expression evaluate to is returned.
+
+        A parameter `description` can be supplied and will be set
+        regardless of a value being passed or not.
+        """
+        if description is not None:
+            value = self.parameter(name)
+            self.java.param().set(name, value, description)
+        if value is None:
+            if not evaluate:
+                return str(self.java.param().get(name))
+            else:
+                return self.java.param().evaluate(name)
+        else:
+            value = str(value)
+            if unit:
+                value += f' [{unit}]'
+            self.java.param().set(name, value)
+
+    def properties(self, node):
+        """Returns the names of all properties defined on a node."""
+        return (self/node).properties()
+
+    def property(self, node, name, value=None):
+        """
+        Returns or changes the value of the named node property.
+
+        If no `value` is given, returns the value of property `name`.
+        Otherwise sets the property to the given value.
+        """
+        return (self/node).property(name, value)
+
+    def create(self, node, *arguments):
+        """
+        Creates a new child node.
+
+        If the given `node` does not exist, creates a node with its
+        name in the node's parent group. Otherwise creates a child
+        node underneath the given node and assigns it an automatically
+        generated unique name/label.
+
+        Refer to the Comsol documentation for the values of valid
+        arguments. It is often just the feature type of the child node
+        to be created, given as a string such as "Block", but may also
+        require different or more arguments.
+
+        Returns the newly created child node as a `Node` instance.
+        """
+        node = self/node
+        if node.exists():
+            return node.create(*arguments)
+        else:
+            return node.parent().create(*arguments, name=node.name())
+
+    def remove(self, node):
+        """Removes the node from the model tree."""
+        (self/node).remove()
+
+    ####################################
     # Files                            #
     ####################################
 
-    def export(self, node, file=None):
+    def import_(self, node, file):
         """
-        Runs the named export `node`.
+        Imports external data from a file and assigns it to the node.
 
         A `file` name can be specified. Otherwise the file name defined
         in the export node itself will be used.
+
+        Note the trailing underscore in the method name. It is needed
+        so that the Python parser does not treat the name as an
+        `import` statement.
         """
-        names   = self.exports()
-        tags    = [tag for tag in self.java.result().export().tags()]
-        tag     = tags[names.index(node)]
-        feature = self.java.result().export(tag)
-        if file is not None:
-            feature.set('filename', str(file))
-        feature.run()
+        file = Path(file)
+        logger.info(f'Loading external data from file "{file.name}".')
+        node.java.discardData()
+        node.property('filename', f'{file}')
+        node.java.importData()
+        logger.info('Finished loading external data.')
+
+    def export(self, node, file=None):
+        """
+        Runs the export node, either given by name or reference.
+
+        A `file` name can be specified. Otherwise the file name defined
+        in the node's properties will be used.
+        """
+        if isinstance(node, str):
+            if '/' in node:
+                node = self/node
+            else:
+                node = self/'exports'/node
+        else:
+            node = Node(node)
+        if not node.exists():
+            logger.warning('Node does not exist in model tree')
+            return
+        if file:
+            node.property('filename', str(file))
+        node.run()
 
     def clear(self):
         """Clears stored solution, mesh, and plot data."""
         logger.info('Clearing stored plot data.')
-        self.java.result().clearStoredPlotData()
+        (self/'plots').java.clearStoredPlotData()
         logger.info('Finished clearing plots.')
         logger.info('Clearing solution data.')
-        for tag in self.java.sol().tags():
-            self.java.sol(tag).clearSolution()
+        for solution in (self/'solutions').children():
+            solution.java.clearSolution()
         logger.info('Finished clearing solutions.')
         logger.info('Clearing mesh data.')
-        for tag in self.java.mesh().tags():
-            self.java.mesh(tag).clearMesh()
+        for mesh in (self/'meshes').children():
+            mesh.java.clearMesh()
         logger.info('Finished clearing meshes.')
 
     def reset(self):
@@ -707,7 +637,7 @@ class Model:
 
     def save(self, path=None, format=None):
         """
-        Saves the model at the given file-system `path`.
+        Saves the model at the given file-system path.
 
         If `path` is not given, the original file name is used, i.e.
         the one from which the model was loaded to begin with. If
@@ -725,8 +655,8 @@ class Model:
         """
 
         # Coerce paths given as string to Path objects.
-        if isinstance(path, str):
-            path = Path.cwd()/path
+        if path:
+            path = Path(path)
 
         # Possibly deduce format from file ending.
         if format is None:
@@ -741,7 +671,7 @@ class Model:
                 format = 'VBA'
             else:
                 error = f'Cannot deduce file format from ending "{suffix}".'
-                logger.critical(error)
+                logger.error(error)
                 raise ValueError(error)
 
         # Allow synonyms for format and map to Comsol's file type.
@@ -755,7 +685,7 @@ class Model:
             (format, type) = ('VBA', 'vba')
         else:
             error = f'Invalid file format "{format}".'
-            logger.critical(error)
+            logger.error(error)
             raise ValueError(error)
 
         # Use model name if no file name specified.
@@ -764,7 +694,7 @@ class Model:
                 logger.info(f'Saving model "{self.name()}".')
                 self.java.save()
             else:
-                file = self.name() + '.' + type
+                file = f'{self}.{type}'
                 logger.info(f'Saving model as "{file.name}".')
                 self.java.save(str(file), type)
         # Otherwise save at given path.
@@ -779,3 +709,86 @@ class Model:
             else:
                 self.java.save(str(file), type)
         logger.info('Finished saving model.')
+
+    ####################################
+    # Deprecation                      #
+    ####################################
+
+    def features(self, physics):
+        """
+        Returns the names of all features in a given physics interface.
+
+        The term feature refers to the nodes defined under a physics
+        interface. They define the differential equations, boundary
+        conditions, initial values, etc.
+
+        *Warning*: This method is deprecated and will be removed in a
+        future release. Use `Node` to retrieve child nodes of a physics
+        interface.
+        """
+        warn('Model.features() is deprecated. Use the Node class instead.')
+        if physics not in self.physics():
+            error = f'No physics interface named "{physics}".'
+            logger.error(error)
+            raise LookupError(error)
+        tags = [tag for tag in self.java.physics().tags()]
+        ptag = tags[self.physics().index(physics)]
+        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
+        return [str(self.java.physics(ptag).feature(ftag).name())
+                for ftag in tags]
+
+    def toggle(self, physics, feature, action='flip'):
+        """
+        Enables or disables features of a physics interface.
+
+        If `action` is `'flip'` (the default), it enables the feature
+        if it is currently disabled or disables it if enabled. Pass
+        `'enable'` or `'on'` to enable the feature regardless of its
+        current state. Pass `'disable'` or `'off'` to disable it.
+
+        *Warning*: This method is deprecated and will be removed in
+        a future release. Use `Node` to toggle nodes in the model tree.
+        """
+        warn('Model.toggle() is deprecated. Use the Node class instead.')
+        if physics not in self.physics():
+            error = f'No physics interface named "{physics}".'
+            logger.error(error)
+            raise LookupError(error)
+        tags = [tag for tag in self.java.physics().tags()]
+        ptag = tags[self.physics().index(physics)]
+        node = self.java.physics(ptag)
+        if feature not in self.features(physics):
+            error = f'No feature named "{feature}" in physics "{physics}".'
+            logger.error(error)
+            raise LookupError(error)
+        tags = [tag for tag in node.feature().tags()]
+        ftag = tags[self.features(physics).index(feature)]
+        node = node.feature(ftag)
+        if action == 'flip':
+            node.active(not node.isActive())
+        elif action in ('enable', 'on', 'activate'):
+            node.active(True)
+        elif action in ('disable', 'off', 'deactivate'):
+            node.active(False)
+
+    def load(self, file, interpolation):
+        """
+        Loads data from a file and assigns it to an interpolation function.
+
+        *Warning*: This method is deprecated and may be removed in a
+        future release. Use the `import_` method instead.
+        """
+        warn('Model.load() is deprecated. Use Model.import_() instead.')
+        for tag in self.java.func().tags():
+            if str(self.java.func(tag).label()) == interpolation:
+                break
+        else:
+            error = f'Interpolation function "{interpolation}" does not exist.'
+            logger.error(error)
+            raise LookupError(error)
+        file = Path(file)
+        logger.info(f'Loading external data from file "{file.name}".')
+        self.java.func(tag).discardData()
+        self.java.func(tag).set('filename', f'{file}')
+        self.java.func(tag).importData()
+        logger.info('Finished loading external data.')
