@@ -94,10 +94,10 @@ class Node:
             'mesh':      'meshes',
             'study':     'studies',
             'solution':  'solutions',
+            'dataset':   'datasets',
             'plot':      'plots',
             'result':    'plots',
             'results':   'plots',
-            'dataset':   'datasets',
             'export':    'exports',
         }
         if self.path[0] in self.alias:
@@ -115,8 +115,8 @@ class Node:
             'meshes':       model.java.mesh(),
             'studies':      model.java.study(),
             'solutions':    model.java.sol(),
-            'plots':        model.java.result(),
             'datasets':     model.java.result().dataset(),
+            'plots':        model.java.result(),
             'exports':      model.java.result().export(),
         }
         self.model = model

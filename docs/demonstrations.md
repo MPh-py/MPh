@@ -375,8 +375,8 @@ block of ice
 ├─ meshes
 ├─ studies
 ├─ solutions
-├─ plots
 ├─ datasets
+├─ plots
 └─ exports
 ```
 
