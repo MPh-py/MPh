@@ -34,11 +34,11 @@ cores available on the machine. Restricting this resource is useful
 when running several simulations in parallel. Note, however, that due
 to [limitations](limitations) of this library's underlying Python-to-Java
 bridge, the [`Client`](api/mph.Client) class can only be instantiated
-once. Subsequent calls to [`mph.start()`](api/mph.start) will therefore
+once. Subsequent calls to [`start()`](api/mph.start) will therefore
 raise an error. If you wish to work around this limitation, in order to
 realize the full parallelization potential of your simulation hardware,
 you will need to [run multiple Python
-sessions](demonstrations.md#multiple-processes), one for each client.
+processes](demonstrations.md#multiple-processes), one for each client.
 
 
 ## Managing models

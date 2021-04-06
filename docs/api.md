@@ -16,7 +16,7 @@ provided by this library.
     Server
     Model
     Node
-    discovery
     tree
     inspect
+    discovery
 ```

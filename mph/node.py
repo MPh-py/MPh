@@ -477,7 +477,7 @@ def inspect(java):
     # Display properties if any are defined.
     if 'properties' in attributes:
         print('properties:')
-        names = [str(property) for property in java.properties()]
+        names = [str(name) for name in java.properties()]
         for name in names:
             try:
                 value = get(java, name)

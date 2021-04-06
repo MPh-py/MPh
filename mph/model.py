@@ -596,8 +596,8 @@ class Model:
         """
         Imports external data from a file and assigns it to the node.
 
-        A `file` name can be specified. Otherwise the file name defined
-        in the export node itself will be used.
+        A `file` name can be specified. Otherwise the node's `filename`
+        property will be used.
 
         Note the trailing underscore in the method name. It is needed
         so that the Python parser does not treat the name as an
@@ -737,8 +737,8 @@ class Model:
         conditions, initial values, etc.
 
         *Warning*: This method is deprecated and will be removed in a
-        future release. Use `Node` to retrieve child nodes of a physics
-        interface.
+        future release. Use the `Node` class to retrieve child nodes of
+        a physics interface.
         """
         warn('Model.features() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
@@ -761,7 +761,8 @@ class Model:
         current state. Pass `'disable'` or `'off'` to disable it.
 
         *Warning*: This method is deprecated and will be removed in
-        a future release. Use `Node` to toggle nodes in the model tree.
+        a future release. Use the `Node` class to toggle nodes in the
+        model tree.
         """
         warn('Model.toggle() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
@@ -790,7 +791,7 @@ class Model:
         Loads data from a file and assigns it to an interpolation function.
 
         *Warning*: This method is deprecated and may be removed in a
-        future release. Use the `import_` method instead.
+        future release. Use the `import_()` method instead.
         """
         warn('Model.load() is deprecated. Use Model.import_() instead.')
         for tag in self.java.func().tags():
