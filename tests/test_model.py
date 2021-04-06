@@ -1,4 +1,4 @@
-﻿"""Tests the model class."""
+﻿"""Tests the Model class."""
 __license__ = 'MIT'
 
 
@@ -65,6 +65,29 @@ def test_truediv():
     node = model/'functions'/'step'
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
+
+
+def test_contains():
+    assert 'functions' in model
+    assert 'functions/step' in model
+    other = client.create('other')
+    assert (other/'functions') in model
+    assert (other/'functions'/'step') in model
+    client.remove(other)
+
+
+def test_iter():
+    assert model/'functions' in list(model)
+    assert model/'functions'/'step' not in list(model)
+
+
+def test_getitem():
+    assert model/'functions' == model['functions']
+    assert model/'functions'/'step' not in list(model)
+    other = client.create('other')
+    assert model['functions'] == model[other/'functions']
+    assert model['functions/step'] == model[other/'functions/step']
+    client.remove(other)
 
 
 def test_name():
@@ -485,6 +508,9 @@ if __name__ == '__main__':
         test_repr()
         test_eq()
         test_truediv()
+        test_contains()
+        test_iter()
+        test_getitem()
 
         test_name()
         test_file()
