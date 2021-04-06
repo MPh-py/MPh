@@ -119,6 +119,12 @@ def test_tag():
     assert Node(model, 'functions/step').tag() == 'step1'
 
 
+def test_type():
+    assert Node(model, 'functions/step').type() == 'Step'
+    assert Node(model, 'functions/image').type() == 'Image'
+    assert Node(model, 'functions/table').type() == 'Interpolation'
+
+
 def test_parent():
     assert Node(model, 'functions/step').parent() == Node(model, 'functions')
 

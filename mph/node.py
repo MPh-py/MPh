@@ -177,6 +177,10 @@ class Node:
         """Returns the node's tag."""
         return str(self.java.tag()) if self.exists() else None
 
+    def type(self):
+        """Returns the node's feature type."""
+        return str(self.java.getType())
+
     def parent(self):
         """Returns the parent node."""
         if self.is_root():
