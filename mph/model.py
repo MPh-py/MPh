@@ -160,55 +160,55 @@ class Model:
 
     def functions(self):
         """Returns the names of all globally defined functions."""
-        return [child.name() for child in (self/'functions').children()]
+        return [child.name() for child in self/'functions']
 
     def components(self):
         """Returns the names of all model components."""
-        return [child.name() for child in (self/'components').children()]
+        return [child.name() for child in self/'components']
 
     def geometries(self):
         """Returns the names of all geometry sequences."""
-        return [child.name() for child in (self/'geometries').children()]
+        return [child.name() for child in self/'geometries']
 
     def selections(self):
         """Returns the names of all selections."""
-        return [child.name() for child in (self/'selections').children()]
+        return [child.name() for child in self/'selections']
 
     def physics(self):
         """Returns the names of all physics interfaces."""
-        return [child.name() for child in (self/'physics').children()]
+        return [child.name() for child in self/'physics']
 
     def multiphysics(self):
         """Returns the names of all multiphysics interfaces."""
-        return [child.name() for child in (self/'multiphysics').children()]
+        return [child.name() for child in self/'multiphysics']
 
     def materials(self):
         """Returns the names of all materials."""
-        return [child.name() for child in (self/'materials').children()]
+        return [child.name() for child in self/'materials']
 
     def meshes(self):
         """Returns the names of all mesh sequences."""
-        return [child.name() for child in (self/'meshes').children()]
+        return [child.name() for child in self/'meshes']
 
     def studies(self):
         """Returns the names of all studies."""
-        return [child.name() for child in (self/'studies').children()]
+        return [child.name() for child in self/'studies']
 
     def solutions(self):
         """Returns the names of all solutions."""
-        return [child.name() for child in (self/'solutions').children()]
+        return [child.name() for child in self/'solutions']
 
     def datasets(self):
         """Returns the names of all datasets."""
-        return [child.name() for child in (self/'datasets').children()]
+        return [child.name() for child in self/'datasets']
 
     def plots(self):
         """Returns the names of all plots."""
-        return [child.name() for child in (self/'plots').children()]
+        return [child.name() for child in self/'plots']
 
     def exports(self):
         """Returns the names of all exports."""
-        return [child.name() for child in (self/'exports').children()]
+        return [child.name() for child in self/'exports']
 
     ####################################
     # Solving                          #
@@ -635,11 +635,11 @@ class Model:
         (self/'plots').java.clearStoredPlotData()
         logger.info('Finished clearing plots.')
         logger.info('Clearing solution data.')
-        for solution in (self/'solutions').children():
+        for solution in self/'solutions':
             solution.java.clearSolution()
         logger.info('Finished clearing solutions.')
         logger.info('Clearing mesh data.')
-        for mesh in (self/'meshes').children():
+        for mesh in self/'meshes':
             mesh.java.clearMesh()
         logger.info('Finished clearing meshes.')
 

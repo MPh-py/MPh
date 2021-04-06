@@ -136,6 +136,18 @@ class Node:
             return Node(self.model, join(parse(f'{self}/{other}')))
         return NotImplemented
 
+    def __contains__(self, node):
+        if isinstance(node, str):
+            if (self/node).exists():
+                return True
+        elif isinstance(node, Node):
+            if node.parent() == self and node.exists():
+                return True
+        return False
+
+    def __iter__(self):
+        yield from self.children()
+
     @property
     def java(self):
         """Returns the Java object this node maps to."""

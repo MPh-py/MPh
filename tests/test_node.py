@@ -1,4 +1,4 @@
-﻿"""Tests the node class."""
+﻿"""Tests the Node class."""
 __license__ = 'MIT'
 
 
@@ -91,6 +91,18 @@ def test_eq():
 
 def test_truediv():
     assert Node(model, 'functions')/'step' == Node(model, 'functions/step')
+
+
+def test_contains():
+    assert 'step' in Node(model, 'functions')
+    assert 'other' not in Node(model, 'functions')
+    assert Node(model, 'functions/step') in Node(model, 'functions')
+    assert Node(model, 'functions/other') not in Node(model, 'functions')
+
+
+def test_iter():
+    assert Node(model, 'functions/step')  in list(Node(model, 'functions'))
+    assert Node(model, 'functions/image') in list(Node(model, 'functions'))
 
 
 def test_java():
@@ -235,6 +247,8 @@ if __name__ == '__main__':
         test_repr()
         test_eq()
         test_truediv()
+        test_contains()
+        test_iter()
         test_java()
 
         test_name()
