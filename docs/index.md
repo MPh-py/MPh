@@ -21,9 +21,12 @@ for multi-physics. Hence the name of this library. It is open-source
 and in no way affiliated with Comsol Inc., the company that develops
 and sells the simulation software.
 
+[comsol]: https://www.comsol.com
+[jpype]:  https://pypi.org/project/JPype1
 
+[![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
+[![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![source](https://img.shields.io/github/stars/John-Hennig/MPh?style=social)](https://github.com/John-Hennig/MPh)
-[![license](https://img.shields.io/github/license/John-Hennig/MPh?style=social)](https://opensource.org/licenses/MIT)
 
 ```{toctree}
 :hidden:
@@ -34,6 +37,3 @@ limitations
 demonstrations
 api
 ```
-
-[comsol]: https://www.comsol.com
-[jpype]:  https://pypi.org/project/JPype1
