@@ -606,8 +606,6 @@ class Model:
                 node = self/node
             else:
                 node = self/'exports'/node
-        else:
-            node = Node(node)
         if not node.exists():
             logger.warning('Node does not exist in model tree')
             return
