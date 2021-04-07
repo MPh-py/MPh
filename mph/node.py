@@ -157,9 +157,10 @@ class Node:
         if self.is_group():
             return self.groups.get(name, None)
         parent = self.parent()
-        if not parent.exists():
+        java = parent.java
+        if not java:
             return
-        container = parent.java if parent.is_group() else parent.java.feature()
+        container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
             if name == escape(member.name()):
@@ -190,14 +191,14 @@ class Node:
 
     def children(self):
         """Returns all child nodes."""
+        java = self.java
         if self.is_root():
             return [Node(self.model, group) for group in self.groups]
         elif self.is_group():
-            return [self/escape(self.java.get(tag).name())
-                    for tag in self.java.tags()]
-        elif hasattr(self.java, 'feature'):
-            return [self/escape(self.java.feature(tag).name())
-                    for tag in self.java.feature().tags()]
+            return [self/escape(java.get(tag).name()) for tag in java.tags()]
+        elif hasattr(java, 'feature'):
+            return [self/escape(java.feature(tag).name())
+                    for tag in java.feature().tags()]
         else:
             return []
 
