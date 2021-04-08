@@ -247,6 +247,20 @@ def test_rename():
     assert model.name() == name
 
 
+def test_parameter():
+    value = model.parameter('U')
+    model.parameter('U', '2[V]')
+    assert model.parameter('U') == '2[V]'
+    model.parameter('U', '2')
+    assert model.parameter('U') == '2'
+    assert model.parameter('U', evaluate=True) == 2
+    model.parameter('U', 3)
+    assert model.parameter('U') == '3'
+    assert model.parameter('U', evaluate=True) == 3
+    model.parameter('U', value)
+    assert model.parameter('U') == value
+
+
 def test_parameters():
     parameters = model.parameters()
     names = [parameter.name for parameter in parameters]
@@ -254,19 +268,6 @@ def test_parameters():
     assert 'd' in names
     assert 'l' in names
     assert 'w' in names
-
-
-def test_parameter():
-    value = model.parameter('U')
-    model.parameter('U', '2[V]')
-    assert model.parameter('U') == '2[V]'
-    model.parameter('U', '2', 'V')
-    assert model.parameter('U') == '2 [V]'
-    model.parameter('U', '2')
-    assert model.parameter('U') == '2'
-    assert model.parameter('U', evaluate=True) == 2
-    model.parameter('U', value)
-    assert model.parameter('U') == value
 
 
 def test_description():
@@ -546,8 +547,8 @@ if __name__ == '__main__':
         test_evaluate()
 
         test_rename()
-        test_parameters()
         test_parameter()
+        test_parameters()
         test_description()
         test_descriptions()
         test_property()

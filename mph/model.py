@@ -497,6 +497,46 @@ class Model:
         """Assigns a new name to the model."""
         self.java.name(name)
 
+    def parameter(self, name, value=None, evaluate=False,
+                        unit=None, description=None):
+        """
+        Returns or sets the parameter of the given name.
+
+        If no `value` is given, returns the value of parameter `name`.
+        Otherwise sets it.
+
+        Values are accepted as expressions (strings, possibly including
+        the unit inside square brackets) or as numerical values
+        (referring to default units).
+
+        By default, values are returned as strings, i.e. the expression
+        as entered in the user interface. That expression may include
+        the unit, again inside brackets. If the option `evaluate` is set
+        to `True`, the numerical value that the expression evaluates to
+        is returned.
+
+        *Warning*: The optional arguments `unit` and `description` are
+        deprecated and will be removed in a future release. Add the unit
+        to the value string inside square brackets and call the
+        `description()` method to change a parameter description.
+        """
+        if unit is not None:
+            warn('Argument "unit" to Model.parameter() is deprecated. '
+                 'Include the unit in the value inside square brackets.')
+            if value:
+                value += f' [{unit}]'
+        if description is not None:
+            warn('Argument "description" to Model.parameter() is deprecated.'
+                 'Call .description() instead.')
+            self.description(name, description)
+        if value is None:
+            if not evaluate:
+                return str(self.java.param().get(name))
+            else:
+                return self.java.param().evaluate(name)
+        else:
+            self.java.param().set(name, value)
+
     def parameters(self):
         """
         Returns the global model parameters.
@@ -512,44 +552,6 @@ class Model:
             descr = str(self.java.param().descr(name))
             parameters.append(Parameter(name, value, descr))
         return parameters
-
-    def parameter(self, name, value=None, unit=None, evaluate=False,
-                        description=None):
-        """
-        Returns or sets the parameter of the given name.
-
-        If no `value` is given (the default `None` is passed), returns
-        the value of parameter `name`. Otherwise sets it.
-
-        Values are accepted as expressions (strings) or as numerical
-        values (referring to default units). An optional `unit` may be
-        specified, unless it is already part of the expression itself,
-        inside square brackets.
-
-        By default, values are always returned as strings, i.e. the
-        expression as entered in the user interface. That expression
-        may include the unit, again inside brackets. If the option
-        `evaluate` is set to `True`, the numerical value that the
-        parameter expression evaluate to is returned.
-
-        *Warning*: The optional argument `description` is deprecated
-        and will be removed in a future release. Call the `description()`
-        method instead.
-        """
-        if description is not None:
-            warn('Argument "description" to Model.parameter() is deprecated.'
-                 'Call .description() instead.')
-            self.description(name, description)
-        if value is None:
-            if not evaluate:
-                return str(self.java.param().get(name))
-            else:
-                return self.java.param().evaluate(name)
-        else:
-            value = str(value)
-            if unit:
-                value += f' [{unit}]'
-            self.java.param().set(name, value)
 
     def description(self, name, text=None):
         """
