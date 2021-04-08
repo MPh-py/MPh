@@ -83,18 +83,25 @@ Or we could remove all models at once — restart from a clean slate.
 
 ## Inspecting models
 
-Let's have a look at the parameters defined in the model.
+Let's have a look at the parameters defined in the model:
 ```python
->>> for parameter in model.parameters():
-...     print(parameter)
-...
-parameter(name='U', value='1[V]', description='applied voltage')
-parameter(name='d', value='2[mm]', description='electrode spacing')
-parameter(name='l', value='10[mm]', description='plate length')
-parameter(name='w', value='2[mm]', description='plate width')
+>>> model.parameters()
+{'U': '1[V]', 'd': '2[mm]', 'l': '10[mm]', 'w': '2[mm]'}
 ```
 
-Or the materials for that matter.
+With a little more typing we can include the parameter descriptions:
+```python
+>>> for (name, value) in model.parameters().items():
+...     description = model.description(name)
+...     print(f'{description:20} {name} = {value}')
+...
+applied voltage      U = 1[V]
+electrode spacing    d = 2[mm]
+plate length         l = 10[mm]
+plate width          w = 2[mm]
+```
+
+Two custom materials are defined:
 ```python
 >>> model.materials()
 ['medium 1', 'medium 2']
@@ -281,10 +288,7 @@ well run the time-dependent study a number of times and change the
 parameter value from one run to the next. General parameter sweeps
 can get quite complicated in terms of how they map to indices as
 soon as combinations of parameters are allowed. Support for this may
-therefore be dropped in a future release — while the API is still
-considered unstable, which it is for as long as the version number
-of this library does not start with a 1 —, just to keep things simple
-and clean.
+therefore be limited.
 
 
 ## Saving results

@@ -13,7 +13,6 @@ from .node import Node                 # model node
 ########################################
 import numpy                           # fast numerics
 from numpy import array                # numerical array
-from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
 from pathlib import Path               # file-system paths
 from warnings import warn              # user warning
@@ -502,8 +501,8 @@ class Model:
         """
         Returns or sets the parameter of the given name.
 
-        If no `value` is given, returns the value of parameter `name`.
-        Otherwise sets it.
+        Returns the value of parameter `name` if no `value` is given.
+        Otherwise sets the value.
 
         Values are accepted as expressions (strings, possibly including
         the unit inside square brackets) or as numerical values
@@ -516,9 +515,9 @@ class Model:
         is returned.
 
         *Warning*: The optional arguments `unit` and `description` are
-        deprecated and will be removed in a future release. Add the unit
-        to the value string inside square brackets and call the
-        `description()` method to change a parameter description.
+        deprecated and will be removed in a future release. Include the
+        unit in the value expression and call the `description()` method
+        to change a parameter description.
         """
         if unit is not None:
             warn('Argument "unit" to Model.parameter() is deprecated. '
@@ -537,21 +536,31 @@ class Model:
         else:
             self.java.param().set(name, value)
 
-    def parameters(self):
+    def parameters(self, evaluate=False):
         """
         Returns the global model parameters.
 
-        The parameters are returned as a list of tuples holding name,
-        value, and description for each of them.
+        The parameters are returned as a dictionary indexed by the
+        parameter names and mapping to the parameter values.
+
+        Value are returned as string expressions, i.e. as entered by
+        the user, unless `evaluate` is set to `True`, in which case
+        the expressions are evaluated and the corresponding numbers
+        are returned.
+
+        *Warning*: Prior to version 1.0, this method would return
+        a list of named tuples holding name, value, and description.
+        It now returns a dictionary, which is a breaking change that
+        may require application code to be adapted. The descriptions
+        can be retrieved by additionally calling `.description()` or
+        `.descriptions()`.
         """
-        Parameter = namedtuple('parameter', ('name', 'value', 'description'))
-        parameters = []
-        for name in self.java.param().varnames():
-            name  = str(name)
-            value = str(self.java.param().get(name))
-            descr = str(self.java.param().descr(name))
-            parameters.append(Parameter(name, value, descr))
-        return parameters
+        if not evaluate:
+            return {str(name): str(self.java.param().get(name))
+                    for name in self.java.param().varnames()}
+        else:
+            return {str(name): str(self.java.param().evaluate(name))
+                    for name in self.java.param().varnames()}
 
     def description(self, name, text=None):
         """
@@ -568,8 +577,7 @@ class Model:
 
     def descriptions(self):
         """Returns all parameter descriptions as a dictionary."""
-        names = [name for (name, value, description) in self.parameters()]
-        return {name: self.description(name) for name in names}
+        return {name: self.description(name) for name in self.parameters()}
 
     def property(self, node, name, value=None):
         """

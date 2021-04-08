@@ -262,12 +262,10 @@ def test_parameter():
 
 
 def test_parameters():
-    parameters = model.parameters()
-    names = [parameter.name for parameter in parameters]
-    assert 'U' in names
-    assert 'd' in names
-    assert 'l' in names
-    assert 'w' in names
+    assert 'U' in model.parameters()
+    assert 'U' in model.parameters().keys()
+    assert '1[V]' in model.parameters().values()
+    assert ('U', '1[V]') in model.parameters().items()
 
 
 def test_description():
