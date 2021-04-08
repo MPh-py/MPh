@@ -549,10 +549,6 @@ class Model:
                 value += f' [{unit}]'
             self.java.param().set(name, value)
 
-    def properties(self, node):
-        """Returns the names of all properties defined on a node."""
-        return (self/node).properties()
-
     def property(self, node, name, value=None):
         """
         Returns or changes the value of the named node property.
@@ -561,6 +557,10 @@ class Model:
         Otherwise sets the property to the given value.
         """
         return (self/node).property(name, value)
+
+    def properties(self, node):
+        """Returns names and values of all node properties as a dictionary."""
+        return (self/node).properties()
 
     def create(self, node, *arguments):
         """

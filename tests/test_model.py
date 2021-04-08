@@ -273,10 +273,6 @@ def test_parameter():
     assert descriptions[names.index('U')] == 'test'
 
 
-def test_properties():
-    assert 'flipx' in model.properties('functions/image')
-
-
 def test_property():
     # Test conversion to and from 'Boolean'.
     old = model.property('functions/image', 'flipx')
@@ -340,6 +336,10 @@ def test_property():
     assert model.property('plots/evolution', 'plotonsecyaxis') == new
     model.property('plots/evolution', 'plotonsecyaxis', old)
     assert model.property('plots/evolution', 'plotonsecyaxis') == old
+
+
+def test_properties():
+    assert 'flipx' in model.properties('functions/image')
 
 
 def test_create():
@@ -537,8 +537,8 @@ if __name__ == '__main__':
         test_rename()
         test_parameters()
         test_parameter()
-        test_properties()
         test_property()
+        test_properties()
         test_create()
         test_remove()
 

@@ -150,7 +150,14 @@ class Node:
 
     @property
     def java(self):
-        """Returns the Java object this node maps to."""
+        """
+        Returns the Java object this node maps to.
+
+        Note that this is a property, not an attribute. Internally,
+        it is a function that performs a top-down search of the model
+        tree in order to resolve the node reference. So it introduces
+        a certain overhead every time it is accessed.
+        """
         if self.is_root():
             return self.model.java
         name = self.name()
@@ -231,10 +238,6 @@ class Node:
         self.java.name(name)
         self.path = self.path[:-1] + (name,)
 
-    def properties(self):
-        """Returns the names of all node properties."""
-        return [str(name) for name in self.java.properties()]
-
     def property(self, name, value=None):
         """
         Returns or changes the value of the named property.
@@ -246,6 +249,12 @@ class Node:
             return get(self.java, name)
         else:
             self.java.set(name, cast(value))
+
+    def properties(self):
+        """Returns names and values of all node properties as a dictionary."""
+        java = self.java
+        names = sorted(str(name) for name in java.properties())
+        return {name: get(java, name) for name in names}
 
     def toggle(self, action='flip'):
         """

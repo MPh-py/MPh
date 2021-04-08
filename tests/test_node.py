@@ -166,10 +166,6 @@ def test_rename():
     assert not renamed.exists()
 
 
-def test_properties():
-    assert 'funcname' in Node(model, 'functions/step').properties()
-
-
 def test_property():
     node = Node(model, 'functions/step')
     assert node.property('funcname') == 'step'
@@ -182,6 +178,14 @@ def test_property():
     assert node.property('from') == 0.1
     node.property('from', 0.0)
     assert node.property('from') == 0.0
+
+
+def test_properties():
+    step = Node(model, 'functions/step')
+    assert 'funcname' in step.properties()
+    assert 'funcname' in step.properties().keys()
+    assert 'step' in step.properties().values()
+    assert ('funcname', 'step') in step.properties().items()
 
 
 def test_toggle():
@@ -266,8 +270,8 @@ if __name__ == '__main__':
         test_exists()
 
         test_rename()
-        test_properties()
         test_property()
+        test_properties()
         test_toggle()
         test_run()
         test_create()
