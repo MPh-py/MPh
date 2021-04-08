@@ -267,10 +267,21 @@ def test_parameter():
     assert model.parameter('U', evaluate=True) == 2
     model.parameter('U', value)
     assert model.parameter('U') == value
-    model.parameter('U', description='test')
-    names = [p.name for p in model.parameters()]
-    descriptions = [p.description for p in model.parameters()]
-    assert descriptions[names.index('U')] == 'test'
+
+
+def test_description():
+    assert model.description('U') == 'applied voltage'
+    model.description('U', 'test')
+    assert model.description('U') == 'test'
+    model.description('U', 'applied voltage')
+    assert model.description('U') == 'applied voltage'
+
+
+def test_descriptions():
+    assert 'U' in model.descriptions()
+    assert 'U' in model.descriptions().keys()
+    assert 'applied voltage' in model.descriptions().values()
+    assert ('U', 'applied voltage') in model.descriptions().items()
 
 
 def test_property():
@@ -537,6 +548,8 @@ if __name__ == '__main__':
         test_rename()
         test_parameters()
         test_parameter()
+        test_description()
+        test_descriptions()
         test_property()
         test_properties()
         test_create()

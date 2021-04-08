@@ -513,8 +513,8 @@ class Model:
             parameters.append(Parameter(name, value, descr))
         return parameters
 
-    def parameter(self, name, value=None, unit=None, description=None,
-                        evaluate=False):
+    def parameter(self, name, value=None, unit=None, evaluate=False,
+                        description=None):
         """
         Returns or sets the parameter of the given name.
 
@@ -532,12 +532,14 @@ class Model:
         `evaluate` is set to `True`, the numerical value that the
         parameter expression evaluate to is returned.
 
-        A parameter `description` can be supplied and will be set
-        regardless of a value being passed or not.
+        *Warning*: The optional argument `description` is deprecated
+        and will be removed in a future release. Call the `description()`
+        method instead.
         """
         if description is not None:
-            value = self.parameter(name)
-            self.java.param().set(name, value, description)
+            warn('Argument "description" to Model.parameter() is deprecated.'
+                 'Call .description() instead.')
+            self.description(name, description)
         if value is None:
             if not evaluate:
                 return str(self.java.param().get(name))
@@ -548,6 +550,24 @@ class Model:
             if unit:
                 value += f' [{unit}]'
             self.java.param().set(name, value)
+
+    def description(self, name, text=None):
+        """
+        Returns or sets the description of the named parameter.
+
+        If no `text` is given, returns the text description of
+        parameter `name`. Otherwise sets it.
+        """
+        if text is not None:
+            value = self.parameter(name)
+            self.java.param().set(name, value, text)
+        else:
+            return str(self.java.param().descr(name))
+
+    def descriptions(self):
+        """Returns all parameter descriptions as a dictionary."""
+        names = [name for (name, value, description) in self.parameters()]
+        return {name: self.description(name) for name in names}
 
     def property(self, node, name, value=None):
         """
@@ -791,9 +811,9 @@ class Model:
         Loads data from a file and assigns it to an interpolation function.
 
         *Warning*: This method is deprecated and may be removed in a
-        future release. Use the `import_()` method instead.
+        future release. Call the `import_()` method instead.
         """
-        warn('Model.load() is deprecated. Use Model.import_() instead.')
+        warn('Model.load() is deprecated. Call .import_() instead.')
         for tag in self.java.func().tags():
             if str(self.java.func(tag).label()) == interpolation:
                 break
