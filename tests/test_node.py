@@ -9,6 +9,7 @@ import parent # noqa F401
 import mph
 from mph import node
 from mph.node import Node
+from numpy import array, isclose
 from sys import argv
 from pathlib import Path
 import logging
@@ -166,18 +167,95 @@ def test_rename():
     assert not renamed.exists()
 
 
+def test_rewrite(node):
+    java = node.java
+    if hasattr(java, 'properties'):
+        names = [str(name) for name in node.java.properties()]
+    else:
+        names = []
+    for name in names:
+        value = node.property(name)
+        # Changing selections is not (yet) implemented.
+        if node.java.getValueType(name) == 'Selection':
+            continue
+        # Writing "sol" changes certain node names.
+        if name == 'sol':
+            continue
+        node.property(name, value)
+    for child in node:
+        test_rewrite(child)
+
+
 def test_property():
-    node = Node(model, 'functions/step')
-    assert node.property('funcname') == 'step'
-    node.property('funcname', 'renamed')
-    assert node.property('funcname') == 'renamed'
-    node.property('funcname', 'step')
-    assert node.property('funcname') == 'step'
-    assert node.property('from') == 0.0
-    node.property('from', 0.1)
-    assert node.property('from') == 0.1
-    node.property('from', 0.0)
-    assert node.property('from') == 0.0
+    root   = Node(model, '')
+    image  = Node(model, 'functions/image')
+    plot   = Node(model, 'plots/evolution')
+    field  = Node(model, 'exports/field')
+    vector = Node(model, 'exports/vector')
+    # Test conversion to and from 'Boolean'.
+    old = image.property('flipx')
+    image.property('flipx', False)
+    assert image.property('flipx') is False
+    image.property('flipx', old)
+    assert image.property('flipx') == old
+    # Test conversion to and from 'Double'.
+    old = image.property('xmin')
+    image.property('xmin', -10.0)
+    assert isclose(image.property('xmin'), -10)
+    image.property('xmin', old)
+    assert isclose(image.property('xmin'), old)
+    # Test conversion to and from 'DoubleArray'.
+    old = field.property('outersolnumindices')
+    new = array([1.0, 2.0, 3.0])
+    field.property('outersolnumindices', new)
+    assert isclose(field.property('outersolnumindices'), new).all()
+    field.property('outersolnumindices', old)
+    assert isclose(field.property('outersolnumindices'), old).all()
+    # Test conversion to and from 'File'.
+    old = image.property('filename')
+    image.property('filename', Path('new.tif'))
+    assert image.property('filename') == Path('new.tif')
+    image.property('filename', old)
+    assert image.property('filename') == old
+    # Test conversion to and from 'Int'.
+    old = image.property('refreshcount')
+    image.property('refreshcount', 1)
+    assert image.property('refreshcount') == 1
+    image.property('refreshcount', old)
+    assert image.property('refreshcount') == old
+    # Test conversion to and from 'IntArray'.
+    old = plot.property('solnum')
+    new = array([1, 2, 3])
+    plot.property('solnum', new)
+    assert (plot.property('solnum') == new).all()
+    plot.property('solnum', old)
+    assert (plot.property('solnum') == old).all()
+    # Test conversion from 'None'.
+    none = image.property('exportfilename')
+    assert none is None
+    # Test conversion to and from 'String'.
+    old = image.property('funcname')
+    image.property('funcname', 'new')
+    assert image.property('funcname') == 'new'
+    image.property('funcname', old)
+    assert image.property('funcname') == old
+    # Test conversion to and from 'StringArray'.
+    old = vector.property('descr')
+    vector.property('descr', ['x', 'y', 'z'])
+    assert vector.property('descr') == ['x', 'y', 'z']
+    vector.property('descr', old)
+    assert vector.property('descr') == old
+    # Test conversion to and from 'StringMatrix'.
+    old = plot.property('plotonsecyaxis')
+    new = [['medium 1', 'on', 'ptgr1'], ['medium 2', 'on', 'ptgr2']]
+    plot.property('plotonsecyaxis', new)
+    assert plot.property('plotonsecyaxis') == new
+    plot.property('plotonsecyaxis', old)
+    assert plot.property('plotonsecyaxis') == old
+    # Read and write back every node property in the model.
+    if not client.port:
+        # Skip test in client-server mode where it's excruciatingly slow.
+        test_rewrite(root)
 
 
 def test_properties():

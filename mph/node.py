@@ -253,6 +253,8 @@ class Node:
     def properties(self):
         """Returns names and values of all node properties as a dictionary."""
         java = self.java
+        if not hasattr(java, 'properties'):
+            return {}
         names = sorted(str(name) for name in java.properties())
         return {name: get(java, name) for name in names}
 
@@ -386,14 +388,23 @@ def cast(value):
     elif isinstance(value, Path):
         return JString(str(value))
     elif isinstance(value, (list, tuple)):
-        return value
+        dimension = array(value).ndim
+        if value == [[]]:
+            value = []
+        return JArray(JString, dimension)(value)
     elif isinstance(value, ndarray):
-        if value.dtype.kind == 'i':
-            return JArray(JInt, value.ndim)(value)
+        if value.dtype.kind == 'b':
+            return JArray(JBoolean, value.ndim)(value)
         elif value.dtype.kind == 'f':
             return JArray(JDouble, value.ndim)(value)
-        elif value.dtype.kind == 'b':
-            return JArray(JBoolean, value.ndim)(value)
+        elif value.dtype.kind == 'i':
+            return JArray(JInt, value.ndim)(value)
+        elif value.dtype.kind == 'O':
+            if value.ndim > 2:
+                error = 'Cannot cast object arrays with more than two rows.'
+                logger.error(error)
+                raise TypeError(error)
+            return JArray(JDouble, 2)([row.astype(float) for row in value])
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
             logger.error(error)
@@ -419,6 +430,19 @@ def get(java, name):
         return array(java.getDoubleArray(name))
     elif datatype == 'DoubleMatrix':
         return array([line for line in java.getDoubleMatrix(name)])
+    elif datatype == 'DoubleRowMatrix':
+        value = java.getDoubleMatrix(name)
+        if len(value) == 0:
+            rows = []
+        elif len(value) == 1:
+            rows = [array(value[0])]
+        elif len(value) == 2:
+            rows = [array(value[0]), array(value[1])]
+        else:
+            error = 'Cannot convert double-row matrix with more than two rows.'
+            logger.error(error)
+            raise TypeError(error)
+        return array(rows, dtype=object)
     elif datatype == 'File':
         return Path(str(java.getString(name)))
     elif datatype == 'Int':
@@ -429,15 +453,23 @@ def get(java, name):
         return array([line for line in java.getIntMatrix(name)])
     elif datatype == 'None':
         return None
+    elif datatype == 'Selection':
+        return [str(string) for string in java.getEntryKeys(name)]
     elif datatype == 'String':
-        return str(java.getString(name))
+        value = java.getString(name)
+        return str(value) if value else None
     elif datatype == 'StringArray':
         return [str(string) for string in java.getStringArray(name)]
     elif datatype == 'StringMatrix':
-        return [[str(string) for string in line]
-                for line in java.getStringMatrix(name)]
+        value = java.getStringMatrix(name)
+        if value:
+            return [[str(string) for string in line] for line in value]
+        else:
+            return [[]]
     else:
-        raise TypeError(f'Cannot convert Java data type "{datatype}".')
+        error = f'Cannot convert Java data type "{datatype}".'
+        logger.error(error)
+        raise TypeError(error)
 
 
 ########################################
@@ -489,10 +521,7 @@ def inspect(java):
         print('properties:')
         names = [str(name) for name in java.properties()]
         for name in names:
-            try:
-                value = get(java, name)
-            except TypeError:
-                value = '[?]'
+            value = get(java, name)
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.

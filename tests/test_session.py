@@ -103,9 +103,10 @@ def test_getitem():
 
 
 def test_remove():
-    assert model in client
+    name = model.name()
+    assert name in client.names()
     client.remove(model)
-    assert model not in client
+    assert name not in client.names()
     message = ''
     try:
         model.java.component()
