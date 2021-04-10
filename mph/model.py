@@ -640,24 +640,30 @@ class Model:
         node.java.importData()
         logger.info('Finished loading external data.')
 
-    def export(self, node, file=None):
+    def export(self, node=None, file=None):
         """
-        Runs the export node, either given by name or reference.
+        Runs the export node, either given by name or node reference.
 
         A `file` name can be specified. Otherwise the file name defined
-        in the node's properties will be used.
+        in the node's properties will be used. If called without any
+        arguments, all export nodes defined in the model are run using
+        the default file names.
         """
-        if isinstance(node, str):
-            if '/' in node:
-                node = self/node
-            else:
-                node = self/'exports'/node
-        if not node.exists():
-            logger.warning('Node does not exist in model tree')
-            return
-        if file:
-            node.property('filename', str(file))
-        node.run()
+        if node is None:
+            for node in self/'exports':
+                node.run()
+        else:
+            if isinstance(node, str):
+                if '/' in node:
+                    node = self/node
+                else:
+                    node = self/'exports'/node
+            if not node.exists():
+                logger.warning('Node does not exist in model tree')
+                return
+            if file:
+                node.property('filename', str(file))
+            node.run()
 
     def clear(self):
         """Clears stored solution, mesh, and plot data."""

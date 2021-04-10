@@ -34,11 +34,11 @@ def teardown_module():
         file = here/f'model.{suffix}'
         if file.exists():
             file.unlink()
-    file = here/'model2.mph'
-    if file.exists():
-        file.unlink()
-    for name in ('field.txt', 'field2.txt', 'vector.txt', 'vector.vtu'):
-        file = here/name
+    files = (here/'model2.mph',
+             here/'field.txt', here/'field2.txt',
+             here/'vector.txt', here/'vector.vtu',
+             here/'image.png')
+    for file in files:
         if file.exists():
             file.unlink()
 
@@ -360,7 +360,16 @@ def test_import():
 
 def test_export():
     here = Path(__file__).parent
+    model.export()
+    assert (here/'field.txt').exists()
+    assert (here/'vector.txt').exists()
+    assert (here/'image.png').exists()
+    (here/'field.txt').unlink()
+    (here/'vector.txt').unlink()
+    (here/'image.png').unlink()
     assert not (here/'field.txt').exists()
+    assert not (here/'vector.txt').exists()
+    assert not (here/'image.png').exists()
     model.export('field')
     assert (here/'field.txt').exists()
     (here/'field.txt').unlink()
@@ -387,6 +396,11 @@ def test_export():
     model.export('exports/vector', here/'vector.vtu')
     assert (here/'vector.vtu').exists()
     (here/'vector.vtu').unlink()
+    assert not (here/'image.png').exists()
+    model.export('image')
+    assert (here/'image.png').exists()
+    (here/'image.png').unlink()
+    assert not (here/'image.png').exists()
 
 
 def test_clear():
