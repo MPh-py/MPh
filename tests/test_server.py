@@ -1,4 +1,4 @@
-﻿"""Tests the server class."""
+﻿"""Tests the Server class."""
 __license__ = 'MIT'
 
 
@@ -33,11 +33,18 @@ def teardown_module():
 # Tests                                #
 ########################################
 
-def test_start():
+def test_init():
     global server
     server = mph.Server(cores=1, port=2035)
-    assert server.running()
     assert server.port == 2035
+
+
+def test_repr():
+    assert repr(server) == f'Server(port={server.port})'
+
+
+def test_running():
+    assert server.running()
 
 
 def test_stop():
@@ -60,7 +67,9 @@ if __name__ == '__main__':
 
     setup_module()
     try:
-        test_start()
+        test_init()
+        test_repr()
+        test_running()
         test_stop()
     finally:
         teardown_module()

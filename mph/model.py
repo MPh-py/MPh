@@ -13,7 +13,6 @@ from .node import Node                 # model node
 ########################################
 import numpy                           # fast numerics
 from numpy import array                # numerical array
-from collections import namedtuple     # named tuples
 import jpype.types as jtypes           # Java data types
 from pathlib import Path               # file-system paths
 from warnings import warn              # user warning
@@ -97,6 +96,22 @@ class Model:
             return Node(self, None)
         return NotImplemented
 
+    def __contains__(self, node):
+        if isinstance(node, (str, Node)):
+            if (self/node).exists():
+                return True
+        return False
+
+    def __iter__(self):
+        yield from (self/None).children()
+
+    def __getitem__(self, node):
+        if not isinstance(node, (str, Node)):
+            error = 'Key must be string or Node instance.'
+            logger.error(error)
+            raise TypeError(error)
+        return self/node
+
     def _dataset(self, name=None):
         """
         Returns the dataset as a Java object.
@@ -144,55 +159,55 @@ class Model:
 
     def functions(self):
         """Returns the names of all globally defined functions."""
-        return [child.name() for child in (self/'functions').children()]
+        return [child.name() for child in self/'functions']
 
     def components(self):
         """Returns the names of all model components."""
-        return [child.name() for child in (self/'components').children()]
+        return [child.name() for child in self/'components']
 
     def geometries(self):
         """Returns the names of all geometry sequences."""
-        return [child.name() for child in (self/'geometries').children()]
+        return [child.name() for child in self/'geometries']
 
     def selections(self):
         """Returns the names of all selections."""
-        return [child.name() for child in (self/'selections').children()]
+        return [child.name() for child in self/'selections']
 
     def physics(self):
         """Returns the names of all physics interfaces."""
-        return [child.name() for child in (self/'physics').children()]
+        return [child.name() for child in self/'physics']
 
     def multiphysics(self):
         """Returns the names of all multiphysics interfaces."""
-        return [child.name() for child in (self/'multiphysics').children()]
+        return [child.name() for child in self/'multiphysics']
 
     def materials(self):
         """Returns the names of all materials."""
-        return [child.name() for child in (self/'materials').children()]
+        return [child.name() for child in self/'materials']
 
     def meshes(self):
         """Returns the names of all mesh sequences."""
-        return [child.name() for child in (self/'meshes').children()]
+        return [child.name() for child in self/'meshes']
 
     def studies(self):
         """Returns the names of all studies."""
-        return [child.name() for child in (self/'studies').children()]
+        return [child.name() for child in self/'studies']
 
     def solutions(self):
         """Returns the names of all solutions."""
-        return [child.name() for child in (self/'solutions').children()]
+        return [child.name() for child in self/'solutions']
 
     def datasets(self):
         """Returns the names of all datasets."""
-        return [child.name() for child in (self/'datasets').children()]
+        return [child.name() for child in self/'datasets']
 
     def plots(self):
         """Returns the names of all plots."""
-        return [child.name() for child in (self/'plots').children()]
+        return [child.name() for child in self/'plots']
 
     def exports(self):
         """Returns the names of all exports."""
-        return [child.name() for child in (self/'exports').children()]
+        return [child.name() for child in self/'exports']
 
     ####################################
     # Solving                          #
@@ -481,61 +496,88 @@ class Model:
         """Assigns a new name to the model."""
         self.java.name(name)
 
-    def parameters(self):
-        """
-        Returns the global model parameters.
-
-        The parameters are returned as a list of tuples holding name,
-        value, and description for each of them.
-        """
-        Parameter = namedtuple('parameter', ('name', 'value', 'description'))
-        parameters = []
-        for name in self.java.param().varnames():
-            name  = str(name)
-            value = str(self.java.param().get(name))
-            descr = str(self.java.param().descr(name))
-            parameters.append(Parameter(name, value, descr))
-        return parameters
-
-    def parameter(self, name, value=None, unit=None, description=None,
-                        evaluate=False):
+    def parameter(self, name, value=None, evaluate=False,
+                        unit=None, description=None):
         """
         Returns or sets the parameter of the given name.
 
-        If no `value` is given (the default `None` is passed), returns
-        the value of parameter `name`. Otherwise sets it.
+        Returns the value of parameter `name` if no `value` is given.
+        Otherwise sets the value.
 
-        Values are accepted as expressions (strings) or as numerical
-        values (referring to default units). An optional `unit` may be
-        specified, unless it is already part of the expression itself,
-        inside square brackets.
+        Values are accepted as expressions (strings, possibly including
+        the unit inside square brackets) or as numerical values
+        (referring to default units).
 
-        By default, values are always returned as strings, i.e. the
-        expression as entered in the user interface. That expression
-        may include the unit, again inside brackets. If the option
-        `evaluate` is set to `True`, the numerical value that the
-        parameter expression evaluate to is returned.
+        By default, values are returned as strings, i.e. the expression
+        as entered in the user interface. That expression may include
+        the unit, again inside brackets. If the option `evaluate` is set
+        to `True`, the numerical value that the expression evaluates to
+        is returned.
 
-        A parameter `description` can be supplied and will be set
-        regardless of a value being passed or not.
+        *Warning*: The optional arguments `unit` and `description` are
+        deprecated and will be removed in a future release. Include the
+        unit in the value expression and call the `description()` method
+        to change a parameter description.
         """
+        if unit is not None:
+            warn('Argument "unit" to Model.parameter() is deprecated. '
+                 'Include the unit in the value inside square brackets.')
+            if value:
+                value += f' [{unit}]'
         if description is not None:
-            value = self.parameter(name)
-            self.java.param().set(name, value, description)
+            warn('Argument "description" to Model.parameter() is deprecated.'
+                 'Call .description() instead.')
+            self.description(name, description)
         if value is None:
             if not evaluate:
                 return str(self.java.param().get(name))
             else:
                 return self.java.param().evaluate(name)
         else:
-            value = str(value)
-            if unit:
-                value += f' [{unit}]'
             self.java.param().set(name, value)
 
-    def properties(self, node):
-        """Returns the names of all properties defined on a node."""
-        return (self/node).properties()
+    def parameters(self, evaluate=False):
+        """
+        Returns the global model parameters.
+
+        The parameters are returned as a dictionary indexed by the
+        parameter names and mapping to the parameter values.
+
+        Value are returned as string expressions, i.e. as entered by
+        the user, unless `evaluate` is set to `True`, in which case
+        the expressions are evaluated and the corresponding numbers
+        are returned.
+
+        *Warning*: Prior to version 1.0, this method would return
+        a list of named tuples holding name, value, and description.
+        It now returns a dictionary, which is a breaking change that
+        may require application code to be adapted. The descriptions
+        can be retrieved by additionally calling `.description()` or
+        `.descriptions()`.
+        """
+        if not evaluate:
+            return {str(name): str(self.java.param().get(name))
+                    for name in self.java.param().varnames()}
+        else:
+            return {str(name): str(self.java.param().evaluate(name))
+                    for name in self.java.param().varnames()}
+
+    def description(self, name, text=None):
+        """
+        Returns or sets the description of the named parameter.
+
+        If no `text` is given, returns the text description of
+        parameter `name`. Otherwise sets it.
+        """
+        if text is not None:
+            value = self.parameter(name)
+            self.java.param().set(name, value, text)
+        else:
+            return str(self.java.param().descr(name))
+
+    def descriptions(self):
+        """Returns all parameter descriptions as a dictionary."""
+        return {name: self.description(name) for name in self.parameters()}
 
     def property(self, node, name, value=None):
         """
@@ -545,6 +587,10 @@ class Model:
         Otherwise sets the property to the given value.
         """
         return (self/node).property(name, value)
+
+    def properties(self, node):
+        """Returns names and values of all node properties as a dictionary."""
+        return (self/node).properties()
 
     def create(self, node, *arguments):
         """
@@ -580,8 +626,8 @@ class Model:
         """
         Imports external data from a file and assigns it to the node.
 
-        A `file` name can be specified. Otherwise the file name defined
-        in the export node itself will be used.
+        A `file` name can be specified. Otherwise the node's `filename`
+        property will be used.
 
         Note the trailing underscore in the method name. It is needed
         so that the Python parser does not treat the name as an
@@ -606,8 +652,6 @@ class Model:
                 node = self/node
             else:
                 node = self/'exports'/node
-        else:
-            node = Node(node)
         if not node.exists():
             logger.warning('Node does not exist in model tree')
             return
@@ -621,11 +665,11 @@ class Model:
         (self/'plots').java.clearStoredPlotData()
         logger.info('Finished clearing plots.')
         logger.info('Clearing solution data.')
-        for solution in (self/'solutions').children():
+        for solution in self/'solutions':
             solution.java.clearSolution()
         logger.info('Finished clearing solutions.')
         logger.info('Clearing mesh data.')
-        for mesh in (self/'meshes').children():
+        for mesh in self/'meshes':
             mesh.java.clearMesh()
         logger.info('Finished clearing meshes.')
 
@@ -723,8 +767,8 @@ class Model:
         conditions, initial values, etc.
 
         *Warning*: This method is deprecated and will be removed in a
-        future release. Use `Node` to retrieve child nodes of a physics
-        interface.
+        future release. Use the `Node` class to retrieve child nodes of
+        a physics interface.
         """
         warn('Model.features() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
@@ -747,7 +791,8 @@ class Model:
         current state. Pass `'disable'` or `'off'` to disable it.
 
         *Warning*: This method is deprecated and will be removed in
-        a future release. Use `Node` to toggle nodes in the model tree.
+        a future release. Use the `Node` class to toggle nodes in the
+        model tree.
         """
         warn('Model.toggle() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
@@ -776,9 +821,9 @@ class Model:
         Loads data from a file and assigns it to an interpolation function.
 
         *Warning*: This method is deprecated and may be removed in a
-        future release. Use the `import_` method instead.
+        future release. Call the `import_()` method instead.
         """
-        warn('Model.load() is deprecated. Use Model.import_() instead.')
+        warn('Model.load() is deprecated. Call .import_() instead.')
         for tag in self.java.func().tags():
             if str(self.java.func(tag).label()) == interpolation:
                 break

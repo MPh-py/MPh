@@ -127,6 +127,9 @@ class Server:
         self.port    = port
         self.process = process
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(port={self.port})"
+
     def running(self):
         """Returns whether the server process is still running."""
         return (self.process.poll() is None)

@@ -75,6 +75,10 @@ class Client:
     via the instance attribute `.java`.
     """
 
+    ####################################
+    # Internal                         #
+    ####################################
+
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
 
         # Make sure this is the one and only client.
@@ -134,6 +138,56 @@ class Client:
         self.port    = port
         self.java    = java
 
+    def __repr__(self):
+        connection = f'port={self.port}' if self.port else 'stand-alone'
+        return f"{self.__class__.__name__}({connection})"
+
+    def __contains__(self, item):
+        if isinstance(item, str):
+            if item in self.names():
+                return True
+        elif isinstance(item, Model):
+            if item in self.models():
+                return True
+        return False
+
+    def __iter__(self):
+        yield from self.models()
+
+    def __getitem__(self, item):
+        if isinstance(item, str):
+            for model in self:
+                if item == model.name():
+                    return model
+        elif isinstance(item, Model):
+            for model in self.models():
+                if item == model:
+                    return model
+        else:
+            error = 'Key is not a string.'
+            logger.error(error)
+            raise TypeError(error)
+
+    ####################################
+    # Inspection                       #
+    ####################################
+
+    def models(self):
+        """Returns all models currently held in memory."""
+        return [Model(self.java.model(tag)) for tag in self.java.tags()]
+
+    def names(self):
+        """Returns the names of all loaded models."""
+        return [model.name() for model in self.models()]
+
+    def files(self):
+        """Returns the file-system paths of all loaded models."""
+        return [model.file() for model in self.models()]
+
+    ####################################
+    # Interaction                      #
+    ####################################
+
     def load(self, file):
         """Loads a model from the given `file` and returns it."""
         file = Path(file).resolve()
@@ -181,20 +235,23 @@ class Client:
             model.rename(name)
         return model
 
-    def models(self):
-        """Returns all models currently held in memory."""
-        return [Model(self.java.model(tag)) for tag in self.java.tags()]
-
-    def names(self):
-        """Returns the names of all loaded models."""
-        return [model.name() for model in self.models()]
-
-    def files(self):
-        """Returns the file-system paths of all loaded models."""
-        return [model.file() for model in self.models()]
-
     def remove(self, model):
         """Removes the given `model` from memory."""
+        if isinstance(model, str):
+            if model not in self.names():
+                error = f'No model named "{model}" exists.'
+                logger.error(error)
+                raise ValueError(error)
+            model = self[model]
+        elif isinstance(model, Model):
+            if model not in self.models():
+                error = f'Model "{model}" does not exist.'
+                logger.error(error)
+                raise ValueError(error)
+        else:
+            error = 'Model must either be a model name or Model instance.'
+            logger.error(error)
+            raise TypeError(error)
         name = model.name()
         tag  = model.java.tag()
         logger.debug(f'Removing model "{name}" with tag "{tag}".')

@@ -10,7 +10,7 @@ requires = ['JPype1', 'NumPy']
 requires-python = '>=3.6'
 license = 'MIT'
 home-page = 'https://github.com/john-hennig/mph'
-description-file = 'ReadMe.md'
+description-file = 'pypi.md'
 keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
 classifiers = [
     'Development Status :: 4 - Beta',

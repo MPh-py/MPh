@@ -1,10 +1,9 @@
-﻿Tutorial
---------
+﻿# Tutorial
 
 To follow along with this tutorial in an interactive Python session,
-if you wish to do so, make sure you have downloaded the [demonstration
-model "capacitor.mph"][demo] from this library's GitHub repository,
-and saved it in the same folder from which you run Python.
+if you wish to do so, make sure you have downloaded the demonstration
+model [`capacitor.mph`][capa] (file is linked) from MPh's source-code
+repository. Save it in the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -16,7 +15,7 @@ Comsol platform, but not for any add-on module beyond that.
 ![](images/capacitor.png)
 
 
-### Starting Comsol
+## Starting Comsol
 
 In the beginning was the client. And the client was with Comsol. And
 the client was Comsol. So let there be a Comsol client.
@@ -34,14 +33,15 @@ processor core. If the optional parameter is omitted, it will use all
 cores available on the machine. Restricting this resource is useful
 when running several simulations in parallel. Note, however, that due
 to [limitations](limitations) of this library's underlying Python-to-Java
-bridge, the `Client` class can only be instantiated once. Subsequent
-calls to `mph.start()` will therefore raise an error. If you wish to
-work around this limitation, in order to realize the full parallelization
-potential of your simulation hardware, you will need to run multiple
-Python sessions, one for each client.
+bridge, the [`Client`](api/mph.Client) class can only be instantiated
+once. Subsequent calls to [`start()`](api/mph.start) will therefore
+raise an error. If you wish to work around this limitation, in order to
+realize the full parallelization potential of your simulation hardware,
+you will need to [run multiple Python
+processes](demonstrations.md#multiple-processes), one for each client.
 
 
-### Managing models
+## Managing models
 
 Now that we have the client up and running, we can tell it to load a
 model file.
@@ -81,20 +81,27 @@ Or we could remove all models at once — restart from a clean slate.
 ```
 
 
-### Inspecting models
+## Inspecting models
 
-Let's have a look at the parameters defined in the model.
+Let's have a look at the parameters defined in the model:
 ```python
->>> for parameter in model.parameters():
-...     print(parameter)
-...
-parameter(name='U', value='1[V]', description='applied voltage')
-parameter(name='d', value='2[mm]', description='electrode spacing')
-parameter(name='l', value='10[mm]', description='plate length')
-parameter(name='w', value='2[mm]', description='plate width')
+>>> model.parameters()
+{'U': '1[V]', 'd': '2[mm]', 'l': '10[mm]', 'w': '2[mm]'}
 ```
 
-Or the materials for that matter.
+With a little more typing we can include the parameter descriptions:
+```python
+>>> for (name, value) in model.parameters().items():
+...     description = model.description(name)
+...     print(f'{description:20} {name} = {value}')
+...
+applied voltage      U = 1[V]
+electrode spacing    d = 2[mm]
+plate length         l = 10[mm]
+plate width          w = 2[mm]
+```
+
+Two custom materials are defined:
 ```python
 >>> model.materials()
 ['medium 1', 'medium 2']
@@ -133,7 +140,7 @@ may also set up different models to be automated by the same script.
 No problem, as long as your naming scheme is consistent throughout.
 
 
-### Modifying parameters
+## Modifying parameters
 
 As we have learned from the list above, the model defines a parameter
 named `d` that denotes the electrode spacing. If we know a parameter's
@@ -165,7 +172,7 @@ away.
 >>> model.build()
 ```
 
-### Running simulations
+## Running simulations
 
 To solve the model, we need to create a mesh. This would also be taken
 care of automatically, but let's make sure this critical step passes
@@ -196,7 +203,7 @@ studies at once, or rather, all of the studies defined in the model.
 ```
 
 
-### Evaluating results
+## Evaluating results
 
 Let's see what we found out and evaluate the electrostatic capacitance,
 i.e. at zero time or infinite frequency.
@@ -206,7 +213,7 @@ array(1.31948342)
 ```
 
 All results are returned as NumPy arrays. Though scalars such as this
-one could be readily cast to a (regular Python) `float`.
+one could be readily cast to a (regular Python) [`float`][float].
 
 We could also ask where the electric field is strongest.
 ```python
@@ -281,13 +288,10 @@ well run the time-dependent study a number of times and change the
 parameter value from one run to the next. General parameter sweeps
 can get quite complicated in terms of how they map to indices as
 soon as combinations of parameters are allowed. Support for this may
-therefore be dropped in a future release — while the API is still
-considered unstable, which it is for as long as the version number
-of this library does not start with a 1 —, just to keep things simple
-and clean.
+therefore be limited.
 
 
-### Saving results
+## Saving results
 
 To save the model we just solved, along with its solution, just do:
 ```python
@@ -322,4 +326,5 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[demo]: https://github.com/John-Hennig/mph/blob/master/tests/capacitor.mph
+[capa]:  https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
+[float]: https://docs.python.org/3/library/functions.html#float

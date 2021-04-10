@@ -27,7 +27,7 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Node:
     """
-    Refers to a node in the model tree.
+    Represents a model mode.
 
     Nodes work similarly to `pathlib.Path` objects from Python's
     standard library. They support string concatenation to the right
@@ -50,8 +50,8 @@ class Node:
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
-    demo model. These literal forward slashes can be escaped by doubling
-    the character:
+    demo model from the Tutorial. These literal forward slashes can be
+    escaped by doubling the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()
@@ -136,18 +136,38 @@ class Node:
             return Node(self.model, join(parse(f'{self}/{other}')))
         return NotImplemented
 
+    def __contains__(self, node):
+        if isinstance(node, str):
+            if (self/node).exists():
+                return True
+        elif isinstance(node, Node):
+            if node.parent() == self and node.exists():
+                return True
+        return False
+
+    def __iter__(self):
+        yield from self.children()
+
     @property
     def java(self):
-        """Returns the Java object this node maps to."""
+        """
+        Returns the Java object this node maps to.
+
+        Note that this is a property, not an attribute. Internally,
+        it is a function that performs a top-down search of the model
+        tree in order to resolve the node reference. So it introduces
+        a certain overhead every time it is accessed.
+        """
         if self.is_root():
             return self.model.java
         name = self.name()
         if self.is_group():
             return self.groups.get(name, None)
         parent = self.parent()
-        if not parent.exists():
+        java = parent.java
+        if not java:
             return
-        container = parent.java if parent.is_group() else parent.java.feature()
+        container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
             if name == escape(member.name()):
@@ -165,6 +185,10 @@ class Node:
         """Returns the node's tag."""
         return str(self.java.tag()) if self.exists() else None
 
+    def type(self):
+        """Returns the node's feature type."""
+        return str(self.java.getType())
+
     def parent(self):
         """Returns the parent node."""
         if self.is_root():
@@ -174,23 +198,23 @@ class Node:
 
     def children(self):
         """Returns all child nodes."""
+        java = self.java
         if self.is_root():
             return [Node(self.model, group) for group in self.groups]
         elif self.is_group():
-            return [self/escape(self.java.get(tag).name())
-                    for tag in self.java.tags()]
-        elif hasattr(self.java, 'feature'):
-            return [self/escape(self.java.feature(tag).name())
-                    for tag in self.java.feature().tags()]
+            return [self/escape(java.get(tag).name()) for tag in java.tags()]
+        elif hasattr(java, 'feature'):
+            return [self/escape(java.feature(tag).name())
+                    for tag in java.feature().tags()]
         else:
             return []
 
     def is_root(self):
-        """Checks if node is the model's root."""
+        """Checks if the node is the model's root node."""
         return bool(len(self.path) == 1 and not self.path[0])
 
     def is_group(self):
-        """Checks if the node refers to a built-in top-level group."""
+        """Checks if the node refers to a built-in group."""
         return bool(len(self.path) == 1 and self.path[0])
 
     def exists(self):
@@ -208,15 +232,11 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         if self.is_group():
-            error = 'Cannot rename a top-level group.'
+            error = 'Cannot rename a built-in group.'
             logger.error(error)
             raise PermissionError(error)
         self.java.name(name)
         self.path = self.path[:-1] + (name,)
-
-    def properties(self):
-        """Returns the names of all node properties."""
-        return [str(name) for name in self.java.properties()]
 
     def property(self, name, value=None):
         """
@@ -229,6 +249,14 @@ class Node:
             return get(self.java, name)
         else:
             self.java.set(name, cast(value))
+
+    def properties(self):
+        """Returns names and values of all node properties as a dictionary."""
+        java = self.java
+        if not hasattr(java, 'properties'):
+            return {}
+        names = sorted(str(name) for name in java.properties())
+        return {name: get(java, name) for name in names}
 
     def toggle(self, action='flip'):
         """
@@ -264,9 +292,9 @@ class Node:
         Creates a new child node.
 
         Refer to the Comsol documentation for the values of valid
-        arguments. It is often just the feature type of the child node
-        to be created, given as a string such as `'Block'`, but may
-        also require different or more arguments.
+        `arguments`. It is often just the feature type of the child
+        node to be created, given as a string such as `'Block'`, but
+        may also require different or more arguments.
 
         If `name` is not given, a unique name/label will be assigned
         automatically.
@@ -300,7 +328,7 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         if self.is_group():
-            error = 'Cannot remove a top-level group.'
+            error = 'Cannot remove a built-in group.'
             logger.error(error)
             raise PermissionError(error)
         if not self.exists():
@@ -344,7 +372,7 @@ def unescape(name):
 
 
 ########################################
-# Type-casting                         #
+# Type casting                         #
 ########################################
 
 def cast(value):
@@ -360,14 +388,23 @@ def cast(value):
     elif isinstance(value, Path):
         return JString(str(value))
     elif isinstance(value, (list, tuple)):
-        return value
+        dimension = array(value).ndim
+        if value == [[]]:
+            value = []
+        return JArray(JString, dimension)(value)
     elif isinstance(value, ndarray):
-        if value.dtype.kind == 'i':
-            return JArray(JInt, value.ndim)(value)
+        if value.dtype.kind == 'b':
+            return JArray(JBoolean, value.ndim)(value)
         elif value.dtype.kind == 'f':
             return JArray(JDouble, value.ndim)(value)
-        elif value.dtype.kind == 'b':
-            return JArray(JBoolean, value.ndim)(value)
+        elif value.dtype.kind == 'i':
+            return JArray(JInt, value.ndim)(value)
+        elif value.dtype.kind == 'O':
+            if value.ndim > 2:
+                error = 'Cannot cast object arrays with more than two rows.'
+                logger.error(error)
+                raise TypeError(error)
+            return JArray(JDouble, 2)([row.astype(float) for row in value])
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
             logger.error(error)
@@ -393,6 +430,19 @@ def get(java, name):
         return array(java.getDoubleArray(name))
     elif datatype == 'DoubleMatrix':
         return array([line for line in java.getDoubleMatrix(name)])
+    elif datatype == 'DoubleRowMatrix':
+        value = java.getDoubleMatrix(name)
+        if len(value) == 0:
+            rows = []
+        elif len(value) == 1:
+            rows = [array(value[0])]
+        elif len(value) == 2:
+            rows = [array(value[0]), array(value[1])]
+        else:
+            error = 'Cannot convert double-row matrix with more than two rows.'
+            logger.error(error)
+            raise TypeError(error)
+        return array(rows, dtype=object)
     elif datatype == 'File':
         return Path(str(java.getString(name)))
     elif datatype == 'Int':
@@ -403,15 +453,23 @@ def get(java, name):
         return array([line for line in java.getIntMatrix(name)])
     elif datatype == 'None':
         return None
+    elif datatype == 'Selection':
+        return [str(string) for string in java.getEntryKeys(name)]
     elif datatype == 'String':
-        return str(java.getString(name))
+        value = java.getString(name)
+        return str(value) if value else None
     elif datatype == 'StringArray':
         return [str(string) for string in java.getStringArray(name)]
     elif datatype == 'StringMatrix':
-        return [[str(string) for string in line]
-                for line in java.getStringMatrix(name)]
+        value = java.getStringMatrix(name)
+        if value:
+            return [[str(string) for string in line] for line in value]
+        else:
+            return [[]]
     else:
-        raise TypeError(f'Cannot convert Java data type "{datatype}".')
+        error = f'Cannot convert Java data type "{datatype}".'
+        logger.error(error)
+        raise TypeError(error)
 
 
 ########################################
@@ -461,12 +519,9 @@ def inspect(java):
     # Display properties if any are defined.
     if 'properties' in attributes:
         print('properties:')
-        names = [str(property) for property in java.properties()]
+        names = [str(name) for name in java.properties()]
         for name in names:
-            try:
-                value = get(java, name)
-            except TypeError:
-                value = '[?]'
+            value = get(java, name)
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.

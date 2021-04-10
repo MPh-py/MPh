@@ -1,6 +1,4 @@
-﻿# MPh
-
-Pythonic scripting interface for Comsol Multiphysics
+﻿Pythonic scripting interface for Comsol Multiphysics
 
 [Comsol][comsol] is a commercial software application that is widely
 used in science and industry for research and development. It excels
@@ -21,19 +19,12 @@ for multi-physics. Hence the name of this library. It is open-source
 and in no way affiliated with Comsol Inc., the company that develops
 and sells the simulation software.
 
+Find the full [documentation on Read-the-Docs][docs].
+
 [comsol]: https://www.comsol.com
 [jpype]:  https://pypi.org/project/JPype1
+[docs]:   https://mph.readthedocs.io
 
 [![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![source](https://img.shields.io/github/stars/John-Hennig/MPh?style=social)](https://github.com/John-Hennig/MPh)
-
-```{toctree}
-:hidden:
-
-installation
-tutorial
-limitations
-demonstrations
-api
-```

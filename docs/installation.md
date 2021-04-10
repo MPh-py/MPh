@@ -1,5 +1,4 @@
-﻿Installation
-------------
+﻿# Installation
 
 MPh is [available on PyPI][pypi] and can be readily installed via
 ```none

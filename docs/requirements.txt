@@ -1,5 +1,5 @@
 sphinx>=2.0.0
 sphinx_rtd_theme
-recommonmark
+myst-parser
 commonmark
 docutils==0.16

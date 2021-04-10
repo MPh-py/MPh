@@ -34,13 +34,18 @@ def teardown_module():
 # Tests                                #
 ########################################
 
-
 def test_init():
     global client
     client = mph.start(cores=cores)
     assert client.java is not None
-    assert not client.models()
     assert client.cores == cores
+
+
+def test_repr():
+    if client.port:
+        assert repr(client) == f'Client(port={client.port})'
+    else:
+        assert repr(client) == 'Client(stand-alone)'
 
 
 def test_load():
@@ -81,8 +86,25 @@ def test_files():
     assert file.resolve() in client.files()
 
 
+def test_contains():
+    assert model in client
+    assert 'capacitor' in client
+    assert 'test' in client
+
+
+def test_iter():
+    models = list(client)
+    assert model in models
+
+
+def test_getitem():
+    assert model == client['capacitor']
+    assert model == client[model]
+
+
 def test_remove():
     name = model.name()
+    assert name in client.names()
     client.remove(model)
     assert name not in client.names()
     message = ''
@@ -132,12 +154,16 @@ if __name__ == '__main__':
     setup_module()
     try:
         test_init()
+        test_repr()
         test_load()
         test_caching()
         test_create()
         test_models()
         test_names()
         test_files()
+        test_contains()
+        test_iter()
+        test_getitem()
         test_remove()
         test_clear()
         test_disconnect()

@@ -1,7 +1,6 @@
-﻿Demonstrations
---------------
+﻿# Demonstrations
 
-### Busbar
+## Busbar
 
 ["Electrical Heating in a Busbar"][busbar] is an example model used
 in the tutorial in ["Introduction to Comsol Multiphysics"][intro] and
@@ -33,11 +32,8 @@ Tmin = 322.41 K at (0.063272, 0.000000, 0.000000)
 You could now sweep the model's parameters, for example the length `L`
 or width `wbb` of the busbar.
 
-[busbar]: https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
-[intro]: https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
 
-
-### Compacting models
+## Compacting models
 
 We usually save models to disk after we have solved them, which
 includes the solution and mesh data in the file. This is convenient
@@ -60,39 +56,38 @@ for file in Path.cwd().glob('*.mph'):
     model.save()
 ```
 
-The script `compact_models.py` in the ["demos" folder][demos] of the
-source-code repository is a refined version of the above code. It
-displays more status information and also resets the modeling history.
+The script [`compact_models.py`][compact] in the [`demos`][demos] folder
+of the source-code [repository][repo] is a refined version of the above
+code. It displays more status information and also resets the modeling
+history.
 
 Note that we could easily go through all sub-directories recursively
 by replacing `glob` with `rglob`. However, this should be used with
 caution so as to not accidentally modify models in folders that were
 not meant to be included.
 
-[demos]: https://github.com/John-Hennig/MPh/tree/master/demos
 
-
-### Multiple processes
+## Multiple processes
 
 As explained in [Limitations](limitations), we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
 multiple Python processes in parallel, thanks to the
-[multiprocessing][multi] module that is part of the standard library.
+[`multiprocessing`][multi] module that is part of the standard library.
 
-So, other than MPh itself, we are going to need `multiprocessing`,
-as well as `queue`, also from the standard library, though only for
-the `queue.Empty` exception type that it provides.
+So, other than MPh itself, we are going to need [`multiprocessing`][multi],
+as well as [`queue`][queue], also from the standard library, though
+only for the [`queue.Empty`][empty] exception type that it provides.
 ```python
 import mph
 import multiprocessing
 import queue
 ```
 
-In this demonstration, we will solve the model `capacitor.mph` from the
-["tests" folder][tests] of the source-code repository, the same model
-we used in the [Tutorial](tutorial). We want to sweep the electrode
-distance d and calculate the capacitance C for each value of the
-distance, ranging from 0.5 to 5 mm.
+In this demonstration, we will solve the model [`capacitor.mph`][capa]
+from the [`tests`][tests] folder of the source-code [repository][repo],
+the same model we used in the [Tutorial](tutorial). We want to sweep
+the electrode distance d and calculate the capacitance C for each value
+of the distance, ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 ```
@@ -137,8 +132,8 @@ which parameter is solved for and when. The parameter values don't
 have to be hard-coded, they could come from user input or be generated
 depending on the outcome of previous simulations. For example, this
 approach lends itself to iterative optimization schemes such as the
-"genetic algorithm", where a batch of simulations would be run for
-each new "generation".
+["genetic algorithm"][ga], where a batch of simulations would be run
+for each new "generation".
 
 Note how the returned results also contain the input parameter. As
 the worker processes will run asynchronously in parallel, we cannot
@@ -180,42 +175,41 @@ for _ in values:
 We would then display them, plot them, save them to a file, or whatever
 it is we do with simulation results.
 
-The complete script `worker_pool.py`, which implements all of the above
-and also irons out some wrinkles not covered here for the sake of
-brevity, can be found in the ["demos" folder][demos] of the source-code
-repository. As it runs, it displays a live plot such as the one that
-follows. It is reproduced here preserving the real time from a run with
-two workers. Observe how the first two data points do in fact come in
-out of order.
+The complete script [`worker_pool.py`][pool], which implements all of
+the above and also irons out some wrinkles not covered here for the
+sake of brevity, can be found in the [`demos`][demos] folder of the
+source-code [repository][repo]. As it runs, it displays a live plot
+such as the one that follows. It is reproduced here preserving the real
+time from a run with two workers. Observe how the first two data points
+do in fact come in out of order.
 
 ![](images/worker_pool.gif)
 
-A more advanced implementation may use a class derived from `multiprocessing.Process` instead of a mere function, just to be able
-to save state. For long-running simulations it would make sense to
-store jobs and results on disk, rather than in memory, so that the
+A more advanced implementation may use a class derived from
+[`multiprocessing.Process`][mproc] instead of a mere function, just to
+be able to save state. For long-running simulations it would make sense
+to store jobs and results on disk, rather than in memory, so that the
 execution of the queue may be resumed after a possible interruption.
-In that case, one may, or may not, find the [subprocess][subpr]
-module more convenient for starting the external processes. The
-worker implementation would then be in a separate module that is run
-as a script.
-
-[multi]: https://docs.python.org/3/library/multiprocessing.html
-[tests]: https://github.com/John-Hennig/MPh/tree/master/tests
-[subpr]: https://docs.python.org/3/library/subprocess.html
+In that case, one may, or may not, find the [`subprocess`][sproc]
+module from the standard library more convenient for starting the
+external processes. The worker implementation would then be in a
+separate module that is run as a script.
 
 
-### Creating models: Java style
+
+## Creating models: Java style
 
 The primary focus of MPh is to automate the simulation workflow, like
 running parameter sweeps or optimization routines with customized,
 Python-powered post-processing. Creating and altering models is
-possible (see next section), but has some limitations.
+possible (see [next section](#creating-models-python-style)), but has
+some limitations.
 
 However, any and all functionality offered by the [Comsol Java API][japi]
-is accessible via the "pythonized" Java layer provided by JPype, which
-is exposed as the `.java` attribute of `Client` instances, mapping to
-Comsol's `ModelUtil`, as well as `Model` instances, mapping to Comsol's
-`model`.
+is accessible via the "pythonized" Java layer provided by [JPype][jpype],
+which is exposed as the `.java` attribute of [`Client`](api/mph.Client)
+instances, mapping to Comsol's `ModelUtil`, as well as of
+[`Model`](api/mph.Model) instances, mapping to Comsol's `model`.
 
 Let's take this Comsol blog post as an example: ["Automate Your Modeling
 Tasks with the Comsol API for use with Java"][blog]. It starts with the
@@ -263,8 +257,8 @@ model.geom("geom1").run("fin");
 Note how the *functional* Java code (excluding syntax sugar) was
 essentially copied and pasted, even the semicolons, which Python
 simply ignores. We had to replace `new String[]{"0.1", "0.2", "0.5"}`
-because Python does not know what `new` means. There, Java expects a
-list of three strings. So we replaced the expression with
+because Python does not know what [`new`][new] means. There, Java
+expects a list of three strings. So we replaced the expression with
 `["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
 of these three strings.
 
@@ -287,7 +281,7 @@ The advantage of using Python over Java is:
   Comsol documentation explains a lot of things, but not every little
   detail. The function [`mph.inspect()`](api/mph.inspect) makes
   introspection even easier, as it formats the output more nicely than
-  Python's built-in `dir()`.
+  Python's built-in [`dir()`][dir].
 
 To save the model created in the above example, we do:
 ```python
@@ -298,12 +292,9 @@ This stores a file named `model.mph` in the working directory, which
 may then be opened in the Comsol GUI or be used in any other Python,
 Java, or Matlab project.
 
-[japi]: https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[jpype]: https://jpype.readthedocs.io/en/stable
-[blog]: https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
 
-### Creating models: Python style
+## Creating models: Python style
 
 The example from the previous section can be expressed in more
 "pythonic" syntax if we ignore the Java layer and only use methods
@@ -318,7 +309,7 @@ model.property('geometries/Geometry 1/Block 1', 'size', ('0.1', '0.2', '0.5'))
 model.build('Geometry 1')
 ```
 
-This, again, hides all tags in application code. Instead we refer to
+This, again, hides all tags in application code. Instead, we refer to
 the nodes in the model tree by name. In the example, these names were
 generated automatically, in the same way the Comsol GUI does it. We
 could also supply names of our choice.
@@ -332,17 +323,18 @@ model.property('geometries/geometry/ice block', 'size', ('0.1', '0.2', '0.5'))
 model.build('geometry')
 ```
 
-If `model.create()` receives a reference to a node that does not exist
-yet, such as `geometries/geometry` in the example, it creates that
-node in its parent group, here the built-in top-level group named
+If [`model.create()`](api/mph.Model) receives a reference to a node
+that does not exist yet, such as `geometries/geometry` in the example,
+it creates that node in its parent group, here the built-in group named
 `geometries`, and gives it the name we supplied, here `geometry`.
 
 So far we have used strings to refer to nodes. We could also use the
 [`Node`](api/mph.Node) class, which offers more flexibility and extra
-functionality. Instances of that class are returned by `model.create()`
-for convenience. But they can be generated from scratch by string
-concatenation with the division operator `/` — much like `pathlib.Path`
-objects from Python's standard library.
+functionality. Instances of that class are returned by
+[`model.create()`](api/mph.Model) for convenience. But they can be
+generated from scratch by string concatenation with the division
+operator `/` — much like [`pathlib.Path`][path] objects from Python's
+standard library.
 ```python
 import mph
 client = mph.start()
@@ -381,5 +373,31 @@ block of ice
 ```
 
 The one component and default view were created by Comsol automatically.
-We could rename them if we wanted to. Most built-in top-level groups are
-still empty, waiting for nodes to be created.
+We could rename them if we wanted to. Most built-in groups are still
+empty, waiting for nodes to be created.
+
+
+[repo]:    https://github.com/John-Hennig/MPh
+[tests]:   https://github.com/John-Hennig/MPh/tree/master/tests
+[capa]:    https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
+[demos]:   https://github.com/John-Hennig/MPh/tree/master/demos
+[compact]: https://github.com/John-Hennig/MPh/blob/main/demos/compact_models.py
+[pool]:    https://github.com/John-Hennig/MPh/blob/main/demos/worker_pool.py
+
+[japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[intro]:   https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
+[busbar]:  https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
+[blog]:    https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
+
+[jpype]:   https://jpype.readthedocs.io/en/stable
+[new]:     https://www.javatpoint.com/new-keyword-in-java
+
+[multi]:   https://docs.python.org/3/library/multiprocessing.html
+[queue]:   https://docs.python.org/3/library/queue.html
+[empty]:   https://docs.python.org/3/library/queue.html#queue.Empty
+[mproc]:   https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process
+[sproc]:   https://docs.python.org/3/library/subprocess.html
+[path]:    https://docs.python.org/3/library/pathlib.html
+[dir]:     https://docs.python.org/3/library/functions.html#dir
+
+[ga]:      https://en.wikipedia.org/wiki/Genetic_algorithm

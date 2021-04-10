@@ -1,4 +1,4 @@
-﻿"""Tests the model class."""
+﻿"""Tests the Model class."""
 __license__ = 'MIT'
 
 
@@ -8,7 +8,6 @@ __license__ = 'MIT'
 import parent # noqa F401
 import mph
 from pathlib import Path
-from numpy import array, isclose
 from sys import argv
 import logging
 import warnings
@@ -65,6 +64,29 @@ def test_truediv():
     node = model/'functions'/'step'
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
+
+
+def test_contains():
+    assert 'functions' in model
+    assert 'functions/step' in model
+    other = client.create('other')
+    assert (other/'functions') in model
+    assert (other/'functions'/'step') in model
+    client.remove(other)
+
+
+def test_iter():
+    assert model/'functions' in list(model)
+    assert model/'functions'/'step' not in list(model)
+
+
+def test_getitem():
+    assert model/'functions' == model['functions']
+    assert model/'functions'/'step' not in list(model)
+    other = client.create('other')
+    assert model['functions'] == model[other/'functions']
+    assert model['functions/step'] == model[other/'functions/step']
+    client.remove(other)
 
 
 def test_name():
@@ -224,99 +246,57 @@ def test_rename():
     assert model.name() == name
 
 
-def test_parameters():
-    parameters = model.parameters()
-    names = [parameter.name for parameter in parameters]
-    assert 'U' in names
-    assert 'd' in names
-    assert 'l' in names
-    assert 'w' in names
-
-
 def test_parameter():
     value = model.parameter('U')
     model.parameter('U', '2[V]')
     assert model.parameter('U') == '2[V]'
-    model.parameter('U', '2', 'V')
-    assert model.parameter('U') == '2 [V]'
     model.parameter('U', '2')
     assert model.parameter('U') == '2'
     assert model.parameter('U', evaluate=True) == 2
+    model.parameter('U', 3)
+    assert model.parameter('U') == '3'
+    assert model.parameter('U', evaluate=True) == 3
     model.parameter('U', value)
     assert model.parameter('U') == value
-    model.parameter('U', description='test')
-    names = [p.name for p in model.parameters()]
-    descriptions = [p.description for p in model.parameters()]
-    assert descriptions[names.index('U')] == 'test'
+
+
+def test_parameters():
+    assert 'U' in model.parameters()
+    assert 'U' in model.parameters().keys()
+    assert '1[V]' in model.parameters().values()
+    assert ('U', '1[V]') in model.parameters().items()
+
+
+def test_description():
+    assert model.description('U') == 'applied voltage'
+    model.description('U', 'test')
+    assert model.description('U') == 'test'
+    model.description('U', 'applied voltage')
+    assert model.description('U') == 'applied voltage'
+
+
+def test_descriptions():
+    assert 'U' in model.descriptions()
+    assert 'U' in model.descriptions().keys()
+    assert 'applied voltage' in model.descriptions().values()
+    assert ('U', 'applied voltage') in model.descriptions().items()
+
+
+def test_property():
+    assert model.property('functions/step', 'funcname') == 'step'
+    model.property('functions/step', 'funcname', 'renamed')
+    assert model.property('functions/step', 'funcname') == 'renamed'
+    model.property('functions/step', 'funcname', 'step')
+    assert model.property('functions/step', 'funcname') == 'step'
+    assert model.property('functions/step', 'from') == 0.0
+    model.property('functions/step', 'from', 0.1)
+    assert model.property('functions/step', 'from') == 0.1
+    model.property('functions/step', 'from', 0.0)
+    assert model.property('functions/step', 'from') == 0.0
 
 
 def test_properties():
     assert 'flipx' in model.properties('functions/image')
-
-
-def test_property():
-    # Test conversion to and from 'Boolean'.
-    old = model.property('functions/image', 'flipx')
-    model.property('functions/image', 'flipx', False)
-    assert model.property('functions/image', 'flipx') is False
-    model.property('functions/image', 'flipx', old)
-    assert model.property('functions/image', 'flipx') == old
-    # Test conversion to and from 'Double'.
-    old = model.property('functions/image', 'xmin')
-    model.property('functions/image', 'xmin', -10.0)
-    assert isclose(model.property('functions/image', 'xmin'), -10)
-    model.property('functions/image', 'xmin', old)
-    assert isclose(model.property('functions/image', 'xmin'), old)
-    # Test conversion to and from 'DoubleArray'.
-    old = model.property('exports/field', 'outersolnumindices')
-    new = array([1.0, 2.0, 3.0])
-    model.property('exports/field', 'outersolnumindices', new)
-    assert isclose(model.property('exports/field', 'outersolnumindices'),
-                   new).all()
-    model.property('exports/field', 'outersolnumindices', old)
-    assert isclose(model.property('exports/field', 'outersolnumindices'),
-                   old).all()
-    # Test conversion to and from 'File'.
-    old = model.property('functions/image', 'filename')
-    model.property('functions/image', 'filename', Path('new.tif'))
-    assert model.property('functions/image', 'filename') == Path('new.tif')
-    model.property('functions/image', 'filename', old)
-    assert model.property('functions/image', 'filename') == old
-    # Test conversion to and from 'Int'.
-    old = model.property('functions/image', 'refreshcount')
-    model.property('functions/image', 'refreshcount', 1)
-    assert model.property('functions/image', 'refreshcount') == 1
-    model.property('functions/image', 'refreshcount', old)
-    assert model.property('functions/image', 'refreshcount') == old
-    # Test conversion to and from 'IntArray'.
-    old = model.property('plots/evolution', 'solnum')
-    new = array([1, 2, 3])
-    model.property('plots/evolution', 'solnum', new)
-    assert (model.property('plots/evolution', 'solnum') == new).all()
-    model.property('plots/evolution', 'solnum', old)
-    assert (model.property('plots/evolution', 'solnum') == old).all()
-    # Test conversion from 'None'.
-    none = model.property('functions/image', 'exportfilename')
-    assert none is None
-    # Test conversion to and from 'String'.
-    old = model.property('functions/image', 'funcname')
-    model.property('functions/image', 'funcname', 'new')
-    assert model.property('functions/image', 'funcname') == 'new'
-    model.property('functions/image', 'funcname', old)
-    assert model.property('functions/image', 'funcname') == old
-    # Test conversion to and from 'StringArray'.
-    old = model.property('exports/vector', 'descr')
-    model.property('exports/vector', 'descr', ['x', 'y', 'z'])
-    assert model.property('exports/vector', 'descr') == ['x', 'y', 'z']
-    model.property('exports/vector', 'descr', old)
-    assert model.property('exports/vector', 'descr') == old
-    # Test conversion to and from 'StringMatrix'.
-    old = model.property('plots/evolution', 'plotonsecyaxis')
-    new = [['medium 1', 'on', 'ptgr1'], ['medium 2', 'on', 'ptgr2']]
-    model.property('plots/evolution', 'plotonsecyaxis', new)
-    assert model.property('plots/evolution', 'plotonsecyaxis') == new
-    model.property('plots/evolution', 'plotonsecyaxis', old)
-    assert model.property('plots/evolution', 'plotonsecyaxis') == old
 
 
 def test_create():
@@ -384,6 +364,15 @@ def test_export():
     model.export('field')
     assert (here/'field.txt').exists()
     (here/'field.txt').unlink()
+    assert not (here/'field.txt').exists()
+    model.export('exports/field')
+    assert (here/'field.txt').exists()
+    (here/'field.txt').unlink()
+    assert not (here/'field.txt').exists()
+    model.export(model/'exports'/'field')
+    assert (here/'field.txt').exists()
+    (here/'field.txt').unlink()
+    assert not (here/'field.txt').exists()
     assert not (here/'field2.txt').exists()
     model.export('exports/field', here/'field2.txt')
     assert (here/'field2.txt').exists()
@@ -476,6 +465,9 @@ if __name__ == '__main__':
         test_repr()
         test_eq()
         test_truediv()
+        test_contains()
+        test_iter()
+        test_getitem()
 
         test_name()
         test_file()
@@ -500,10 +492,12 @@ if __name__ == '__main__':
         test_evaluate()
 
         test_rename()
-        test_parameters()
         test_parameter()
-        test_properties()
+        test_parameters()
+        test_description()
+        test_descriptions()
         test_property()
+        test_properties()
         test_create()
         test_remove()
 
