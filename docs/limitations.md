@@ -41,9 +41,9 @@ The Comsol API offers two distinct ways to run a simulation session
 on the local machine. One may either start a "stand-alone" client,
 which does not require a Comsol server. Or one may start a server
 separately and have a "thin" client connect to it via a loop-back
-network socket. The first approach is more lightweight and arguably
-more robust, as it keeps everything inside the same process. The
-second approach is slower to start up and relies on the inter-process
+network socket. The first approach is more lightweight and more
+reliable, as it keeps everything inside the same process. The second
+approach is slower to start up and relies on the inter-process
 communication to be robust, but would also work across the network,
 i.e., for remote sessions where the client runs locally and delegates
 the heavy lifting to a server running on another machine. If we
@@ -82,20 +82,27 @@ selecting a specific Comsol version from within MPh, as adding multiple
 installations to that search path will lead to name collisions. One
 could work around the issue by wrapping a Python program using MPh in
 a shell script that sets the environment variable only for that one
-process. Or have the Python program start the Comsol session in a
-subprocess. However, none of this is ideal. Starting the client should
-work without any of these detours.
+process. Or have the Python program run the Comsol session in another
+Python subprocess. However, none of this is ideal. Starting the client
+should work without any of these detours.
 
 The function [`mph.start()`](api/mph.start) exists to navigate these
 platform differences. On Windows, it starts a stand-alone client in
 order to profit from the better start-up performance. On Linux and
 macOS, it creates a local session in client–server mode so that no
 shell configuration is required up front. This behavior is reflected
-in the configuration option "session", accessible via
+in the configuration option `'session'`, accessible via
 [`mph.option()`](api/mph.config), which is set to `'platform-dependent'`
 by default. It could also be set to `'stand-alone'` or `'client-server'`
 before calling [`start()`](api/mph.start) in order to override the
 default behavior.
+
+Performance in client–server mode is noticeably worse in certain
+scenarios, not just at start-up. If functions access the Java API
+frequently, such as when navigating the model tree, perhaps even
+recursively as [`mph.tree()`](api/mph.tree) does, then client–server
+mode can be slower by a large factor compared to a stand-alone client.
+Rest assured though that simulation run-times are not affected.
 
 
 [tests]:  https://github.com/John-Hennig/mph/tree/master/tests
