@@ -1,4 +1,4 @@
 sphinx>=2.1
-sphinx_rtd_theme
+furo
 myst-parser
 commonmark

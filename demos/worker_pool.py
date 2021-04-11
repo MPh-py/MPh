@@ -2,7 +2,7 @@
 Distributes a parameter sweep over multiple worker processes.
 
 This demonstration works around the limitation that only a single
-Comsol client can run inside a Python session. It leverages the
+Comsol client can run inside one Python process. It leverages the
 `multiprocessing` module from Python's standard library to create
 several independent subprocesses ("workers") that communicate with
 the parent process ("boss") via inter-process queues to pass job
@@ -40,8 +40,8 @@ figure = graph = None
 def plot_create():
     """Create the plot figure to be updated as simulations are under way."""
     global figure, graph
-    figure = pyplot.figure(tight_layout=True)
-    figure.canvas.set_window_title('Simulation results')
+    figure = pyplot.figure(figsize=(4,3), tight_layout=True)
+    figure.canvas.manager.set_window_title('Simulation results')
     axes = figure.add_subplot()
     graph = axes.plot([], [], '.-', color='navy', markersize=20)[0]
     axes.set_xlabel('electrode distance (mm)')

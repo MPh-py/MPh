@@ -28,7 +28,6 @@ import sys                             # system specifics
 from pathlib import Path               # file-system path
 
 extensions = [
-    'sphinx_rtd_theme',                # Register Read-the-Docs theme.
     'myst_parser',                     # Accept Markdown as input.
     'sphinx.ext.autodoc',              # Get documentation from doc-strings.
     'sphinx.ext.autosummary',          # Create summaries automatically.
@@ -63,7 +62,7 @@ def docstring(app, what, name, obj, options, lines):
 
 
 def setup(app):
-    """Configure customized text processing."""
+    """Sets up customized text processing."""
     app.connect('autodoc-process-docstring', docstring)
 
 
@@ -80,25 +79,30 @@ author    = meta.__author__
 copyright = meta.__copyright__
 license   = meta.__license__
 
+# Logo
+html_logo    = 'images/logo-96px.png'  # documentation logo
+html_favicon = 'images/logo-256px.png' # browser icon
+
 # Source parsing
 master_doc = 'index'                   # start page
 nitpicky   = True                      # Warn about missing references?
 
 # Code documentation
-add_module_names = False               # Don't prefix members with module name.
 autodoc_default_options = {
     'members':       True,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
+add_module_names = False               # Don't prefix members with module name.
 
-# Output style
-html_theme       = 'sphinx_rtd_theme'  # Use the Read-the-Docs theme.
-pygments_style   = 'trac'              # syntax highlighting style
-html_static_path = ['style']           # folders to include in output
-html_css_files   = ['custom.css']      # extra style files to apply
-
-# Output options
+# Rendering options
 myst_heading_anchors = 2               # Generate link anchors for sections.
 html_copy_source     = False           # Copy documentation source files?
 html_show_copyright  = False           # Show copyright notice in footer?
 html_show_sphinx     = False           # Show Sphinx blurb in footer?
+
+# Rendering style
+html_theme          = 'furo'           # custom theme with light and dark mode
+pygments_style      = 'friendly'       # syntax highlight style in light mode
+pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
+html_static_path    = ['style']        # folders to include in output
+html_css_files      = ['custom.css']   # extra style files to apply

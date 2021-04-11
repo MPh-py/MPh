@@ -183,7 +183,10 @@ such as the one that follows. It is reproduced here preserving the real
 time from a run with two workers. Observe how the first two data points
 do in fact come in out of order.
 
-![](images/worker_pool.gif)
+```{image} images/worker_pool.gif
+:alt: Live plot of worker pool demo
+:align: center
+```
 
 A more advanced implementation may use a class derived from
 [`multiprocessing.Process`][mproc] instead of a mere function, just to
@@ -333,7 +336,7 @@ So far we have used strings to refer to nodes. We could also use the
 functionality. Instances of that class are returned by
 [`model.create()`](api/mph.Model) for convenience. But they can be
 generated from scratch by string concatenation with the division
-operator `/` — much like [`pathlib.Path`][path] objects from Python's
+operator `/` — much like [`pathlib.Path`][path] objects from the
 standard library.
 ```python
 import mph
