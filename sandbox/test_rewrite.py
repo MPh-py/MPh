@@ -7,7 +7,7 @@ in case something fails. The script can then be run with
 figure out when went wrong with the last property.
 
 The script displays a count of how many properties have been tested
-successfully. There are a little over 4000 properties total defined
+successfully. There are a little over 4200 properties total defined
 in the demo model.
 
 The test runs much faster in stand-alone mode, the default on Windows,
@@ -54,7 +54,7 @@ def test_rewrite(node):
         if java.getValueType(name) == 'Selection':
             # Changing selections is not (yet) implemented.
             continue
-        if name == 'sol':
+        if name == 'sol' and node.parent().name() == 'parametric solutions':
             # Writing "sol" changes certain node names.
             continue
         node.property(name, value)
