@@ -54,10 +54,14 @@ class Server:
     several are installed on the machine, for example `version='5.3a'`.
     Otherwise the latest version is used.
 
-    The server can be instructed to use a given network `port`. If
-    omitted, the first server started on the machine will use port
-    2036, servers started subsequently will use port numbers of
-    increasing value. The actual port number of a server instance
+    The server can be instructed to use a specific network `port` for
+    communication with clients by passing the number of a free port
+    explicitly. If `port=None`, the default, the server will try to
+    use the default port 2036 or, in case it is blocked by another
+    server, will try subsequent numbers until it finds a free port.
+    (This is not robust and may lead to start-up failures if multiple
+    servers are spun up at once.) If `port=0`, the server will select
+    a random free port. The actual port number of a server instance
     can be accessed via its `port` attribute once it has started.
 
     A `timeout` can be set for the server start-up. The default is 60
@@ -76,7 +80,7 @@ class Server:
             arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
             logger.info(f'Server restricted to {cores} processor {noun}.')
-        if port:
+        if port is not None:
             arguments += ['-port', str(port)]
         command = server + arguments
         if version_info < (3, 8):

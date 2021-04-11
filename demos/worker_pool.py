@@ -7,12 +7,6 @@ Comsol client can run inside one Python process. It leverages the
 several independent subprocesses ("workers") that communicate with
 the parent process ("boss") via inter-process queues to pass job
 instructions and results back and forth.
-
-Note that on Linux and macOS, where by default we use client–server
-mode to run the local Comsol session, we must assign fixed and
-mutually exclusive port numbers to the different servers in order
-to avoid collisions at start-up. In stand-alone mode, the default
-on Windows, this is not necessary.
 """
 __license__ = 'MIT'
 
@@ -25,7 +19,6 @@ from multiprocessing import Process    # external subprocess
 from multiprocessing import Queue      # inter-process queue
 from multiprocessing import cpu_count  # number of (logical) cores
 from queue import Empty                # queue-is-empty exception
-from platform import system            # operating system
 from numpy import insert               # element insertion into array
 from matplotlib import pyplot          # data plots
 
@@ -76,9 +69,9 @@ def plot_final():
 # Workers                              #
 ########################################
 
-def worker(jobs, results, port):
+def worker(jobs, results):
     """Performs jobs and delivers the results."""
-    client = mph.start(cores=1, port=port)
+    client = mph.start(cores=1)
     model = client.load('../tests/capacitor.mph')
     while True:
         try:
@@ -101,14 +94,12 @@ def boss():
     values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     for d in values:
         jobs.put(d)
-
     results = Queue()
 
     processes = []
     workers = cpu_count()
     for n in range(workers):
-        port = None if system() == 'Windows' else 2036+n
-        process = Process(target=worker, args=(jobs, results, port))
+        process = Process(target=worker, args=(jobs, results))
         processes.append(process)
         process.start()
 
