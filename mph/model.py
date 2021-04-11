@@ -15,6 +15,7 @@ from numpy import array, ndarray       # numerical array
 from numpy import integer              # NumPy integer
 from jpype.types import JInt           # Java integer
 from pathlib import Path               # file-system path
+from re import match                   # pattern matching
 from warnings import warn              # user warning
 from logging import getLogger          # event logging
 
@@ -126,6 +127,11 @@ class Model:
     def file(self):
         """Returns the absolute path to the file the model was loaded from."""
         return Path(str(self.java.getFilePath())).resolve()
+
+    def version(self):
+        """Returns the Comsol version the model was last saved with."""
+        version = str(self.java.getComsolVersion())
+        return match(r'(?i)Comsol.+?(\d[0-9.a-z]*)', version).group(1)
 
     def functions(self):
         """Returns the names of all globally defined functions."""

@@ -97,6 +97,10 @@ def test_file():
     assert model.file().name == 'capacitor.mph'
 
 
+def test_version():
+    assert model.version() == '5.5'
+
+
 def test_functions():
     assert 'step'  in model.functions()
     assert 'image' in model.functions()
@@ -492,6 +496,7 @@ if __name__ == '__main__':
 
         test_name()
         test_file()
+        test_version()
         test_functions()
         test_components()
         test_geometries()
