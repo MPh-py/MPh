@@ -4,10 +4,10 @@ __license__ = 'MIT'
 from pathlib import Path
 from shutil import rmtree
 
-root = Path(__file__).absolute().parent.parent
+root = Path(__file__).resolve().parent.parent
 
 for folder in root.rglob('__pycache__'):
-    rmtree(folder)
+    rmtree(folder, ignore_errors=True)
 
 for folder in root.rglob('.pytest_cache'):
     rmtree(folder)
