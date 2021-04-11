@@ -7,8 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
-from mph import node
-from mph.node import Node
+from mph import node, Node
 from numpy import array, isclose
 from sys import argv
 from pathlib import Path
@@ -20,15 +19,13 @@ import logging
 ########################################
 client = None
 model  = None
-here   = Path(__file__).parent
-file   = here/'capacitor.mph'
-saveas = here/'temp'
 
 
 def setup_module():
     global client, model
     client = mph.start()
-    model = client.load(file)
+    here = Path(__file__).parent
+    model = client.load(here/'capacitor.mph')
 
 
 def teardown_module():
@@ -170,16 +167,16 @@ def test_rename():
 def test_rewrite(node):
     java = node.java
     if hasattr(java, 'properties'):
-        names = [str(name) for name in node.java.properties()]
+        names = [str(name) for name in java.properties()]
     else:
         names = []
     for name in names:
         value = node.property(name)
-        # Changing selections is not (yet) implemented.
-        if node.java.getValueType(name) == 'Selection':
+        if java.getValueType(name) == 'Selection':
+            # Changing selections is not (yet) implemented.
             continue
-        # Writing "sol" changes certain node names.
-        if name == 'sol':
+        if name == 'sol' and node.parent().name() == 'parametric solutions':
+            # Writing "sol" changes certain node names.
             continue
         node.property(name, value)
     for child in node:
