@@ -71,7 +71,7 @@ class Server:
         backend = discovery.backend(version)
         server  = backend['server']
         logger.info('Starting external server process.')
-        arguments = ['-login', 'auto']
+        arguments = ['-login', 'auto', '-graphics']
         if cores:
             arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
