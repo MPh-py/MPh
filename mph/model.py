@@ -533,8 +533,8 @@ class Model:
         """Assigns a new name to the model."""
         self.java.name(name)
 
-    def parameter(self, name, value=None, evaluate=False,
-                        unit=None, description=None):
+    def parameter(self, name, value=None, unit=None, description=None,
+                        evaluate=False):
         """
         Returns or sets the parameter of the given name.
 
