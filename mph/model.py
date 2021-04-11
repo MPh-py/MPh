@@ -813,17 +813,11 @@ class Model:
     ####################################
 
     def features(self, physics):
-        """
-        Returns the names of all features in a given physics interface.
-
-        The term feature refers to the nodes defined under a physics
-        interface. They define the differential equations, boundary
-        conditions, initial values, etc.
-
-        *Warning*: This method is deprecated and will be removed in a
-        future release. Use the `Node` class to retrieve child nodes of
-        a physics interface.
-        """
+        # Returns the names of all features in a given physics interface.
+        #
+        # The term feature refers to the nodes defined under a physics
+        # interface. They define the differential equations, boundary
+        # conditions, initial values, etc.
         warn('Model.features() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
@@ -836,18 +830,12 @@ class Model:
                 for ftag in tags]
 
     def toggle(self, physics, feature, action='flip'):
-        """
-        Enables or disables features of a physics interface.
-
-        If `action` is `'flip'` (the default), it enables the feature
-        if it is currently disabled or disables it if enabled. Pass
-        `'enable'` or `'on'` to enable the feature regardless of its
-        current state. Pass `'disable'` or `'off'` to disable it.
-
-        *Warning*: This method is deprecated and will be removed in
-        a future release. Use the `Node` class to toggle nodes in the
-        model tree.
-        """
+        # Enables or disables features of a physics interface.
+        #
+        # If `action` is `'flip'` (the default), it enables the feature
+        # if it is currently disabled or disables it if enabled. Pass
+        # `'enable'` or `'on'` to enable the feature regardless of its
+        # current state. Pass `'disable'` or `'off'` to disable it.
         warn('Model.toggle() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
@@ -871,12 +859,7 @@ class Model:
             node.active(False)
 
     def load(self, file, interpolation):
-        """
-        Loads data from a file and assigns it to an interpolation function.
-
-        *Warning*: This method is deprecated and may be removed in a
-        future release. Call the `import_()` method instead.
-        """
+        # Loads data from a file and assigns it to an interpolation function.
         warn('Model.load() is deprecated. Call .import_() instead.')
         for tag in self.java.func().tags():
             if str(self.java.func(tag).label()) == interpolation:
