@@ -178,11 +178,30 @@ def test_solve():
     model.solve()
 
 
+def test_inner():
+    (indices, values) = model.inner('time-dependent')
+    assert indices.dtype.kind == 'i'
+    assert values.dtype.kind  == 'f'
+    assert (indices == list(range(1,102))).all()
+    assert values[0] == 0
+    assert values[-1] == 1
+
+
+def test_outer():
+    (indices, values) = model.outer('parametric sweep')
+    assert indices.dtype.kind == 'i'
+    assert values.dtype.kind  == 'f'
+    assert (indices == list(range(1,4))).all()
+    assert values[0] == 1.0
+    assert values[1] == 2.0
+    assert values[2] == 3.0
+
+
 def test_evaluate():
     # Test global evaluation of stationary solution.
     C = model.evaluate('2*es.intWe/U^2', 'pF')
     assert abs(C - 0.74) < 0.01
-    # Test local evaluation of stationary solution.
+    # Test field evaluation of stationary solution.
     (x, y, E) = model.evaluate(['x', 'y', 'es.normE'], ['mm', 'mm', 'V/m'])
     (Emax, xmax, ymax) = (E.max(), x[E.argmax()], y[E.argmax()])
     assert abs(Emax - 818) < 5
@@ -190,9 +209,6 @@ def test_evaluate():
     assert abs(abs(ymax) - 4.27) < 0.01
     # Test global evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', '2*ec.intWe/U^2', 'pF')
-    (indices, values) = model.inner(dataset)
-    assert values[0] == 0
-    assert values[-1] == 1
     Cf = model.evaluate(expression, unit, dataset, 'first')
     assert abs(Cf - 0.74) < 0.01
     Cl = model.evaluate(expression, unit, dataset, 'last')
@@ -200,7 +216,7 @@ def test_evaluate():
     C = model.evaluate(expression, unit, dataset)
     assert C[0] == Cf
     assert C[-1] == Cl
-    # Test local evaluation of time-dependent solution.
+    # Test field evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
     Df = model.evaluate(expression, unit, dataset, 'first')
     assert abs(Df.max() -  7.2) < 0.1
@@ -212,28 +228,19 @@ def test_evaluate():
     # Test global evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', '2*ec.intWe/U^2', 'pF')
     (indices, values) = model.outer(dataset)
-    for (index, value) in zip(indices, values):
-        C = model.evaluate(expression, unit, dataset, 'first', index)
-        if value == 1:
-            assert abs(C - 1.32) < 0.01
-        elif value == 2:
-            assert abs(C - 0.74) < 0.01
-        elif value == 3:
-            assert abs(C - 0.53) < 0.01
-        else:
-            raise ValueError(f'Unexpected value {value} for parameter d."')
-    # Test local evaluation of parameter sweep.
-    for (index, value) in zip(indices, values):
-        if value == 2:
-            break
-    else:
-        raise ValueError('Could not find solution for d = 2 mm."')
+    C1 = model.evaluate(expression, unit, dataset, 'first', 1)
+    assert abs(C1 - 1.32) < 0.01
+    C2 = model.evaluate(expression, unit, dataset, 'first', 2)
+    assert abs(C2 - 0.74) < 0.01
+    C3 = model.evaluate(expression, unit, dataset, 'first', 3)
+    assert abs(C3 - 0.53) < 0.01
+    # Test field evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', 'ec.normD', 'nC/m^2')
-    Df = model.evaluate(expression, unit, dataset, 'first', index)
+    Df = model.evaluate(expression, unit, dataset, 'first', 2)
     assert abs(Df.max() -  7.2) < 0.1
-    Dl = model.evaluate(expression, unit, dataset, 'last', index)
+    Dl = model.evaluate(expression, unit, dataset, 'last', 2)
     assert abs(Dl.max() - 10.8) < 0.1
-    D = model.evaluate(expression, unit, dataset, outer=index)
+    D = model.evaluate(expression, unit, dataset, outer=2)
     assert D[0].max()  == Df.max()
     assert D[-1].max() == Dl.max()
 
@@ -383,17 +390,17 @@ def test_export():
     (here/'field.txt').unlink()
     assert not (here/'field.txt').exists()
     assert not (here/'field2.txt').exists()
-    model.export('exports/field', here/'field2.txt')
+    model.export('exports/field', 'field2.txt')
     assert (here/'field2.txt').exists()
     (here/'field2.txt').unlink()
     assert not (here/'vector.txt').exists()
     model.property('exports/vector', 'exporttype', 'text')
-    model.export('exports/vector', here/'vector.txt')
+    model.export('exports/vector', 'vector.txt')
     assert (here/'vector.txt').exists()
     (here/'vector.txt').unlink()
     assert not (here/'vector.vtu').exists()
     model.property('exports/vector', 'exporttype', 'vtu')
-    model.export('exports/vector', here/'vector.vtu')
+    model.export('exports/vector', 'vector.vtu')
     assert (here/'vector.vtu').exists()
     (here/'vector.vtu').unlink()
     assert not (here/'image.png').exists()
@@ -503,6 +510,8 @@ if __name__ == '__main__':
         test_mesh()
         test_solve()
 
+        test_inner()
+        test_outer()
         test_evaluate()
 
         test_rename()

@@ -229,10 +229,12 @@ class Client:
         retain its automatically generated name, like "Model 1".
         """
         java = self.java.createUnique('model')
-        logger.debug(f'Created model with tag "{java.tag()}".')
         model = Model(java)
         if name:
             model.rename(name)
+        else:
+            name = model.name()
+        logger.debug(f'Created model "{name}" with tag "{java.tag()}".')
         return model
 
     def remove(self, model):

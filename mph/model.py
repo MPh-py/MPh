@@ -11,10 +11,10 @@ from .node import Node                 # model node
 ########################################
 # Dependencies                         #
 ########################################
-import numpy                           # fast numerics
-from numpy import array                # numerical array
-import jpype.types as jtypes           # Java data types
-from pathlib import Path               # file-system paths
+from numpy import array, ndarray       # numerical array
+from numpy import integer              # NumPy integer
+from jpype.types import JInt           # Java integer
+from pathlib import Path               # file-system path
 from warnings import warn              # user warning
 from logging import getLogger          # event logging
 
@@ -111,36 +111,6 @@ class Model:
             logger.error(error)
             raise TypeError(error)
         return self/node
-
-    def _dataset(self, name=None):
-        """
-        Returns the dataset as a Java object.
-
-        If `name` is given, returns the dataset object with that name.
-        Otherwise returns the default dataset.
-        """
-        # To do: Refactor this method, maybe eliminate it entirely.
-        if name is not None:
-            names = self.datasets()
-            tags  = [tag for tag in self.java.result().dataset().tags()]
-            try:
-                dtag = tags[names.index(name)]
-            except ValueError:
-                error = f'Dataset "{name}" does not exist.'
-                raise LookupError(error) from None
-        else:
-            etag = self.java.result().numerical().uniquetag('eval')
-            eval = self.java.result().numerical().create(etag, 'Eval')
-            dtag = eval.getString('data')
-            self.java.result().numerical().remove(etag)
-        return self.java.result().dataset(dtag)
-
-    def _solution(self, dataset=None):
-        """Returns the Java solution object the named dataset is based on."""
-        # To do: Refactor this method, maybe eliminate it entirely.
-        dset = self._dataset(dataset)
-        stag = dset.getString('solution')
-        return self.java.sol(stag)
 
     ####################################
     # Inspection                       #
@@ -313,11 +283,37 @@ class Model:
         array and a floating-point array. A `dataset` name may be
         specified. Otherwise the default dataset is used.
         """
-        dataset  = self._dataset(dataset)
-        solution = self._solution(dataset.name())
-        solinfo  = solution.getSolutioninfo()
-        indices  = array(solinfo.getSolnum(1, True))
-        values   = array(solution.getPVals())
+        # Validate dataset argument.
+        if dataset is not None:
+            if isinstance(dataset, str):
+                if '/' in dataset:
+                    dataset = self/dataset
+                else:
+                    dataset = self/'datasets'/dataset
+            if not isinstance(dataset, Node):
+                error = 'Dataset must be a dataset name or dataset node.'
+                logger.error(error)
+                raise TypeError(error)
+        if not dataset.exists():
+            error = f'Dataset {dataset.name()} does not exist.'
+            logger.error(error)
+            raise ValueError(error)
+
+        # Find corresponding solution.
+        tag = dataset.property('solution')
+        for solution in self/'solutions':
+            if solution.tag() == tag:
+                break
+        else:
+            error = f'Dataset {dataset.name()} does not refer to a solution.'
+            logger.error(error)
+            raise RuntimeError(error)
+
+        # Get indices from solution info and values from solution itself.
+        java    = solution.java
+        info    = java.getSolutioninfo()
+        indices = array(info.getSolnum(1, True))
+        values  = array(java.getPVals())
         return (indices, values)
 
     def outer(self, dataset=None):
@@ -329,12 +325,36 @@ class Model:
         array. A `dataset` name may be specified. Otherwise the default
         dataset is used.
         """
-        dataset  = self._dataset(dataset)
-        solution = self._solution(dataset.name())
-        solinfo  = solution.getSolutioninfo()
-        indices  = array(solinfo.getOuterSolnum())
-        values   = array([solinfo.getPvals([[index,1]])[0][0]
-                          for index in indices])
+        # Validate dataset argument.
+        if dataset is not None:
+            if isinstance(dataset, str):
+                if '/' in dataset:
+                    dataset = self/dataset
+                else:
+                    dataset = self/'datasets'/dataset
+            if not isinstance(dataset, Node):
+                error = 'Dataset must be a dataset name or dataset node.'
+                logger.error(error)
+                raise TypeError(error)
+        if not dataset.exists():
+            error = f'Dataset {dataset.name()} does not exist.'
+            logger.error(error)
+            raise ValueError(error)
+
+        # Find corresponding solution.
+        tag = dataset.property('solution')
+        for solution in self/'solutions':
+            if solution.tag() == tag:
+                break
+        else:
+            error = f'Dataset {dataset.name()} does not refer to a solution.'
+            logger.error(error)
+            raise RuntimeError(error)
+
+        # Get indices and values from solution info.
+        info = solution.java.getSolutioninfo()
+        indices = array(info.getOuterSolnum())
+        values = array([info.getPvals([[index,1]])[0][0] for index in indices])
         return (indices, values)
 
     def evaluate(self, expression, unit=None, dataset=None,
@@ -345,7 +365,9 @@ class Model:
         The `expression` may be a string, denoting a single expression,
         or a sequence of strings, denoting multiple. The optional
         `unit` must be given correspondingly. If omitted, default
-        units are used.
+        units are used. The expression may be a global one, or a scalar
+        field, or particle data. Results are returned as NumPy arrays
+        of whichever dimensionality they may then have.
 
         A `dataset` may be specified. Otherwise the expression will
         be evaluated on the default dataset. If the solution stored in
@@ -355,44 +377,62 @@ class Model:
         the very first/last index. If the dataset represents a
         parameter sweep, the `outer` solution(s) can be selected by
         index or sequence of indices.
-
-        Results are returned as NumPy arrays of whichever
-        dimensionality they may have. The expression may be a global
-        one, or a scalar field, or particle data.
         """
-        # To do: Refactor this method using the Node API.
-
-        # Get dataset and solution (Java) objects.
-        dataset = self._dataset(dataset)
-        logger.info(f'Evaluating {expression} on "{dataset.name()}" dataset.')
-        solution = self._solution(dataset.name())
-
-        # Make sure solution has actually been computed.
-        if solution.isEmpty():
-            error = 'The solution has not been computed.'
-            logger.error(error)
-            raise RuntimeError(error)
-
-        # Validate solution arguments.
+        # Validate input arguments.
+        if dataset is not None:
+            if isinstance(dataset, str):
+                if '/' in dataset:
+                    dataset = self/dataset
+                else:
+                    dataset = self/'datasets'/dataset
+            if not isinstance(dataset, Node):
+                error = 'Dataset must be a dataset name or dataset node.'
+                logger.error(error)
+                raise TypeError(error)
         if not (inner is None
-                or (isinstance(inner, str)
-                    and inner in ('first', 'last'))
+                or (isinstance(inner, str) and inner in ('first', 'last'))
                 or (isinstance(inner, list)
                     and all(isinstance(index, int) for index in inner))
-                or (isinstance(inner, numpy.ndarray)
-                    and inner.dtype == 'int')):
+                or (isinstance(inner, ndarray) and inner.dtype.kind == 'i')):
             error = ('Argument "inner", if specified, must be either '
                      '"first", "last", or a list/array of integers.')
             logger.error(error)
-            raise ValueError(error)
-        if not (outer is None
-                or isinstance(outer, int)
-                or (hasattr(outer, 'dtype')
-                    and issubclass(outer.dtype.type, numpy.integer)
-                    and not outer.shape)):
+            raise TypeError(error)
+        if outer is not None and not isinstance(outer, (int, integer)):
             error = 'Argument "outer", if specified, must be an integer index.'
             logger.error(error)
+            raise TypeError(error)
+
+        # Find the default dataset if nothing specified.
+        if not dataset:
+            etag = self.java.result().numerical().uniquetag('eval')
+            eval = self.java.result().numerical().create(etag, 'Eval')
+            dtag = eval.getString('data')
+            self.java.result().numerical().remove(etag)
+            name = str(self.java.result().dataset().get(dtag).name())
+            dataset = self/'datasets'/name
+        if not dataset.exists():
+            error = f'Dataset {dataset.name()} does not exist.'
+            logger.error(error)
             raise ValueError(error)
+        logger.info(f'Evaluating "{expression}" '
+                    f'on dataset "{dataset.name()}".')
+
+        # Find corresponding solution.
+        tag = dataset.property('solution')
+        for solution in self/'solutions':
+            if solution.tag() == tag:
+                break
+        else:
+            error = f'Dataset "{dataset.name()}" does not refer to a solution.'
+            logger.error(error)
+            raise RuntimeError(error)
+
+        # Make sure solution has actually been computed.
+        if solution.java.isEmpty():
+            error = 'The solution has not been computed.'
+            logger.error(error)
+            raise RuntimeError(error)
 
         # Try to perform a global evaluation, which may fail.
         etag = self.java.result().numerical().uniquetag('eval')
@@ -403,9 +443,9 @@ class Model:
         if dataset is not None:
             eval.set('data', dataset.tag())
         if outer is not None:
-            eval.set('outersolnum', jtypes.JInt(outer))
+            eval.set('outersolnum', JInt(outer))
         try:
-            logger.info('Trying global evaluation.')
+            logger.debug('Trying global evaluation.')
             results = array(eval.getData())
             if eval.isComplex():
                 results += 1j * array(eval.getImagData())
@@ -420,23 +460,20 @@ class Model:
             else:
                 results = results[:, inner, :]
             return results.squeeze()
-        # Move on if this fails. It seems to not be a global expression then.
+        # Move on if this fails. Seems to not be a global expression then.
         except Exception:
-            logger.info('Global evaluation failed.')
-
-        # Find out the type of the dataset.
-        dtype = str(dataset.getType()).lower()
+            logger.debug('Global evaluation failed. Moving on.')
 
         # For particle datasets, create an EvalPoint node.
         etag = self.java.result().numerical().uniquetag('eval')
-        if dtype == 'particle':
+        if dataset.type() == 'Particle':
             eval = self.java.result().numerical().create(etag, 'EvalPoint')
             if inner is not None:
                 if inner in ('first', 'last'):
                     eval.set('innerinput', inner)
                 else:
                     eval.set('innerinput', 'manual')
-                    eval.set('solnum', [jtypes.JInt(index) for index in inner])
+                    eval.set('solnum', [JInt(index) for index in inner])
         # Otherwise create an Eval node.
         else:
             eval = self.java.result().numerical().create(etag, 'Eval')
@@ -454,11 +491,11 @@ class Model:
 
         # Select an outer solution, i.e. parameter index, if specified.
         if outer is not None:
-            eval.set('outersolnum', jtypes.JInt(outer))
+            eval.set('outersolnum', JInt(outer))
 
         # Retrieve the data.
         logger.info('Retrieving data.')
-        if dtype == 'particle':
+        if dataset.type() == 'Particle':
             results = array(eval.getReal())
             if eval.isComplex():
                 results += 1j * array(eval.getImag())
@@ -651,7 +688,9 @@ class Model:
         """
         if node is None:
             for node in self/'exports':
+                logger.info(f'Running export node "{node.name()}".')
                 node.run()
+                logger.info('Finished running export.')
         else:
             if isinstance(node, str):
                 if '/' in node:
@@ -659,11 +698,14 @@ class Model:
                 else:
                     node = self/'exports'/node
             if not node.exists():
-                logger.warning('Node does not exist in model tree')
-                return
+                error = f'Node "{node}" does not exist in model tree.'
+                logger.error(error)
+                raise ValueError(error)
             if file:
                 node.property('filename', str(file))
+            logger.info(f'Running export node "{node.name()}".')
             node.run()
+            logger.info('Finished running export.')
 
     def clear(self):
         """Clears stored solution, mesh, and plot data."""
