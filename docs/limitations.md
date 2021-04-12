@@ -18,9 +18,9 @@ processes"](demonstrations.md#multiple-processes) for a demonstration.
 
 For the same reason, the [test suite][tests] that comes with MPh fails
 when collected and run via the testing framework [pyTest][pytest].
-They must be run directly from the command line. Since they cannot be
-used for continuous integration testing anyway, given that they depend
-on Comsol being installed on the local machine, this is but a minor
+The tests must be run directly from the command line. Since they cannot
+be used for continuous integration testing anyway, given that they
+depend on Comsol being installed on the machine, this is but a minor
 inconvenience.
 
 Furthermore, there are some known, but unresolved issues with JPype's

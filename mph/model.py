@@ -42,8 +42,8 @@ class Model:
         import mph
         client = mph.start()
         model = client.load('capacitor.mph')
-        model.parameter('U', '1', 'V')
-        model.parameter('d', '1', 'mm')
+        model.parameter('U', '1 [V]')
+        model.parameter('d', '1 [mm]')
         model.solve()
         C = model.evaluate('2*es.intWe/U^2', 'pF')
         print(f'capacitance C = {C:.3f} pF')
@@ -661,9 +661,6 @@ class Model:
     def import_(self, node, file):
         """
         Imports external data from a file and assigns it to the node.
-
-        A `file` name can be specified. Otherwise the node's `filename`
-        property will be used.
 
         Note the trailing underscore in the method name. It is needed
         so that the Python parser does not treat the name as an

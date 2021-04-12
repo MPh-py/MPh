@@ -257,13 +257,14 @@ model.geom("geom1").feature("blk1").set("size", ["0.1", "0.2", "0.5"]);
 model.geom("geom1").run("fin");
 ```
 
-Note how the *functional* Java code (excluding syntax sugar) was
+Note how the *functional* Java code (excluding syntax elements) was
 essentially copied and pasted, even the semicolons, which Python
-simply ignores. We had to replace `new String[]{"0.1", "0.2", "0.5"}`
-because Python does not know what [`new`][new] means. There, Java
-expects a list of three strings. So we replaced the expression with
-`["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
-of these three strings.
+simply ignores. We named the Python wrapper `pymodel` and assigned
+`model` to the underlying Java object just so we could do this. We
+had to replace `new String[]{"0.1", "0.2", "0.5"}` because Python
+does not know what [`new`][new] means. There, Java expects a list of
+three strings. So we replaced the expression with `["0.1", "0.2", "0.5"]`,
+the Python equivalent of just that: a list of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
 documentation — or a blog post, as the case was here —, you will have

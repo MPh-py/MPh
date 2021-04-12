@@ -565,6 +565,13 @@ def tree(node, levels=[], max_depth=None):
     console. `node` would typically be the model's root node. `levels`
     is used internally when traversing the model tree recursively.
     Specify `max_depth` to possibly limit the number of lower branches.
+
+    Note that this function performs poorly in client–server mode, the
+    default on Linux and macOS, especially for complex models. The
+    client–server communication introduces inefficiencies that do not
+    occur in stand-alone mode, the default on Windows, where the model
+    tree, i.e. the hierarchy of related Java objects, can be traversed
+    reasonably fast.
     """
     if not isinstance(node, Node):
         # Support passing the model directly instead of a node.
