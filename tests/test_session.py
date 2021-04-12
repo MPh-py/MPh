@@ -99,7 +99,6 @@ def test_iter():
 
 def test_getitem():
     assert model == client['capacitor']
-    assert model == client[model]
 
 
 def test_remove():

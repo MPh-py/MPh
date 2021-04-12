@@ -154,17 +154,17 @@ class Client:
     def __iter__(self):
         yield from self.models()
 
-    def __getitem__(self, item):
-        if isinstance(item, str):
+    def __getitem__(self, name):
+        if isinstance(name, str):
             for model in self:
-                if item == model.name():
+                if name == model.name():
                     return model
-        elif isinstance(item, Model):
-            for model in self.models():
-                if item == model:
-                    return model
+            else:
+                error = f'Model "{name}" has not been loaded by client.'
+                logger.error(error)
+                raise KeyError(error)
         else:
-            error = 'Key is not a string.'
+            error = 'Key must be the name of a loaded model.'
             logger.error(error)
             raise TypeError(error)
 
