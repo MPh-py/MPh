@@ -401,10 +401,20 @@ def cast(value):
             return JArray(JInt, value.ndim)(value)
         elif value.dtype.kind == 'O':
             if value.ndim > 2:
-                error = 'Cannot cast object arrays with more than two rows.'
+                error = 'Cannot cast object arrays of dimension higher than 2.'
                 logger.error(error)
                 raise TypeError(error)
-            return JArray(JDouble, 2)([row.astype(float) for row in value])
+            rows = [row.astype(float) for row in value]
+            if len(rows) > 2:
+                error = 'Will not cast object arrays with more than two rows.'
+                logger.error(error)
+                raise TypeError(error)
+            for row in rows:
+                if row.ndim > 1:
+                    error = 'Rows in object arrays must be one-dimensional.'
+                    logger.error(error)
+                    raise TypeError(error)
+            return JArray(JDouble, 2)(rows)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
             logger.error(error)
