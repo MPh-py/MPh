@@ -104,5 +104,6 @@ html_show_sphinx     = False           # Show Sphinx blurb in footer?
 html_theme          = 'furo'           # custom theme with light and dark mode
 pygments_style      = 'friendly'       # syntax highlight style in light mode
 pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
+templates_path      = ['templates']    # style template overrides
 html_static_path    = ['style']        # folders to include in output
 html_css_files      = ['custom.css']   # extra style files to apply
