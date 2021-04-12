@@ -519,7 +519,10 @@ class Model:
         self.java.result().numerical().remove(etag)
 
         # Squeeze out singleton array dimensions.
-        results = results.squeeze()
+        if isinstance(expression, (list, tuple)):
+            results = [result.squeeze() for result in results]
+        else:
+            results = results.squeeze()
 
         # Return array of results.
         return results
