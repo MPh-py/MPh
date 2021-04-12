@@ -80,15 +80,6 @@ def test_iter():
     assert model/'functions'/'step' not in list(model)
 
 
-def test_getitem():
-    assert model/'functions' == model['functions']
-    assert model/'functions'/'step' not in list(model)
-    other = client.create('other')
-    assert model['functions'] == model[other/'functions']
-    assert model['functions/step'] == model[other/'functions/step']
-    client.remove(other)
-
-
 def test_name():
     assert model.name() == 'capacitor'
 
@@ -492,7 +483,6 @@ if __name__ == '__main__':
         test_truediv()
         test_contains()
         test_iter()
-        test_getitem()
 
         test_name()
         test_file()

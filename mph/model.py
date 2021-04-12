@@ -106,13 +106,6 @@ class Model:
     def __iter__(self):
         yield from (self/None).children()
 
-    def __getitem__(self, node):
-        if not isinstance(node, (str, Node)):
-            error = 'Key must be string or Node instance.'
-            logger.error(error)
-            raise TypeError(error)
-        return self/node
-
     ####################################
     # Inspection                       #
     ####################################
