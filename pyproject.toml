@@ -13,7 +13,7 @@ home-page = 'https://github.com/MPh-py/MPh'
 description-file = 'pypi.md'
 keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
 classifiers = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python :: 3',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',
@@ -24,7 +24,7 @@ classifiers = [
     'License :: OSI Approved :: MIT License']
 
 [tool.flit.metadata.requires-extra]
-doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark]
+doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
 
 [tool.flit.metadata.urls]
 Documentation = 'https://mph.readthedocs.io'
