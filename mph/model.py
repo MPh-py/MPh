@@ -365,17 +365,24 @@ class Model:
         or a sequence of strings, denoting multiple. The optional
         `unit` must be given correspondingly. If omitted, default
         units are used. The expression may be a global one, or a scalar
-        field, or particle data. Results are returned as NumPy arrays
-        of whichever dimensionality they may then have.
+        field, or particle data. Results are returned as (lists of)
+        NumPy arrays, of whichever dimensionality they may then have.
 
         A `dataset` may be specified. Otherwise the expression will
         be evaluated on the default dataset. If the solution stored in
-        the dataset is time-dependent, one or several `inner`
-        solution(s) can be preselected, either by an index number, a
-        sequence of indices, or by passing "first"/"last" to select
-        the very first/last index. If the dataset represents a
-        parameter sweep, the `outer` solution(s) can be selected by
-        index or sequence of indices.
+        the dataset is time-dependent, one or several `inner` solutions
+        can be preselected, either by an index number, a sequence of
+        indices, or by passing `'first`'/`'last'` to select the very
+        first/last index. If the dataset represents a parameter sweep,
+        the `outer` solution(s) can be selected by index or sequence
+        of indices.
+
+        Please note that this method, while broad in its intended scope,
+        covers common use cases, but not all of them. In case it fails
+        to return the expected results, consider using the Comsol API
+        features directly via the `.java` attribute of this class, and
+        refer to the "Results" chapter in the Comsol Programming Manual
+        for guidance.
         """
         # Validate input arguments.
         if dataset is not None:

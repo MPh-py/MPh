@@ -6,7 +6,7 @@ used in science and industry for research and development. It excels
 at modeling almost any (multi-)physics problem by solving the governing
 set of partial differential equations via the finite-element method.
 It comes with a modern graphical user interface to set up simulation
-models and can be scripted from Matlab or via its native Java API.
+models and can be scripted from Matlab or its native Java API.
 
 MPh brings the dearly missing power of Python to the world of Comsol.
 It leverages the Java bridge provided by [JPype][jpype] to access the
@@ -26,6 +26,7 @@ Find the full [documentation on Read-the-Docs][docs].
 [jpype]:  https://pypi.org/project/JPype1
 [docs]:   https://mph.readthedocs.io
 
+[![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![release](https://img.shields.io/pypi/v/mph.svg)](https://pypi.python.org/pypi/mph)
 [![downloads](https://pepy.tech/badge/mph)](https://pepy.tech/project/mph)

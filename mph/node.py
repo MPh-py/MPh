@@ -186,7 +186,14 @@ class Node:
         return str(self.java.tag()) if self.exists() else None
 
     def type(self):
-        """Returns the node's feature type."""
+        """
+        Returns the node's feature type.
+
+        This a something like `'Block'` for "a right-angled solid or
+        surface block in 3D". Refer to the Comsol documentation for
+        details. Feature types are displayed in the Comsol GUI at the
+        top of the `Settings` tab.
+        """
         return str(self.java.getType())
 
     def parent(self):

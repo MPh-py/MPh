@@ -3,9 +3,9 @@
 ## Java bridge
 
 MPh is built on top of the Python-to-Java bridge [JPype][jpype].
-It is JPype that allows us to look at Comsol's Java API and run the
-same commands from Python. All credit to the JPype developers for
-making this possible.
+It is JPype that allows us to look at [Comsol's Java API][japi] and
+run the same commands from Python. All credit to the JPype developers
+for making this possible.
 
 However, MPh therefore inherits JPype's limitation in that only one
 Java virtual machine can be managed within the same Python process,
@@ -23,8 +23,8 @@ be used for continuous integration testing anyway, given that they
 depend on Comsol being installed on the machine, this is but a minor
 inconvenience.
 
-Furthermore, there are some known, but unresolved issues with JPype's
-shutdown of the Java virtual machine. Most notably, pressing
+More importantly, there are some known, but unresolved issues with
+JPype's shutdown of the Java virtual machine. Notably, pressing
 <kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
 the Python session. So do not rely on catching [`KeyboardInterrupt`][kbint]
 exceptions in application code.
@@ -37,13 +37,13 @@ from the Python encapsulation.)
 
 ## Platform differences
 
-The Comsol API offers two distinct ways to run a simulation session
-on the local machine. One may either start a "stand-alone" client,
-which does not require a Comsol server. Or one may start a server
-separately and have a "thin" client connect to it via a loop-back
-network socket. The first approach is more lightweight and more
-reliable, as it keeps everything inside the same process. The second
-approach is slower to start up and relies on the inter-process
+The [Comsol API][japi] offers two distinct ways to run a simulation
+session on the local machine. One may either start a "stand-alone"
+client, which does not require a Comsol server. Or one may start a
+server separately and have a "thin" client connect to it via a
+loop-back network socket. The first approach is more lightweight and
+more reliable, as it keeps everything inside the same process. The
+second approach is slower to start up and relies on the inter-process
 communication to be robust, but would also work across the network,
 i.e., for remote sessions where the client runs locally and delegates
 the heavy lifting to a server running on another machine. If we
@@ -63,7 +63,7 @@ macOS.
 
 For example, for an installation of Comsol 5.6 on Ubuntu Linux, you
 would add the following lines at the end of the shell configuration
-file `.bashrc`:
+file `.bashrc`.
 ```shell
 # Help MPh find Comsol's shared libraries.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH\
@@ -102,11 +102,17 @@ scenarios, not just at start-up. If functions access the Java API
 frequently, such as when navigating the model tree, perhaps even
 recursively as [`mph.tree()`](api/mph.tree) does, then client–server
 mode can be slower by a large factor compared to a stand-alone client.
-Rest assured though that simulation run-times are not affected.
+Rest assured however that simulation run-times are not affected.
+
+Conversely, setting up stand-alone mode on Linux or macOS is also
+not a robust solution. Image exports, for example, are known to crash
+due to some conflict with external libraries. As opposed to Windows,
+where this works reliably.
 
 
-[tests]:  https://github.com/John-Hennig/mph/tree/master/tests
 [jpype]:  https://github.com/jpype-project/jpype
+[japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[tests]:  https://github.com/John-Hennig/mph/tree/main/tests
 [pytest]: https://docs.pytest.org
 [kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [jnius]:  https://pyjnius.readthedocs.io

@@ -2,8 +2,8 @@
 
 ## Busbar
 
-["Electrical Heating in a Busbar"][busbar] is an example model used
-in the tutorial in ["Introduction to Comsol Multiphysics"][intro] and
+["Electrical Heating in a Busbar"][busbar] is an example model featured
+in the tutorial of ["Introduction to Comsol Multiphysics"][intro] and
 explained there in great detail. The section "Getting the Maximum and
 Minimum Temperature" demonstrates how to obtain the two temperature
 extremes within the Comsol GUI.
@@ -62,9 +62,9 @@ code. It displays more status information and also resets the modeling
 history.
 
 Note that we could easily go through all sub-directories recursively
-by replacing `glob` with `rglob`. However, this should be used with
-caution so as to not accidentally modify models in folders that were
-not meant to be included.
+by replacing [`glob`][glob] with [`rglob`][rglob]. However, this should
+be used with caution so as to not accidentally modify models in folders
+that were not meant to be included.
 
 
 ## Multiple processes
@@ -122,7 +122,7 @@ independently of work being done for any other value.
 
 We could also solve this sequentially, one parameter value at a time.
 Comsol's solver could then make use of all cores and would also employ
-some kind of parallelization in its internal computation. But the
+some parallelization strategy in its internal computation. But the
 speed-up would not scale linearly with the number of cores, especially
 for large numbers of them.
 
@@ -193,7 +193,7 @@ A more advanced implementation may use a class derived from
 be able to save state. For long-running simulations it would make sense
 to store jobs and results on disk, rather than in memory, so that the
 execution of the queue may be resumed after a possible interruption.
-In that case, one may, or may not, find the [`subprocess`][sproc]
+In that case one may, or may not, find the [`subprocess`][sproc]
 module from the standard library more convenient for starting the
 external processes. The worker implementation would then be in a
 separate module that is run as a script.
@@ -205,7 +205,7 @@ separate module that is run as a script.
 The primary focus of MPh is to automate the simulation workflow, like
 running parameter sweeps or optimization routines with customized,
 Python-powered post-processing. Creating and altering models is
-possible (see [next section](#creating-models-python-style)), but has
+possible, see [next section](#creating-models-python-style), but has
 some limitations.
 
 However, any and all functionality offered by the [Comsol Java API][japi]
@@ -214,8 +214,8 @@ which is exposed as the `.java` attribute of [`Client`](api/mph.Client)
 instances, mapping to Comsol's `ModelUtil`, as well as of
 [`Model`](api/mph.Model) instances, mapping to Comsol's `model`.
 
-Let's take this Comsol blog post as an example: ["Automate Your Modeling
-Tasks with the Comsol API for use with Java"][blog]. It starts with the
+Let's take this Comsol blog post as an example: ["Automate your modeling
+tasks with the Comsol API for use with Java"][blog]. It starts with the
 following Java code:
 ```java
 import com.comsol.model.*;
@@ -257,21 +257,22 @@ model.geom("geom1").feature("blk1").set("size", ["0.1", "0.2", "0.5"]);
 model.geom("geom1").run("fin");
 ```
 
-Note how the *functional* Java code (excluding syntax elements) was
-essentially copied and pasted, even the semicolons, which Python
-simply ignores. We named the Python wrapper `pymodel` and assigned
-`model` to the underlying Java object just so we could do this. We
-had to replace `new String[]{"0.1", "0.2", "0.5"}` because Python
-does not know what [`new`][new] means. There, Java expects a list of
-three strings. So we replaced the expression with `["0.1", "0.2", "0.5"]`,
-the Python equivalent of just that: a list of these three strings.
+Note how the *functional* Java code (excluding Java-specific syntax
+elements) was essentially copied and pasted, even the semicolons,
+which Python simply ignores. We named the Python wrapper `pymodel`
+and assigned `model` to the underlying Java object just so we could
+do this. We had to replace `new String[]{"0.1", "0.2", "0.5"}` because
+Python does not know what [`new`][new] means. There, Java expects a
+list of three strings. So we replaced the expression with
+`["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
+of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
 documentation — or a blog post, as the case was here —, you will have
 to amend code lines such as the one above. But they are few and far
-between. The error messages you might receive would point you in the
+between. The error messages you might receive should point you in the
 right direction and the [JPype documentation][jpype] would offer help
-on type conversion.
+on issues with type conversion.
 
 The advantage of using Python over Java is:
 * You don't really need to know Java. Just a little, to understand that
@@ -329,16 +330,16 @@ model.build('geometry')
 
 If [`model.create()`](api/mph.Model) receives a reference to a node
 that does not exist yet, such as `geometries/geometry` in the example,
-it creates that node in its parent group, here the built-in group named
+it creates that node in its parent group, here the built-in group
 `geometries`, and gives it the name we supplied, here `geometry`.
 
-So far we have used strings to refer to nodes. We could also use the
+So far, we have used strings to refer to nodes. We could also use the
 [`Node`](api/mph.Node) class, which offers more flexibility and extra
 functionality. Instances of that class are returned by
 [`model.create()`](api/mph.Model) for convenience. But they can be
 generated from scratch by string concatenation with the division
-operator `/` — much like [`pathlib.Path`][path] objects from the
-standard library.
+operator — much like [`pathlib.Path`][path] objects from the standard
+library.
 ```python
 import mph
 client = mph.start()
@@ -382,9 +383,9 @@ empty, waiting for nodes to be created.
 
 
 [repo]:    https://github.com/John-Hennig/MPh
-[tests]:   https://github.com/John-Hennig/MPh/tree/master/tests
+[tests]:   https://github.com/John-Hennig/MPh/tree/main/tests
 [capa]:    https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
-[demos]:   https://github.com/John-Hennig/MPh/tree/master/demos
+[demos]:   https://github.com/John-Hennig/MPh/tree/main/demos
 [compact]: https://github.com/John-Hennig/MPh/blob/main/demos/compact_models.py
 [pool]:    https://github.com/John-Hennig/MPh/blob/main/demos/worker_pool.py
 
@@ -396,6 +397,8 @@ empty, waiting for nodes to be created.
 [jpype]:   https://jpype.readthedocs.io/en/stable
 [new]:     https://www.javatpoint.com/new-keyword-in-java
 
+[glob]:    https://docs.python.org/3/library/pathlib.html#pathlib.Path.glob
+[rglob]:   https://docs.python.org/3/library/pathlib.html#pathlib.Path.rglob
 [multi]:   https://docs.python.org/3/library/multiprocessing.html
 [queue]:   https://docs.python.org/3/library/queue.html
 [empty]:   https://docs.python.org/3/library/queue.html#queue.Empty
