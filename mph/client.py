@@ -154,7 +154,7 @@ class Client:
     def __iter__(self):
         yield from self.models()
 
-    def __getitem__(self, name):
+    def __truediv__(self, name):
         if isinstance(name, str):
             for model in self:
                 if name == model.name():
@@ -162,11 +162,8 @@ class Client:
             else:
                 error = f'Model "{name}" has not been loaded by client.'
                 logger.error(error)
-                raise KeyError(error)
-        else:
-            error = 'Key must be the name of a loaded model.'
-            logger.error(error)
-            raise TypeError(error)
+                raise ValueError(error)
+        return NotImplemented
 
     ####################################
     # Inspection                       #

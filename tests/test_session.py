@@ -97,8 +97,8 @@ def test_iter():
     assert model in models
 
 
-def test_getitem():
-    assert model == client['capacitor']
+def test_truediv():
+    assert client/'capacitor' == model
 
 
 def test_remove():
@@ -162,7 +162,7 @@ if __name__ == '__main__':
         test_files()
         test_contains()
         test_iter()
-        test_getitem()
+        test_truediv()
         test_remove()
         test_clear()
         test_disconnect()
