@@ -9,7 +9,7 @@ author = 'John Hennig'
 requires = ['JPype1', 'NumPy']
 requires-python = '>=3.6'
 license = 'MIT'
-home-page = 'https://github.com/john-hennig/mph'
+home-page = 'https://github.com/MPh-py/MPh'
 description-file = 'pypi.md'
 keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
 classifiers = [
@@ -28,4 +28,4 @@ doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark]
 
 [tool.flit.metadata.urls]
 Documentation = 'https://mph.readthedocs.io'
-Source = 'https://github.com/john-hennig/mph'
+Source = 'https://github.com/MPh-py/MPh'

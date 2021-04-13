@@ -112,8 +112,8 @@ where this works reliably.
 
 [jpype]:  https://github.com/jpype-project/jpype
 [japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[tests]:  https://github.com/John-Hennig/mph/tree/main/tests
+[tests]:  https://github.com/MPh-py/mph/tree/main/tests
 [pytest]: https://docs.pytest.org
 [kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [jnius]:  https://pyjnius.readthedocs.io
-[issue8]: https://github.com/John-Hennig/MPh/issues/8
+[issue8]: https://github.com/MPh-py/MPh/issues/8

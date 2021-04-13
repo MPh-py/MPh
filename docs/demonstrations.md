@@ -382,12 +382,12 @@ We could rename them if we wanted to. Most built-in groups are still
 empty, waiting for nodes to be created.
 
 
-[repo]:    https://github.com/John-Hennig/MPh
-[tests]:   https://github.com/John-Hennig/MPh/tree/main/tests
-[capa]:    https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
-[demos]:   https://github.com/John-Hennig/MPh/tree/main/demos
-[compact]: https://github.com/John-Hennig/MPh/blob/main/demos/compact_models.py
-[pool]:    https://github.com/John-Hennig/MPh/blob/main/demos/worker_pool.py
+[repo]:    https://github.com/MPh-py/MPh
+[tests]:   https://github.com/MPh-py/MPh/tree/main/tests
+[capa]:    https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
+[demos]:   https://github.com/MPh-py/MPh/tree/main/demos
+[compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
+[pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
 
 [japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [intro]:   https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf

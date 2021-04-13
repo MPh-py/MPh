@@ -26,7 +26,7 @@ and sells the simulation software.
 [![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![release](https://img.shields.io/pypi/v/mph.svg)](https://pypi.python.org/pypi/mph)
-[![source](https://img.shields.io/github/stars/John-Hennig/MPh?style=social)](https://github.com/John-Hennig/MPh)
+[![source](https://img.shields.io/github/stars/MPh-py/MPh?style=social)](https://github.com/MPh-py/MPh)
 
 ```{toctree}
 :hidden:

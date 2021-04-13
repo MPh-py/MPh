@@ -359,7 +359,7 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[repo]:  https://github.com/John-Hennig/MPh
-[capa]:  https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
+[repo]:  https://github.com/MPh-py/MPh
+[capa]:  https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
 [array]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 [float]: https://docs.python.org/3/library/functions.html#float

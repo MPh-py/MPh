@@ -27,4 +27,4 @@ Find the full [documentation on Read-the-Docs][docs].
 
 [![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![source](https://img.shields.io/github/stars/John-Hennig/MPh?style=social)](https://github.com/John-Hennig/MPh)
+[![source](https://img.shields.io/github/stars/MPh-py/MPh?style=social)](https://github.com/MPh-py/MPh)
