@@ -154,19 +154,16 @@ class Client:
     def __iter__(self):
         yield from self.models()
 
-    def __getitem__(self, item):
-        if isinstance(item, str):
+    def __truediv__(self, name):
+        if isinstance(name, str):
             for model in self:
-                if item == model.name():
+                if name == model.name():
                     return model
-        elif isinstance(item, Model):
-            for model in self.models():
-                if item == model:
-                    return model
-        else:
-            error = 'Key is not a string.'
-            logger.error(error)
-            raise TypeError(error)
+            else:
+                error = f'Model "{name}" has not been loaded by client.'
+                logger.error(error)
+                raise ValueError(error)
+        return NotImplemented
 
     ####################################
     # Inspection                       #
@@ -229,10 +226,12 @@ class Client:
         retain its automatically generated name, like "Model 1".
         """
         java = self.java.createUnique('model')
-        logger.debug(f'Created model with tag "{java.tag()}".')
         model = Model(java)
         if name:
             model.rename(name)
+        else:
+            name = model.name()
+        logger.debug(f'Created model "{name}" with tag "{java.tag()}".')
         return model
 
     def remove(self, model):

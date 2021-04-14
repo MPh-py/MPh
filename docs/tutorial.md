@@ -2,8 +2,8 @@
 
 To follow along with this tutorial in an interactive Python session,
 if you wish to do so, make sure you have downloaded the demonstration
-model [`capacitor.mph`][capa] (file is linked) from MPh's source-code
-repository. Save it in the same folder from which you run Python.
+model [`capacitor.mph`][capa] from MPh's source-code [repository][repo].
+Save it in the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -12,7 +12,10 @@ different dielectric permittivity fill the separate halves of the
 electrode gap. Running the model only requires a license for the core
 Comsol platform, but not for any add-on module beyond that.
 
-![](images/capacitor.png)
+```{image} images/capacitor.png
+:alt: Screen-shot of demonstration model "capacitor" in Comsol GUI
+:align: center
+```
 
 
 ## Starting Comsol
@@ -32,12 +35,11 @@ In this example, the Comsol back-end is instructed to use but one
 processor core. If the optional parameter is omitted, it will use all
 cores available on the machine. Restricting this resource is useful
 when running several simulations in parallel. Note, however, that due
-to [limitations](limitations) of this library's underlying Python-to-Java
-bridge, the [`Client`](api/mph.Client) class can only be instantiated
-once. Subsequent calls to [`start()`](api/mph.start) will therefore
-raise an error. If you wish to work around this limitation, in order to
-realize the full parallelization potential of your simulation hardware,
-you will need to [run multiple Python
+to [limitations](limitations) of the underlying Python-to-Java bridge,
+the `Client` class can only be instantiated once. Subsequent calls to
+`start()` will therefore raise an error. If you wish to work around
+this limitation, in order to realize the full parallelization potential
+of your simulation hardware, you will need to [run multiple Python
 processes](demonstrations.md#multiple-processes), one for each client.
 
 
@@ -89,7 +91,7 @@ Let's have a look at the parameters defined in the model:
 {'U': '1[V]', 'd': '2[mm]', 'l': '10[mm]', 'w': '2[mm]'}
 ```
 
-With a little more typing we can include the parameter descriptions:
+With a little more typing, we can include the parameter descriptions:
 ```python
 >>> for (name, value) in model.parameters().items():
 ...     description = model.description(name)
@@ -212,10 +214,12 @@ i.e. at zero time or infinite frequency.
 array(1.31948342)
 ```
 
-All results are returned as NumPy arrays. Though scalars such as this
-one could be readily cast to a (regular Python) [`float`][float].
+All results are returned as [NumPy arrays][array]. Though "global"
+evaluations such as this one could be readily cast to a regular Python
+[`float`][float].
 
-We could also ask where the electric field is strongest.
+We might also ask where the electric field is strongest and have
+[`evaluate()`](api/mph.Model) perform a "local" evaluation.
 ```python
 >>> (x, y, E) = model.evaluate(['x', 'y', 'es.normE'])
 >>> E.max()
@@ -226,8 +230,8 @@ We could also ask where the electric field is strongest.
 ```
 
 Note how this time we did not specify any units. When left out, values
-are returned in default units. Here specifically, the maximum field
-strength in V/m and its coordinates in meters.
+are returned in default units. Here specifically, the field strength
+in V/m and its coordinates in meters.
 
 We also did not specify the dataset, even though there are three
 different studies that have separate solutions and datasets associated
@@ -254,7 +258,7 @@ array(1.31948342)
 array(1.48410283)
 ```
 
-The "first" and "last" time step defined in that study are 0 and 1
+The `'first'` and `'last'` time step defined in that study are 0 and 1
 second, respectively.
 ```python
 >>> (indices, values) = model.inner('time-dependent')
@@ -307,10 +311,12 @@ in the screen-shot at the top of the page.
 We can trigger all three exports at once by calling `model.export()`.
 Or we can be more selective and just export the image:
 `model.export('image')`. The exported files will end up in the same
-folder as the model file itself and have the names that were
-assigned in the model's export nodes. But we can also supply
-custom file names or paths by adding them as the second argument:
-`model.export('image', 'static field.png')`.
+folder as the model file itself and have the names that were assigned
+in the model's export nodes. But we can also supply custom file names
+or paths by adding them as the second argument.
+```python
+>>> model.export('image', 'static field.png')
+```
 
 The idea here is to first set up sensible exports in the GUI, such as
 images that illustrate the simulation results, and then trigger the
@@ -339,7 +345,7 @@ The model was quick enough to solve, and we do like free disk space.
 We would just like to be able to look up modeling details somewhere
 down the line. Comsol also keeps track of the modeling history: a log
 of which features were created, deleted, modified, and in which order.
-Typically, such details are irrelevant. We can prune them by resetting
+Typically, these details are irrelevant. We can prune them by resetting
 that record.
 ```python
 >>> model.clear()
@@ -353,5 +359,7 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[capa]:  https://github.com/John-Hennig/MPh/blob/main/tests/capacitor.mph
+[repo]:  https://github.com/MPh-py/MPh
+[capa]:  https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
+[array]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 [float]: https://docs.python.org/3/library/functions.html#float

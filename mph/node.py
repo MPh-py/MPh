@@ -186,7 +186,14 @@ class Node:
         return str(self.java.tag()) if self.exists() else None
 
     def type(self):
-        """Returns the node's feature type."""
+        """
+        Returns the node's feature type.
+
+        This a something like `'Block'` for "a right-angled solid or
+        surface block in 3D". Refer to the Comsol documentation for
+        details. Feature types are displayed in the Comsol GUI at the
+        top of the `Settings` tab.
+        """
         return str(self.java.getType())
 
     def parent(self):
@@ -401,10 +408,20 @@ def cast(value):
             return JArray(JInt, value.ndim)(value)
         elif value.dtype.kind == 'O':
             if value.ndim > 2:
-                error = 'Cannot cast object arrays with more than two rows.'
+                error = 'Cannot cast object arrays of dimension higher than 2.'
                 logger.error(error)
                 raise TypeError(error)
-            return JArray(JDouble, 2)([row.astype(float) for row in value])
+            rows = [row.astype(float) for row in value]
+            if len(rows) > 2:
+                error = 'Will not cast object arrays with more than two rows.'
+                logger.error(error)
+                raise TypeError(error)
+            for row in rows:
+                if row.ndim > 1:
+                    error = 'Rows in object arrays must be one-dimensional.'
+                    logger.error(error)
+                    raise TypeError(error)
+            return JArray(JDouble, 2)(rows)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
             logger.error(error)
@@ -555,6 +572,13 @@ def tree(node, levels=[], max_depth=None):
     console. `node` would typically be the model's root node. `levels`
     is used internally when traversing the model tree recursively.
     Specify `max_depth` to possibly limit the number of lower branches.
+
+    Note that this function performs poorly in client–server mode, the
+    default on Linux and macOS, especially for complex models. The
+    client–server communication introduces inefficiencies that do not
+    occur in stand-alone mode, the default on Windows, where the model
+    tree, i.e. the hierarchy of related Java objects, can be traversed
+    reasonably fast.
     """
     if not isinstance(node, Node):
         # Support passing the model directly instead of a node.

@@ -1,15 +1,21 @@
-﻿.section { text-align: justify }
+﻿/* Furo theme left-aligns text, but we have better taste. */
+p {
+    text-align: justify;
+}
 
-code.docutils > span.pre { color: black; font-weight: normal }
-p + div[class^="highlight"] { margin-top: -12px !important }
+/* Furo theme does not actually respect the `:align: center` image option. */
+img.align-center {
+    display:      block;
+    margin-left:  auto;
+    margin-right: auto;
+}
 
-.rst-content ul.simple li > p { margin-bottom: 0}
-.rst-content dd ul.simple li > p { margin-bottom: 0 !important }
-p + ul.simple { margin-top: -24px }
-dd p + ul.simple { margin-top: -12px }
+/* Push bulleted lists a little closer to lead-in paragraph. */
+p + ul.simple {
+    margin-top: -6px;
+}
 
-.rst-content ol.simple li > p { margin-bottom: 0}
-.rst-content dd ol.simple li > p { margin-bottom: 0 !important }
-p + ol.simple { margin-top: -24px }
-ol.simple ol.simple { margin-top: 0; margin-bottom: 0; }
-dd p + ol.simple { margin-top: -12px }
+/* Push ordered lists a little closer to lead-in paragraph. */
+p + ol.simple {
+    margin-top: -6px;
+}
