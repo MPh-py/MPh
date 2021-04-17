@@ -36,4 +36,5 @@ tutorial
 limitations
 demonstrations
 api
+releases
 ```
