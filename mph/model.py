@@ -413,12 +413,18 @@ class Model:
         if not dataset:
             etag = self.java.result().numerical().uniquetag('eval')
             eval = self.java.result().numerical().create(etag, 'Eval')
-            dtag = eval.getString('data')
+            dtag = str(eval.getString('data'))
             self.java.result().numerical().remove(etag)
-            name = str(self.java.result().dataset().get(dtag).name())
-            dataset = self/'datasets'/name
+            for dataset in self/'datasets':
+                if dataset.tag() == dtag:
+                    break
+            else:
+                error = 'Could not determine default dataset.'
+                logger.error(error)
+                raise RuntimeError(error)
+
         if not dataset.exists():
-            error = f'Dataset {dataset.name()} does not exist.'
+            error = f'Dataset "{dataset.name()}" does not exist.'
             logger.error(error)
             raise ValueError(error)
         logger.info(f'Evaluating "{expression}" '
