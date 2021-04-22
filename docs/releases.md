@@ -1,7 +1,7 @@
 ﻿# Releases
 
 ## 1.0.0
-* Released on April 13, 2021.
+* [Published](https://pypi.org/project/MPh/1.0.0) on April 13, 2021.
 * We now offer you the best API Comsol has ever seen! 🎉
 * See ["Creating models: Python style"](https://mph.readthedocs.io/en/1.0/demonstrations.html#creating-models-python-style) for a feature demonstration.
 * A new [`Node`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html) class allows easy navigation of the model tree.
@@ -28,7 +28,7 @@
 * Documentation builds now use the [MyST parser](https://github.com/executablebooks/MyST-Parser) and the [Furo theme](https://github.com/pradyunsg/furo).
 
 ## 0.9.1
-* Released on March 24, 2021.
+* [Published](https://pypi.org/project/MPh/0.9.1) on March 24, 2021.
 * Added documentation chapter ["Demonstrations"](https://mph.readthedocs.io/en/0.9/demonstrations.html).
 * Added [demo script](https://github.com/MPh-py/MPh/blob/72624ea6d92f009af07b3c7468084ab2a62dccfb/demos/worker_pool.py) that runs parallel Comsol sessions.
 * Amended [`mph.start()`](https://mph.readthedocs.io/en/0.9/api/mph.start.html#mph.start) to allow hand-selecting the server port.
@@ -38,7 +38,7 @@
 * This suppresses possibly confusing log messages as described in [#28](https://github.com/MPh-py/MPh/issues/28).
 
 ## 0.9.0
-* Released on March 10, 2021.
+* [Published](https://pypi.org/project/MPh/0.9.0) on March 10, 2021.
 * [`mph.start()`](https://mph.readthedocs.io/en/0.9/api/mph.start.html) is now the preferred way to start a local Comsol session.
 * On Windows, it starts a lightweight, stand-alone client.
 * On Linux and macOS, it starts a thin client and local server.
@@ -56,24 +56,24 @@
 * Fixes [issue #24](https://github.com/MPh-py/MPh/issues/24) regarding localized server output messages.
 
 ## 0.8.2
-* Released on February 13, 2021.
+* [Published](https://pypi.org/project/MPh/0.8.2) on February 13, 2021.
 * Works around issue of [incorrect exit behavior](https://github.com/MPh-py/MPh/issues/15).
 * Fixes: Exit code was always 0, even when terminating with `sys.exit(2)`.
 * Fixes: Exit code was 0, not 1, when exiting due to unhandled exception.
 
 ## 0.8.1
-* Released on February 9, 2021.
+* [Published](https://pypi.org/project/MPh/0.8.1) on February 9, 2021.
 * Applies fixes for macOS from [pull request #11](https://github.com/MPh-py/MPh/pull/11).
 * macOS support has now actually been tested according to [issue #13](https://github.com/MPh-py/MPh/issues/13).
 
 ## 0.8.0
-* Released on February 7, 2020.
+* [Published](https://pypi.org/project/MPh/0.8.0) on February 7, 2020.
 * Adds support for Linux and macOS.
 * Caveats apply. See documentation chapter ["Limitations"](https://mph.readthedocs.io/en/0.8/limitations.html) as well as issues [#8](https://github.com/MPh-py/MPh/issues/8) and [#9](https://github.com/MPh-py/MPh/issues/9).
 * Refactored [discovery](https://mph.readthedocs.io/en/0.8/api/mph.discovery.html) mechanism for Comsol installations.
 
 ## 0.7.6
-* Released on November 29, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.6) on November 29, 2020.
 * Unpins [JPype](https://pypi.org/project/JPype1) and Python version.
 * Works around [issue #1](https://github.com/MPh-py/MPh/issues/1) by brute-forcing shutdown of Java VM.
 * [`Client`](https://mph.readthedocs.io/en/0.7/api/mph.Client.html) instances now report the Comsol version actually used.
@@ -82,7 +82,7 @@
 * Possibly resolves [issue #5](https://github.com/MPh-py/MPh/issues/5) regarding spaces in path names.
 
 ## 0.7.5
-* Released on July 30, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.5) on July 30, 2020.
 * First release used extensively "in production".
 * Last release based on [JPype 0.7.5](https://github.com/jpype-project/jpype/releases/tag/v0.7.5).
 * Performs a regular shutdown of the Java VM, as opposed to releases to follow.
@@ -91,26 +91,26 @@
 * Adds [deployment](https://github.com/MPh-py/MPh/tree/a86f77a7b26e24e314c01639b846a3ee927f1e6d/deploy) instructions for developers.
 
 ## 0.7.4
-* Released on July 17, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.4) on July 17, 2020.
 * Pins JPype dependency to [version 0.7.5](https://github.com/jpype-project/jpype/releases/tag/v0.7.5).
 * Works around shutdown delays of the Java VM, see [issue #1](https://github.com/MPh-py/MPh/issues/1).
 * Requires Python version to be 3.8.3 or below.
 * Minor improvements to wording of documentation.
 
 ## 0.7.3
-* Released on June 15, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.3) on June 15, 2020.
 * Suppresses console pop-up during [client initialization](https://mph.readthedocs.io/en/0.7/api/mph.Client.html).
 * Ignores empty units in [parameter assignments](https://mph.readthedocs.io/en/0.7/api/mph.Model.html#mph.Model.parameter).
 
 ## 0.7.2
-* Released on May 18, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.2) on May 18, 2020.
 * Makes `dataset` argument to [`Model.outer()`](https://mph.readthedocs.io/en/0.7/api/mph.Model.html#mph.Model.outer) optional.
 * Minor tweaks to project's meta information.
 
 ## 0.7.1
-* Released on May 17, 2020… later that day.
+* [Published](https://pypi.org/project/MPh/0.7.1) on May 17, 2020… later that day.
 * Fixes meta information [on PyPI](https://pypi.org/project/MPh).
 
 ## 0.7.0
-* Released on May 17, 2020.
+* [Published](https://pypi.org/project/MPh/0.7.0) on May 17, 2020.
 * First open-source release [published on PyPI](https://pypi.org/project/MPh#history).
