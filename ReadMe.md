@@ -23,7 +23,7 @@ and sells the simulation software.
 Find the full [documentation on Read-the-Docs][docs].
 
 [comsol]: https://www.comsol.com
-[jpype]:  https://pypi.org/project/JPype1
+[jpype]:  https://github.com/jpype-project/jpype
 [docs]:   https://mph.readthedocs.io
 
 [![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
