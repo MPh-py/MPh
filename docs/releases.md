@@ -1,5 +1,11 @@
 ﻿# Releases
 
+## 1.0.1
+* [Published](https://pypi.org/project/MPh/1.0.1) on April 23, 2021.
+* Fixes failing evaluation when name of default dataset contains slash.
+* Fixes failing evaluation of complex-valued expressions.
+* Fixes issue with complex numbers in parameter assignments. ([#36](https://github.com/MPh-py/MPh/issues/36))
+
 ## 1.0.0
 * [Published](https://pypi.org/project/MPh/1.0.0) on April 13, 2021.
 * We now offer you the best API Comsol has ever seen! 🎉
