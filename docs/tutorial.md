@@ -297,31 +297,30 @@ therefore be limited.
 
 ## Exporting results
 
-Three exports are defined in the demonstration model:
+Two exports are defined in the demonstration model:
 ```python
 >>> model.exports()
-['field', 'vector', 'image']
+['data', 'image']
 ```
 
-The first two export text data: one the electrostatic field strength
-as a function of the coordinates, the other all three vector components
-of that electric field. The third renders an image of the plot featured
-in the screen-shot at the top of the page.
+The first exports the solution of the electrostatic field as text data.
+The second renders an image of the plot featured in the screen-shot at
+the top of the page.
 
-We can trigger all three exports at once by calling `model.export()`.
-Or we can be more selective and just export the image:
-`model.export('image')`. The exported files will end up in the same
-folder as the model file itself and have the names that were assigned
-in the model's export nodes. But we can also supply custom file names
-or paths by adding them as the second argument.
+We can trigger all exports at once by calling `model.export()`. Or we
+can be more selective and just export one: `model.export('image')`.
+The exported files will end up in the same folder as the model file
+itself and have the names that were assigned in the model's export
+nodes. Unless we supply custom file names or paths by adding them as
+the second argument.
 ```python
 >>> model.export('image', 'static field.png')
 ```
 
 The idea here is to first set up sensible exports in the GUI, such as
-images that illustrate the simulation results, and then trigger the
-exports from a script for a particular simulation run, the results of
-which may depend on parameter values.
+images that illustrate the simulation results, and then trigger them
+from a script for a particular simulation run, the results of which
+may depend on parameter values.
 
 
 ## Saving results

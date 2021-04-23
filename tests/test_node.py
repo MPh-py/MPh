@@ -100,7 +100,6 @@ def test_contains():
 
 def test_iter():
     assert Node(model, 'functions/step')  in list(Node(model, 'functions'))
-    assert Node(model, 'functions/image') in list(Node(model, 'functions'))
 
 
 def test_java():
@@ -119,8 +118,6 @@ def test_tag():
 
 def test_type():
     assert Node(model, 'functions/step').type() == 'Step'
-    assert Node(model, 'functions/image').type() == 'Image'
-    assert Node(model, 'functions/table').type() == 'Interpolation'
 
 
 def test_parent():
@@ -184,42 +181,42 @@ def test_rewrite(node):
 
 
 def test_property():
-    root   = Node(model, '')
-    image  = Node(model, 'functions/image')
-    plot   = Node(model, 'plots/evolution')
-    field  = Node(model, 'exports/field')
-    vector = Node(model, 'exports/vector')
+    root     = Node(model, '')
+    function = root/'functions'/'step'
+    material = root/'materials'/'medium 1'
+    plot     = root/'plots'/'evolution'
+    export   = root/'exports'/'data'
     # Test conversion to and from 'Boolean'.
-    old = image.property('flipx')
-    image.property('flipx', False)
-    assert image.property('flipx') is False
-    image.property('flipx', old)
-    assert image.property('flipx') == old
+    old = function.property('smoothactive')
+    function.property('smoothactive', False)
+    assert function.property('smoothactive') is False
+    function.property('smoothactive', old)
+    assert function.property('smoothactive') == old
     # Test conversion to and from 'Double'.
-    old = image.property('xmin')
-    image.property('xmin', -10.0)
-    assert isclose(image.property('xmin'), -10)
-    image.property('xmin', old)
-    assert isclose(image.property('xmin'), old)
+    old = function.property('location')
+    function.property('location', -10.0)
+    assert isclose(function.property('location'), -10)
+    function.property('location', old)
+    assert isclose(function.property('location'), old)
     # Test conversion to and from 'DoubleArray'.
-    old = field.property('outersolnumindices')
+    old = export.property('outersolnumindices')
     new = array([1.0, 2.0, 3.0])
-    field.property('outersolnumindices', new)
-    assert isclose(field.property('outersolnumindices'), new).all()
-    field.property('outersolnumindices', old)
-    assert isclose(field.property('outersolnumindices'), old).all()
+    export.property('outersolnumindices', new)
+    assert isclose(export.property('outersolnumindices'), new).all()
+    export.property('outersolnumindices', old)
+    assert isclose(export.property('outersolnumindices'), old).all()
     # Test conversion to and from 'File'.
-    old = image.property('filename')
-    image.property('filename', Path('new.tif'))
-    assert image.property('filename') == Path('new.tif')
-    image.property('filename', old)
-    assert image.property('filename') == old
+    old = export.property('filename')
+    export.property('filename', Path('new.tif'))
+    assert export.property('filename') == Path('new.tif')
+    export.property('filename', old)
+    assert export.property('filename') == old
     # Test conversion to and from 'Int'.
-    old = image.property('refreshcount')
-    image.property('refreshcount', 1)
-    assert image.property('refreshcount') == 1
-    image.property('refreshcount', old)
-    assert image.property('refreshcount') == old
+    old = plot.property('axisprecision')
+    plot.property('axisprecision', 4)
+    assert plot.property('axisprecision') == 4
+    plot.property('axisprecision', old)
+    assert plot.property('axisprecision') == old
     # Test conversion to and from 'IntArray'.
     old = plot.property('solnum')
     new = array([1, 2, 3])
@@ -228,20 +225,19 @@ def test_property():
     plot.property('solnum', old)
     assert (plot.property('solnum') == old).all()
     # Test conversion from 'None'.
-    none = image.property('exportfilename')
-    assert none is None
+    assert material.property('customize') is None
     # Test conversion to and from 'String'.
-    old = image.property('funcname')
-    image.property('funcname', 'new')
-    assert image.property('funcname') == 'new'
-    image.property('funcname', old)
-    assert image.property('funcname') == old
+    old = function.property('funcname')
+    function.property('funcname', 'new')
+    assert function.property('funcname') == 'new'
+    function.property('funcname', old)
+    assert function.property('funcname') == old
     # Test conversion to and from 'StringArray'.
-    old = vector.property('descr')
-    vector.property('descr', ['x', 'y', 'z'])
-    assert vector.property('descr') == ['x', 'y', 'z']
-    vector.property('descr', old)
-    assert vector.property('descr') == old
+    old = export.property('descr')
+    export.property('descr', ['x', 'y', 'z'])
+    assert export.property('descr') == ['x', 'y', 'z']
+    export.property('descr', old)
+    assert export.property('descr') == old
     # Test conversion to and from 'StringMatrix'.
     old = plot.property('plotonsecyaxis')
     new = [['medium 1', 'on', 'ptgr1'], ['medium 2', 'on', 'ptgr2']]
@@ -256,11 +252,11 @@ def test_property():
 
 
 def test_properties():
-    step = Node(model, 'functions/step')
-    assert 'funcname' in step.properties()
-    assert 'funcname' in step.properties().keys()
-    assert 'step' in step.properties().values()
-    assert ('funcname', 'step') in step.properties().items()
+    function = Node(model, 'functions/step')
+    assert 'funcname' in function.properties()
+    assert 'funcname' in function.properties().keys()
+    assert 'step' in function.properties().values()
+    assert ('funcname', 'step') in function.properties().items()
 
 
 def test_toggle():

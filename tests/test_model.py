@@ -30,14 +30,10 @@ def setup_module():
 def teardown_module():
     client.clear()
     here = Path(__file__).parent
-    for suffix in ('mph', 'java', 'm', 'vba'):
-        file = here/f'model.{suffix}'
-        if file.exists():
-            file.unlink()
-    files = (here/'model2.mph',
-             here/'field.txt', here/'field2.txt',
-             here/'vector.txt', here/'vector.vtu',
-             here/'image.png')
+    files = (here/'model.mph', here/'model2.mph',
+             here/'model.java', here/'model.m', here/'model.vba',
+             here/'data.txt', here/'data.vtu',
+             here/'image.png', here/'image2.png')
     for file in files:
         if file.exists():
             file.unlink()
@@ -94,8 +90,6 @@ def test_version():
 
 def test_functions():
     assert 'step'  in model.functions()
-    assert 'image' in model.functions()
-    assert 'table' in model.functions()
 
 
 def test_components():
@@ -158,7 +152,8 @@ def test_plots():
 
 
 def test_exports():
-    assert 'field' in model.exports()
+    assert 'data'  in model.exports()
+    assert 'image' in model.exports()
 
 
 def test_build():
@@ -301,7 +296,7 @@ def test_property():
 
 
 def test_properties():
-    assert 'flipx' in model.properties('functions/image')
+    assert 'funcname' in model.properties('functions/step')
 
 
 def test_create():
@@ -315,11 +310,28 @@ def test_remove():
 
 
 def test_import():
+    # Create interpolation function based on external image.
+    image = model.create('functions/image', 'Image')
+    image.property('funcname', 'im')
+    image.property('fununit', '1/m^2')
+    image.property('xmin', -5)
+    image.property('xmax', +5)
+    image.property('ymin', -5)
+    image.property('ymax', +5)
+    image.property('extrap', 'value')
+    # Create interpolation table.
+    table = model.create('functions/table', 'Interpolation')
+    table.property('funcname', 'f')
+    table.property('table', [
+        ['+1',   '+2'],
+        ['+0.5', '+1'],
+        [ '0',    '0'],
+        ['-0.5', '-1'],
+        ['-1',   '-2'],
+    ])
+    table.property('interp', 'cubicspline')
     # Import image with file name specified as string and Path.
     here = Path(__file__).parent
-    image = model/'functions'/'image'
-    assert image.property('sourcetype') == 'model'
-    image.java.discardData()
     assert image.property('sourcetype') == 'user'
     model.import_(image, 'gaussian.tif')
     assert image.property('sourcetype') == 'model'
@@ -329,7 +341,6 @@ def test_import():
     assert image.property('sourcetype') == 'model'
     # Solve with pre-defined boundary condition.
     model.solve('static')
-    table = model/'functions'/'table'
     assert table.property('table')[0] == ['+1', '+2']
     assert table.property('funcname') == 'f'
     old_table = table.property('table')
@@ -361,51 +372,56 @@ def test_import():
     (E_re, y_re) = (E.max(), y[E.argmax()])
     assert (E_re - E_pre) < 1
     assert (y_re - y_pre) < 0.001
+    # Remove test fixtures.
+    model.remove('functions/image')
+    model.remove('functions/table')
 
 
 def test_export():
     here = Path(__file__).parent
     model.export()
-    assert (here/'field.txt').exists()
-    assert (here/'vector.txt').exists()
+    assert (here/'data.txt').exists()
     assert (here/'image.png').exists()
-    (here/'field.txt').unlink()
-    (here/'vector.txt').unlink()
+    (here/'data.txt').unlink()
     (here/'image.png').unlink()
-    assert not (here/'field.txt').exists()
-    assert not (here/'vector.txt').exists()
+    assert not (here/'data.txt').exists()
     assert not (here/'image.png').exists()
-    model.export('field')
-    assert (here/'field.txt').exists()
-    (here/'field.txt').unlink()
-    assert not (here/'field.txt').exists()
-    model.export('exports/field')
-    assert (here/'field.txt').exists()
-    (here/'field.txt').unlink()
-    assert not (here/'field.txt').exists()
-    model.export(model/'exports'/'field')
-    assert (here/'field.txt').exists()
-    (here/'field.txt').unlink()
-    assert not (here/'field.txt').exists()
-    assert not (here/'field2.txt').exists()
-    model.export('exports/field', 'field2.txt')
-    assert (here/'field2.txt').exists()
-    (here/'field2.txt').unlink()
-    assert not (here/'vector.txt').exists()
-    model.property('exports/vector', 'exporttype', 'text')
-    model.export('exports/vector', 'vector.txt')
-    assert (here/'vector.txt').exists()
-    (here/'vector.txt').unlink()
-    assert not (here/'vector.vtu').exists()
-    model.property('exports/vector', 'exporttype', 'vtu')
-    model.export('exports/vector', 'vector.vtu')
-    assert (here/'vector.vtu').exists()
-    (here/'vector.vtu').unlink()
+    model.export('data')
+    assert (here/'data.txt').exists()
+    (here/'data.txt').unlink()
+    assert not (here/'data.txt').exists()
+    model.export('exports/data')
+    assert (here/'data.txt').exists()
+    (here/'data.txt').unlink()
+    assert not (here/'data.txt').exists()
+    model.export(model/'exports'/'data')
+    assert (here/'data.txt').exists()
+    (here/'data.txt').unlink()
+    assert not (here/'data.txt').exists()
+    assert not (here/'data2.txt').exists()
+    model.export('exports/data', 'data2.txt')
+    assert (here/'data2.txt').exists()
+    (here/'data2.txt').unlink()
+    assert not (here/'data.txt').exists()
+    model.property('exports/data', 'exporttype', 'text')
+    model.export('exports/data', 'data.txt')
+    assert (here/'data.txt').exists()
+    (here/'data.txt').unlink()
+    assert not (here/'data.vtu').exists()
+    model.property('exports/data', 'exporttype', 'vtu')
+    model.export('exports/data', 'data.vtu')
+    assert (here/'data.vtu').exists()
+    (here/'data.vtu').unlink()
     assert not (here/'image.png').exists()
     model.export('image')
     assert (here/'image.png').exists()
     (here/'image.png').unlink()
     assert not (here/'image.png').exists()
+    assert not (here/'image2.png').exists()
+    model.export('image', 'image2.png')
+    assert (here/'image2.png').exists()
+    (here/'image2.png').unlink()
+    assert not (here/'image2.png').exists()
 
 
 def test_clear():
@@ -457,7 +473,16 @@ def test_toggle():
 
 
 def test_load():
+    image = model.create('functions/image', 'Image')
+    image.property('funcname', 'im')
+    image.property('fununit', '1/m^2')
+    image.property('xmin', -5)
+    image.property('xmax', +5)
+    image.property('ymin', -5)
+    image.property('ymax', +5)
+    image.property('extrap', 'value')
     model.load('gaussian.tif', 'image')
+    model.remove('functions/image')
 
 
 ########################################
