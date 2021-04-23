@@ -575,7 +575,7 @@ class Model:
             warn('Argument "unit" to Model.parameter() is deprecated. '
                  'Include the unit in the value inside square brackets.')
             if value:
-                value += f' [{unit}]'
+                value = f'{value} [{unit}]'
         if description is not None:
             warn('Argument "description" to Model.parameter() is deprecated.'
                  'Call .description() instead.')
@@ -584,8 +584,19 @@ class Model:
             if not evaluate:
                 return str(self.java.param().get(name))
             else:
-                return self.java.param().evaluate(name)
+                try:
+                    return self.java.param().evaluate(name)
+                except Exception:
+                    try:
+                        value = self.java.param().evaluateComplex(name)
+                        return complex(value[0], value[1])
+                    except Exception:
+                        error = f'Evaluation of parameter "{name}" failed.'
+                        logger.exception(error)
+                        raise RuntimeError(error)
         else:
+            if isinstance(value, complex):
+                value = str(value)
             self.java.param().set(name, value)
 
     def parameters(self, evaluate=False):

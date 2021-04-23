@@ -258,6 +258,9 @@ def test_parameter():
     model.parameter('U', 3)
     assert model.parameter('U') == '3'
     assert model.parameter('U', evaluate=True) == 3
+    model.parameter('U', 1+1j)
+    assert model.parameter('U') == '(1+1j)'
+    assert model.parameter('U', evaluate=True) == 1+1j
     model.parameter('U', value)
     assert model.parameter('U') == value
 
