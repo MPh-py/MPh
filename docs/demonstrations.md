@@ -381,6 +381,10 @@ The one component and default view were created by Comsol automatically.
 We could rename them if we wanted to. Most built-in groups are still
 empty, waiting for nodes to be created.
 
+The demo script [`create_capacitor.py`][create] shows how to create more
+advanced features than the simple example here: It generates the
+demonstration model used in the [Tutorial](tutorial).
+
 
 [repo]:    https://github.com/MPh-py/MPh
 [tests]:   https://github.com/MPh-py/MPh/tree/main/tests
@@ -388,6 +392,7 @@ empty, waiting for nodes to be created.
 [demos]:   https://github.com/MPh-py/MPh/tree/main/demos
 [compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
 [pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
+[create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
 
 [japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [intro]:   https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
