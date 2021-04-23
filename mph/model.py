@@ -460,6 +460,7 @@ class Model:
             logger.debug('Trying global evaluation.')
             results = array(eval.getData())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImagData())
             self.java.result().numerical().remove(etag)
             logger.info('Finished global evaluation.')
@@ -510,6 +511,7 @@ class Model:
         if dataset.type() == 'Particle':
             results = array(eval.getReal())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImag())
             if isinstance(expression, (tuple, list)):
                 shape = results.shape[1:]
@@ -517,6 +519,7 @@ class Model:
         else:
             results = array(eval.getData())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImagData())
             if inner is None:
                 pass
