@@ -508,6 +508,10 @@ def inspect(java):
     down, for the sake of clarity.
     """
 
+    # Also accept Node and Model instances.
+    if hasattr(java, 'java'):
+        java = java.java
+
     # Display general information about the feature.
     print(f'name:    {java.name()}')
     print(f'tag:     {java.tag()}')
