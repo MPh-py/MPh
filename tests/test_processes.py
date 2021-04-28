@@ -1,4 +1,4 @@
-﻿"""Tests multi-processing."""
+﻿"""Tests running subprocesses."""
 __license__ = 'MIT'
 
 
@@ -14,26 +14,21 @@ import logging
 
 
 ########################################
-# Globals                              #
-########################################
-here   = Path(__file__).parent
-python = 'python' if system() == 'Windows' else 'python3'
-
-
-########################################
 # Tests                                #
 ########################################
 
 def test_exit_sys():
+    here = Path(__file__).parent
+    python = 'python' if system() == 'Windows' else 'python3'
     process = run([python, 'exit_sys.py'], stdout=PIPE, stderr=PIPE, cwd=here)
-    exit_code = process.returncode
-    assert exit_code == 2
+    assert process.returncode == 2
 
 
 def test_exit_exc():
+    here = Path(__file__).parent
+    python = 'python' if system() == 'Windows' else 'python3'
     process = run([python, 'exit_exc.py'], stdout=PIPE, stderr=PIPE, cwd=here)
-    exit_code = process.returncode
-    assert exit_code == 1
+    assert process.returncode == 1
     stderr = process.stderr.decode().strip()
     assert stderr.startswith('Traceback')
     assert stderr.endswith('RuntimeError')

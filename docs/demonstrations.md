@@ -84,10 +84,9 @@ import queue
 ```
 
 In this demonstration, we will solve the model [`capacitor.mph`][capa]
-from the [`tests`][tests] folder of the source-code [repository][repo],
-the same model we used in the [Tutorial](tutorial). We want to sweep
-the electrode distance d and calculate the capacitance C for each value
-of the distance, ranging from 0.5 to 5 mm.
+from the [Tutorial](tutorial). We want to sweep the electrode distance
+d and calculate the capacitance C for each value of the distance,
+ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 ```
@@ -387,9 +386,8 @@ demonstration model used in the [Tutorial](tutorial).
 
 
 [repo]:    https://github.com/MPh-py/MPh
-[tests]:   https://github.com/MPh-py/MPh/tree/main/tests
-[capa]:    https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
 [demos]:   https://github.com/MPh-py/MPh/tree/main/demos
+[capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
 [compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
 [pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
 [create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py

@@ -18,7 +18,7 @@ __license__ = 'MIT'
 import platform                        # platform information
 import re                              # regular expressions
 from subprocess import run, PIPE       # external processes
-from functools import lru_cache        # least-recently-used cache
+from functools import lru_cache        # function cache
 from pathlib import Path               # file paths
 from sys import version_info           # Python version
 from logging import getLogger          # event logging

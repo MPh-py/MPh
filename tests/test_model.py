@@ -1,4 +1,4 @@
-﻿"""Tests the Model class."""
+﻿"""Tests the `model` module."""
 __license__ = 'MIT'
 
 
@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
+from models import capacitor
 from pathlib import Path
 from sys import argv
 import logging
@@ -23,8 +24,7 @@ model  = None
 def setup_module():
     global client, model
     client = mph.start()
-    here = Path(__file__).parent
-    model = client.load(here/'capacitor.mph')
+    model = capacitor()
 
 
 def teardown_module():
@@ -81,11 +81,11 @@ def test_name():
 
 
 def test_file():
-    assert model.file().name == 'capacitor.mph'
+    assert model.file().name == Path().resolve().name
 
 
 def test_version():
-    assert model.version() == '5.5'
+    assert model.version() == mph.discovery.backend()['name']
 
 
 def test_functions():
@@ -547,11 +547,12 @@ if __name__ == '__main__':
         test_create()
         test_remove()
 
+        test_save()
+
         test_import()
         test_export()
         test_clear()
         test_reset()
-        test_save()
 
         warnings.simplefilter('ignore')
         test_features()

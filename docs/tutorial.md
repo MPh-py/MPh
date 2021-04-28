@@ -2,8 +2,8 @@
 
 To follow along with this tutorial in an interactive Python session,
 if you wish to do so, make sure you have downloaded the demonstration
-model [`capacitor.mph`][capa] from MPh's source-code [repository][repo].
-Save it in the same folder from which you run Python.
+model [`capacitor.mph`][capa] from MPh's source-code repository. Save
+it in the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -358,7 +358,6 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[repo]:  https://github.com/MPh-py/MPh
-[capa]:  https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
+[capa]:  https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
 [array]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
 [float]: https://docs.python.org/3/library/functions.html#float

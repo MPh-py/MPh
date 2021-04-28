@@ -6,13 +6,16 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 from numpy import array, ndarray       # numerical array
-from jpype.types import JBoolean       # Java boolean
-from jpype.types import JInt           # Java integer
-from jpype.types import JDouble        # Java float
-from jpype.types import JString        # Java string
-from jpype.types import JArray         # Java array
+from jpype import JBoolean             # Java boolean
+from jpype import JInt                 # Java integer
+from jpype import JDouble              # Java float
+from jpype import JString              # Java string
+from jpype import JArray               # Java array
 from pathlib import Path               # file-system path
 from re import split                   # string splitting
+from json import load as json_load     # JSON decoder
+from difflib import get_close_matches  # fuzzy matching
+from functools import lru_cache        # function cache
 from logging import getLogger          # event logging
 
 
@@ -31,7 +34,7 @@ class Node:
 
     Nodes work similarly to `pathlib.Path` objects from Python's
     standard library. They support string concatenation to the right
-    with the `/` operator  in order to reference child nodes:
+    with the division operator  in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -40,7 +43,7 @@ class Node:
     Node('functions/step')
     ```
 
-    Note how the `model` object also supports the `/` operator in
+    Note how the `model` object also supports the division operator in
     order to generate node references. As mere references, nodes must
     must not necessarily exist in the model tree:
     ```python
@@ -183,7 +186,8 @@ class Node:
 
     def tag(self):
         """Returns the node's tag."""
-        return str(self.java.tag()) if self.exists() else None
+        java = self.java
+        return str(java.tag()) if java else None
 
     def type(self):
         """
@@ -194,7 +198,8 @@ class Node:
         details. Feature types are displayed in the Comsol GUI at the
         top of the `Settings` tab.
         """
-        return str(self.java.getType())
+        java = self.java
+        return str(java.getType()) if hasattr(java, 'getType') else None
 
     def parent(self):
         """Returns the parent node."""
@@ -242,8 +247,28 @@ class Node:
             error = 'Cannot rename a built-in group.'
             logger.error(error)
             raise PermissionError(error)
-        self.java.name(name)
+        java = self.java
+        if java:
+            java.name(name)
         self.path = self.path[:-1] + (name,)
+
+    def retag(self, tag):
+        """Assigns a new tag to the node."""
+        java = self.java
+        if self.is_root():
+            error = 'Cannot change tag of root node.'
+            logger.error(error)
+            raise PermissionError(error)
+        elif self.is_group():
+            error = 'Cannot change tag of built-in group.'
+            logger.error(error)
+            raise PermissionError(error)
+        elif java:
+            java.tag(tag)
+        else:
+            error = 'Cannot change tag as node does not exist.'
+            logger.error(error)
+            raise RuntimeError(error)
 
     def property(self, name, value=None):
         """
@@ -275,24 +300,26 @@ class Node:
         regardless of its current state. Pass `'disable'` or `'off'`
         to disable it.
         """
-        if not self.exists():
+        java = self.java
+        if not java:
             error = f'Node {self} does not exist in model tree.'
             logger.error(error)
             raise LookupError(error)
         if action == 'flip':
-            self.java.active(not self.java.isActive())
+            java.active(not java.isActive())
         elif action in ('enable', 'on', 'activate'):
-            self.java.active(True)
+            java.active(True)
         elif action in ('disable', 'off', 'deactivate'):
-            self.java.active(False)
+            java.active(False)
 
     def run(self):
         """Performs the "run" action if the node implements it."""
-        if not hasattr(self.java, 'run'):
+        java = self.java
+        if not hasattr(java, 'run'):
             error = 'Node "{self}" does not implement "run" operation.'
             logger.error(error)
             raise RuntimeError(error)
-        self.java.run()
+        java.run()
 
     def create(self, *arguments, name=None):
         """
@@ -310,14 +337,21 @@ class Node:
             error = 'Cannot create nodes at root of model tree.'
             logger.error(error)
             raise PermissionError(error)
-        container = self.java if self.is_group() else self.java.feature()
+        java = self.java
+        container = java if self.is_group() else java.feature()
         for argument in arguments:
             if isinstance(argument, str):
-                prefix = argument.strip().replace(' ', '_').lower()[:3]
+                type = argument
                 break
         else:
-            prefix = 'tag'
-        tag = container.uniquetag(prefix)
+            type = '?'
+        pattern = tag_pattern(feature_path(self) + [type])
+        if pattern.endswith('*'):
+            tag = container.uniquetag(pattern[:-1])
+        elif pattern in container.tags():
+            tag = container.uniquetag(pattern)
+        else:
+            tag = pattern
         if not arguments:
             container.create(tag)
         else:
@@ -326,7 +360,19 @@ class Node:
             container.get(tag).name(name)
         else:
             name = str(container.get(tag).name())
-        return self/name
+        child = self/name
+        check = tag_pattern(feature_path(child))
+        if pattern != check:
+            pattern = check
+            if pattern.endswith('*'):
+                tag = container.uniquetag(pattern[:-1])
+            elif pattern in container.tags():
+                tag = container.uniquetag(pattern)
+            else:
+                tag = pattern
+            logger.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
+            child.retag(tag)
+        return child
 
     def remove(self):
         """Removes the node from the model tree."""
@@ -376,6 +422,44 @@ def escape(name):
 def unescape(name):
     """Reverses escaping of forward slashes in a node name."""
     return name.replace('//', '/')
+
+
+########################################
+# Tag patterns                         #
+########################################
+
+@lru_cache(maxsize=1)
+def load_patterns():
+    """Loads the look-up table for tag patterns indexed by feature path."""
+    file = Path(__file__).parent/'tags.json'
+    with file.open(encoding='UTF-8-sig') as stream:
+        patterns = json_load(stream)
+    return patterns
+
+
+def feature_path(node):
+    """Returns the feature path of a node."""
+    if node.is_group():
+        return [node.name()]
+    type = node.type()
+    if not type:
+        type = '?'
+    return feature_path(node.parent()) + [type]
+
+
+def tag_pattern(feature_path):
+    """Looks up the tag pattern for the best match to given feature path."""
+    (group, type) = (feature_path[0], feature_path[-1])
+    patterns = load_patterns()
+    selected = [key for key in patterns
+                if key.startswith(group) and key.endswith(type)]
+    matches = get_close_matches(' → '.join(feature_path), selected)
+    if matches:
+        return patterns[matches[0]]
+    elif type != '?':
+        return type.lower()[:3]
+    else:
+        return 'tag'
 
 
 ########################################

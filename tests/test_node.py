@@ -1,4 +1,4 @@
-﻿"""Tests the Node class."""
+﻿"""Tests the `node` module."""
 __license__ = 'MIT'
 
 
@@ -8,6 +8,7 @@ __license__ = 'MIT'
 import parent # noqa F401
 import mph
 from mph import node, Node
+from models import capacitor
 from numpy import array, isclose
 from sys import argv
 from pathlib import Path
@@ -24,8 +25,7 @@ model  = None
 def setup_module():
     global client, model
     client = mph.start()
-    here = Path(__file__).parent
-    model = client.load(here/'capacitor.mph')
+    model = capacitor()
 
 
 def teardown_module():
@@ -112,8 +112,22 @@ def test_name():
     assert Node(model, 'functions/step').name() == 'step'
 
 
+def compare_tags(node, other):
+    assert (other/node).exists()
+    assert node.tag() == (other/node).tag() or node.is_root()
+    for child in node:
+        compare_tags(child, other)
+
+
 def test_tag():
     assert Node(model, 'functions/step').tag() == 'step1'
+    if not client.port:
+        # Skip test in client-server mode where it's fairly slow.
+        here = Path(__file__).resolve().parent
+        demo = client.load(here.parent/'demos'/'capacitor.mph')
+        demo.solve()
+        root = Node(model, '')
+        compare_tags(root, demo)
 
 
 def test_type():
@@ -161,7 +175,7 @@ def test_rename():
     assert not renamed.exists()
 
 
-def test_rewrite(node):
+def rewrite_properties(node):
     java = node.java
     if hasattr(java, 'properties'):
         names = [str(name) for name in java.properties()]
@@ -177,12 +191,13 @@ def test_rewrite(node):
             continue
         node.property(name, value)
     for child in node:
-        test_rewrite(child)
+        rewrite_properties(child)
 
 
 def test_property():
     root     = Node(model, '')
     function = root/'functions'/'step'
+    axis     = root/'geometries'/'geometry'/'axis'
     material = root/'materials'/'medium 1'
     plot     = root/'plots'/'evolution'
     export   = root/'exports'/'data'
@@ -218,12 +233,12 @@ def test_property():
     plot.property('axisprecision', old)
     assert plot.property('axisprecision') == old
     # Test conversion to and from 'IntArray'.
-    old = plot.property('solnum')
-    new = array([1, 2, 3])
-    plot.property('solnum', new)
-    assert (plot.property('solnum') == new).all()
-    plot.property('solnum', old)
-    assert (plot.property('solnum') == old).all()
+    old = axis.property('segid')
+    new = array([1, 2, 3], dtype=int)
+    axis.property('segid', new)
+    assert (axis.property('segid') == new).all()
+    axis.property('segid', old)
+    assert (axis.property('segid') == old).all()
     # Test conversion from 'None'.
     assert material.property('customize') is None
     # Test conversion to and from 'String'.
@@ -248,7 +263,7 @@ def test_property():
     # Read and write back every node property in the model.
     if not client.port:
         # Skip test in client-server mode where it's excruciatingly slow.
-        test_rewrite(root)
+        rewrite_properties(root)
 
 
 def test_properties():

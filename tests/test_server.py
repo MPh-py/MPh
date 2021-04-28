@@ -1,4 +1,4 @@
-﻿"""Tests the Server class."""
+﻿"""Tests the `server` module."""
 __license__ = 'MIT'
 
 
