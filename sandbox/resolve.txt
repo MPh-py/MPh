@@ -1,0 +1,231 @@
+﻿components → Component: comp*
+components → ExtraDim: xdim*
+coordinates → VectorBase: comp*
+datasets → Average: avh*
+datasets → CutPoint1D: cpt*
+datasets → Grid1D: grid*
+datasets → Grid2D: grid*
+evaluations → EvalGlobal: gev*
+exports → Image: img*
+functions → Analytic: an*
+functions → Interpolation: int*
+functions → Step: step*
+functions → Wave: wv*
+geometries → ?: part*
+geometries → ? → BallSelection: ballsel*
+geometries → ? → DifferenceSelection: difsel*
+geometries → ? → Else: else*
+geometries → ? → EndIf: endif*
+geometries → ? → Mirror: mir*
+geometries → ? → Move: mov*
+geometries → ? → Rotate: rot*
+geometries → ? → Scale: sca*
+geometries → ? → UnionSelection: unisel*
+geometries → ? → WorkPlane: wp*
+geometries → empty: geom*
+geometries → point: pgeom_cpt
+geometries → point → Point: pt*
+geometries → solid: geom*
+geometries → solid → BoxSelection: boxsel*
+geometries → solid → Interval: i*
+geometries → solid → PartInstance: pi*
+geometries → solid → Partition: par*
+materials → Common: mat*
+materials → Switch → Common: mat*
+meshes → ?: mesh*
+meshes → ? → Adapt: adap*
+meshes → ? → BndLayer → BndLayerProp: blp*
+meshes → ? → Distribution: dis*
+meshes → ? → Edge: edg*
+meshes → ? → Edge → Distribution: dis*
+meshes → ? → Reference: ref*
+parameters → ?: default
+physics → Aeroacoustics: ae
+physics → BeamRotor: rotbm
+physics → Chemistry: chem
+physics → Chemistry → ReactionChem: rch*
+physics → Chemistry → SpeciesChem: sch*
+physics → Circuit: cir
+physics → Circuit → Capacitor: C*
+physics → Circuit → Resistor: R*
+physics → Circuit → SubCircuit: X*
+physics → Circuit → SubCircuitBlock: sub*
+physics → Circuit → SubCircuitBlock → Capacitor: C*
+physics → Circuit → SubCircuitBlock → Inductor: L*
+physics → Circuit → SubCircuitBlock → Resistor: R*
+physics → Circuit → SubCircuitBlock → VoltageVoltageSource: V*
+physics → Circuit → VoltageSource: V*
+physics → CoefficientFormPDE: c
+physics → ColdPlasma → Species: sp*
+physics → ConcentratedSpecies: tcs
+physics → ConductiveMedia: ec
+physics → CurvilinearCoordinates: cc
+physics → DarcysLaw: dl
+physics → DarcysLaw → FractureFlow: dfn*
+physics → DeformedGeometry → FreeDeformation: free
+physics → DilutedSpecies: tds
+physics → DomainODE: dode
+physics → ElectromagneticWaves: emw
+physics → ElectromagneticWavesBeamEnvelopes: ewbe
+physics → ElectromagneticWavesFrequencyDomain: ewfd
+physics → Electrostatics: es
+physics → Fatigue: ftg
+physics → FreeAndPorousMediaFlow: fp
+physics → FreeMolecularFlow: fmf
+physics → GeneralFormPDE: g
+physics → GeneralOptimization: opt
+physics → GlobalEquations: ge
+physics → HeatTransfer: ht
+physics → HeatTransferInBuildingMaterials: ht
+physics → HeatTransferInFluids: ht
+physics → HeatTransferInSolidsAndFluids: ht
+physics → HeavySpeciesTransport → Species: sp*
+physics → HeavySpeciesTransport → SurfaceSpecies: ssp*
+physics → HermitianBeam → Gravity: gr*
+physics → InductionCurrents: mf
+physics → LaminarFlow: spf
+physics → LumpedMechanicalSystem → Damper: C*
+physics → LumpedMechanicalSystem → Mass: M*
+physics → LumpedMechanicalSystem → Spring: K*
+physics → MagneticFieldsNoCurrentsBoundaryElements: mfncbe
+physics → MoistureTransportInBuildingMaterials: mt
+physics → MovingMesh → FreeDeformation: free
+physics → MultibodyDynamics: mbd
+physics → MultibodyDynamics → Attachment: att*
+physics → MultibodyDynamics → HingeJoint: hgj*
+physics → MultibodyDynamics → RigidDomain: rd*
+physics → MultibodyDynamics → SolidContact: cnt*
+physics → PlasmaTimePeriodic → Species: sp*
+physics → PorousMediaHeatTransfer: ht
+physics → PressureAcoustics: acpr
+physics → ReactionEng: re
+physics → ReactionEng → ReactionChem: rch*
+physics → ReactionEng → SpeciesChem: sp*
+physics → RichardsEquation: dl
+physics → SchrodingerEquation: schr
+physics → SecondaryCurrentDistribution: cd
+physics → Shell: shell
+physics → SolidMechanics: solid
+physics → ThinFilmFlowDomain: tff
+physics → TransientPressureAcoustics: actd
+physics → Truss: truss
+physics → TurbulentFlowAlgebraicYplus: spf
+physics → TurbulentFlowkomega: spf
+plots → PlotGroup1D → LineGraph: lngr*
+plots → PlotGroup1D → Table: tblp*
+plots → PlotGroup2D → ArrowLine → Color: col*
+plots → PlotGroup2D → ArrowLine → Deform: def*
+plots → PlotGroup2D → ArrowSurface → Color: col*
+plots → PlotGroup2D → ArrowSurface → Deform: def*
+plots → PlotGroup2D → Contour → Deform: def*
+plots → PlotGroup2D → Line → Deform: def*
+plots → PlotGroup2D → PointTrajectories → Color: col*
+plots → PlotGroup2D → Streamline → Deform: def*
+plots → PlotGroup2D → Surface → Deform: def*
+plots → PlotGroup2D → TableAnnotation: tlan*
+plots → PlotGroup3D → ArrowLine: arwl*
+plots → PlotGroup3D → ArrowLine → Color: col*
+plots → PlotGroup3D → ArrowLine → Deform: def*
+plots → PlotGroup3D → ArrowPoint → Deform: def*
+plots → PlotGroup3D → ArrowSurface → Color: col*
+plots → PlotGroup3D → ArrowSurface → Deform: def*
+plots → PlotGroup3D → ArrowVolume → Color: col*
+plots → PlotGroup3D → ArrowVolume → Deform: def*
+plots → PlotGroup3D → CoordSysSurface: syss*
+plots → PlotGroup3D → CoordSysVolume: sysv*
+plots → PlotGroup3D → Isosurface: iso*
+plots → PlotGroup3D → LayeredMaterialSlice → Deform: def*
+plots → PlotGroup3D → Line → Deform: def*
+plots → PlotGroup3D → PointTrajectories → Color: col*
+plots → PlotGroup3D → Streamline → Color: col*
+plots → PlotGroup3D → Surface → Deform: def*
+selections → FromMesh: mesh*
+solutions → Eigenfrequency: sol*
+solutions → Eigenfrequency → Eigenvalue → Direct: d
+solutions → Eigenfrequency → Eigenvalue → Iterative → DomainDecomposition → CoarseSolver → Direct: d
+solutions → Eigenfrequency → Eigenvalue → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Eigenfrequency → Eigenvalue → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Eigenfrequency → Eigenvalue → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Eigenfrequency → Stationary → Direct: d
+solutions → Eigenfrequency → Stationary → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Eigenfrequency → Stationary → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Eigenfrequency → Stationary → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → NONE → Stationary → Direct: d
+solutions → NONE → Stationary → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → NONE → Stationary → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → NONE → Stationary → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Parametric: sol*
+solutions → Parametric → AWE → Direct: d
+solutions → Parametric → AWE → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Parametric → Eigenvalue → Direct: d
+solutions → Parametric → Eigenvalue → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Parametric → Optimization → StationaryAttrib → Direct: d
+solutions → Parametric → Optimization → StationaryAttrib → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Parametric → Optimization → StationaryAttrib → Segregated → SegregatedStep: ss*
+solutions → Parametric → Stationary → Direct: d
+solutions → Parametric → Stationary → FullyCoupled: fc*
+solutions → Parametric → Stationary → Iterative: i*
+solutions → Parametric → Stationary → Iterative → DomainDecomposition → CoarseSolver → Direct: d
+solutions → Parametric → Stationary → Iterative → DomainDecomposition → DomainSolver → Direct: d
+solutions → Parametric → Stationary → Iterative → DomainDecompositionSchur → DomainSolver → Direct: d
+solutions → Parametric → Stationary → Iterative → DomainDecompositionSchur → SchurSourceSolver → SchurSourceKrylovPreconditioner: sskr
+solutions → Parametric → Stationary → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Parametric → Stationary → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Parametric → Stationary → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Parametric → Stationary → Parametric: p*
+solutions → Parametric → Stationary → Segregated → SegregatedStep: ss*
+solutions → Parametric → Time → Direct: d
+solutions → Parametric → Time → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Parametric → Variables → ControlState: conpar*
+solutions → Parametric → Variables → State: comp*
+solutions → Stationary → Optimization → StationaryAttrib → Direct: d
+solutions → Stationary → Optimization → StationaryAttrib → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Stationary → Optimization → StationaryAttrib → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Stationary → Optimization → StationaryAttrib → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Stationary → Stationary → Direct: d
+solutions → Stationary → Stationary → FullyCoupled: fc*
+solutions → Stationary → Stationary → Iterative: i*
+solutions → Stationary → Stationary → Iterative → DomainDecomposition → DomainSolver → Direct: d
+solutions → Stationary → Stationary → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Stationary → Stationary → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Stationary → Stationary → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Stationary → Variables → ControlState: conpar*
+solutions → Stationary → Variables → Field: comp*
+solutions → Stationary → Variables → State: comp*
+solutions → Time → Stationary → Direct: d
+solutions → Time → Stationary → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Time → Stationary → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Time → Stationary → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Time → Stationary → Segregated → SegregatedStep: ss*
+solutions → Time → Time → AutoRemesh: ar
+solutions → Time → Time → Direct: d
+solutions → Time → Time → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Time → Time → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Time → Time → Iterative → Multigrid → PreSmoother → SOR: so
+solutions → Time → Time → Segregated → SegregatedStep: ss*
+solutions → Time → Time → StopCondition: st*
+solutions → Timeparametric → Stationary → Direct: d
+solutions → Timeparametric → Time → Direct: d
+solutions → Timeparametric → Time → Iterative → Multigrid → CoarseSolver → Direct: d
+solutions → Timeparametric → Time → Iterative → Multigrid → PostSmoother → SOR: so
+solutions → Timeparametric → Time → Iterative → Multigrid → PreSmoother → SOR: so
+studies → ?: std*
+studies → ? → BoundaryModeAnalysis: bma
+studies → ? → CombineSolution: cmbsol
+studies → ? → CurrentDistributionInitialization: cdi
+studies → ? → CyclicVoltammetry: cyclv
+studies → ? → Eigenfrequency: eig
+studies → ? → Eigenvalue: eigv
+studies → ? → Frequency: freq
+studies → ? → Frequencylinearized: frlin
+studies → ? → ModelReduction: mr
+studies → ? → Parametric: param
+studies → ? → SchrodingerPoisson: sdpo
+studies → ? → Stationary: stat
+studies → ? → StudyReference: ref
+studies → ? → Transient: time
+studies → ? → Wavelength: wave
+tables → Table: tbl*
+variables → ?: var*
+views → ResultView2D: view*
+views → ResultView3D: view*
