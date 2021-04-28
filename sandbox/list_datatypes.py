@@ -26,7 +26,7 @@ def list_properties(datatype):
 
 
 client = mph.start()
-model = client.load('../tests/capacitor.mph')
+model = client.load('../demos/capacitor.mph')
 
 datatypes = {}
 search_tree(model/None)

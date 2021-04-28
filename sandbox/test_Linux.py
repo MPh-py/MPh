@@ -98,16 +98,10 @@ FlNativeUtil.ensureLibIsLoaded()
 
 print('Loading Comsol model.')
 tag = client.uniquetag('model')
-model = client.load(tag, '../tests/capacitor.mph')
+model = client.load(tag, '../demos/capacitor.mph')
 
-print('Loading external image.')
-tags  = [str(tag) for tag in model.func().tags()]
-names = [model.func(tag).label() for tag in tags]
-tag   = tags[names.index('test_function')]
-model.func(tag).discardData()
-model.func(tag).set('filename', '../tests/gaussian.tif')
-model.func(tag).importData()
+print('Solving study "std1".')
+model.study('std1').run()
 
-print('Solving model.')
-for tag in model.study().tags():
-    model.study(tag).run()
+print('Exporting image.')
+model.result().export('img1').run()

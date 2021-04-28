@@ -56,7 +56,7 @@ print(f'Client started in {now()-t0:.3f} seconds.')
 print('Loading model file.')
 t0 = now()
 tag = client.uniquetag('model')
-model = client.load(tag, '../tests/capacitor.mph')
+model = client.load(tag, '../demos/capacitor.mph')
 print(f'Model loaded in {now()-t0:.3f} seconds.')
 
 print('Shutting down Java VM.')

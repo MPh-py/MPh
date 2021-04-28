@@ -7,15 +7,15 @@ in case something fails. The script can then be run with
 figure out when went wrong with the last property.
 
 The script displays a count of how many properties have been tested
-successfully. There are a little over 4200 properties total defined
+successfully. There are a little over 4300 properties total defined
 in the demo model.
 
 The test runs much faster in stand-alone mode, the default on Windows,
 where it completes in about 10 seconds. In client-server mode, the
-default on Linux and macOS, it takes much longer, like 10 *minutes*
-and up. This points to some inefficiency in the implementation of
-client-server communication and serialization (passing objects back
-and forth), something that MPh has no control over.
+default on Linux and macOS, it takes much longer, like 5 *minutes*.
+This points to some inefficiency in the implementation of client–server
+communication and serialization (passing objects back and forth),
+something that MPh has no control over.
 """
 
 import mph
@@ -29,7 +29,7 @@ mph.option('session', 'stand-alone')
 print('Starting session.')
 client = mph.start()
 print('Loading model.')
-model = client.load('../tests/capacitor.mph')
+model = client.load('../demos/capacitor.mph')
 
 # Track last node and property name if recursive test fails somewhere.
 last_node = None
