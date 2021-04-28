@@ -110,26 +110,26 @@ class Node:
         if self.path[0] in self.alias:
             self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
-            'parameters':   model.java.param().group(),
-            'functions':    model.java.func(),
-            'components':   model.java.component(),
-            'geometries':   model.java.geom(),
-            'views':        model.java.view(),
-            'selections':   model.java.selection(),
-            'coordinates':  model.java.coordSystem(),
-            'variables':    model.java.variable(),
-            'physics':      model.java.physics(),
-            'multiphysics': model.java.multiphysics(),
-            'materials':    model.java.material(),
-            'meshes':       model.java.mesh(),
-            'studies':      model.java.study(),
-            'solutions':    model.java.sol(),
-            'batches':      model.java.batch(),
-            'datasets':     model.java.result().dataset(),
-            'evaluations':  model.java.result().numerical(),
-            'tables':       model.java.result().table(),
-            'plots':        model.java.result(),
-            'exports':      model.java.result().export(),
+            'parameters':   'self.model.java.param().group()',
+            'functions':    'self.model.java.func()',
+            'components':   'self.model.java.component()',
+            'geometries':   'self.model.java.geom()',
+            'views':        'self.model.java.view()',
+            'selections':   'self.model.java.selection()',
+            'coordinates':  'self.model.java.coordSystem()',
+            'variables':    'self.model.java.variable()',
+            'physics':      'self.model.java.physics()',
+            'multiphysics': 'self.model.java.multiphysics()',
+            'materials':    'self.model.java.material()',
+            'meshes':       'self.model.java.mesh()',
+            'studies':      'self.model.java.study()',
+            'solutions':    'self.model.java.sol()',
+            'batches':      'self.model.java.batch()',
+            'datasets':     'self.model.java.result().dataset()',
+            'evaluations':  'self.model.java.result().numerical()',
+            'tables':       'self.model.java.result().table()',
+            'plots':        'self.model.java.result()',
+            'exports':      'self.model.java.result().export()',
         }
         self.model = model
 
@@ -174,11 +174,11 @@ class Node:
             return self.model.java
         name = self.name()
         if self.is_group():
-            return self.groups.get(name, None)
+            return eval(self.groups.get(name))
         parent = self.parent()
         java = parent.java
         if not java:
-            return
+            return None
         container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
