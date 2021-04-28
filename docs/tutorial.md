@@ -317,4 +317,4 @@ The few things that were left out can be gleaned from the [API
 documentation](api).
 
 
-[demo]: https://github.com/John-Hennig/mph/blob/master/tests/capacitor.mph
+[demo]: https://github.com/MPh-py/mph/blob/main/demos/capacitor.mph
