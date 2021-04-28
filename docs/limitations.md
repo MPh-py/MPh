@@ -73,8 +73,8 @@ have to cast types explicitly. Refer to the [JPype
 documentation][jpype-docs] for help.
 
 
-[mph-repo]:    https://github.com/john-hennig/mph
-[mph-tests]:   https://github.com/John-Hennig/mph/tree/master/tests
+[mph-repo]:    https://github.com/MPh-py/mph
+[mph-tests]:   https://github.com/MPh-py/mph/tree/main/tests
 [jpype-repo]:  https://github.com/jpype-project/jpype
 [jpype-docs]:  https://jpype.readthedocs.io
 [jnius-repo]:  https://github.com/kivy/pyjnius
