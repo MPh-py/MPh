@@ -87,30 +87,36 @@ class Node:
             logger.error(error)
             raise TypeError(error)
         self.alias = {
-            'function':  'functions',
-            'component': 'components',
-            'geometry':  'geometries',
-            'view':      'views',
-            'selection': 'selections',
-            'variable':  'variables',
-            'material':  'materials',
-            'mesh':      'meshes',
-            'study':     'studies',
-            'solution':  'solutions',
-            'dataset':   'datasets',
-            'plot':      'plots',
-            'result':    'plots',
-            'results':   'plots',
-            'export':    'exports',
+            'parameter':  'parameters',
+            'function':   'functions',
+            'component':  'components',
+            'geometry':   'geometries',
+            'view':       'views',
+            'selection':  'selections',
+            'variable':   'variables',
+            'material':   'materials',
+            'mesh':       'meshes',
+            'study':      'studies',
+            'solution':   'solutions',
+            'batch':      'batches',
+            'dataset':    'datasets',
+            'evaluation': 'evaluations',
+            'table':      'tables',
+            'plot':       'plots',
+            'result':     'plots',
+            'results':    'plots',
+            'export':     'exports',
         }
         if self.path[0] in self.alias:
             self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
+            'parameters':   model.java.param().group(),
             'functions':    model.java.func(),
             'components':   model.java.component(),
             'geometries':   model.java.geom(),
             'views':        model.java.view(),
             'selections':   model.java.selection(),
+            'coordinates':  model.java.coordSystem(),
             'variables':    model.java.variable(),
             'physics':      model.java.physics(),
             'multiphysics': model.java.multiphysics(),
@@ -118,7 +124,10 @@ class Node:
             'meshes':       model.java.mesh(),
             'studies':      model.java.study(),
             'solutions':    model.java.sol(),
+            'batches':      model.java.batch(),
             'datasets':     model.java.result().dataset(),
+            'evaluations':  model.java.result().numerical(),
+            'tables':       model.java.result().table(),
             'plots':        model.java.result(),
             'exports':      model.java.result().export(),
         }
@@ -338,7 +347,17 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         java = self.java
-        container = java if self.is_group() else java.feature()
+        if self.is_group():
+            if not hasattr(java, 'uniquetag') and hasattr(java, 'feature'):
+                container = java.feature()
+            else:
+                container = java
+        else:
+            container = java.feature()
+        if not hasattr(container, 'uniquetag'):
+            error = f'Node {self} does not support feature creation.'
+            logger.error(error)
+            raise RuntimeError(error)
         for argument in arguments:
             if isinstance(argument, str):
                 type = argument
@@ -457,7 +476,7 @@ def tag_pattern(feature_path):
     if matches:
         return patterns[matches[0]]
     elif type != '?':
-        return type.lower()[:3]
+        return type.lower()[:3] + '*'
     else:
         return 'tag'
 

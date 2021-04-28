@@ -3,14 +3,14 @@ __license__ = 'MIT'
 
 
 import mph
-from jpype import JBoolean
 
 
 def capacitor():
     """Creates the tutorial model."""
     model = mph.session.client.create('capacitor')
 
-    model.java.param().group('default').name('parameters')
+    parameters = model/'parameters'
+    (parameters/'Parameters 1').rename('parameters')
     model.parameter('U', '1[V]')
     model.description('U', 'applied voltage')
     model.parameter('d', '2[mm]')
@@ -60,8 +60,10 @@ def capacitor():
         ['+d/4', '0'],
         ['+d/2', '0'],
     ])
-    model.java.coordSystem('sys1').label('boundary system')
     model.build(geometry)
+
+    coordinates = model/'coordinates'
+    (coordinates/'Boundary System 1').rename('boundary system')
 
     views = model/'views'
     view = views/'View 1'
@@ -111,17 +113,17 @@ def capacitor():
     probe1.property('r', 'd/10')
     probe2 = selections.create('Disk', name='probe 2')
     probe2.property('entitydim', 0)
-    probe2.property('posx',      '+d/4')
-    probe2.property('r',         'd/10')
+    probe2.property('posx', '+d/4')
+    probe2.property('r', 'd/10')
 
     physics = model/'physics'
     es = physics.create('Electrostatics', geometry, name='electrostatic')
     es.java.field('electricpotential').field('V_es')
     es.java.selection().named(media.tag())
     es.java.prop('d').set('d', 'l')
-    es.java.feature('ccn1').label('Laplace equation')
-    es.java.feature('zc1').label('zero charge')
-    es.java.feature('init1').label('initial values')
+    (es/'Charge Conservation 1').rename('Laplace equation')
+    (es/'Zero Charge 1').rename('zero charge')
+    (es/'Initial Values 1').rename('initial values')
     anode = es.create('ElectricPotential', 1, name='anode')
     anode.java.selection().named(anode_surface.tag())
     anode.property('V0', '+U/2')
@@ -132,9 +134,9 @@ def capacitor():
     ec.java.field('electricpotential').field('V_ec')
     ec.java.selection().named(media.tag())
     ec.java.prop('d').set('d', 'l')
-    ec.java.feature('cucn1').label('current conservation')
-    ec.java.feature('ein1').label('insulation')
-    ec.java.feature('init1').label('initial values')
+    (ec/'Current Conservation 1').rename('current conservation')
+    (ec/'Electric Insulation 1').rename('insulation')
+    (ec/'Initial Values 1').rename('initial values')
     anode = ec.create('ElectricPotential', 1, name='anode')
     anode.java.selection().named(anode_surface.tag())
     anode.property('V0', '+U/2*step(t[1/s])')
@@ -165,6 +167,7 @@ def capacitor():
 
     studies = model/'studies'
     solutions = model/'solutions'
+    batches = model/'batches'
     study = studies.create(name='static')
     study.java.setGenPlots(False)
     study.java.setGenConv(False)
@@ -181,9 +184,9 @@ def capacitor():
     solution.create('StudyStep', name='equations')
     solution.create('Variables', name='variables')
     solver = solution.create('Stationary', name='stationary solver')
-    solver.java.feature('fcDef').label('fully coupled')
-    solver.java.feature('aDef').label('advanced options')
-    solver.java.feature('dDef').label('direct solver')
+    (solver/'Fully Coupled').rename('fully coupled')
+    (solver/'Advanced').rename('advanced options')
+    (solver/'Direct').rename('direct solver')
     study = studies.create(name='relaxation')
     study.java.setGenPlots(False)
     study.java.setGenConv(False)
@@ -203,9 +206,9 @@ def capacitor():
     variables.property('clist', ['range(0, 0.01, 1)', '0.001[s]'])
     solver = solution.create('Time', name='time-dependent solver')
     solver.property('tlist', 'range(0, 0.01, 1)')
-    solver.java.feature('fcDef').label('fully coupled')
-    solver.java.feature('aDef').label('advanced options')
-    solver.java.feature('dDef').label('direct solver')
+    (solver/'Fully Coupled').rename('fully coupled')
+    (solver/'Advanced').rename('advanced options')
+    (solver/'Direct').rename('direct solver')
     study = studies.create(name='sweep')
     study.java.setGenPlots(False)
     study.java.setGenConv(False)
@@ -229,75 +232,64 @@ def capacitor():
     variables.property('clist', ['range(0, 0.01, 1)', '0.001[s]'])
     solver = solution.create('Time', name='time-dependent solver')
     solver.property('tlist', 'range(0, 0.01, 1)')
-    solver.java.feature('fcDef').label('fully coupled')
-    solver.java.feature('aDef').label('advanced options')
-    solver.java.feature('dDef').label('direct solver')
+    (solver/'Fully Coupled').rename('fully coupled')
+    (solver/'Advanced').rename('advanced options')
+    (solver/'Direct').rename('direct solver')
     sols = solutions.create(name='parametric solutions')
     sols.java.study(study.tag())
-    model.java.batch().create('p1', 'Parametric')
-    model.java.batch('p1').create('so1', 'Solutionseq')
-    model.java.batch('p1').study(study.tag())
-    model.java.batch('p1').label('parametric sweep')
-    model.java.batch('p1').set('control',
-        (model/'studies'/'sweep'/'parameter sweep').tag())
-    model.java.batch('p1').set('pname', ['d'])
-    model.java.batch('p1').set('plistarr', ['1 2 3'])
-    model.java.batch('p1').set('punit', ['mm'])
-    model.java.batch('p1').set('err', JBoolean(True))
-    model.java.batch('p1').feature('so1').label('parametric solution')
-    model.java.batch('p1').feature('so1').set('seq', solution.tag())
-    model.java.batch('p1').feature('so1').set('psol', sols.tag())
-    model.java.batch('p1').feature('so1').set('param', [
-        '"d","0.001"',
-        '"d","0.002"',
-        '"d","0.003"',
-    ])
-    model.java.batch('p1').attach(study.tag())
+    batch = batches.create('Parametric', name='parametric sweep')
+    sequence = batch.create('Solutionseq', name='parametric solution')
+    sequence.property('seq', solution)
+    sequence.property('psol', sols)
+    sequence.property('param', ['"d","0.001"', '"d","0.002"', '"d","0.003"'])
+    batch.java.study(study.tag())
+    batch.java.attach(study.tag())
+    batch.property('control', model/'studies'/'sweep'/'parameter sweep')
+    batch.property('pname', ['d'])
+    batch.property('plistarr', ['1 2 3'])
+    batch.property('punit', ['mm'])
+    batch.property('err', True)
 
     datasets = model/'datasets'
-    model.java.result().dataset('dset1').label('electrostatic')
-    model.java.result().dataset('dset2').label('time-dependent')
-    model.java.result().dataset('dset3').label('sweep/solution')
-    model.java.result().dataset('dset3').comments(
+    (datasets/'static//electrostatic solution').rename('electrostatic')
+    (datasets/'relaxation//time-dependent solution').rename('time-dependent')
+    (datasets/'sweep//parametric solution').rename('sweep/solution')
+    (datasets/'sweep//solution').java.comments(
         'This auto-generated feature could be removed, as it is not '
         'really needed. It was left in the model for the purpose of '
         'testing MPh. Its name contains a forward slash, which MPh '
-        'uses to denote parent–child relationships in the node hierarchy.\n')
-    model.java.result().dataset('dset4').label('parametric sweep')
+        'uses to denote parent–child relationships in the node hierarchy.')
+    (datasets/'sweep//parametric solutions').rename('parametric sweep')
 
-    model.java.result().table().create('tbl1', 'Table')
-    model.java.result().table('tbl1').label('electrostatic')
-    model.java.result().table().create('tbl2', 'Table')
-    model.java.result().table('tbl2').label('time-dependent')
-    model.java.result().table().create('tbl3', 'Table')
-    model.java.result().table('tbl3').label('parametric')
+    tables = model/'tables'
+    tables.create('Table', name='electrostatic')
+    tables.create('Table', name='time-dependent')
+    tables.create('Table', name='parametric')
 
-    model.java.result().numerical().create('gev1', 'EvalGlobal')
-    model.java.result().numerical('gev1').set('probetag', 'none')
-    model.java.result().numerical('gev1').label('electrostatic')
-    model.java.result().numerical('gev1').set('table', 'tbl1')
-    model.java.result().numerical('gev1').set('expr',  ['2*es.intWe/U^2'])
-    model.java.result().numerical('gev1').set('unit',  ['pF'])
-    model.java.result().numerical('gev1').set('descr', ['capacitance'])
-    model.java.result().numerical('gev1').setResult()
-    model.java.result().numerical().create('gev2', 'EvalGlobal')
-    model.java.result().numerical('gev2').set('data', 'dset2')
-    model.java.result().numerical('gev2').set('probetag', 'none')
-    model.java.result().numerical('gev2').label('time-dependent')
-    model.java.result().numerical('gev2').set('table', 'tbl2')
-    model.java.result().numerical('gev2').set('expr',  ['2*ec.intWe/U^2'])
-    model.java.result().numerical('gev2').set('unit',  ['pF'])
-    model.java.result().numerical('gev2').set('descr', ['capacitance'])
-    model.java.result().numerical('gev2').setResult()
-    model.java.result().numerical().create('gev3', 'EvalGlobal')
-    model.java.result().numerical('gev3').set('data', 'dset4')
-    model.java.result().numerical('gev3').set('probetag', 'none')
-    model.java.result().numerical('gev3').label('parametric')
-    model.java.result().numerical('gev3').set('table', 'tbl3')
-    model.java.result().numerical('gev3').set('expr',  ['2*ec.intWe/U^2'])
-    model.java.result().numerical('gev3').set('unit',  ['pF'])
-    model.java.result().numerical('gev3').set('descr', ['capacitance'])
-    model.java.result().numerical('gev3').setResult()
+    evaluations = model/'evaluations'
+    evaluation = evaluations.create('EvalGlobal', name='electrostatic')
+    evaluation.property('probetag', 'none')
+    evaluation.property('table', tables/'electrostatic')
+    evaluation.property('expr',  ['2*es.intWe/U^2'])
+    evaluation.property('unit',  ['pF'])
+    evaluation.property('descr', ['capacitance'])
+    evaluation.java.setResult()
+    evaluation = evaluations.create('EvalGlobal', name='time-dependent')
+    evaluation.property('data', datasets/'time-dependent')
+    evaluation.property('probetag', 'none')
+    evaluation.property('table', tables/'time-dependent')
+    evaluation.property('expr',  ['2*ec.intWe/U^2'])
+    evaluation.property('unit',  ['pF'])
+    evaluation.property('descr', ['capacitance'])
+    evaluation.java.setResult()
+    evaluation = evaluations.create('EvalGlobal', name='parametric')
+    evaluation.property('data', 'dset4')
+    evaluation.property('probetag', 'none')
+    evaluation.property('table', tables/'parametric')
+    evaluation.property('expr',  ['2*ec.intWe/U^2'])
+    evaluation.property('unit',  ['pF'])
+    evaluation.property('descr', ['capacitance'])
+    evaluation.java.setResult()
 
     plots = model/'plots'
     plots.java.setOnlyPlotWhenRequested(True)

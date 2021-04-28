@@ -354,6 +354,8 @@ The latter two code examples produce the following model tree:
 ```python
 >>> mph.tree(model)
 block of ice
+├─ parameters
+│  └─ Parameters 1
 ├─ functions
 ├─ components
 │  └─ Component 1
@@ -364,6 +366,8 @@ block of ice
 ├─ views
 │  └─ View 1
 ├─ selections
+├─ coordinates
+│  └─ Boundary System 1
 ├─ variables
 ├─ physics
 ├─ multiphysics
@@ -371,18 +375,25 @@ block of ice
 ├─ meshes
 ├─ studies
 ├─ solutions
+├─ batches
 ├─ datasets
+├─ evaluations
+├─ tables
 ├─ plots
 └─ exports
+
+>>> mph.tree(model)
+block of ice
 ```
 
-The one component and default view were created by Comsol automatically.
-We could rename them if we wanted to. Most built-in groups are still
-empty, waiting for nodes to be created.
+The parameter group, model component, default view and coordinate
+system were created by Comsol automatically. We could rename these
+nodes if we wanted to. Most built-in groups are still empty, waiting
+for features to be created.
 
-The demo script [`create_capacitor.py`][create] shows how to create more
-advanced features than the simple example here: It generates the
-demonstration model used in the [Tutorial](tutorial).
+The demo script [`create_capacitor.py`][create] shows how to create
+more advanced features than in the simple example here: It generates
+the demonstration model used in the [Tutorial](tutorial).
 
 
 [repo]:    https://github.com/MPh-py/MPh
