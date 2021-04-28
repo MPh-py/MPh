@@ -3,7 +3,6 @@ __license__ = 'MIT'
 
 
 import mph
-from numpy import array
 from jpype import JBoolean
 
 
@@ -393,7 +392,7 @@ def capacitor():
     image.property('antialias', 'on')
     image.property('zoomextents', 'off')
     image.property('fontsize', '12')
-    image.property('customcolor', array([1, 1, 1]))
+    image.property('customcolor', [1, 1, 1])
     image.property('background', 'color')
     image.property('gltfincludelines', 'on')
     image.property('title1d', 'on')

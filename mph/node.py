@@ -479,10 +479,19 @@ def cast(value):
     elif isinstance(value, Path):
         return JString(str(value))
     elif isinstance(value, (list, tuple)):
-        dimension = array(value).ndim
-        if value == [[]]:
-            value = []
-        return JArray(JString, dimension)(value)
+        dimension = 0
+        item = value
+        while isinstance(item, (list, tuple)):
+            dimension += 1
+            if not len(item):
+                datatype = JString
+                value = []
+                break
+            item = item[0]
+        else:
+            datatype = cast(item).__class__
+        value = [cast(item) for item in value]
+        return JArray(datatype, dimension)(value)
     elif isinstance(value, ndarray):
         if value.dtype.kind == 'b':
             return JArray(JBoolean, value.ndim)(value)
