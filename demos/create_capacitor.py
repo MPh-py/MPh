@@ -81,12 +81,12 @@ anode_volume = selections.create('Disk', name='anode volume')
 anode_volume.property('posx', '-d/2-w/2')
 anode_volume.property('r', 'w/10')
 anode_surface = selections.create('Adjacent', name='anode surface')
-anode_surface.property('input', [anode_volume.tag()])
+anode_surface.property('input', [anode_volume])
 cathode_volume = selections.create('Disk', name='cathode volume')
 cathode_volume.property('posx', '+d/2+w/2')
 cathode_volume.property('r', 'w/10')
 cathode_surface = selections.create('Adjacent', name='cathode surface')
-cathode_surface.property('input', [cathode_volume.tag()])
+cathode_surface.property('input', [cathode_volume])
 medium1 = selections.create('Disk', name='medium 1')
 medium1.property('posx', '-2*d/10')
 medium1.property('r', 'd/10')
@@ -94,11 +94,11 @@ medium2 = selections.create('Disk', name='medium 2')
 medium2.property('posx', '+2*d/10')
 medium2.property('r', 'd/10')
 media = selections.create('Union', name='media')
-media.property('input', [medium1.tag(), medium2.tag()])
+media.property('input', [medium1, medium2])
 domains = selections.create('Explicit', name='domains')
 domains.java.all()
 exterior = selections.create('Adjacent', name='exterior')
-exterior.property('input', [domains.tag()])
+exterior.property('input', [domains])
 axis = selections.create('Box', name='axis')
 axis.property('entitydim', 1)
 axis.property('xmin', '-d/2-w/10')
@@ -119,7 +119,7 @@ probe2.property('posx',      '+d/4')
 probe2.property('r',         'd/10')
 
 physics = model/'physics'
-es = physics.create('Electrostatics', geometry.tag(), name='electrostatic')
+es = physics.create('Electrostatics', geometry, name='electrostatic')
 es.java.field('electricpotential').field('V_es')
 es.java.selection().named(media.tag())
 es.java.prop('d').set('d', 'l')
@@ -132,8 +132,7 @@ anode.property('V0', '+U/2')
 cathode = es.create('ElectricPotential', 1, name='cathode')
 cathode.java.selection().named(cathode_surface.tag())
 cathode.property('V0', '-U/2')
-ec = physics.create('ConductiveMedia', geometry.tag(),
-                    name='electric currents')
+ec = physics.create('ConductiveMedia', geometry, name='electric currents')
 ec.java.field('electricpotential').field('V_ec')
 ec.java.selection().named(media.tag())
 ec.java.prop('d').set('d', 'l')
@@ -166,7 +165,7 @@ medium2.java.propertyGroup('def').set('electricconductivity',
 medium2.java.propertyGroup('def').set('electricconductivity_symmetry', '0')
 
 meshes = model/'meshes'
-meshes.create(geometry.tag(), name='mesh')
+meshes.create(geometry, name='mesh')
 
 studies = model/'studies'
 solutions = model/'solutions'
@@ -175,8 +174,8 @@ study.java.setGenPlots(False)
 study.java.setGenConv(False)
 step = study.create('Stationary', name='stationary')
 step.property('activate', [
-    (physics/'electrostatic').tag(), 'on',
-    (physics/'electric currents').tag(), 'off',
+    physics/'electrostatic', 'on',
+    physics/'electric currents', 'off',
     'frame:spatial1', 'on',
     'frame:material1', 'on',
 ])
@@ -195,8 +194,8 @@ study.java.setGenConv(False)
 step = study.create('Transient', name='time-dependent')
 step.property('tlist', 'range(0, 0.01, 1)')
 step.property('activate', [
-    (physics/'electrostatic').tag(), 'off',
-    (physics/'electric currents').tag(), 'on',
+    physics/'electrostatic', 'off',
+    physics/'electric currents', 'on',
     'frame:spatial1', 'on',
     'frame:material1', 'on',
 ])
@@ -220,8 +219,8 @@ step.property('plistarr', ['1 2 3'])
 step.property('punit', ['mm'])
 step = study.create('Transient', name='time-dependent')
 step.property('activate', [
-    (physics/'electrostatic').tag(), 'off',
-    (physics/'electric currents').tag(), 'on',
+    physics/'electrostatic', 'off',
+    physics/'electric currents', 'on',
     'frame:spatial1', 'on',
     'frame:material1', 'on',
 ])
@@ -320,7 +319,7 @@ contour.property('colorlegend', False)
 contour.property('color', 'gray')
 contour.property('resolution', 'normal')
 plot = plots.create('PlotGroup2D', name='time-dependent field')
-plot.property('data', (datasets/'time-dependent').tag())
+plot.property('data', datasets/'time-dependent')
 plot.property('titletype', 'manual')
 plot.property('title', 'Time-dependent field')
 plot.property('showlegendsunit', True)
@@ -335,7 +334,7 @@ contour.property('colorlegend', False)
 contour.property('color', 'gray')
 contour.property('resolution', 'normal')
 plot = plots.create('PlotGroup1D', name='evolution')
-plot.property('data', (datasets/'time-dependent').tag())
+plot.property('data', datasets/'time-dependent')
 plot.property('titletype', 'manual')
 plot.property('title', 'Evolution of field over time')
 plot.property('xlabel', 't (s)')
@@ -363,7 +362,7 @@ graph.property('legend', True)
 graph.property('legendmethod', 'manual')
 graph.property('legends', ['medium 2'])
 plot = plots.create('PlotGroup2D', name='sweep')
-plot.property('data', (datasets/'parametric sweep').tag())
+plot.property('data', datasets/'parametric sweep')
 plot.property('titletype', 'manual')
 plot.property('title', 'Parameter sweep')
 plot.property('showlegendsunit', True)
@@ -385,7 +384,7 @@ data.property('unit', ['V/m', 'V/m', 'V/m'])
 data.property('descr', ['x-component', 'y-component', 'z-component'])
 data.property('filename', 'data.txt')
 image = exports.create('Image', name='image')
-image.property('sourceobject', (plots/'electrostatic field').tag())
+image.property('sourceobject', plots/'electrostatic field')
 image.property('filename', 'image.png')
 image.property('size', 'manualweb')
 image.property('unit', 'px')

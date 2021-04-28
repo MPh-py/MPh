@@ -468,7 +468,9 @@ def tag_pattern(feature_path):
 
 def cast(value):
     """Casts a value from its Python data type to a suitable Java data type."""
-    if isinstance(value, bool):
+    if isinstance(value, Node):
+        return JString(value.tag())
+    elif isinstance(value, bool):
         return JBoolean(value)
     elif isinstance(value, int):
         return JInt(value)
