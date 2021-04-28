@@ -1,5 +1,19 @@
 ﻿# Releases
 
+## 1.0.2
+* [Published](https://pypi.org/project/MPh/1.0.2) on April 28, 2021.
+* Assigns more typical tag names when creating new model features.
+* In most cases, tags are now named like they are in the Comsol GUI.
+* [`Node.retag()`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html#mph.Node.retag) allows post-hoc modification of a node's tag.
+* Adds missing built-in groups, e.g. evaluations and tables.
+* Improves performance of node navigation in client–server mode.
+* The internal type-casting converts [`Node`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html) instances to their tags.
+* The internal type-casting handles lists of numbers.
+* Before, [`property()`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html#mph.Node.property) and [`create()`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html#mph.Node.create) would only accept lists of strings.
+* [`Node.type()`](https://mph.readthedocs.io/en/1.0/api/mph.Node.html#mph.Node.type) now returns nothing if node has no feature type.
+* Moved tutorial model to [`demos`](https://github.com/MPh-py/MPh/tree/main/demos) folder.
+* Added demo script [`create_capacitor.py`](https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py) that generates the tutorial model.
+
 ## 1.0.1
 * [Published](https://pypi.org/project/MPh/1.0.1) on April 23, 2021.
 * Fixes failing evaluation when name of default dataset contains slash.
