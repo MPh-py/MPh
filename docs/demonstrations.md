@@ -84,10 +84,9 @@ import queue
 ```
 
 In this demonstration, we will solve the model [`capacitor.mph`][capa]
-from the [`tests`][tests] folder of the source-code [repository][repo],
-the same model we used in the [Tutorial](tutorial). We want to sweep
-the electrode distance d and calculate the capacitance C for each value
-of the distance, ranging from 0.5 to 5 mm.
+from the [Tutorial](tutorial). We want to sweep the electrode distance
+d and calculate the capacitance C for each value of the distance,
+ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 ```
@@ -355,6 +354,8 @@ The latter two code examples produce the following model tree:
 ```python
 >>> mph.tree(model)
 block of ice
+├─ parameters
+│  └─ Parameters 1
 ├─ functions
 ├─ components
 │  └─ Component 1
@@ -365,6 +366,8 @@ block of ice
 ├─ views
 │  └─ View 1
 ├─ selections
+├─ coordinates
+│  └─ Boundary System 1
 ├─ variables
 ├─ physics
 ├─ multiphysics
@@ -372,22 +375,33 @@ block of ice
 ├─ meshes
 ├─ studies
 ├─ solutions
+├─ batches
 ├─ datasets
+├─ evaluations
+├─ tables
 ├─ plots
 └─ exports
+
+>>> mph.tree(model)
+block of ice
 ```
 
-The one component and default view were created by Comsol automatically.
-We could rename them if we wanted to. Most built-in groups are still
-empty, waiting for nodes to be created.
+The parameter group, model component, default view and coordinate
+system were created by Comsol automatically. We could rename these
+nodes if we wanted to. Most built-in groups are still empty, waiting
+for features to be created.
+
+The demo script [`create_capacitor.py`][create] shows how to create
+more advanced features than in the simple example here: It generates
+the demonstration model used in the [Tutorial](tutorial).
 
 
 [repo]:    https://github.com/MPh-py/MPh
-[tests]:   https://github.com/MPh-py/MPh/tree/main/tests
-[capa]:    https://github.com/MPh-py/MPh/blob/main/tests/capacitor.mph
 [demos]:   https://github.com/MPh-py/MPh/tree/main/demos
+[capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
 [compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
 [pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
+[create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
 
 [japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [intro]:   https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf

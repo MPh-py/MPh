@@ -6,13 +6,16 @@ __license__ = 'MIT'
 # Dependencies                         #
 ########################################
 from numpy import array, ndarray       # numerical array
-from jpype.types import JBoolean       # Java boolean
-from jpype.types import JInt           # Java integer
-from jpype.types import JDouble        # Java float
-from jpype.types import JString        # Java string
-from jpype.types import JArray         # Java array
+from jpype import JBoolean             # Java boolean
+from jpype import JInt                 # Java integer
+from jpype import JDouble              # Java float
+from jpype import JString              # Java string
+from jpype import JArray               # Java array
 from pathlib import Path               # file-system path
 from re import split                   # string splitting
+from json import load as json_load     # JSON decoder
+from difflib import get_close_matches  # fuzzy matching
+from functools import lru_cache        # function cache
 from logging import getLogger          # event logging
 
 
@@ -31,7 +34,7 @@ class Node:
 
     Nodes work similarly to `pathlib.Path` objects from Python's
     standard library. They support string concatenation to the right
-    with the `/` operator  in order to reference child nodes:
+    with the division operator  in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -40,7 +43,7 @@ class Node:
     Node('functions/step')
     ```
 
-    Note how the `model` object also supports the `/` operator in
+    Note how the `model` object also supports the division operator in
     order to generate node references. As mere references, nodes must
     must not necessarily exist in the model tree:
     ```python
@@ -84,40 +87,49 @@ class Node:
             logger.error(error)
             raise TypeError(error)
         self.alias = {
-            'function':  'functions',
-            'component': 'components',
-            'geometry':  'geometries',
-            'view':      'views',
-            'selection': 'selections',
-            'variable':  'variables',
-            'material':  'materials',
-            'mesh':      'meshes',
-            'study':     'studies',
-            'solution':  'solutions',
-            'dataset':   'datasets',
-            'plot':      'plots',
-            'result':    'plots',
-            'results':   'plots',
-            'export':    'exports',
+            'parameter':  'parameters',
+            'function':   'functions',
+            'component':  'components',
+            'geometry':   'geometries',
+            'view':       'views',
+            'selection':  'selections',
+            'variable':   'variables',
+            'material':   'materials',
+            'mesh':       'meshes',
+            'study':      'studies',
+            'solution':   'solutions',
+            'batch':      'batches',
+            'dataset':    'datasets',
+            'evaluation': 'evaluations',
+            'table':      'tables',
+            'plot':       'plots',
+            'result':     'plots',
+            'results':    'plots',
+            'export':     'exports',
         }
         if self.path[0] in self.alias:
             self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
-            'functions':    model.java.func(),
-            'components':   model.java.component(),
-            'geometries':   model.java.geom(),
-            'views':        model.java.view(),
-            'selections':   model.java.selection(),
-            'variables':    model.java.variable(),
-            'physics':      model.java.physics(),
-            'multiphysics': model.java.multiphysics(),
-            'materials':    model.java.material(),
-            'meshes':       model.java.mesh(),
-            'studies':      model.java.study(),
-            'solutions':    model.java.sol(),
-            'datasets':     model.java.result().dataset(),
-            'plots':        model.java.result(),
-            'exports':      model.java.result().export(),
+            'parameters':   'self.model.java.param().group()',
+            'functions':    'self.model.java.func()',
+            'components':   'self.model.java.component()',
+            'geometries':   'self.model.java.geom()',
+            'views':        'self.model.java.view()',
+            'selections':   'self.model.java.selection()',
+            'coordinates':  'self.model.java.coordSystem()',
+            'variables':    'self.model.java.variable()',
+            'physics':      'self.model.java.physics()',
+            'multiphysics': 'self.model.java.multiphysics()',
+            'materials':    'self.model.java.material()',
+            'meshes':       'self.model.java.mesh()',
+            'studies':      'self.model.java.study()',
+            'solutions':    'self.model.java.sol()',
+            'batches':      'self.model.java.batch()',
+            'datasets':     'self.model.java.result().dataset()',
+            'evaluations':  'self.model.java.result().numerical()',
+            'tables':       'self.model.java.result().table()',
+            'plots':        'self.model.java.result()',
+            'exports':      'self.model.java.result().export()',
         }
         self.model = model
 
@@ -162,11 +174,11 @@ class Node:
             return self.model.java
         name = self.name()
         if self.is_group():
-            return self.groups.get(name, None)
+            return eval(self.groups.get(name))
         parent = self.parent()
         java = parent.java
         if not java:
-            return
+            return None
         container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
@@ -183,7 +195,8 @@ class Node:
 
     def tag(self):
         """Returns the node's tag."""
-        return str(self.java.tag()) if self.exists() else None
+        java = self.java
+        return str(java.tag()) if java else None
 
     def type(self):
         """
@@ -194,7 +207,8 @@ class Node:
         details. Feature types are displayed in the Comsol GUI at the
         top of the `Settings` tab.
         """
-        return str(self.java.getType())
+        java = self.java
+        return str(java.getType()) if hasattr(java, 'getType') else None
 
     def parent(self):
         """Returns the parent node."""
@@ -242,8 +256,28 @@ class Node:
             error = 'Cannot rename a built-in group.'
             logger.error(error)
             raise PermissionError(error)
-        self.java.name(name)
+        java = self.java
+        if java:
+            java.name(name)
         self.path = self.path[:-1] + (name,)
+
+    def retag(self, tag):
+        """Assigns a new tag to the node."""
+        java = self.java
+        if self.is_root():
+            error = 'Cannot change tag of root node.'
+            logger.error(error)
+            raise PermissionError(error)
+        elif self.is_group():
+            error = 'Cannot change tag of built-in group.'
+            logger.error(error)
+            raise PermissionError(error)
+        elif java:
+            java.tag(tag)
+        else:
+            error = 'Cannot change tag as node does not exist.'
+            logger.error(error)
+            raise RuntimeError(error)
 
     def property(self, name, value=None):
         """
@@ -275,24 +309,26 @@ class Node:
         regardless of its current state. Pass `'disable'` or `'off'`
         to disable it.
         """
-        if not self.exists():
+        java = self.java
+        if not java:
             error = f'Node {self} does not exist in model tree.'
             logger.error(error)
             raise LookupError(error)
         if action == 'flip':
-            self.java.active(not self.java.isActive())
+            java.active(not java.isActive())
         elif action in ('enable', 'on', 'activate'):
-            self.java.active(True)
+            java.active(True)
         elif action in ('disable', 'off', 'deactivate'):
-            self.java.active(False)
+            java.active(False)
 
     def run(self):
         """Performs the "run" action if the node implements it."""
-        if not hasattr(self.java, 'run'):
+        java = self.java
+        if not hasattr(java, 'run'):
             error = 'Node "{self}" does not implement "run" operation.'
             logger.error(error)
             raise RuntimeError(error)
-        self.java.run()
+        java.run()
 
     def create(self, *arguments, name=None):
         """
@@ -310,14 +346,31 @@ class Node:
             error = 'Cannot create nodes at root of model tree.'
             logger.error(error)
             raise PermissionError(error)
-        container = self.java if self.is_group() else self.java.feature()
+        java = self.java
+        if self.is_group():
+            if not hasattr(java, 'uniquetag') and hasattr(java, 'feature'):
+                container = java.feature()
+            else:
+                container = java
+        else:
+            container = java.feature()
+        if not hasattr(container, 'uniquetag'):
+            error = f'Node {self} does not support feature creation.'
+            logger.error(error)
+            raise RuntimeError(error)
         for argument in arguments:
             if isinstance(argument, str):
-                prefix = argument.strip().replace(' ', '_').lower()[:3]
+                type = argument
                 break
         else:
-            prefix = 'tag'
-        tag = container.uniquetag(prefix)
+            type = '?'
+        pattern = tag_pattern(feature_path(self) + [type])
+        if pattern.endswith('*'):
+            tag = container.uniquetag(pattern[:-1])
+        elif pattern in container.tags():
+            tag = container.uniquetag(pattern)
+        else:
+            tag = pattern
         if not arguments:
             container.create(tag)
         else:
@@ -326,7 +379,19 @@ class Node:
             container.get(tag).name(name)
         else:
             name = str(container.get(tag).name())
-        return self/name
+        child = self/name
+        check = tag_pattern(feature_path(child))
+        if pattern != check:
+            pattern = check
+            if pattern.endswith('*'):
+                tag = container.uniquetag(pattern[:-1])
+            elif pattern in container.tags():
+                tag = container.uniquetag(pattern)
+            else:
+                tag = pattern
+            logger.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
+            child.retag(tag)
+        return child
 
     def remove(self):
         """Removes the node from the model tree."""
@@ -379,12 +444,52 @@ def unescape(name):
 
 
 ########################################
+# Tag patterns                         #
+########################################
+
+@lru_cache(maxsize=1)
+def load_patterns():
+    """Loads the look-up table for tag patterns indexed by feature path."""
+    file = Path(__file__).parent/'tags.json'
+    with file.open(encoding='UTF-8-sig') as stream:
+        patterns = json_load(stream)
+    return patterns
+
+
+def feature_path(node):
+    """Returns the feature path of a node."""
+    if node.is_group():
+        return [node.name()]
+    type = node.type()
+    if not type:
+        type = '?'
+    return feature_path(node.parent()) + [type]
+
+
+def tag_pattern(feature_path):
+    """Looks up the tag pattern for the best match to given feature path."""
+    (group, type) = (feature_path[0], feature_path[-1])
+    patterns = load_patterns()
+    selected = [key for key in patterns
+                if key.startswith(group) and key.endswith(type)]
+    matches = get_close_matches(' → '.join(feature_path), selected)
+    if matches:
+        return patterns[matches[0]]
+    elif type != '?':
+        return type.lower()[:3] + '*'
+    else:
+        return 'tag'
+
+
+########################################
 # Type casting                         #
 ########################################
 
 def cast(value):
     """Casts a value from its Python data type to a suitable Java data type."""
-    if isinstance(value, bool):
+    if isinstance(value, Node):
+        return JString(value.tag())
+    elif isinstance(value, bool):
         return JBoolean(value)
     elif isinstance(value, int):
         return JInt(value)
@@ -395,10 +500,19 @@ def cast(value):
     elif isinstance(value, Path):
         return JString(str(value))
     elif isinstance(value, (list, tuple)):
-        dimension = array(value).ndim
-        if value == [[]]:
-            value = []
-        return JArray(JString, dimension)(value)
+        dimension = 0
+        item = value
+        while isinstance(item, (list, tuple)):
+            dimension += 1
+            if not len(item):
+                datatype = JString
+                value = []
+                break
+            item = item[0]
+        else:
+            datatype = cast(item).__class__
+        value = [cast(item) for item in value]
+        return JArray(datatype, dimension)(value)
     elif isinstance(value, ndarray):
         if value.dtype.kind == 'b':
             return JArray(JBoolean, value.ndim)(value)
@@ -507,6 +621,10 @@ def inspect(java):
     common to all objects, are suppressed in the method list further
     down, for the sake of clarity.
     """
+
+    # Also accept Node and Model instances.
+    if hasattr(java, 'java'):
+        java = java.java
 
     # Display general information about the feature.
     print(f'name:    {java.name()}')

@@ -1,4 +1,4 @@
-﻿"""Tests discovering Comsol installations."""
+﻿"""Tests the `discovery` module."""
 __license__ = 'MIT'
 
 

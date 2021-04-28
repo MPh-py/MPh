@@ -1,4 +1,4 @@
-﻿"""Tests a local Comsol session."""
+﻿"""Tests the `session` module."""
 __license__ = 'MIT'
 
 
@@ -18,8 +18,7 @@ from pathlib import Path
 client = None
 cores  = 1
 model  = None
-here   = Path(__file__).parent
-file   = here/'capacitor.mph'
+demo   = Path(__file__).resolve().parent.parent/'demos'/'capacitor.mph'
 
 
 def setup_module():
@@ -50,19 +49,19 @@ def test_repr():
 
 def test_load():
     global model
-    assert file.is_file()
-    model = client.load(file)
+    assert demo.is_file()
+    model = client.load(demo)
     assert model
 
 
 def test_caching():
     assert not client.caching()
-    copy = client.load(file)
+    copy = client.load(demo)
     assert model != copy
     client.remove(copy)
     client.caching(True)
     assert client.caching()
-    copy = client.load(file)
+    copy = client.load(demo)
     assert model == copy
     client.caching(False)
     assert not client.caching()
@@ -83,7 +82,7 @@ def test_names():
 
 
 def test_files():
-    assert file.resolve() in client.files()
+    assert demo in client.files()
 
 
 def test_contains():

@@ -21,7 +21,7 @@ and in no way affiliated with Comsol Inc., the company that develops
 and sells the simulation software.
 
 [comsol]: https://www.comsol.com
-[jpype]:  https://pypi.org/project/JPype1
+[jpype]:  https://jpype.readthedocs.io
 
 [![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
 [![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -36,4 +36,5 @@ tutorial
 limitations
 demonstrations
 api
+releases
 ```

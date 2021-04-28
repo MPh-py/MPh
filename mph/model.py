@@ -413,12 +413,18 @@ class Model:
         if not dataset:
             etag = self.java.result().numerical().uniquetag('eval')
             eval = self.java.result().numerical().create(etag, 'Eval')
-            dtag = eval.getString('data')
+            dtag = str(eval.getString('data'))
             self.java.result().numerical().remove(etag)
-            name = str(self.java.result().dataset().get(dtag).name())
-            dataset = self/'datasets'/name
+            for dataset in self/'datasets':
+                if dataset.tag() == dtag:
+                    break
+            else:
+                error = 'Could not determine default dataset.'
+                logger.error(error)
+                raise RuntimeError(error)
+
         if not dataset.exists():
-            error = f'Dataset {dataset.name()} does not exist.'
+            error = f'Dataset "{dataset.name()}" does not exist.'
             logger.error(error)
             raise ValueError(error)
         logger.info(f'Evaluating "{expression}" '
@@ -454,6 +460,7 @@ class Model:
             logger.debug('Trying global evaluation.')
             results = array(eval.getData())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImagData())
             self.java.result().numerical().remove(etag)
             logger.info('Finished global evaluation.')
@@ -504,6 +511,7 @@ class Model:
         if dataset.type() == 'Particle':
             results = array(eval.getReal())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImag())
             if isinstance(expression, (tuple, list)):
                 shape = results.shape[1:]
@@ -511,6 +519,7 @@ class Model:
         else:
             results = array(eval.getData())
             if eval.isComplex():
+                results = results.astype('complex')
                 results += 1j * array(eval.getImagData())
             if inner is None:
                 pass
@@ -569,7 +578,7 @@ class Model:
             warn('Argument "unit" to Model.parameter() is deprecated. '
                  'Include the unit in the value inside square brackets.')
             if value:
-                value += f' [{unit}]'
+                value = f'{value} [{unit}]'
         if description is not None:
             warn('Argument "description" to Model.parameter() is deprecated.'
                  'Call .description() instead.')
@@ -578,8 +587,19 @@ class Model:
             if not evaluate:
                 return str(self.java.param().get(name))
             else:
-                return self.java.param().evaluate(name)
+                try:
+                    return self.java.param().evaluate(name)
+                except Exception:
+                    try:
+                        value = self.java.param().evaluateComplex(name)
+                        return complex(value[0], value[1])
+                    except Exception:
+                        error = f'Evaluation of parameter "{name}" failed.'
+                        logger.exception(error)
+                        raise RuntimeError(error)
         else:
+            if isinstance(value, complex):
+                value = str(value)
             self.java.param().set(name, value)
 
     def parameters(self, evaluate=False):
