@@ -129,11 +129,11 @@ set to "platform-dependent" by default. It could also be set to
 to override the default behavior.
 
 
-[repo]:   https://github.com/john-hennig/mph
-[tests]:  https://github.com/John-Hennig/mph/tree/master/tests
+[repo]:   https://github.com/MPh-py/mph
+[tests]:  https://github.com/MPh-py/mph/tree/main/tests
 [jpype]:  https://jpype.readthedocs.io
 [jnius]:  https://pyjnius.readthedocs.io
 [pytest]: https://docs.pytest.org
 [japi]:   https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[issues]: https://github.com/John-Hennig/MPh/issues
-[issue8]: https://github.com/John-Hennig/MPh/issues/8
+[issues]: https://github.com/MPh-py/MPh/issues
+[issue8]: https://github.com/MPh-py/MPh/issues/8

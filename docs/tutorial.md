@@ -322,4 +322,4 @@ documentation](api). A number of use-case examples are showcased in
 chapter [Demonstrations](demonstrations).
 
 
-[demo]: https://github.com/John-Hennig/mph/blob/master/tests/capacitor.mph
+[demo]: https://github.com/MPh-py/mph/blob/main/demos/capacitor.mph

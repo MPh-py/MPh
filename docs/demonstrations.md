@@ -69,7 +69,7 @@ by replacing `glob` with `rglob`. However, this should be used with
 caution so as to not accidentally modify models in folders that were
 not meant to be included.
 
-[demos]: https://github.com/John-Hennig/MPh/tree/master/demos
+[demos]: https://github.com/MPh-py/MPh/tree/main/demos
 
 
 ### Multiple processes
@@ -201,7 +201,7 @@ worker implementation would then be in a separate module that is run
 as a script.
 
 [multi]: https://docs.python.org/3/library/multiprocessing.html
-[tests]: https://github.com/John-Hennig/MPh/tree/master/tests
+[tests]: https://github.com/MPh-py/MPh/tree/main/tests
 [subpr]: https://docs.python.org/3/library/subprocess.html
 
 
