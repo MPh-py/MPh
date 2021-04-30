@@ -12,5 +12,5 @@ for folder in root.rglob('__pycache__'):
 for folder in root.rglob('.pytest_cache'):
     rmtree(folder)
 
-for folder in (root/'deploy'/'dist', root/'deploy'/'docs'):
-    rmtree(folder, ignore_errors=True)
+for folder in ('docs', 'dist', 'coverage'):
+    rmtree(root/'deploy'/folder, ignore_errors=True)

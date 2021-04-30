@@ -381,9 +381,6 @@ block of ice
 ├─ tables
 ├─ plots
 └─ exports
-
->>> mph.tree(model)
-block of ice
 ```
 
 The parameter group, model component, default view and coordinate

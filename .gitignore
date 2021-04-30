@@ -1,12 +1,14 @@
 /develop/
 /deploy/docs/
 /deploy/dist/
+/deploy/coverage/
+/deploy/coverage.sqlite
 /dist/
 **/__pycache__
 **/.pytest_cache
 flake8.txt
+.spyproject
+.idea
 *.lnk
 .DS_Store
 Thumbs.db
-.spyproject
-.idea

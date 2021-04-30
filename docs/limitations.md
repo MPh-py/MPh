@@ -16,18 +16,11 @@ to be started as separate Python subprocesses. This is a feasible
 work-around, but a limitation nonetheless. Refer to section  ["Multiple
 processes"](demonstrations.md#multiple-processes) for a demonstration.
 
-For the same reason, the [test suite][tests] that comes with MPh fails
-when collected and run via the testing framework [pyTest][pytest].
-The tests must be run directly from the command line. Since they cannot
-be used for continuous integration testing anyway, given that they
-depend on Comsol being installed on the machine, this is but a minor
-inconvenience.
-
-More importantly, there are some known, but unresolved issues with
-JPype's shutdown of the Java virtual machine. Notably, pressing
-<kbd>Ctrl+C</kbd> to interrupt an ongoing operation will usually crash
-the Python session. So do not rely on catching [`KeyboardInterrupt`][kbint]
-exceptions in application code.
+Additionally, there are some known, but unresolved issues with JPype's
+shutdown of the Java virtual machine. Notably, pressing <kbd>Ctrl+C</kbd>
+to interrupt an ongoing operation will usually crash the Python session.
+So do not rely on catching [`KeyboardInterrupt`][kbint] exceptions in
+application code.
 
 (There is an alternative Java bridge, [pyJNIus][jnius], which is
 not limited to one virtual machine, but then fails in another regard:
@@ -112,8 +105,6 @@ where this works reliably.
 
 [jpype]:  https://github.com/jpype-project/jpype
 [japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[tests]:  https://github.com/MPh-py/mph/tree/main/tests
-[pytest]: https://docs.pytest.org
 [kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [jnius]:  https://pyjnius.readthedocs.io
 [issue8]: https://github.com/MPh-py/MPh/issues/8
