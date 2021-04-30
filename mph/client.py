@@ -19,6 +19,7 @@ import platform                        # platform information
 import os                              # operating system
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
+import faulthandler                    # traceback dumps
 
 
 ########################################
@@ -93,6 +94,14 @@ class Client:
         # Instruct Comsol to limit number of processor cores to use.
         if cores:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
+
+        # On Windows, turn off fault handlers if enabled.
+        # Without this, pyTest will crash when starting the Java VM.
+        # See "Errors reported by Python fault handler" in JPype docs.
+        # The problem may be the SIGSEGV signal, see JPype issue #886.
+        if platform.system() == 'Windows' and faulthandler.is_enabled():
+            logger.debug('Turning off Python fault handlers.')
+            faulthandler.disable()
 
         # Start the Java virtual machine.
         logger.debug(f'JPype version is {jpype.__version__}.')
