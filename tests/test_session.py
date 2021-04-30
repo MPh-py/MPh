@@ -1,4 +1,4 @@
-﻿"""Tests the `session` module."""
+﻿"""Tests the `session` and `client` modules."""
 __license__ = 'MIT'
 
 
@@ -7,9 +7,9 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
-import logging
-from sys import argv
 from pathlib import Path
+from sys import argv
+import logging
 
 
 ########################################

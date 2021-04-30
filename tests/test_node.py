@@ -9,9 +9,9 @@ import parent # noqa F401
 import mph
 from mph import node, Node
 from models import capacitor
+from pathlib import Path
 from numpy import array, isclose
 from sys import argv
-from pathlib import Path
 import logging
 
 

@@ -29,11 +29,10 @@ def setup_module():
 
 def teardown_module():
     client.clear()
-    here = Path(__file__).parent
+    here = Path(__file__).resolve().parent
     files = (here/'model.mph', here/'model2.mph',
              here/'model.java', here/'model.m', here/'model.vba',
-             here/'data.txt', here/'data.vtu',
-             here/'image.png', here/'image2.png')
+             here/'data.txt', here/'data.vtu', here/'image.png')
     for file in files:
         if file.exists():
             file.unlink()
@@ -331,9 +330,9 @@ def test_import():
     ])
     table.property('interp', 'cubicspline')
     # Import image with file name specified as string and Path.
-    here = Path(__file__).parent
+    here = Path(__file__).resolve().parent
     assert image.property('sourcetype') == 'user'
-    model.import_(image, 'gaussian.tif')
+    model.import_(image, str(here/'gaussian.tif'))
     assert image.property('sourcetype') == 'model'
     image.java.discardData()
     assert image.property('sourcetype') == 'user'
@@ -378,15 +377,9 @@ def test_import():
 
 
 def test_export():
-    here = Path(__file__).parent
-    model.export()
-    assert (here/'data.txt').exists()
-    assert (here/'image.png').exists()
-    (here/'data.txt').unlink()
-    (here/'image.png').unlink()
+    here = Path(__file__).resolve().parent
     assert not (here/'data.txt').exists()
-    assert not (here/'image.png').exists()
-    model.export('data')
+    model.export('data', here/'data.txt')
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
     assert not (here/'data.txt').exists()
@@ -398,30 +391,27 @@ def test_export():
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
     assert not (here/'data.txt').exists()
-    assert not (here/'data2.txt').exists()
-    model.export('exports/data', 'data2.txt')
-    assert (here/'data2.txt').exists()
-    (here/'data2.txt').unlink()
-    assert not (here/'data.txt').exists()
     model.property('exports/data', 'exporttype', 'text')
-    model.export('exports/data', 'data.txt')
+    model.export('exports/data', here/'data.txt')
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
     assert not (here/'data.vtu').exists()
     model.property('exports/data', 'exporttype', 'vtu')
-    model.export('exports/data', 'data.vtu')
+    model.export('exports/data', here/'data.vtu')
     assert (here/'data.vtu').exists()
     (here/'data.vtu').unlink()
     assert not (here/'image.png').exists()
-    model.export('image')
+    model.export('image', here/'image.png')
     assert (here/'image.png').exists()
     (here/'image.png').unlink()
     assert not (here/'image.png').exists()
-    assert not (here/'image2.png').exists()
-    model.export('image', 'image2.png')
-    assert (here/'image2.png').exists()
-    (here/'image2.png').unlink()
-    assert not (here/'image2.png').exists()
+    model.export()
+    assert (here/'data.vtu').exists()
+    assert (here/'image.png').exists()
+    (here/'data.vtu').unlink()
+    (here/'image.png').unlink()
+    assert not (here/'data.vtu').exists()
+    assert not (here/'image.png').exists()
 
 
 def test_clear():
@@ -433,7 +423,7 @@ def test_reset():
 
 
 def test_save():
-    here = Path(__file__).parent
+    here = Path(__file__).resolve().parent
     model.save(here/'model.mph')
     assert (here/'model.mph').exists()
     model.save(str(here/'model2.mph'))
@@ -547,12 +537,11 @@ if __name__ == '__main__':
         test_create()
         test_remove()
 
-        test_save()
-
         test_import()
         test_export()
         test_clear()
         test_reset()
+        test_save()
 
         warnings.simplefilter('ignore')
         test_features()
