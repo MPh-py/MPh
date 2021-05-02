@@ -580,12 +580,17 @@ class Model:
             if value:
                 value = f'{value} [{unit}]'
         if description is not None:
-            warn('Argument "description" to Model.parameter() is deprecated.'
+            warn('Argument "description" to Model.parameter() is deprecated. '
                  'Call .description() instead.')
             self.description(name, description)
         if value is None:
             if not evaluate:
-                return str(self.java.param().get(name))
+                try:
+                    return str(self.java.param().get(name))
+                except Exception:
+                    error = f'Parameter "{name}" is not defined.'
+                    logger.error(error)
+                    raise ValueError(error) from None
             else:
                 try:
                     return self.java.param().evaluate(name)
@@ -595,8 +600,8 @@ class Model:
                         return complex(value[0], value[1])
                     except Exception:
                         error = f'Evaluation of parameter "{name}" failed.'
-                        logger.exception(error)
-                        raise RuntimeError(error)
+                        logger.error(error)
+                        raise RuntimeError(error) from None
         else:
             if isinstance(value, complex):
                 value = str(value)
@@ -625,7 +630,7 @@ class Model:
             return {str(name): str(self.java.param().get(name))
                     for name in self.java.param().varnames()}
         else:
-            return {str(name): str(self.java.param().evaluate(name))
+            return {str(name): self.java.param().evaluate(name)
                     for name in self.java.param().varnames()}
 
     def description(self, name, text=None):
@@ -808,11 +813,20 @@ class Model:
 
         # Use model name if no file name specified.
         if path is None:
+            file = self.file()
             if format == 'Comsol':
-                logger.info(f'Saving model "{self.name()}".')
-                self.java.save()
+                if file.is_file():
+                    logger.info(f'Saving model "{self}".')
+                    self.java.save()
+                elif file.is_dir():
+                    file = file/f'{self}.{type}'
+                    logger.info(f'Saving model as "{file.name}".')
+                    self.java.save(str(file))
             else:
-                file = f'{self}.{type}'
+                if file.is_file():
+                    file = file.with_suffix(f'.{type}')
+                elif file.is_dir():
+                    file = file/f'{self}.{type}'
                 logger.info(f'Saving model as "{file.name}".')
                 self.java.save(str(file), type)
         # Otherwise save at given path.

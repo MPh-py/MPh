@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
+from fixtures import logging_disabled
 import logging
 from sys import argv
 
@@ -50,6 +51,8 @@ def test_running():
 def test_stop():
     server.stop()
     assert not server.running()
+    with logging_disabled():
+        server.stop()
 
 
 ########################################

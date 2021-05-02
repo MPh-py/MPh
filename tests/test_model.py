@@ -7,7 +7,8 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
-from models import capacitor
+import models
+from fixtures import logging_disabled
 from pathlib import Path
 from sys import argv
 import logging
@@ -19,18 +20,21 @@ import warnings
 ########################################
 client = None
 model  = None
+empty  = None
 
 
 def setup_module():
-    global client, model
+    global client, model, empty
     client = mph.start()
-    model = capacitor()
+    model  = models.capacitor()
+    empty  = client.create('empty')
 
 
 def teardown_module():
     client.clear()
     here = Path(__file__).resolve().parent
-    files = (here/'model.mph', here/'model2.mph',
+    files = (Path('capacitor.mph'), Path('empty.java'),
+             here/'capacitor.mph', here/'model.mph',
              here/'model.java', here/'model.m', here/'model.vba',
              here/'data.txt', here/'data.vtu', here/'image.png')
     for file in files:
@@ -38,9 +42,19 @@ def teardown_module():
             file.unlink()
 
 
+class Derived(mph.Model):
+    pass
+
+
 ########################################
 # Tests                                #
 ########################################
+
+
+def test_init():
+    derived = Derived(model)
+    assert derived.java == model.java
+
 
 def test_str():
     assert str(model) == 'capacitor'
@@ -59,11 +73,17 @@ def test_truediv():
     node = model/'functions'/'step'
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
+    with logging_disabled():
+        try:
+            model/False
+        except TypeError:
+            pass
 
 
 def test_contains():
     assert 'functions' in model
     assert 'functions/step' in model
+    assert 'function/non-existing' not in model
     other = client.create('other')
     assert (other/'functions') in model
     assert (other/'functions'/'step') in model
@@ -157,14 +177,71 @@ def test_exports():
 
 def test_build():
     model.build()
+    model.build('geometry')
+    model.build(model/'geometries'/'geometry')
+    with logging_disabled():
+        try:
+            model.build(model/'function'/'step')
+        except ValueError:
+            pass
+        try:
+            model.build('non-existing')
+        except LookupError:
+            pass
+        try:
+            model.build(False)
+        except TypeError:
+            pass
+        try:
+            empty.build()
+        except RuntimeError:
+            pass
 
 
 def test_mesh():
     model.mesh()
+    model.mesh('mesh')
+    model.mesh(model/'meshes'/'mesh')
+    with logging_disabled():
+        try:
+            model.mesh(model/'function'/'step')
+        except ValueError:
+            pass
+        try:
+            model.mesh('non-existing')
+        except LookupError:
+            pass
+        try:
+            model.mesh(False)
+        except TypeError:
+            pass
+        try:
+            empty.mesh()
+        except RuntimeError:
+            pass
 
 
 def test_solve():
     model.solve()
+    model.solve('static')
+    model.solve(model/'studies'/'static')
+    with logging_disabled():
+        try:
+            model.solve(model/'function'/'step')
+        except ValueError:
+            pass
+        try:
+            model.solve('non-existing')
+        except LookupError:
+            pass
+        try:
+            model.solve(False)
+        except TypeError:
+            pass
+        try:
+            empty.solve()
+        except RuntimeError:
+            pass
 
 
 def test_inner():
@@ -174,6 +251,17 @@ def test_inner():
     assert (indices == list(range(1,102))).all()
     assert values[0] == 0
     assert values[-1] == 1
+    assert model.inner('datasets/time-dependent')
+    assert model.inner(model/'datasets'/'time-dependent')
+    with logging_disabled():
+        try:
+            model.inner('non-existing')
+        except ValueError:
+            pass
+        try:
+            model.inner(False)
+        except TypeError:
+            pass
 
 
 def test_outer():
@@ -181,9 +269,18 @@ def test_outer():
     assert indices.dtype.kind == 'i'
     assert values.dtype.kind  == 'f'
     assert (indices == list(range(1,4))).all()
-    assert values[0] == 1.0
-    assert values[1] == 2.0
-    assert values[2] == 3.0
+    assert (values == (1.0, 2.0, 3.0)).all()
+    assert model.outer('datasets/parametric sweep')
+    assert model.outer(model/'datasets'/'parametric sweep')
+    with logging_disabled():
+        try:
+            model.outer('non-existing')
+        except ValueError:
+            pass
+        try:
+            model.outer(False)
+        except TypeError:
+            pass
 
 
 def test_evaluate():
@@ -205,6 +302,10 @@ def test_evaluate():
     C = model.evaluate(expression, unit, dataset)
     assert C[0] == Cf
     assert C[-1] == Cl
+    # To do: This test fails because inner indices are 1-based, not 0-based.
+    # C = model.evaluate(expression, unit, dataset, inner=[1, 101])
+    # assert C[0] == Cf
+    # assert C[1] == Cl
     # Test field evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
     Df = model.evaluate(expression, unit, dataset, 'first')
@@ -232,6 +333,36 @@ def test_evaluate():
     D = model.evaluate(expression, unit, dataset, outer=2)
     assert D[0].max()  == Df.max()
     assert D[-1].max() == Dl.max()
+    # Test argument "dataset".
+    with logging_disabled():
+        assert model.evaluate('U')
+        assert model.evaluate('U', dataset='electrostatic')
+        assert model.evaluate('U', dataset='datasets/electrostatic')
+        assert model.evaluate('U', dataset=model/'datasets'/'electrostatic')
+        try:
+            model.evaluate('U', dataset='non-existing')
+        except ValueError:
+            pass
+        try:
+            model.evaluate('U', dataset=False)
+        except TypeError:
+            pass
+        try:
+            empty.evaluate('U')
+        except RuntimeError:
+            pass
+    # Test argument "inner".
+    with logging_disabled():
+        try:
+            model.evaluate('U', dataset='time-dependent', inner='invalid')
+        except TypeError:
+            pass
+    # Test argument "outer".
+    with logging_disabled():
+        try:
+            model.evaluate('U', dataset='parametric sweep', outer='invalid')
+        except TypeError:
+            pass
 
 
 def test_rename():
@@ -257,6 +388,15 @@ def test_parameter():
     assert model.parameter('U', evaluate=True) == 1+1j
     model.parameter('U', value)
     assert model.parameter('U') == value
+    with logging_disabled():
+        try:
+            model.parameter('non-existing')
+        except ValueError:
+            pass
+        try:
+            model.parameter('non-existing', evaluate=True)
+        except RuntimeError:
+            pass
 
 
 def test_parameters():
@@ -264,6 +404,7 @@ def test_parameters():
     assert 'U' in model.parameters().keys()
     assert '1[V]' in model.parameters().values()
     assert ('U', '1[V]') in model.parameters().items()
+    assert ('U', 1) in model.parameters(evaluate=True).items()
 
 
 def test_description():
@@ -301,11 +442,15 @@ def test_properties():
 def test_create():
     model.create('functions/interpolation', 'Interpolation')
     assert 'interpolation' in model.functions()
+    model.create(model/'functions', 'Image')
+    assert 'Image 1' in model.functions()
 
 
 def test_remove():
     model.remove('functions/interpolation')
     assert 'interpolation' not in model.functions()
+    model.remove(model/'functions'/'Image 1')
+    assert 'Image 1' not in model.functions()
 
 
 def test_import():
@@ -412,6 +557,11 @@ def test_export():
     (here/'image.png').unlink()
     assert not (here/'data.vtu').exists()
     assert not (here/'image.png').exists()
+    with logging_disabled():
+        try:
+            model.export('non-existing')
+        except ValueError:
+            pass
 
 
 def test_clear():
@@ -424,20 +574,45 @@ def test_reset():
 
 def test_save():
     here = Path(__file__).resolve().parent
+    model.save()
+    empty.save(format='java')
+    assert Path(f'{model}.mph').exists()
+    assert Path(f'{empty}.java').exists()
+    Path(f'{empty}.java').unlink()
+    model.save(here)
+    Path(f'{model}.mph').unlink()
+    model.save(here, format='java')
+    assert (here/f'{model}.mph').exists()
+    assert (here/f'{model}.java').exists()
+    (here/f'{model}.java').unlink()
     model.save(here/'model.mph')
-    assert (here/'model.mph').exists()
-    model.save(str(here/'model2.mph'))
-    assert (here/'model2.mph').exists()
+    model.save()
     assert (here/'model.mph').read_text(errors='ignore').startswith('PK')
     model.save(here/'model.java')
     assert (here/'model.java').exists()
     assert 'public static void main' in (here/'model.java').read_text()
+    (here/'model.java').unlink()
+    assert not (here/'model.java').exists()
+    model.save(format='java')
+    assert (here/'model.java').exists()
+    (here/'model.java').unlink()
     model.save(here/'model.m')
     assert (here/'model.m').exists()
     assert 'function out = model' in (here/'model.m').read_text()
+    (here/'model.m').unlink()
     model.save(here/'model.vba')
     assert (here/'model.vba').exists()
     assert 'Sub run()' in (here/'model.vba').read_text()
+    (here/'model.vba').unlink()
+    with logging_disabled():
+        try:
+            model.save('model.invalid')
+        except ValueError:
+            pass
+        try:
+            model.save('model.mph', format='invalid')
+        except ValueError:
+            pass
 
 
 def test_features():
@@ -446,6 +621,11 @@ def test_features():
     assert 'initial values'   in model.features('electrostatic')
     assert 'anode'            in model.features('electrostatic')
     assert 'cathode'          in model.features('electrostatic')
+    with logging_disabled():
+        try:
+            model.features('non-existing')
+        except LookupError:
+            pass
 
 
 def test_toggle():
@@ -460,6 +640,15 @@ def test_toggle():
     model.toggle('electrostatic', 'cathode', 'off')
     model.solve('static')
     assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
+    with logging_disabled():
+        try:
+            model.toggle('non-existing', 'feature')
+        except LookupError:
+            pass
+        try:
+            model.toggle('electrostatic', 'non-existing')
+        except LookupError:
+            pass
 
 
 def test_load():
@@ -473,6 +662,11 @@ def test_load():
     image.property('extrap', 'value')
     model.load('gaussian.tif', 'image')
     model.remove('functions/image')
+    with logging_disabled():
+        try:
+            model.load('image.png', 'non-existing')
+        except LookupError:
+            pass
 
 
 ########################################

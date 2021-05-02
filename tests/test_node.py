@@ -8,9 +8,12 @@ __license__ = 'MIT'
 import parent # noqa F401
 import mph
 from mph import node, Node
-from models import capacitor
+import models
+from fixtures import logging_disabled
+from fixtures import capture_stdout
 from pathlib import Path
 from numpy import array, isclose
+from textwrap import dedent
 from sys import argv
 import logging
 
@@ -25,7 +28,7 @@ model  = None
 def setup_module():
     global client, model
     client = mph.start()
-    model = capacitor()
+    model = models.capacitor()
 
 
 def teardown_module():
@@ -36,43 +39,21 @@ def teardown_module():
 # Tests                                #
 ########################################
 
-def test_parse():
-    assert node.parse('a/b')        == ('a', 'b')
-    assert node.parse('/a/b')       == ('a', 'b')
-    assert node.parse('a/b/')       == ('a', 'b')
-    assert node.parse('/a/b/')      == ('a', 'b')
-    assert node.parse('a/b/c')      == ('a', 'b', 'c')
-    assert node.parse('a/b//c')     == ('a', 'b/c')
-    assert node.parse('a//b/c')     == ('a/b', 'c')
-    assert node.parse('//a//b/c//') == ('a/b', 'c')
-    assert node.parse('a//b/c//d')  == ('a/b', 'c/d')
-
-
-def test_join():
-    assert node.join(('a', 'b'))      == 'a/b'
-    assert node.join(('a', 'b', 'c')) == 'a/b/c'
-    assert node.join(('a', 'b/c'))    == 'a/b//c'
-    assert node.join(('a/b', 'c'))    == 'a//b/c'
-    assert node.join(('a/b', 'c/d'))  == 'a//b/c//d'
-
-
-def test_escape():
-    assert node.escape('a/b')   == 'a//b'
-    assert node.escape('a//b')  == 'a////b'
-    assert node.escape('a/b/c') == 'a//b//c'
-
-
-def test_unescape():
-    assert node.unescape('a//b')    == 'a/b'
-    assert node.unescape('a////b')  == 'a//b'
-    assert node.unescape('a//b//c') == 'a/b/c'
-
-
 def test_init():
+    node = Node(model, '')
+    assert node.model == model
     node = Node(model, 'functions')
-    assert node.model
-    assert node.alias
-    assert node.groups
+    assert node.model == model
+    assert 'function' in node.alias
+    assert 'functions' in node.alias.values()
+    assert 'functions' in node.groups
+    assert 'self.model.java.func()' in node.groups.values()
+    Node(model, node)
+    with logging_disabled():
+        try:
+            Node(model, False)
+        except TypeError:
+            pass
 
 
 def test_str():
@@ -89,6 +70,11 @@ def test_eq():
 
 def test_truediv():
     assert Node(model, 'functions')/'step' == Node(model, 'functions/step')
+    with logging_disabled():
+        try:
+            Node(model, 'functions')/False
+        except TypeError:
+            pass
 
 
 def test_contains():
@@ -135,6 +121,7 @@ def test_type():
 
 
 def test_parent():
+    assert Node(model, '').parent() is None
     assert Node(model, 'functions/step').parent() == Node(model, 'functions')
 
 
@@ -163,6 +150,15 @@ def test_exists():
 
 
 def test_rename():
+    with logging_disabled():
+        try:
+            Node(model, '').rename('something')
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'functions').rename('something')
+        except PermissionError:
+            pass
     node = Node(model, 'functions/step')
     name = node.name()
     renamed = Node(model, 'functions/renamed')
@@ -173,6 +169,28 @@ def test_rename():
     node.rename(name)
     assert node.exists()
     assert not renamed.exists()
+
+
+def test_retag():
+    with logging_disabled():
+        try:
+            Node(model, '').retag('something')
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'functions').retag('something')
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'functions/non-existing').retag('something')
+        except Exception:
+            pass
+    node = Node(model, 'functions/step')
+    old = node.tag()
+    node.retag('new')
+    assert node.tag() == 'new'
+    node.retag(old)
+    assert node.tag() == old
 
 
 def rewrite_properties(node):
@@ -267,6 +285,7 @@ def test_property():
 
 
 def test_properties():
+    assert Node(model, 'functions').properties() == {}
     function = Node(model, 'functions/step')
     assert 'funcname' in function.properties()
     assert 'funcname' in function.properties().keys()
@@ -285,6 +304,12 @@ def test_toggle():
     assert not node.java.isActive()
     node.toggle('on')
     assert node.java.isActive()
+    assert not Node(model, 'functions/non-existing').exists()
+    with logging_disabled():
+        try:
+            Node(model, 'functions/non-existing').toggle()
+        except LookupError:
+            pass
 
 
 def test_run():
@@ -293,6 +318,15 @@ def test_run():
     assert solution.java.isEmpty()
     study.run()
     assert not solution.java.isEmpty()
+    with logging_disabled():
+        try:
+            Node(model, 'functions/non-existing').run()
+        except LookupError:
+            pass
+        try:
+            Node(model, 'functions').run()
+        except RuntimeError:
+            pass
 
 
 def test_create():
@@ -301,6 +335,18 @@ def test_create():
     assert (functions/'Analytic 1').exists()
     functions.create('Analytic', name='f')
     assert (functions/'f').exists()
+    geometry = Node(model, 'geometries/geometry')
+    physics = Node(model, 'physics')
+    physics.create('Electrostatics', geometry)
+    with logging_disabled():
+        try:
+            Node(model, '').create()
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'components/component').create()
+        except RuntimeError:
+            pass
 
 
 def test_remove():
@@ -311,6 +357,140 @@ def test_remove():
     assert (functions/'f').exists()
     (functions/'f').remove()
     assert not (functions/'f').exists()
+    physics = Node(model, 'physics')
+    (physics/'Electrostatics 1').remove()
+    assert not (physics/'Electrostatics 1').exists()
+    with logging_disabled():
+        try:
+            Node(model, '').remove()
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'function').remove()
+        except PermissionError:
+            pass
+        try:
+            Node(model, 'function/non-existing').remove()
+        except LookupError:
+            pass
+
+
+def test_parse():
+    assert node.parse('a/b')        == ('a', 'b')
+    assert node.parse('/a/b')       == ('a', 'b')
+    assert node.parse('a/b/')       == ('a', 'b')
+    assert node.parse('/a/b/')      == ('a', 'b')
+    assert node.parse('a/b/c')      == ('a', 'b', 'c')
+    assert node.parse('a/b//c')     == ('a', 'b/c')
+    assert node.parse('a//b/c')     == ('a/b', 'c')
+    assert node.parse('//a//b/c//') == ('a/b', 'c')
+    assert node.parse('a//b/c//d')  == ('a/b', 'c/d')
+
+
+def test_join():
+    assert node.join(('a', 'b'))      == 'a/b'
+    assert node.join(('a', 'b', 'c')) == 'a/b/c'
+    assert node.join(('a', 'b/c'))    == 'a/b//c'
+    assert node.join(('a/b', 'c'))    == 'a//b/c'
+    assert node.join(('a/b', 'c/d'))  == 'a//b/c//d'
+
+
+def test_escape():
+    assert node.escape('a/b')   == 'a//b'
+    assert node.escape('a//b')  == 'a////b'
+    assert node.escape('a/b/c') == 'a//b//c'
+
+
+def test_unescape():
+    assert node.unescape('a//b')    == 'a/b'
+    assert node.unescape('a////b')  == 'a//b'
+    assert node.unescape('a//b//c') == 'a/b/c'
+
+
+def test_load_patterns():
+    tags = node.load_patterns()
+    assert 'physics → Electrostatics' in tags.keys()
+    assert 'es' in tags.values()
+
+
+def test_feature_path():
+    assert node.feature_path(model/'functions') == ['functions']
+    assert node.feature_path(model/'functions/step') == ['functions', 'Step']
+    assert node.feature_path(model/'meshes'/'mesh') == ['meshes', '?']
+
+
+def test_tag_pattern():
+    node.tag_pattern(['functions']) == 'func'
+    node.tag_pattern(['functions', 'Step']) == 'step*'
+    node.tag_pattern(['non-existing', '?']) == 'non*'
+    node.tag_pattern(['non-existing', 'tag']) == 'tag*'
+
+
+def test_cast():
+    bool_array_1d = array([True, False])
+    bool_array_2d = array([[True, False], [False, True]])
+    assert node.cast(bool_array_1d).__class__.__name__ == 'boolean[]'
+    assert node.cast(bool_array_2d).__class__.__name__ == 'boolean[][]'
+    with logging_disabled():
+        try:
+            array3d = array([[[1,2], [3,4]], [[5,6], [7,8]]], dtype=object)
+            node.cast(array3d)
+        except TypeError:
+            pass
+        try:
+            three_rows = array([[1,2], [3,4], [5,6]], dtype=object)
+            node.cast(three_rows)
+        except TypeError:
+            pass
+        try:
+            node.cast(array([1+1j, 1-1j]))
+        except TypeError:
+            pass
+        try:
+            node.cast({1, 2, 3})
+        except TypeError:
+            pass
+
+
+def test_get():
+    pass
+
+
+def test_inspect():
+    node = Node(model, 'datasets/sweep//solution')
+    node.toggle('off')
+    with capture_stdout() as output:
+        mph.inspect(node)
+    assert output.text().strip().startswith('name:')
+
+
+def test_tree():
+    with capture_stdout() as output:
+        mph.tree(model, max_depth=1)
+    expected = '''
+    capacitor
+    ├─ parameters
+    ├─ functions
+    ├─ components
+    ├─ geometries
+    ├─ views
+    ├─ selections
+    ├─ coordinates
+    ├─ variables
+    ├─ physics
+    ├─ multiphysics
+    ├─ materials
+    ├─ meshes
+    ├─ studies
+    ├─ solutions
+    ├─ batches
+    ├─ datasets
+    ├─ evaluations
+    ├─ tables
+    ├─ plots
+    └─ exports
+    '''
+    assert output.text().strip() == dedent(expected).strip()
 
 
 ########################################
@@ -332,11 +512,6 @@ if __name__ == '__main__':
 
     setup_module()
     try:
-
-        test_parse()
-        test_join()
-        test_escape()
-        test_unescape()
 
         test_init()
         test_str()
@@ -362,6 +537,20 @@ if __name__ == '__main__':
         test_run()
         test_create()
         test_remove()
+
+        test_parse()
+        test_join()
+        test_escape()
+        test_unescape()
+
+        test_load_patterns()
+        test_feature_path()
+        test_tag_pattern()
+
+        test_cast()
+        test_get()
+        test_inspect()
+        test_tree()
 
     finally:
         teardown_module()

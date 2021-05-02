@@ -1,4 +1,4 @@
-﻿"""Tests the `session` and `client` modules."""
+﻿"""Tests the `session`, `client`, and `config` modules."""
 __license__ = 'MIT'
 
 
@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
+from fixtures import logging_disabled
 from pathlib import Path
 from sys import argv
 import logging
@@ -38,6 +39,30 @@ def test_init():
     client = mph.start(cores=cores)
     assert client.java is not None
     assert client.cores == cores
+    with logging_disabled():
+        try:
+            mph.start()
+        except NotImplementedError:
+            pass
+        try:
+            mph.Client()
+        except NotImplementedError:
+            pass
+
+
+def test_load():
+    global model
+    assert demo.is_file()
+    model = client.load(demo)
+    assert model
+
+
+def test_create():
+    name = 'empty'
+    client.create(name)
+    assert name in client.names()
+    client.create()
+    assert 'Untitled' in client.names()
 
 
 def test_repr():
@@ -47,11 +72,45 @@ def test_repr():
         assert repr(client) == 'Client(stand-alone)'
 
 
-def test_load():
-    global model
-    assert demo.is_file()
-    model = client.load(demo)
-    assert model
+def test_contains():
+    assert model in client
+    assert 'capacitor' in client
+    assert 'empty' in client
+    assert 'non-existing' not in client
+
+
+def test_iter():
+    models = list(client)
+    assert model in models
+
+
+def test_truediv():
+    assert client/'capacitor' == model
+    with logging_disabled():
+        try:
+            client/'non-existing'
+        except ValueError:
+            pass
+        try:
+            client/model
+        except TypeError:
+            pass
+        try:
+            client/False
+        except TypeError:
+            pass
+
+
+def test_models():
+    assert model in client.models()
+
+
+def test_names():
+    assert model.name() in client.names()
+
+
+def test_files():
+    assert demo in client.files()
 
 
 def test_caching():
@@ -65,39 +124,11 @@ def test_caching():
     assert model == copy
     client.caching(False)
     assert not client.caching()
-
-
-def test_create():
-    name = 'test'
-    client.create(name)
-    assert name in client.names()
-
-
-def test_models():
-    pass
-
-
-def test_names():
-    assert model.name() in client.names()
-
-
-def test_files():
-    assert demo in client.files()
-
-
-def test_contains():
-    assert model in client
-    assert 'capacitor' in client
-    assert 'test' in client
-
-
-def test_iter():
-    models = list(client)
-    assert model in models
-
-
-def test_truediv():
-    assert client/'capacitor' == model
+    with logging_disabled():
+        try:
+            client.caching('anything else')
+        except ValueError:
+            pass
 
 
 def test_remove():
@@ -105,6 +136,9 @@ def test_remove():
     assert name in client.names()
     client.remove(model)
     assert name not in client.names()
+    assert 'empty' in client.names()
+    client.remove('empty')
+    assert 'empty' not in client.names()
     message = ''
     try:
         model.java.component()
@@ -114,6 +148,19 @@ def test_remove():
         assert 'no_longer_in_the_model' in message
     else:
         assert 'is_removed' in message
+    with logging_disabled():
+        try:
+            client.remove(model)
+        except ValueError:
+            pass
+        try:
+            client.remove('non-existing')
+        except ValueError:
+            pass
+        try:
+            client.remove(True)
+        except TypeError:
+            pass
 
 
 def test_clear():
@@ -124,12 +171,28 @@ def test_clear():
 def test_disconnect():
     if client.port:
         client.disconnect()
-        try:
-            client.models()
-            connected = True
-        except Exception:
-            connected = False
-        assert not connected
+        assert client.host is None
+        assert client.port is None
+        with logging_disabled():
+            try:
+                client.models()
+            except Exception:
+                pass
+    else:
+        with logging_disabled():
+            try:
+                client.disconnect()
+            except RuntimeError:
+                pass
+
+
+def test_option():
+    assert 'session' in mph.option()
+    assert 'platform-dependent' in mph.option().values()
+    assert mph.option('session') == 'platform-dependent'
+    mph.option('session', 'something else')
+    assert mph.option('session') == 'something else'
+    mph.option('session', 'platform-dependent')
 
 
 ########################################
@@ -152,18 +215,19 @@ if __name__ == '__main__':
     setup_module()
     try:
         test_init()
-        test_repr()
         test_load()
-        test_caching()
         test_create()
-        test_models()
-        test_names()
-        test_files()
+        test_repr()
         test_contains()
         test_iter()
         test_truediv()
+        test_models()
+        test_names()
+        test_files()
+        test_caching()
         test_remove()
         test_clear()
         test_disconnect()
+        test_option()
     finally:
         teardown_module()

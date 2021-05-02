@@ -250,10 +250,16 @@ class Client:
                 error = f'No model named "{model}" exists.'
                 logger.error(error)
                 raise ValueError(error)
-            model = self[model]
+            model = self/model
         elif isinstance(model, Model):
+            try:
+                model.java.tag()
+            except Exception:
+                error = 'Model does not exist.'
+                logger.error(error)
+                raise ValueError(error)
             if model not in self.models():
-                error = f'Model "{model}" does not exist.'
+                error = 'Model does not exist.'
                 logger.error(error)
                 raise ValueError(error)
         else:

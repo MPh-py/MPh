@@ -263,21 +263,20 @@ class Node:
 
     def retag(self, tag):
         """Assigns a new tag to the node."""
-        java = self.java
         if self.is_root():
             error = 'Cannot change tag of root node.'
             logger.error(error)
             raise PermissionError(error)
-        elif self.is_group():
+        if self.is_group():
             error = 'Cannot change tag of built-in group.'
             logger.error(error)
             raise PermissionError(error)
-        elif java:
-            java.tag(tag)
-        else:
-            error = 'Cannot change tag as node does not exist.'
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
             logger.error(error)
-            raise RuntimeError(error)
+            raise LookupError(error)
+        java.tag(tag)
 
     def property(self, name, value=None):
         """
@@ -311,7 +310,7 @@ class Node:
         """
         java = self.java
         if not java:
-            error = f'Node {self} does not exist in model tree.'
+            error = f'Node "{self}" does not exist in model tree.'
             logger.error(error)
             raise LookupError(error)
         if action == 'flip':
@@ -324,8 +323,12 @@ class Node:
     def run(self):
         """Performs the "run" action if the node implements it."""
         java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            logger.error(error)
+            raise LookupError(error)
         if not hasattr(java, 'run'):
-            error = 'Node "{self}" does not implement "run" operation.'
+            error = f'Node "{self}" does not implement "run" operation.'
             logger.error(error)
             raise RuntimeError(error)
         java.run()
@@ -347,12 +350,13 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         java = self.java
+        container = None
         if self.is_group():
             if not hasattr(java, 'uniquetag') and hasattr(java, 'feature'):
                 container = java.feature()
-            else:
+            elif hasattr(java, 'uniquetag') and hasattr(java, 'create'):
                 container = java
-        else:
+        elif hasattr(java, 'feature'):
             container = java.feature()
         if not hasattr(container, 'uniquetag'):
             error = f'Node {self} does not support feature creation.'
@@ -404,7 +408,7 @@ class Node:
             logger.error(error)
             raise PermissionError(error)
         if not self.exists():
-            error = 'Node does not exist in model tree.'
+            error = f'Node "{self}" does not exist in model tree.'
             logger.error(error)
             raise LookupError(error)
         parent = self.parent()
@@ -478,7 +482,7 @@ def tag_pattern(feature_path):
     elif type != '?':
         return type.lower()[:3] + '*'
     else:
-        return 'tag'
+        return 'tag*'
 
 
 ########################################
@@ -525,16 +529,11 @@ def cast(value):
                 error = 'Cannot cast object arrays of dimension higher than 2.'
                 logger.error(error)
                 raise TypeError(error)
-            rows = [row.astype(float) for row in value]
-            if len(rows) > 2:
+            if len(value) > 2:
                 error = 'Will not cast object arrays with more than two rows.'
                 logger.error(error)
                 raise TypeError(error)
-            for row in rows:
-                if row.ndim > 1:
-                    error = 'Rows in object arrays must be one-dimensional.'
-                    logger.error(error)
-                    raise TypeError(error)
+            rows = [row.astype(float) for row in value]
             return JArray(JDouble, 2)(rows)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
@@ -629,10 +628,8 @@ def inspect(java):
     # Display general information about the feature.
     print(f'name:    {java.name()}')
     print(f'tag:     {java.tag()}')
-    try:
+    if hasattr(java, 'getType'):
         print(f'type:    {java.getType()}')
-    except AttributeError:
-        pass
     print(f'display: {java.getDisplayString()}')
     print(f'doc:     {java.docMarker()}')
 
@@ -642,11 +639,8 @@ def inspect(java):
         print(f'comment: {comments}')
     if not java.isActive():
         print('This feature is currently deactivated.')
-    try:
-        if java.hasWarning():
-            print('This feature has warnings.')
-    except AttributeError:
-        pass
+    if hasattr(java, 'hasWarning') and java.hasWarning():
+        print('This feature has warnings.')
 
     # Introspect the feature's attributes.
     attributes = [attribute for attribute in dir(java)]
