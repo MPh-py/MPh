@@ -302,10 +302,9 @@ def test_evaluate():
     C = model.evaluate(expression, unit, dataset)
     assert C[0] == Cf
     assert C[-1] == Cl
-    # To do: This test fails because inner indices are 1-based, not 0-based.
-    # C = model.evaluate(expression, unit, dataset, inner=[1, 101])
-    # assert C[0] == Cf
-    # assert C[1] == Cl
+    C = model.evaluate(expression, unit, dataset, inner=[1, 101])
+    assert C[0] == Cf
+    assert C[1] == Cl
     # Test field evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
     Df = model.evaluate(expression, unit, dataset, 'first')
@@ -313,8 +312,11 @@ def test_evaluate():
     Dl = model.evaluate(expression, unit, dataset, 'last')
     assert abs(Dl.max() - 10.8) < 0.1
     D = model.evaluate(expression, unit, dataset)
-    assert D[0].max()  == Df.max()
-    assert D[-1].max() == Dl.max()
+    assert (D[0]  == Df).all()
+    assert (D[-1] == Dl).all()
+    D = model.evaluate(expression, unit, dataset, inner=[1, 101])
+    assert (D[0] == Df).all()
+    assert (D[1] == Dl).all()
     # Test global evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', '2*ec.intWe/U^2', 'pF')
     (indices, values) = model.outer(dataset)
@@ -331,8 +333,8 @@ def test_evaluate():
     Dl = model.evaluate(expression, unit, dataset, 'last', 2)
     assert abs(Dl.max() - 10.8) < 0.1
     D = model.evaluate(expression, unit, dataset, outer=2)
-    assert D[0].max()  == Df.max()
-    assert D[-1].max() == Dl.max()
+    assert (D[0]  == Df).all()
+    assert (D[-1] == Dl).all()
     # Test argument "dataset".
     with logging_disabled():
         assert model.evaluate('U')

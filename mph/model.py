@@ -471,7 +471,9 @@ class Model:
             elif inner == 'last':
                 results = results[:, -1, :]
             else:
-                results = results[:, inner, :]
+                if isinstance(inner, list):
+                    inner = array(inner)
+                results = results[:, inner-1, :]
             return results.squeeze()
         # Move on if this fails. Seems to not be a global expression then.
         except Exception:
@@ -528,7 +530,9 @@ class Model:
             elif inner == 'last':
                 results = results[:, -1, :]
             else:
-                results = results[:, inner, :]
+                if isinstance(inner, list):
+                    inner = array(inner)
+                results = results[:, inner-1, :]
         logger.info('Finished retrieving data.')
 
         # Remove the temporary evaluation node we added to the model.
