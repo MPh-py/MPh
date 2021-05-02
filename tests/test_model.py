@@ -582,7 +582,6 @@ def test_save():
     assert Path(f'{empty}.java').exists()
     Path(f'{empty}.java').unlink()
     model.save(here)
-    Path(f'{model}.mph').unlink()
     model.save(here, format='java')
     assert (here/f'{model}.mph').exists()
     assert (here/f'{model}.java').exists()

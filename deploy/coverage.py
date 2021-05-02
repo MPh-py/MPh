@@ -21,7 +21,8 @@ if file.exists() and not append:
     print('Coverage report already exists.')
 else:
     command = ['pytest', '--cov', '--cov-append']
-    tests = ['discovery', 'server', 'session', 'node', 'model', 'processes']
+    tests  = ['config', 'discovery', 'server', 'client', 'client-server',
+              'stand-alone', 'node', 'model', 'processes']
     for test in tests:
         run(command + [f'tests/test_{test}.py'], cwd=root)
 

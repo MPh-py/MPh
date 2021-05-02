@@ -7,7 +7,8 @@ from platform   import system
 from sys        import argv
 from timeit     import default_timer as now
 
-tests  = ['discovery', 'server', 'session', 'node', 'model', 'processes']
+tests  = ['config', 'discovery', 'server', 'client', 'client-server',
+          'stand-alone', 'node', 'model', 'processes']
 here   = Path(__file__).parent
 python = 'python' if system() == 'Windows' else 'python3'
 for test in tests:

@@ -31,10 +31,6 @@ def setup_module():
     model = models.capacitor()
 
 
-def teardown_module():
-    pass
-
-
 ########################################
 # Tests                                #
 ########################################
@@ -511,46 +507,42 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     setup_module()
-    try:
 
-        test_init()
-        test_str()
-        test_repr()
-        test_eq()
-        test_truediv()
-        test_contains()
-        test_iter()
-        test_java()
+    test_init()
+    test_str()
+    test_repr()
+    test_eq()
+    test_truediv()
+    test_contains()
+    test_iter()
+    test_java()
 
-        test_name()
-        test_tag()
-        test_parent()
-        test_children()
-        test_is_root()
-        test_is_group()
-        test_exists()
+    test_name()
+    test_tag()
+    test_parent()
+    test_children()
+    test_is_root()
+    test_is_group()
+    test_exists()
 
-        test_rename()
-        test_property()
-        test_properties()
-        test_toggle()
-        test_run()
-        test_create()
-        test_remove()
+    test_rename()
+    test_property()
+    test_properties()
+    test_toggle()
+    test_run()
+    test_create()
+    test_remove()
 
-        test_parse()
-        test_join()
-        test_escape()
-        test_unescape()
+    test_parse()
+    test_join()
+    test_escape()
+    test_unescape()
 
-        test_load_patterns()
-        test_feature_path()
-        test_tag_pattern()
+    test_load_patterns()
+    test_feature_path()
+    test_tag_pattern()
 
-        test_cast()
-        test_get()
-        test_inspect()
-        test_tree()
-
-    finally:
-        teardown_module()
+    test_cast()
+    test_get()
+    test_inspect()
+    test_tree()

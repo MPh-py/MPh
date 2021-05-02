@@ -18,10 +18,6 @@ from sys import argv
 server = None
 
 
-def setup_module():
-    pass
-
-
 def teardown_module():
     if server and server.running():
         try:
@@ -68,7 +64,6 @@ if __name__ == '__main__':
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',
             datefmt = '%H:%M:%S')
 
-    setup_module()
     try:
         test_init()
         test_repr()

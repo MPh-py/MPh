@@ -1,4 +1,4 @@
-﻿"""Tests the `session`, `client`, and `config` modules."""
+﻿"""Tests the `client` module."""
 __license__ = 'MIT'
 
 
@@ -17,17 +17,8 @@ import logging
 # Fixtures                             #
 ########################################
 client = None
-cores  = 1
 model  = None
 demo   = Path(__file__).resolve().parent.parent/'demos'/'capacitor.mph'
-
-
-def setup_module():
-    pass
-
-
-def teardown_module():
-    pass
 
 
 ########################################
@@ -36,9 +27,11 @@ def teardown_module():
 
 def test_init():
     global client
-    client = mph.start(cores=cores)
+    if mph.option('session') == 'platform-dependent':
+        mph.option('session', 'client-server')
+    client = mph.start(cores=1)
     assert client.java is not None
-    assert client.cores == cores
+    assert client.cores == 1
     with logging_disabled():
         try:
             mph.start()
@@ -144,10 +137,7 @@ def test_remove():
         model.java.component()
     except Exception as error:
         message = error.getMessage()
-    if client.port:
-        assert 'no_longer_in_the_model' in message
-    else:
-        assert 'is_removed' in message
+    assert 'no_longer_in_the_model' in message
     with logging_disabled():
         try:
             client.remove(model)
@@ -169,30 +159,14 @@ def test_clear():
 
 
 def test_disconnect():
-    if client.port:
-        client.disconnect()
-        assert client.host is None
-        assert client.port is None
-        with logging_disabled():
-            try:
-                client.models()
-            except Exception:
-                pass
-    else:
-        with logging_disabled():
-            try:
-                client.disconnect()
-            except RuntimeError:
-                pass
-
-
-def test_option():
-    assert 'session' in mph.option()
-    assert 'platform-dependent' in mph.option().values()
-    assert mph.option('session') == 'platform-dependent'
-    mph.option('session', 'something else')
-    assert mph.option('session') == 'something else'
-    mph.option('session', 'platform-dependent')
+    client.disconnect()
+    assert client.host is None
+    assert client.port is None
+    with logging_disabled():
+        try:
+            client.models()
+        except Exception:
+            pass
 
 
 ########################################
@@ -212,22 +186,17 @@ if __name__ == '__main__':
             format  = '[%(asctime)s.%(msecs)03d] %(message)s',
             datefmt = '%H:%M:%S')
 
-    setup_module()
-    try:
-        test_init()
-        test_load()
-        test_create()
-        test_repr()
-        test_contains()
-        test_iter()
-        test_truediv()
-        test_models()
-        test_names()
-        test_files()
-        test_caching()
-        test_remove()
-        test_clear()
-        test_disconnect()
-        test_option()
-    finally:
-        teardown_module()
+    test_init()
+    test_load()
+    test_create()
+    test_repr()
+    test_contains()
+    test_iter()
+    test_truediv()
+    test_models()
+    test_names()
+    test_files()
+    test_caching()
+    test_remove()
+    test_clear()
+    test_disconnect()
