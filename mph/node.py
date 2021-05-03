@@ -427,7 +427,9 @@ def parse(string):
     string = str(string)
     # Remove all leading and trailing forward slashes.
     string = string.lstrip('/').rstrip('/')
-    return tuple(unescape(name) for name in split(r'(?<!/)/(?!/)', string))
+    # Split at forward slashes, but not double forward slashes.
+    path = tuple(unescape(name) for name in split(r'(?<!/)/(?!/)', string))
+    return path
 
 
 def join(path):

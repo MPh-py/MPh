@@ -335,6 +335,16 @@ def test_evaluate():
     D = model.evaluate(expression, unit, dataset, outer=2)
     assert (D[0]  == Df).all()
     assert (D[-1] == Dl).all()
+    # Test evaluation of complex-valued global expressions.
+    U = model.evaluate('U')
+    z = model.evaluate('U + j*U')
+    assert z.real == U
+    assert z.imag == U
+    # Test evaluation of complex-valued fields.
+    (Ex, Ey) = model.evaluate(['es.Ex', 'es.Ey'])
+    Z = model.evaluate('es.Ex + j*es.Ey')
+    assert (Z.real == Ex).all()
+    assert (Z.imag == Ey).all()
     # Test argument "dataset".
     with logging_disabled():
         assert model.evaluate('U')

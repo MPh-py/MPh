@@ -16,7 +16,6 @@ from subprocess import PIPE            # I/O redirection
 from subprocess import TimeoutExpired  # communication time-out
 from re import match as regex          # regular expression
 from time import perf_counter as now   # wall-clock time
-from time import sleep                 # execution delay
 from sys import version_info           # Python version
 from logging import getLogger          # event logging
 
