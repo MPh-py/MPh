@@ -149,15 +149,5 @@ class Server:
             logger.info(f'Server on port {self.port} has stopped.')
         except TimeoutExpired:
             logger.warning('Server did not shut down within time-out period.')
-            logger.info('Forcefully terminating external server process.')
+            logger.info('Trying to forcefully terminate server process.')
             self.process.kill()
-            t0 = now()
-            while self.running():
-                if not self.running():
-                    break
-                if now() - t0 > timeout:
-                    error = 'Forceful shutdown failed within time-out period.'
-                    logger.error(error)
-                    raise TimeoutError(error) from None
-                sleep(0.1)
-            logger.info('Server process has been forcefully terminated.')
