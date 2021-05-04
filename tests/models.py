@@ -3,6 +3,8 @@ __license__ = 'MIT'
 
 
 import mph
+from jpype import JInt
+from jpype import JBoolean
 
 
 def capacitor():
@@ -408,5 +410,181 @@ def capacitor():
     image.property('qualityactive', 'off')
     image.property('imagetype', 'png')
     image.property('lockview', 'off')
+
+    return model
+
+
+def needle():
+    """Creates model of a needle electrode emitting electrons."""
+    model = mph.session.client.create('needle')
+
+    parameters = model/'parameters'
+    (parameters/'Parameters 1').rename('parameters')
+
+    parameters = model/'parameters'
+    (parameters/'Parameters 1').rename('parameters')
+    model.parameter('U', '1[MV]')
+    model.description('U', 'applied voltage')
+    model.parameter('W', '4.5[eV]')
+    model.description('W', 'work function')
+
+    components = model/'components'
+    components.create(True, name='component')
+
+    geometries = model/'geometries'
+    geometry = geometries.create(3, name='geometry')
+    geometry.java.geomRep('comsol')
+    cylinder = geometry.create('Cylinder', name='cylinder')
+    cylinder.property('pos', ['0', '0', '1.5[mm]'])
+    cylinder.property('r', '1[mm]/2')
+    cylinder.property('h', '8.5[mm]')
+    sphere = geometry.create('Sphere', name='sphere')
+    sphere.property('pos', ['0', '0', '1.5[mm]'])
+    sphere.property('r', '1[mm]/2')
+    union = geometry.create('Union', name='union')
+    union.property('intbnd', False)
+    union.java.selection('input').set(cylinder.tag(), sphere.tag())
+    box = geometry.create('Block', name='box')
+    box.property('pos', ['-10[mm]/2', '-10[mm]/2', '0'])
+    box.property('size', ['10[mm]', '10[mm]', '10[mm]'])
+    model.build(geometry)
+
+    coordinates = model/'coordinates'
+    (coordinates/'Boundary System 1').rename('boundary system')
+
+    views = model/'views'
+    view = views/'View 1'
+    view.rename('view')
+    view.java.light('lgt1').label('light 1')
+    view.java.light('lgt2').label('light 2')
+    view.java.light('lgt3').label('light 3')
+
+    selections = model/'selections'
+    domains = selections.create('Explicit', name='domains')
+    domains.java.all()
+    exterior = selections.create('Adjacent', name='exterior')
+    exterior.property('input', [domains])
+    electrode = selections.create('Explicit', name='electrode')
+    electrode.java.set(2)
+    surface = selections.create('Adjacent', name='surface')
+    surface.property('input', [electrode])
+    insulation = selections.create('Explicit', name='insulation')
+    insulation.java.geom(geometry.tag(), 2)
+    insulation.java.set(4)
+    ground = selections.create('Difference', name='ground')
+    ground.property('entitydim', 2)
+    ground.property('add', [exterior])
+    ground.property('subtract', [insulation])
+    vacuum = selections.create('Difference', name='vacuum')
+    vacuum.property('add', [domains])
+    vacuum.property('subtract', [electrode])
+
+    physics = model/'physics'
+    field = physics.create('Electrostatics', geometry, name='field')
+    field.java.selection().named(vacuum.tag())
+    (field/'Charge Conservation 1').rename('Laplace equation')
+    (field/'Zero Charge 1').rename('zero charge')
+    (field/'Initial Values 1').rename('initial values')
+    (field/'Laplace equation').property('epsilonr_mat', 'userdef')
+    electrode = field.create('ElectricPotential', 2, name='electrode')
+    electrode.java.selection().named(surface.tag())
+    electrode.property('V0', '-U')
+    ground = field.create('Ground', 2, name='ground')
+    ground.java.selection().named('dif1')
+    electrons = physics.create('ChargedParticleTracing', geometry,
+                               name='electrons')
+    electrons.java.selection().named(vacuum.tag())
+    (electrons/'Wall 1').rename('walls')
+    (electrons/'Particle Properties 1').rename('properties')
+    electrons.java.prop('RelativisticCorrection').set('RelativisticCorrection',
+                                                      JInt(1))
+    emission = electrons.create('Inlet', 2, name='emission')
+    emission.java.selection().named(surface.tag())
+    emission.property('InitialPosition', 'Density')
+    emission.property('N', 20)
+    emission.property('dpro',
+        'e_const^3*me_const/(8*pi*me_const*h_const*W) * es.normE^2 * '
+        'exp(-4*sqrt(2*me_const*W^3) / (2*hbar_const*e_const*es.normE))')
+    emission.property('InitialVelocity', 'KineticEnergyAndDirection')
+    emission.property('SpecifyInletTangentialNormal', True)
+    emission.property('L0', [[0], [0], [1]])
+    emission.property('Ep0', '1[eV]')
+    force = electrons.create('ElectricForce', 3, name='force')
+    force.java.selection().all()
+    force.property('E_src', 'root.comp1.es.Ex')
+
+    meshes = model/'meshes'
+    meshes.create(geometry, name='mesh')
+
+    studies = model/'studies'
+    study = studies.create(name='study')
+    study.java.setGenPlots(False)
+    study.java.setGenConv(False)
+    step = study.create('BidirectionallyCoupledParticleTracing',
+                        name='particle tracing')
+    step.property('tlist', 'range(0,1[ps],20[ps])')
+    step.property('iter', 1)
+
+    solutions = model/'solutions'
+    solution = solutions.create(name='solution')
+    solution.java.study(study.tag())
+    solution.java.attach(study.tag())
+    solution.create('StudyStep', name='equations')
+    variables1 = solution.create('Variables', name='variables field')
+    variables1.property('control', 'user')
+    variables1.property('clist',  ['range(0,1[ps],20[ps])', '2.0E-14[s]'])
+    variables1.java.feature('comp1_qcpt').set('solvefor', JBoolean(False))
+    solver1 = solution.create('Stationary', name='solver field')
+    (solver1/'Direct').rename('direct solver')
+    (solver1/'Advanced').rename('advanced options')
+    (solver1/'Fully Coupled').rename('fully coupled')
+    variables2 = solution.create('Variables', name='variables electrons')
+    variables2.property('control', 'user')
+    variables2.property('notsolmethod', 'sol')
+    variables2.property('notsol', 'sol1')
+    variables2.property('notsolnum', 'auto')
+    variables2.property('clist', ['range(0,1[ps],20[ps])', '2.0E-14[s]'])
+    variables2.java.feature('comp1_V').set('solvefor', JBoolean(False))
+    solver2 = solution.create('Time', name='solver electrons')
+    (solver2/'Direct').rename('direct solver')
+    (solver2/'Advanced').rename('advanced options')
+    (solver2/'Fully Coupled').rename('fully coupled')
+    solver2.property('tlist', 'range(0,1[ps],20[ps])')
+    solver2.property('rtol', 1.0E-7)
+    solver2.property('timemethod', 'genalpha')
+    solver2.property('estrat', 'exclude')
+    solver2.property('tstepsgenalpha', 'strict')
+    solver2.property('initialstepgenalpha', '(1.0E-13)[s]')
+    solver2.property('initialstepgenalphaactive', True)
+    (solver2/'fully coupled').property('ntolfact', 0.1)
+
+    datasets = model/'datasets'
+    (datasets/'study//Solution 1').rename('solution')
+    datasets.create('Surface', name='surface')
+    (datasets/'surface').java.selection().named(surface.tag())
+    datasets.create('Particle', name='electrons')
+
+    plots = model/'plots'
+    plots.java.setOnlyPlotWhenRequested(True)
+    plot = plots.create('PlotGroup3D', name='plot')
+    plot.property('data', datasets/'electrons')
+    plot.property('titletype', 'manual')
+    plot.property('title', 'Field and trajectories')
+    plot.property('showhiddenobjects', True)
+    plot.property('frametype', 'spatial')
+    plot.property('showlegendsunit', True)
+    field = plot.create('Surface', name='field')
+    field.property('expr', 'es.normE')
+    field.property('data', datasets/'surface')
+    field.property('unit', 'kV/mm')
+    field.property('resolution', 'normal')
+    trajectories = plot.create('ParticleTrajectories', name='trajectories')
+    trajectories.property('linetype', 'tube')
+    trajectories.property('linecolor', 'yellow')
+    trajectories.property('radiusexpr', '0.05[mm]')
+    trajectories.property('tuberadiusscaleactive', True)
+    trajectories.property('pointtype', 'point')
+    trajectories.property('sphereradiusscale', 0.07)
+    trajectories.property('sphereradiusscaleactive', False)
 
     return model

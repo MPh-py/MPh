@@ -375,6 +375,24 @@ def test_evaluate():
             model.evaluate('U', dataset='parametric sweep', outer='invalid')
         except TypeError:
             pass
+    # Test particle tracing (if that add-on module is installed).
+    if client.java.hasProduct('PARTICLETRACING'):
+        needle = models.needle()
+        needle.solve()
+        (qx, qy, qz) = needle.evaluate(['qx', 'qy', 'qz'], dataset='electrons')
+        assert qx.shape == (20, 21)
+        assert qy.shape == (20, 21)
+        assert qz.shape == (20, 21)
+        qf = needle.evaluate('qx', dataset='electrons', inner='first')
+        assert (qf == qx[:,0]).all()
+        ql = needle.evaluate('qx', dataset='electrons', inner='last')
+        assert (ql == qx[:,-1]).all()
+        qi = needle.evaluate('qx', dataset='electrons', inner=[1,21])
+        assert (qi[:,0] == qf).all()
+        assert (qi[:,1] == ql).all()
+        z = needle.evaluate('qx + j*qy', dataset='electrons')
+        assert (z.real == qx).all()
+        assert (z.imag == qy).all()
 
 
 def test_rename():
