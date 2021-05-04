@@ -2,30 +2,32 @@
 
 ## Java bridge
 
-MPh is built on top of the Python-to-Java bridge [JPype][jpype].
-It is JPype that allows us to look at [Comsol's Java API][japi] and
-run the same commands from Python. All credit to the JPype developers
-for making this possible.
+MPh is built on top of the Python-to-Java bridge [JPype][jpype]. It is
+JPype that allows us to look at [Comsol's Java API][japi] and run the
+same commands from Python. All credit to the JPype developers for making
+this possible.
 
-However, MPh therefore inherits JPype's limitation in that only one
-Java virtual machine can be managed within the same Python process,
-and thus only one Comsol client at a time. If several simulations are
-to be run in parallel, distributed over independent processor cores in
-an effort to achieve maximum speed-up of a parameter sweep, they have
-to be started as separate Python subprocesses. This is a feasible
-work-around, but a limitation nonetheless. Refer to section  ["Multiple
-processes"](demonstrations.md#multiple-processes) for a demonstration.
+The Comsol API does not support running more than one client at a time,
+i.e. within the same Java program. Meanwhile, JPype cannot manage more
+than one Java virtual machine within the same Python process. If it
+could, it would be easy to work around Comsol's limitation. (There is
+an alternative Java bridge, [pyJNIus][jnius], which is not limited to
+one virtual machine, but then fails in another regard: A number of Java
+methods exposed by Comsol are inexplicably missing from the Python
+encapsulation.)
+
+Therefore, if several simulations are to be run in parallel, distributed
+over independent processor cores in an effort to achieve maximum speed-up
+of a parameter sweep, they have to be started as separate Python
+subprocesses. Refer to section
+["Multiple processes"](demonstrations.md#multiple-processes) for a
+demonstration.
 
 Additionally, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Notably, pressing <kbd>Ctrl+C</kbd>
 to interrupt an ongoing operation will usually crash the Python session.
 So do not rely on catching [`KeyboardInterrupt`][kbint] exceptions in
 application code.
-
-(There is an alternative Java bridge, [pyJNIus][jnius], which is
-not limited to one virtual machine, but then fails in another regard:
-A number of Java methods exposed by Comsol are inexplicably missing
-from the Python encapsulation.)
 
 
 ## Platform differences
@@ -105,6 +107,6 @@ where this works reliably.
 
 [jpype]:  https://github.com/jpype-project/jpype
 [japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [jnius]:  https://pyjnius.readthedocs.io
+[kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [issue8]: https://github.com/MPh-py/MPh/issues/8
