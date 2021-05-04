@@ -314,7 +314,7 @@ model.build('Geometry 1')
 ```
 
 This, again, hides all tags in application code. Instead, we refer to
-the nodes in the model tree by name. In the example, these names were
+nodes in the model tree by name. In the example, these names were
 generated automatically, in the same way the Comsol GUI does it. We
 could also supply names of our choice.
 ```python
@@ -350,7 +350,30 @@ block.property('size', ('0.1', '0.2', '0.5'))
 model.build(geometry)
 ```
 
-The latter two code examples produce the following model tree:
+The division operator is the Swiss army knife for accessing nodes in
+the model tree. It even works with `client` as root. With the above
+example, the following notations
+```python
+client/'block of ice'/'geometries'/'geometry'/'ice block'
+model/'geometries'/'geometry'/'ice block'
+geometries/'geometry'/'ice block'
+geometry/'ice block'
+block
+```
+
+all refer to the same geometry element in the model. We could also
+include the forward slash in a string expression instead of using it as
+an operator, just like we did in the first and second example.
+```python
+model/'geometries/geometry/ice block'
+```
+
+The model's root node not can be referenced with either `model/''` or
+`model/None`. If any of the node names in the hierarchy contain a
+forward slash themselves, that forward slash can be escaped/masked by
+doubling it, for instance: `geometry/'ice//frozen water'`.
+
+The example model discussed here produces the following model tree:
 ```python
 >>> mph.tree(model)
 block of ice
