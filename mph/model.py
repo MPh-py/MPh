@@ -13,7 +13,6 @@ from .node import Node                 # model node
 ########################################
 from numpy import array, ndarray       # numerical array
 from numpy import integer              # NumPy integer
-from jpype.types import JInt           # Java integer
 from pathlib import Path               # file-system path
 from re import match                   # pattern matching
 from warnings import warn              # user warning
@@ -411,12 +410,11 @@ class Model:
 
         # Find the default dataset if nothing specified.
         if not dataset:
-            etag = self.java.result().numerical().uniquetag('eval')
-            eval = self.java.result().numerical().create(etag, 'Eval')
-            dtag = str(eval.getString('data'))
-            self.java.result().numerical().remove(etag)
+            eval = (self/'evaluations').create('Eval')
+            tag  = eval.property('data')
+            eval.remove()
             for dataset in self/'datasets':
-                if dataset.tag() == dtag:
+                if dataset.tag() == tag:
                     break
             else:
                 error = 'Could not determine default dataset.'
@@ -447,22 +445,21 @@ class Model:
             raise RuntimeError(error)
 
         # Try to perform a global evaluation, which may fail.
-        etag = self.java.result().numerical().uniquetag('eval')
-        eval = self.java.result().numerical().create(etag, 'Global')
-        eval.set('expr', expression)
-        if unit is not None:
-            eval.set('unit', unit)
-        if dataset is not None:
-            eval.set('data', dataset.tag())
+        eval = (self/'evaluations').create('Global')
+        eval.property('expr', expression)
+        if unit:
+            eval.property('unit', unit)
+        eval.property('data', dataset)
         if outer is not None:
-            eval.set('outersolnum', JInt(outer))
+            eval.property('outersolnum', outer)
         try:
             logger.debug('Trying global evaluation.')
-            results = array(eval.getData())
-            if eval.isComplex():
+            java = eval.java
+            results = array(java.getData())
+            if java.isComplex():
                 results = results.astype('complex')
-                results += 1j * array(eval.getImagData())
-            self.java.result().numerical().remove(etag)
+                results += 1j * array(java.getImagData())
+            eval.remove()
             logger.info('Finished global evaluation.')
             if inner is None:
                 pass
@@ -479,64 +476,54 @@ class Model:
         except Exception:
             logger.debug('Global evaluation failed. Moving on.')
 
-        # For particle datasets, create an EvalPoint node.
-        etag = self.java.result().numerical().uniquetag('eval')
+        # For particle datasets, create an "EvalPoint" feature.
         if dataset.type() == 'Particle':
-            eval = self.java.result().numerical().create(etag, 'EvalPoint')
-            if inner is not None:
-                if inner in ('first', 'last'):
-                    eval.set('innerinput', inner)
-                else:
-                    eval.set('innerinput', 'manual')
-                    eval.set('solnum', [JInt(index) for index in inner])
-        # Otherwise create an Eval node.
+            eval = (self/'evaluations').create('EvalPoint')
+            if inner in ('first', 'last'):
+                eval.property('innerinput', inner)
+            elif inner is not None:
+                eval.property('innerinput', 'manual')
+                eval.property('solnum', inner)
+        # Otherwise create an "Eval" feature.
         else:
-            eval = self.java.result().numerical().create(etag, 'Eval')
+            eval = (self/'evaluations').create('Eval')
 
-        # Select the dataset, if specified.
-        if dataset is not None:
-            eval.set('data', dataset.tag())
-
-        # Set the expression(s) to be evaluated.
-        eval.set('expr', expression)
-
-        # Set the unit(s), if specified.
-        if unit is not None:
-            eval.set('unit', unit)
-
-        # Select an outer solution, i.e. parameter index, if specified.
+        # Set up the evaluation feature.
+        eval.property('expr', expression)
+        if unit:
+            eval.property('unit', unit)
+        eval.property('data', dataset)
         if outer is not None:
-            eval.set('outersolnum', JInt(outer))
+            eval.property('outersolnum', outer)
 
         # Retrieve the data.
         logger.info('Retrieving data.')
+        java = eval.java
         if dataset.type() == 'Particle':
-            results = array(eval.getReal())
-            if eval.isComplex():
+            results = array(java.getReal())
+            if java.isComplex():
                 results = results.astype('complex')
-                results += 1j * array(eval.getImag())
+                results += 1j * array(java.getImag())
             if isinstance(expression, (tuple, list)):
                 shape = results.shape[1:]
                 results = results.reshape(len(expression), -1, *shape)
         else:
-            results = array(eval.getData())
-            if eval.isComplex():
+            results = array(java.getData())
+            if java.isComplex():
                 results = results.astype('complex')
-                results += 1j * array(eval.getImagData())
-            if inner is None:
-                pass
-            elif inner == 'first':
+                results += 1j * array(java.getImagData())
+            if inner == 'first':
                 results = results[:, 0, :]
             elif inner == 'last':
                 results = results[:, -1, :]
-            else:
+            elif inner is not None:
                 if isinstance(inner, list):
                     inner = array(inner)
                 results = results[:, inner-1, :]
         logger.info('Finished retrieving data.')
 
-        # Remove the temporary evaluation node we added to the model.
-        self.java.result().numerical().remove(etag)
+        # Remove the temporary evaluation feature we added to the model.
+        eval.remove()
 
         # Squeeze out singleton array dimensions.
         if isinstance(expression, (list, tuple)):
