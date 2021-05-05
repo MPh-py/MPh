@@ -380,9 +380,9 @@ class Node:
         else:
             container.create(tag, *[cast(argument) for argument in arguments])
         if name:
-            container.get(tag).name(name)
+            container.get(tag).name(unescape(name))
         else:
-            name = str(container.get(tag).name())
+            name = escape(container.get(tag).name())
         child = self/name
         check = tag_pattern(feature_path(child))
         if pattern != check:
