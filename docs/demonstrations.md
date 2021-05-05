@@ -392,6 +392,7 @@ block of ice
 ├─ coordinates
 │  └─ Boundary System 1
 ├─ variables
+├─ couplings
 ├─ physics
 ├─ multiphysics
 ├─ materials
