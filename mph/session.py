@@ -26,6 +26,7 @@ from logging import getLogger          # event logging
 ########################################
 client = None                          # client instance
 server = None                          # server instance
+thread = None                          # current thread
 logger = getLogger(__package__)        # event logger
 
 
@@ -60,11 +61,10 @@ def start(cores=None, version=None, port=0):
     chapter "Limitations".
 
     Only one client can be instantiated at a time. This is a limitation
-    of the Python-to-Java bridge JPype, which cannot manage more than
-    one Java virtual machine within the same Python process. Therefore
-    `start()` can only be called once. Subsequent calls will raise
-    `NotImplementedError`. Separate Python processes have to be started
-    to work around this issue. Refer to documentation chapter
+    of the Comsol API. Subsequent calls to `start()` will return the
+    client instance created in the first call. In order to work around
+    this limitation, separate Python processes have to be started. Refer
+    to section "Multiple processes" in documentation chapter
     "Demonstrations" for guidance.
 
     The number of `cores` (threads) the Comsol instance uses can be
@@ -78,12 +78,18 @@ def start(cores=None, version=None, port=0):
     The server `port` can be specified if client–server mode is used.
     If omitted, the server chooses a random free port.
     """
-    global client, server
+    global client, server, thread
 
-    if client or server:
-        error = 'Only one Comsol session can be started in the same process.'
+    if not thread:
+        thread = threading.current_thread()
+    elif thread is not threading.current_thread():
+        error = 'Cannot access client instance from different thread.'
         logger.error(error)
-        raise NotImplementedError(error)
+        raise RuntimeError(error)
+
+    if client:
+        logger.warning('mph.start() returning the existing client instance.')
+        return client
 
     session = option('session')
     if session == 'platform-dependent':
