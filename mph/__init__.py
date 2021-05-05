@@ -2,8 +2,8 @@
 
 # Meta information
 __title__     = 'MPh'
-__version__   = '1.0.2'
-__date__      = '2021–04–28'
+__version__   = '1.0.3'
+__date__      = '2021–05–05'
 __author__    = 'John Hennig'
 __copyright__ = 'John Hennig'
 __license__   = 'MIT'

@@ -25,7 +25,7 @@ classifiers = [
 
 [tool.flit.metadata.requires-extra]
 doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
-test = ['pyTest', 'pyTest-cov', 'coverage-badge']
+test = ['pyTest', 'pyTest-cov', 'coverage-badge', 'flake8']
 
 [tool.flit.metadata.urls]
 Documentation = 'https://mph.readthedocs.io'
