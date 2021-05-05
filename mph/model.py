@@ -293,17 +293,20 @@ class Model:
                 logger.error(error)
                 raise TypeError(error)
         if not dataset.exists():
-            error = f'Dataset {dataset.name()} does not exist.'
+            error = f'Dataset "{dataset.name()}" does not exist.'
             logger.error(error)
             raise ValueError(error)
 
         # Find corresponding solution.
-        tag = dataset.property('solution')
+        if 'solution' in dataset.properties():
+            tag = dataset.property('solution')
+        elif 'data' in dataset.properties():
+            tag = dataset.property('data')
         for solution in self/'solutions':
             if solution.tag() == tag:
                 break
         else:
-            error = f'Dataset {dataset.name()} does not refer to a solution.'
+            error = f'Dataset "{dataset.name()}" does not refer to a solution.'
             logger.error(error)
             raise RuntimeError(error)
 
@@ -335,17 +338,20 @@ class Model:
                 logger.error(error)
                 raise TypeError(error)
         if not dataset.exists():
-            error = f'Dataset {dataset.name()} does not exist.'
+            error = f'Dataset "{dataset.name()}" does not exist.'
             logger.error(error)
             raise ValueError(error)
 
         # Find corresponding solution.
-        tag = dataset.property('solution')
+        if 'solution' in dataset.properties():
+            tag = dataset.property('solution')
+        elif 'data' in dataset.properties():
+            tag = dataset.property('data')
         for solution in self/'solutions':
             if solution.tag() == tag:
                 break
         else:
-            error = f'Dataset {dataset.name()} does not refer to a solution.'
+            error = f'Dataset "{dataset.name()}" does not refer to a solution.'
             logger.error(error)
             raise RuntimeError(error)
 
@@ -429,7 +435,10 @@ class Model:
                     f'on dataset "{dataset.name()}".')
 
         # Find corresponding solution.
-        tag = dataset.property('solution')
+        if 'solution' in dataset.properties():
+            tag = dataset.property('solution')
+        elif 'data' in dataset.properties():
+            tag = dataset.property('data')
         for solution in self/'solutions':
             if solution.tag() == tag:
                 break

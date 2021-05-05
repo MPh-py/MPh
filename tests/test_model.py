@@ -262,6 +262,13 @@ def test_inner():
             model.inner(False)
         except TypeError:
             pass
+        no_solution = (model/'datasets').create('CutPoint2D')
+        no_solution.property('data', 'none')
+        try:
+            model.inner(no_solution)
+        except RuntimeError:
+            pass
+        no_solution.remove()
 
 
 def test_outer():
@@ -281,6 +288,13 @@ def test_outer():
             model.outer(False)
         except TypeError:
             pass
+        no_solution = (model/'datasets').create('CutPoint2D')
+        no_solution.property('data', 'none')
+        try:
+            model.outer(no_solution)
+        except RuntimeError:
+            pass
+        no_solution.remove()
 
 
 def test_evaluate():
@@ -363,6 +377,20 @@ def test_evaluate():
             empty.evaluate('U')
         except RuntimeError:
             pass
+        no_solution = (model/'datasets').create('CutPoint2D')
+        no_solution.property('data', 'none')
+        try:
+            model.evaluate('U', dataset=no_solution)
+        except RuntimeError:
+            pass
+        no_solution.remove()
+        solution = model/'solutions'/'electrostatic solution'
+        solution.java.clearSolution()
+        try:
+            model.evaluate('U')
+        except RuntimeError:
+            pass
+        model.solve('static')
     # Test argument "inner".
     with logging_disabled():
         try:
