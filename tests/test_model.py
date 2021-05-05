@@ -9,10 +9,10 @@ import parent # noqa F401
 import mph
 import models
 from fixtures import logging_disabled
+from fixtures import warnings_disabled
 from pathlib import Path
 from sys import argv
 import logging
-import warnings
 
 
 ########################################
@@ -444,8 +444,6 @@ def test_parameter():
     model.parameter('U', 1+1j)
     assert model.parameter('U') == '(1+1j)'
     assert model.parameter('U', evaluate=True) == 1+1j
-    model.parameter('U', value)
-    assert model.parameter('U') == value
     with logging_disabled():
         try:
             model.parameter('non-existing')
@@ -455,6 +453,12 @@ def test_parameter():
             model.parameter('non-existing', evaluate=True)
         except RuntimeError:
             pass
+    with warnings_disabled():
+        model.parameter('U', '1', 'V')
+        assert model.parameter('U') == '1 [V]'
+        model.parameter('U', description='applied voltage')
+    model.parameter('U', value)
+    assert model.parameter('U') == value
 
 
 def test_parameters():
@@ -673,57 +677,60 @@ def test_save():
 
 
 def test_features():
-    assert 'Laplace equation' in model.features('electrostatic')
-    assert 'zero charge'      in model.features('electrostatic')
-    assert 'initial values'   in model.features('electrostatic')
-    assert 'anode'            in model.features('electrostatic')
-    assert 'cathode'          in model.features('electrostatic')
-    with logging_disabled():
-        try:
-            model.features('non-existing')
-        except LookupError:
-            pass
+    with warnings_disabled():
+        assert 'Laplace equation' in model.features('electrostatic')
+        assert 'zero charge'      in model.features('electrostatic')
+        assert 'initial values'   in model.features('electrostatic')
+        assert 'anode'            in model.features('electrostatic')
+        assert 'cathode'          in model.features('electrostatic')
+        with logging_disabled():
+            try:
+                model.features('non-existing')
+            except LookupError:
+                pass
 
 
 def test_toggle():
-    model.solve('static')
-    assert abs(model.evaluate('V_es').mean()) < 0.1
-    model.toggle('electrostatic', 'cathode')
-    model.solve('static')
-    assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
-    model.toggle('electrostatic', 'cathode', 'on')
-    model.solve('static')
-    assert abs(model.evaluate('V_es').mean()) < 0.1
-    model.toggle('electrostatic', 'cathode', 'off')
-    model.solve('static')
-    assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
-    with logging_disabled():
-        try:
-            model.toggle('non-existing', 'feature')
-        except LookupError:
-            pass
-        try:
-            model.toggle('electrostatic', 'non-existing')
-        except LookupError:
-            pass
+    with warnings_disabled():
+        model.solve('static')
+        assert abs(model.evaluate('V_es').mean()) < 0.1
+        model.toggle('electrostatic', 'cathode')
+        model.solve('static')
+        assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
+        model.toggle('electrostatic', 'cathode', 'on')
+        model.solve('static')
+        assert abs(model.evaluate('V_es').mean()) < 0.1
+        model.toggle('electrostatic', 'cathode', 'off')
+        model.solve('static')
+        assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
+        with logging_disabled():
+            try:
+                model.toggle('non-existing', 'feature')
+            except LookupError:
+                pass
+            try:
+                model.toggle('electrostatic', 'non-existing')
+            except LookupError:
+                pass
 
 
 def test_load():
-    image = model.create('functions/image', 'Image')
-    image.property('funcname', 'im')
-    image.property('fununit', '1/m^2')
-    image.property('xmin', -5)
-    image.property('xmax', +5)
-    image.property('ymin', -5)
-    image.property('ymax', +5)
-    image.property('extrap', 'value')
-    model.load('gaussian.tif', 'image')
-    model.remove('functions/image')
-    with logging_disabled():
-        try:
-            model.load('image.png', 'non-existing')
-        except LookupError:
-            pass
+    with warnings_disabled():
+        image = model.create('functions/image', 'Image')
+        image.property('funcname', 'im')
+        image.property('fununit', '1/m^2')
+        image.property('xmin', -5)
+        image.property('xmax', +5)
+        image.property('ymin', -5)
+        image.property('ymax', +5)
+        image.property('extrap', 'value')
+        model.load('gaussian.tif', 'image')
+        model.remove('functions/image')
+        with logging_disabled():
+            try:
+                model.load('image.png', 'non-existing')
+            except LookupError:
+                pass
 
 
 ########################################
@@ -794,7 +801,6 @@ if __name__ == '__main__':
         test_reset()
         test_save()
 
-        warnings.simplefilter('ignore')
         test_features()
         test_toggle()
         test_load()

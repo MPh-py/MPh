@@ -2,9 +2,10 @@
 __license__ = 'MIT'
 
 
+import logging
+import warnings
 from io import StringIO
 import sys
-import logging
 
 
 class logging_disabled:
@@ -16,6 +17,16 @@ class logging_disabled:
 
     def __exit__(self, type, value, traceback):
         logging.getLogger().setLevel(self.level)
+
+
+class warnings_disabled:
+
+    def __enter__(self):
+        warnings.simplefilter('ignore')
+        return self
+
+    def __exit__(self, type, value, traceback):
+        warnings.resetwarnings()
 
 
 class capture_stdout:
