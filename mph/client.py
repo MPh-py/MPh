@@ -232,12 +232,13 @@ class Client:
         if cores:
             os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
-        # Going back means that most likely the Server ended - raise an info
-        # so this will not create confusion. I have no good idea how to check
-        # if there's a local client running. Options might be regexping the
-        # exceptions or a package-wide storage for server instances - both
-        # ways are not elegant. As this is most likely a rare case, I would
-        # leave it to the user to re-create their local server.
+        # Going back means that most likely the Server ended - this is the
+        # default case if multi option was off and the client disconnects.
+        # Raise an info so this will not create confusion. I have no good idea
+        # how to check if there's a local server running. Options might be
+        # regexping the exceptions or a package-wide storage for server
+        # instances - both ways are not elegant. As this is most likely a rare
+        # case, I would leave it to the user to re-create their local server.
         if host == 'localhost':
             logger.warning(
                 'If you are going back to localhost please '
