@@ -81,6 +81,12 @@ class Client:
     ####################################
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
+        # Check if this will work with classkit, check so early to prevent
+        # unnneccessary jpype start
+        if port is None and option('classkit-license'):
+            error = 'Classkit license does not support API in standalone mode.'
+            logger.error(error)
+            raise NotImplementedError(error)
 
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():

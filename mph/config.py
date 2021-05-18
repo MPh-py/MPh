@@ -9,6 +9,7 @@ __license__ = 'MIT'
 options = {
     'session': 'platform-dependent',
     'caching': False,
+    'classkit-license': False,
 }
 """Default values for configuration options."""
 

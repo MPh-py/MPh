@@ -92,9 +92,18 @@ def start(cores=None, version=None, port=0):
         return client
 
     session = option('session')
+
+    if option('classkit-license') and session == 'stand-alone':
+        error = 'Classkit license does not support API in standalone mode.'
+        logger.error(error)
+        raise NotImplementedError(error)
+
     if session == 'platform-dependent':
         if platform.system() == 'Windows':
-            session = 'stand-alone'
+            if option('classkit-license'):
+                session = 'client-server'
+            else:
+                session = 'stand-alone'
         else:
             session = 'client-server'
 

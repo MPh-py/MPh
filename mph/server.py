@@ -6,6 +6,7 @@ __license__ = 'MIT'
 # Components                           #
 ########################################
 from . import discovery                # back-end discovery
+from .config import option
 
 
 ########################################
@@ -75,6 +76,8 @@ class Server:
         server  = backend['server']
         logger.info('Starting external server process.')
         arguments = ['-login', 'auto', '-graphics']
+        if option('classkit-license'):
+            arguments += ['-ckl']
         if cores:
             arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
