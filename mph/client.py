@@ -353,6 +353,7 @@ class Client:
             self.java.disconnect()
             self.host = None
             self.port = None
+            logger.debug('Client disconnected')
         else:
             error = 'The client is not connected to a server.'
             logger.error(error)
