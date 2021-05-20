@@ -81,13 +81,6 @@ class Client:
     ####################################
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
-        # Check if this will work with classkit, check so early to prevent
-        # unnneccessary jpype start
-        if port is None and option('classkit-license'):
-            error = 'Classkit license does not support API in standalone mode.'
-            logger.error(error)
-            raise NotImplementedError(error)
-
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
@@ -112,7 +105,11 @@ class Client:
         # Start the Java virtual machine.
         logger.debug(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
-        jpype.startJVM(str(backend['jvm']),
+        java_args = [str(backend['jvm'])]
+        if option('classkit'):
+            java_args += ['-Dckl']
+        logger.debug(f'JVM arguments: {java_args}')
+        jpype.startJVM(*java_args,
                        classpath=str(backend['root']/'plugins'/'*'),
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
@@ -143,7 +140,10 @@ class Client:
         java.setPreference('updates.update.check', 'off')
         java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
         java.setPreference('tempfiles.recovery.autosave', 'off')
-        java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
+        try:
+            java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
+        except Exception:
+            logger.warning('Could not turn off check for recovery files.')
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save useful information in instance attributes.
