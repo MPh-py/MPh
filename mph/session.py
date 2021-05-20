@@ -92,7 +92,6 @@ def start(cores=None, version=None, port=0):
         return client
 
     session = option('session')
-
     if session == 'platform-dependent':
         if platform.system() == 'Windows':
             session = 'stand-alone'
