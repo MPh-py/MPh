@@ -7,11 +7,7 @@ and falls back to the Java layer when functionality is (still) missing.
 __license__ = 'MIT'
 
 import sys
-import logging
 import mph
-
-if 'log' in sys.argv[1:]:
-    logging.basicConfig(level=logging.DEBUG)
 
 if 'classkit' in sys.argv[1:]:
     mph.option('classkit', True)
