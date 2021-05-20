@@ -107,7 +107,7 @@ class Client:
         logger.info('Starting Java virtual machine.')
         java_args = [str(backend['jvm'])]
         if option('classkit'):
-            java_args += ['-Dckl']
+            java_args += ['-Dcs.ckl']
         logger.debug(f'JVM arguments: {java_args}')
         jpype.startJVM(*java_args,
                        classpath=str(backend['root']/'plugins'/'*'),

@@ -76,7 +76,7 @@ class Server:
         server  = backend['server']
         logger.info('Starting external server process.')
         arguments = ['-login', 'auto', '-graphics']
-        if option('classkit-license'):
+        if option('classkit'):
             arguments += ['-ckl']
         if cores:
             arguments += ['-np', str(cores)]
