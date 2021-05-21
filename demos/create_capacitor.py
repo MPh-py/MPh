@@ -6,11 +6,7 @@ and falls back to the Java layer when functionality is (still) missing.
 """
 __license__ = 'MIT'
 
-import sys
 import mph
-
-if 'classkit' in sys.argv[1:]:
-    mph.option('classkit', True)
 
 client = mph.start()
 model = client.create('capacitor')
