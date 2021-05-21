@@ -6,7 +6,7 @@ __license__ = 'MIT'
 # Components                           #
 ########################################
 from . import discovery                # back-end discovery
-from .config import option
+from .config import option             # configuration
 
 
 ########################################
