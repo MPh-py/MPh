@@ -3,16 +3,27 @@ __license__ = 'MIT'
 
 
 ########################################
-# Options                              #
+# Dependencies                         #
 ########################################
+from logging import getLogger          # event logging
+
+
+########################################
+# Globals                              #
+########################################
+logger = getLogger(__package__)        # event logger
 
 options = {
-    'session': 'platform-dependent',
-    'caching': False,
+    'session':  'platform-dependent',
+    'caching':  False,
     'classkit': False,
 }
 """Default values for configuration options."""
 
+
+########################################
+# Option                               #
+########################################
 
 def option(name=None, value=None):
     """
@@ -24,7 +35,11 @@ def option(name=None, value=None):
     """
     if name is None:
         return options
-    elif value is None:
+    if name not in options:
+        error = f'Configuration option "{name}" does not exist.'
+        logger.error(error)
+        raise LookupError(error)
+    if value is None:
         return options[name]
     else:
         options[name] = value

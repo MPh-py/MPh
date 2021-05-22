@@ -7,6 +7,7 @@ __license__ = 'MIT'
 ########################################
 import parent # noqa F401
 import mph
+from fixtures import logging_disabled
 from sys import argv
 import logging
 
@@ -22,6 +23,15 @@ def test_option():
     mph.option('session', 'something else')
     assert mph.option('session') == 'something else'
     mph.option('session', 'platform-dependent')
+    with logging_disabled():
+        try:
+            mph.option('non-existing')
+        except LookupError:
+            pass
+        try:
+            mph.option('non-existing', 'assigned value')
+        except LookupError:
+            pass
 
 
 ########################################
