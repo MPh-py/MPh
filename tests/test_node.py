@@ -473,6 +473,7 @@ def test_tree():
     ├─ selections
     ├─ coordinates
     ├─ variables
+    ├─ couplings
     ├─ physics
     ├─ multiphysics
     ├─ materials
