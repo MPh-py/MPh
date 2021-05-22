@@ -92,6 +92,7 @@ autodoc_default_options = {
     'members':       True,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
+autosummary_generate = False           # Stub files are created by hand.
 add_module_names = False               # Don't prefix members with module name.
 
 # Rendering options

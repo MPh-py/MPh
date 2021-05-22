@@ -155,7 +155,7 @@ results = multiprocessing.Queue()
 Then we can start a number of workers, say four:
 ```python
 for _ in range(4):
-    process = multiprocessing.Process(target=worker, args=(jobs, results)
+    process = multiprocessing.Process(target=worker, args=(jobs, results))
     process.start()
 ```
 
@@ -281,11 +281,10 @@ The advantage of using Python over Java is:
   don't need to bother with compiling Java source code to Java classes
   via `comsolcompile`.
 * You can use Python introspection to understand how Comsol models
-  are "created in code". This may be the most productive feature. The
-  Comsol documentation explains a lot of things, but not every little
-  detail. The function [`mph.inspect()`](api/mph.inspect) makes
-  introspection even easier, as it formats the output more nicely than
-  Python's built-in [`dir()`][dir].
+  are "created in code". The Comsol documentation explains a lot of
+  things, but not every little detail. Either use Python's built-in
+  [`dir()`][dir] or call [`mph.inspect()`](api/mph.inspect) to see a
+  pretty-fied representation of a Java object in the model tree.
 
 To save the model created in the above example, we do:
 ```python
@@ -373,7 +372,8 @@ The model's root node not can be referenced with either `model/''` or
 forward slash themselves, that forward slash can be escaped/masked by
 doubling it, for instance: `geometry/'ice//frozen water'`.
 
-The example model discussed here produces the following model tree:
+The example model discussed here produces the following model
+[tree](api/mph.tree):
 ```python
 >>> mph.tree(model)
 block of ice
