@@ -81,7 +81,6 @@ class Client:
     ####################################
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
-
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
@@ -106,7 +105,11 @@ class Client:
         # Start the Java virtual machine.
         logger.debug(f'JPype version is {jpype.__version__}.')
         logger.info('Starting Java virtual machine.')
-        jpype.startJVM(str(backend['jvm']),
+        java_args = [str(backend['jvm'])]
+        if option('classkit'):
+            java_args += ['-Dcs.ckl']
+        logger.debug(f'JVM arguments: {java_args}')
+        jpype.startJVM(*java_args,
                        classpath=str(backend['root']/'plugins'/'*'),
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
