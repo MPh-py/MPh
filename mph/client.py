@@ -141,9 +141,10 @@ class Client:
         java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
         java.setPreference('tempfiles.recovery.autosave', 'off')
         try:
+            # Preference not defined on certain systems, see issue #39.
             java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
         except Exception:
-            logger.warning('Could not turn off check for recovery files.')
+            logger.debug('Could not turn off check for recovery files.')
         java.setPreference('tempfiles.saving.optimize', 'filesize')
 
         # Save useful information in instance attributes.
