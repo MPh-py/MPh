@@ -416,4 +416,8 @@ def backend(version=None):
         return backends[numbers.index(max(numbers))]
     else:
         names = [backend['name'] for backend in backends]
+        if version not in names:
+            error = f'Could not locate Comsol {version} installation.'
+            logger.error(error)
+            raise LookupError(error)
         return backends[names.index(version)]
