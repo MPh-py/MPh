@@ -1,5 +1,12 @@
 ﻿# Releases
 
+## 1.0.4
+* Added missing support for installations with classkit license. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Added name validation of available configuration options. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Added support for persistent configuration storage to [`mph.config`](https://mph.readthedocs.io/en/1.0/api/mph.config.html).
+* Fixed: No preference `checkforrecoveries` on certain installations. ([#39](https://github.com/MPh-py/MPh/issues/39))
+* Fixed: Unclear error message when requested version is not installed. ([#42](https://github.com/MPh-py/MPh/issues/42))
+
 ## 1.0.3
 * [Published](https://pypi.org/project/MPh/1.0.3) on May 5, 2021.
 * Fixes: [`Client.remove()`](https://mph.readthedocs.io/en/1.0/api/mph.Client.html#mph.Client.remove) did not accept model by name.
