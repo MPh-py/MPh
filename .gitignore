@@ -4,6 +4,7 @@
 /deploy/coverage/
 /deploy/coverage.sqlite
 /dist/
+/tests/MPh.ini
 **/__pycache__
 **/.pytest_cache
 flake8.txt
