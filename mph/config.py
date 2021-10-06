@@ -53,7 +53,6 @@ def option(name=None, value=None):
 # Storage                              #
 ########################################
 
-
 def location():
     """
     Returns the default location of the configuration file.

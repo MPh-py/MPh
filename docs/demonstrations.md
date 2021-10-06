@@ -71,21 +71,21 @@ that were not meant to be included.
 
 As explained in [Limitations](limitations), we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
-multiple Python processes in parallel, thanks to the
-[`multiprocessing`][multi] module that is part of the standard library.
-
-So, other than MPh itself, we are going to need [`multiprocessing`][multi],
-as well as [`queue`][queue], also from the standard library, though
-only for the [`queue.Empty`][empty] exception type that it provides.
+multiple Python processes in parallel if we leverage the
+[`multiprocessing`][multi] module from the standard library.
 ```python
 import mph
 import multiprocessing
 import queue
 ```
 
+Additionally, we have imported the [`queue`][queue] module, also from
+the standard library, though only for the [`queue.Empty`][empty] exception
+type that it provides.
+
 In this demonstration, we will solve the model [`capacitor.mph`][capa]
 from the [Tutorial](tutorial). We want to sweep the electrode distance
-d and calculate the capacitance C for each value of the distance,
+*d* and calculate the capacitance *C* for each value of the distance,
 ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
@@ -267,11 +267,12 @@ list of three strings. So we replaced the expression with
 of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
-documentation — or a blog post, as the case was here —, you will have
-to amend code lines such as the one above. But they are few and far
-between. The error messages you might receive should point you in the
-right direction and the [JPype documentation][jpype] would offer help
-on issues with type conversion.
+documentation, or a blog post as the case was here, or which Comsol
+generated from your model when you saved it as a Java/Matlab file,
+you will have to amend code lines such as the one above. But they are
+few and far between. The error messages you might receive should point
+you in the right direction and the [JPype documentation][jpype] would
+offer help on issues with type conversion.
 
 The advantage of using Python over Java is:
 * You don't really need to know Java. Just a little, to understand that
@@ -299,9 +300,9 @@ Java, or Matlab project.
 
 ## Creating models: Python style
 
-The example from the previous section can be expressed in more
-"pythonic" syntax if we ignore the Java layer and only use methods
-from the [`Model`](api/mph.Model) class.
+The example from the previous section can be expressed in much more
+idiomatic Python syntax if we ignore the Java layer and only use
+methods from the [`Model`](api/mph.Model) class.
 ```python
 import mph
 client = mph.start()
@@ -336,8 +337,8 @@ So far, we have used strings to refer to nodes. We could also use the
 functionality. Instances of that class are returned by
 [`model.create()`](api/mph.Model) for convenience. But they can be
 generated from scratch by string concatenation with the division
-operator — much like [`pathlib.Path`][path] objects from the standard
-library.
+operator — much like [`pathlib.Path`][path] objects from Python's
+standard library.
 ```python
 import mph
 client = mph.start()
@@ -350,7 +351,7 @@ model.build(geometry)
 ```
 
 The division operator is the Swiss army knife for accessing nodes in
-the model tree. It even works with `client` as root. With the above
+the model tree. It even works with `client` as root. Within that last
 example, the following notations
 ```python
 client/'block of ice'/'geometries'/'geometry'/'ice block'
@@ -367,10 +368,11 @@ an operator, just like we did in the first and second example.
 model/'geometries/geometry/ice block'
 ```
 
-The model's root node not can be referenced with either `model/''` or
+The model's root node can be referenced with either `model/''` or
 `model/None`. If any of the node names in the hierarchy contain a
-forward slash themselves, that forward slash can be escaped/masked by
-doubling it, for instance: `geometry/'ice//frozen water'`.
+forward slash themselves, that forward slash can be escaped (i.e.,
+marked to be interpreted literally) by doubling it, for instance:
+`geometry/'ice//frozen water'`.
 
 The example model discussed here produces the following model
 [tree](api/mph.tree):

@@ -30,11 +30,11 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Node:
     """
-    Represents a model mode.
+    Represents a model node.
 
     Nodes work similarly to `pathlib.Path` objects from Python's
     standard library. They support string concatenation to the right
-    with the division operator  in order to reference child nodes:
+    with the division operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node

@@ -174,11 +174,12 @@ class Client:
         if isinstance(name, str):
             for model in self:
                 if name == model.name():
-                    return model
+                    break
             else:
                 error = f'Model "{name}" has not been loaded by client.'
                 logger.error(error)
                 raise ValueError(error)
+            return model
         return NotImplemented
 
     ####################################

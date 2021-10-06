@@ -34,12 +34,12 @@ ten seconds for the client to spin up.
 In this example, the Comsol back-end is instructed to use but one
 processor core. If the optional parameter is omitted, it will use all
 cores available on the machine. Restricting this resource is useful
-when running several simulations in parallel. Note, however, that due
-to [limitations](limitations) of the underlying Python-to-Java bridge,
-the `Client` class can only be instantiated once. Subsequent calls to
-`start()` will therefore raise an error. If you wish to work around
-this limitation, in order to realize the full parallelization potential
-of your simulation hardware, you will need to [run multiple Python
+when other simulations are running in parallel. Note, however, that
+within the same Java and therefore Python session, only one Comsol
+client can run at a time. So the `Client` class cannot be instantiated
+more than once. If you wish to work around this limitation imposed by
+Comsol, and realize the full parallelization potential of your
+simulation hardware, you will need to [run multiple Python
 processes](demonstrations.md#multiple-processes), one for each client.
 
 
@@ -248,8 +248,9 @@ Now let's look at the time dependence. The two media in this model
 have a small, but finite conductivity, leading to leakage currents in
 the long run. As the two conductivities also differ in value, charges
 will accumulate at the interface between the media. This interface
-charge leads to a gradual relaxation of the total capacitance over
-time. We can tell that from its value at the first and last time step.
+charge leads to a gradual relaxation of the electric field over time,
+and thus to a change of the capacitance as well. We can tell that from
+its value at the first and last time step.
 ```python
 >>> C = '2*ec.intWe/U^2'
 >>> model.evaluate(C, 'pF', 'time-dependent', 'first')

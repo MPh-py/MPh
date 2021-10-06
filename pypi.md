@@ -25,6 +25,12 @@ Find the full [documentation on Read-the-Docs][docs].
 [jpype]:  https://pypi.org/project/JPype1
 [docs]:   https://mph.readthedocs.io
 
-[![citation](https://zenodo.org/badge/264718959.svg)](https://zenodo.org/badge/latestdoi/264718959)
-[![license](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![source](https://img.shields.io/github/stars/MPh-py/MPh?style=social)](https://github.com/MPh-py/MPh)
+[![citation](
+    https://zenodo.org/badge/264718959.svg)](
+    https://zenodo.org/badge/latestdoi/264718959)
+[![license](
+    https://img.shields.io/badge/License-MIT-green.svg)](
+    https://opensource.org/licenses/MIT)
+[![source](
+    https://img.shields.io/github/stars/MPh-py/MPh?style=social)](
+    https://github.com/MPh-py/MPh)
