@@ -1,5 +1,4 @@
 ﻿"""Publishes the package on PyPI."""
-__license__ = 'MIT'
 
 from subprocess import run
 from pathlib import Path

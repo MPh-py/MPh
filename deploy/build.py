@@ -1,5 +1,4 @@
 ﻿"""Builds the installation package."""
-__license__ = 'MIT'
 
 from subprocess import run
 from pathlib import Path

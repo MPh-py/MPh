@@ -28,7 +28,7 @@ dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
-test = ['pyTest', 'pyTest-cov', 'coverage-badge', 'flake8']
+test = ['pyTest', 'pyTest-cov', 'flake8']
 
 [project.urls]
 Documentation = 'https://mph.readthedocs.io'

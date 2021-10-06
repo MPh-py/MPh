@@ -38,8 +38,10 @@ Find the full [documentation on Read-the-Docs][docs].
 [![downloads](
     https://img.shields.io/pypi/dm/MPh)](
     https://pepy.tech/project/mph)
-![coverage](
-    tests/coverage.svg?raw=true)
+
+[![coverage](
+    https://img.shields.io/codecov/c/github/MPh-py/MPh?token=02ZZ8ZJH3M)](
+    https://codecov.io/gh/MPh-py/MPh)
 [![quality](
     https://img.shields.io/lgtm/grade/python/github/MPh-py/MPh?label=quality)](
     https://lgtm.com/projects/g/MPh-py/MPh)
