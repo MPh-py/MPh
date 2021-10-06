@@ -40,6 +40,9 @@ Find the full [documentation on Read-the-Docs][docs].
     https://pepy.tech/project/mph)
 ![coverage](
     tests/coverage.svg?raw=true)
+[![quality](
+    https://img.shields.io/lgtm/grade/python/github/MPh-py/MPh?label=quality)](
+    https://lgtm.com/projects/g/MPh-py/MPh)
 [![documentation](
     https://readthedocs.org/projects/mph/badge/?version=latest)](
     https://mph.readthedocs.io/en/latest)
