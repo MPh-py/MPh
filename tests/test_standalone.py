@@ -6,6 +6,7 @@
 import parent # noqa F401
 import mph
 from fixtures import logging_disabled
+from pytest import raises
 from platform import system
 from sys import argv
 import logging
@@ -43,19 +44,11 @@ def test_remove():
     client.remove(model)
     assert 'empty' not in client.names()
     assert model not in client.models()
-    message = ''
-    try:
+    with raises(Exception, match='Model node X is removed'):
         model.java.component()
-        assert False
-    except Exception as error:
-        message = error.getMessage()
-    assert 'is_removed' in message
     with logging_disabled():
-        try:
+        with raises(ValueError):
             client.remove(model)
-            assert False
-        except ValueError:
-            pass
 
 
 def test_connect():
@@ -63,11 +56,8 @@ def test_connect():
         return
     client = mph.start()
     with logging_disabled():
-        try:
+        with raises(RuntimeError):
             client.connect(2036)
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_disconnect():
@@ -75,11 +65,8 @@ def test_disconnect():
         return
     client = mph.start()
     with logging_disabled():
-        try:
+        with raises(RuntimeError):
             client.disconnect()
-            assert False
-        except RuntimeError:
-            pass
 
 
 ########################################

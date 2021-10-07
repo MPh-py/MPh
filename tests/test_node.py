@@ -9,6 +9,7 @@ from mph import node, Node
 import models
 from fixtures import logging_disabled
 from fixtures import capture_stdout
+from pytest import raises
 from pathlib import Path
 from numpy import array, isclose
 from textwrap import dedent
@@ -44,11 +45,8 @@ def test_init():
     assert 'self.model.java.func()' in node.groups.values()
     Node(model, node)
     with logging_disabled():
-        try:
+        with raises(TypeError):
             Node(model, False)
-            assert False
-        except TypeError:
-            pass
 
 
 def test_str():
@@ -66,11 +64,8 @@ def test_eq():
 def test_truediv():
     assert Node(model, 'functions')/'step' == Node(model, 'functions/step')
     with logging_disabled():
-        try:
+        with raises(TypeError):
             Node(model, 'functions')/False
-            assert False
-        except TypeError:
-            pass
 
 
 def test_contains():
@@ -147,16 +142,10 @@ def test_exists():
 
 def test_rename():
     with logging_disabled():
-        try:
+        with raises(PermissionError):
             Node(model, '').rename('something')
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(PermissionError):
             Node(model, 'functions').rename('something')
-            assert False
-        except PermissionError:
-            pass
     node = Node(model, 'functions/step')
     name = node.name()
     renamed = Node(model, 'functions/renamed')
@@ -171,21 +160,12 @@ def test_rename():
 
 def test_retag():
     with logging_disabled():
-        try:
+        with raises(PermissionError):
             Node(model, '').retag('something')
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(PermissionError):
             Node(model, 'functions').retag('something')
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(Exception):
             Node(model, 'functions/non-existing').retag('something')
-            assert False
-        except Exception:
-            pass
     node = Node(model, 'functions/step')
     old = node.tag()
     node.retag('new')
@@ -307,11 +287,8 @@ def test_toggle():
     assert node.java.isActive()
     assert not Node(model, 'functions/non-existing').exists()
     with logging_disabled():
-        try:
+        with raises(LookupError):
             Node(model, 'functions/non-existing').toggle()
-            assert False
-        except LookupError:
-            pass
 
 
 def test_run():
@@ -321,16 +298,10 @@ def test_run():
     study.run()
     assert not solution.java.isEmpty()
     with logging_disabled():
-        try:
+        with raises(LookupError):
             Node(model, 'functions/non-existing').run()
-            assert False
-        except LookupError:
-            pass
-        try:
+        with raises(RuntimeError):
             Node(model, 'functions').run()
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_create():
@@ -343,15 +314,10 @@ def test_create():
     physics = Node(model, 'physics')
     physics.create('Electrostatics', geometry)
     with logging_disabled():
-        try:
+        with raises(PermissionError):
             Node(model, '').create()
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(RuntimeError):
             Node(model, 'components/component').create()
-        except RuntimeError:
-            pass
 
 
 def test_remove():
@@ -366,21 +332,12 @@ def test_remove():
     (physics/'Electrostatics 1').remove()
     assert not (physics/'Electrostatics 1').exists()
     with logging_disabled():
-        try:
+        with raises(PermissionError):
             Node(model, '').remove()
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(PermissionError):
             Node(model, 'function').remove()
-            assert False
-        except PermissionError:
-            pass
-        try:
+        with raises(LookupError):
             Node(model, 'function/non-existing').remove()
-            assert False
-        except LookupError:
-            pass
 
 
 def test_parse():
@@ -440,28 +397,16 @@ def test_cast():
     assert node.cast(bool_array_1d).__class__.__name__ == 'boolean[]'
     assert node.cast(bool_array_2d).__class__.__name__ == 'boolean[][]'
     with logging_disabled():
-        try:
+        with raises(TypeError):
             array3d = array([[[1,2], [3,4]], [[5,6], [7,8]]], dtype=object)
             node.cast(array3d)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(TypeError):
             three_rows = array([[1,2], [3,4], [5,6]], dtype=object)
             node.cast(three_rows)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(TypeError):
             node.cast(array([1+1j, 1-1j]))
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(TypeError):
             node.cast({1, 2, 3})
-            assert False
-        except TypeError:
-            pass
 
 
 def test_get():

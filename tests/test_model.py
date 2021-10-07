@@ -8,6 +8,7 @@ import mph
 import models
 from fixtures import logging_disabled
 from fixtures import warnings_disabled
+from pytest import raises
 from pathlib import Path
 from sys import argv
 import logging
@@ -72,11 +73,8 @@ def test_truediv():
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
     with logging_disabled():
-        try:
+        with raises(TypeError):
             model/False
-            assert False
-        except TypeError:
-            pass
 
 
 def test_contains():
@@ -179,26 +177,14 @@ def test_build():
     model.build('geometry')
     model.build(model/'geometries'/'geometry')
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.build(model/'function'/'step')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(LookupError):
             model.build('non-existing')
-            assert False
-        except LookupError:
-            pass
-        try:
+        with raises(TypeError):
             model.build(False)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(RuntimeError):
             empty.build()
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_mesh():
@@ -206,26 +192,14 @@ def test_mesh():
     model.mesh('mesh')
     model.mesh(model/'meshes'/'mesh')
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.mesh(model/'function'/'step')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(LookupError):
             model.mesh('non-existing')
-            assert False
-        except LookupError:
-            pass
-        try:
+        with raises(TypeError):
             model.mesh(False)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(RuntimeError):
             empty.mesh()
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_solve():
@@ -233,26 +207,14 @@ def test_solve():
     model.solve('static')
     model.solve(model/'studies'/'static')
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.solve(model/'function'/'step')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(LookupError):
             model.solve('non-existing')
-            assert False
-        except LookupError:
-            pass
-        try:
+        with raises(TypeError):
             model.solve(False)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(RuntimeError):
             empty.solve()
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_inner():
@@ -265,23 +227,14 @@ def test_inner():
     assert model.inner('datasets/time-dependent')
     assert model.inner(model/'datasets'/'time-dependent')
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.inner('non-existing')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(TypeError):
             model.inner(False)
-            assert False
-        except TypeError:
-            pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
-        try:
+        with raises(RuntimeError):
             model.inner(no_solution)
-            assert False
-        except RuntimeError:
-            pass
         no_solution.remove()
 
 
@@ -294,23 +247,14 @@ def test_outer():
     assert model.outer('datasets/parametric sweep')
     assert model.outer(model/'datasets'/'parametric sweep')
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.outer('non-existing')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(TypeError):
             model.outer(False)
-            assert False
-        except TypeError:
-            pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
-        try:
+        with raises(RuntimeError):
             model.outer(no_solution)
-            assert False
-        except RuntimeError:
-            pass
         no_solution.remove()
 
 
@@ -382,51 +326,30 @@ def test_evaluate():
         assert model.evaluate('U', dataset='electrostatic')
         assert model.evaluate('U', dataset='datasets/electrostatic')
         assert model.evaluate('U', dataset=model/'datasets'/'electrostatic')
-        try:
+        with raises(ValueError):
             model.evaluate('U', dataset='non-existing')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(TypeError):
             model.evaluate('U', dataset=False)
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(RuntimeError):
             empty.evaluate('U')
-            assert False
-        except RuntimeError:
-            pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
-        try:
+        with raises(RuntimeError):
             model.evaluate('U', dataset=no_solution)
-            assert False
-        except RuntimeError:
-            pass
         no_solution.remove()
         solution = model/'solutions'/'electrostatic solution'
         solution.java.clearSolution()
-        try:
+        with raises(RuntimeError):
             model.evaluate('U')
-            assert False
-        except RuntimeError:
-            pass
         model.solve('static')
     # Test argument "inner".
     with logging_disabled():
-        try:
+        with raises(TypeError):
             model.evaluate('U', dataset='time-dependent', inner='invalid')
-            assert False
-        except TypeError:
-            pass
     # Test argument "outer".
     with logging_disabled():
-        try:
+        with raises(TypeError):
             model.evaluate('U', dataset='parametric sweep', outer='invalid')
-            assert False
-        except TypeError:
-            pass
     # Test particle tracing (if that add-on module is installed).
     if client.java.hasProduct('PARTICLETRACING'):
         needle = models.needle()
@@ -469,16 +392,10 @@ def test_parameter():
     assert model.parameter('U') == '(1+1j)'
     assert model.parameter('U', evaluate=True) == 1+1j
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.parameter('non-existing')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(RuntimeError):
             model.parameter('non-existing', evaluate=True)
-            assert False
-        except RuntimeError:
-            pass
     with warnings_disabled():
         model.parameter('U', '1', 'V')
         assert model.parameter('U') == '1 [V]'
@@ -646,11 +563,8 @@ def test_export():
     assert not (here/'data.vtu').exists()
     assert not (here/'image.png').exists()
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.export('non-existing')
-            assert False
-        except ValueError:
-            pass
 
 
 def test_clear():
@@ -693,16 +607,10 @@ def test_save():
     assert 'Sub run()' in (here/'model.vba').read_text()
     (here/'model.vba').unlink()
     with logging_disabled():
-        try:
+        with raises(ValueError):
             model.save('model.invalid')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(ValueError):
             model.save('model.mph', format='invalid')
-            assert False
-        except ValueError:
-            pass
 
 
 def test_features():
@@ -713,11 +621,8 @@ def test_features():
         assert 'anode'            in model.features('electrostatic')
         assert 'cathode'          in model.features('electrostatic')
         with logging_disabled():
-            try:
+            with raises(LookupError):
                 model.features('non-existing')
-                assert False
-            except LookupError:
-                pass
 
 
 def test_toggle():
@@ -734,16 +639,10 @@ def test_toggle():
         model.solve('static')
         assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
         with logging_disabled():
-            try:
+            with raises(LookupError):
                 model.toggle('non-existing', 'feature')
-                assert False
-            except LookupError:
-                pass
-            try:
+            with raises(LookupError):
                 model.toggle('electrostatic', 'non-existing')
-                assert False
-            except LookupError:
-                pass
 
 
 def test_load():
@@ -759,11 +658,8 @@ def test_load():
         model.load('gaussian.tif', 'image')
         model.remove('functions/image')
         with logging_disabled():
-            try:
+            with raises(LookupError):
                 model.load('image.png', 'non-existing')
-                assert False
-            except LookupError:
-                pass
 
 
 ########################################

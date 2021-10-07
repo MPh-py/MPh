@@ -6,6 +6,7 @@
 import parent # noqa F401
 import mph
 from fixtures import logging_disabled
+from pytest import raises
 from pathlib import Path
 from sys import argv
 import logging
@@ -23,16 +24,10 @@ def test_option():
     assert mph.option('session') == 'something else'
     mph.option('session', 'platform-dependent')
     with logging_disabled():
-        try:
+        with raises(LookupError):
             mph.option('non-existing')
-            assert False
-        except LookupError:
-            pass
-        try:
+        with raises(LookupError):
             mph.option('non-existing', 'assigned value')
-            assert False
-        except LookupError:
-            pass
 
 
 def test_location():

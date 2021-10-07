@@ -6,6 +6,7 @@
 import parent # noqa F401
 import mph
 from fixtures import logging_disabled
+from pytest import raises
 from pathlib import Path
 from sys import argv
 import logging
@@ -39,11 +40,8 @@ def test_init():
     assert client.java
     assert not client.standalone
     with logging_disabled():
-        try:
+        with raises(NotImplementedError):
             mph.Client()
-            assert False
-        except NotImplementedError:
-            pass
 
 
 def test_load():
@@ -80,21 +78,12 @@ def test_iter():
 def test_truediv():
     assert client/'capacitor' == model
     with logging_disabled():
-        try:
+        with raises(ValueError):
             client/'non-existing'
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(TypeError):
             client/model
-            assert False
-        except TypeError:
-            pass
-        try:
+        with raises(TypeError):
             client/False
-            assert False
-        except TypeError:
-            pass
 
 
 def test_cores():
@@ -125,11 +114,8 @@ def test_caching():
     client.caching(False)
     assert not client.caching()
     with logging_disabled():
-        try:
+        with raises(ValueError):
             client.caching('anything else')
-            assert False
-        except ValueError:
-            pass
 
 
 def test_remove():
@@ -140,29 +126,15 @@ def test_remove():
     assert 'empty' in client.names()
     client.remove('empty')
     assert 'empty' not in client.names()
-    message = ''
-    try:
+    with raises(Exception, match='is no longer in the model'):
         model.java.component()
-        assert False
-    except Exception as error:
-        message = error.getMessage()
-    assert 'no_longer_in_the_model' in message
     with logging_disabled():
-        try:
+        with raises(ValueError):
             client.remove(model)
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(ValueError):
             client.remove('non-existing')
-            assert False
-        except ValueError:
-            pass
-        try:
+        with raises(TypeError):
             client.remove(True)
-            assert False
-        except TypeError:
-            pass
 
 
 def test_clear():
@@ -176,16 +148,10 @@ def test_disconnect():
     assert client.port is None
     assert repr(client) == 'Client(disconnected)'
     with logging_disabled():
-        try:
+        with raises(Exception):
             client.models()
-            assert False
-        except Exception:
-            pass
-        try:
+        with raises(RuntimeError):
             client.disconnect()
-            assert False
-        except RuntimeError:
-            pass
 
 
 def test_connect():
@@ -194,11 +160,8 @@ def test_connect():
     assert client.port == server.port
     assert client.cores == 1
     with logging_disabled():
-        try:
+        with raises(RuntimeError):
             client.connect(server.port)
-            assert False
-        except RuntimeError:
-            pass
     client.disconnect()
     server.stop()
 

@@ -1,9 +1,10 @@
 ﻿"""
 Runs all tests in the intended order.
 
-This script does not use pyTest, but runs the test scripts as is,
-in a subprocess. We impose the intended order, from the most basic
-functionality to the high-level abstractions.
+This script does not run the tests via pyTest, but just executes the
+test scripts as is, in a subprocess. (pyTest is however needed for some
+test fixtures, so it must be installed.) We impose the intended order,
+from the most basic functionality to the high-level abstractions.
 
 Pass 'log' as a command-line argument to have the scripts print log
 messages to the console while the tests are running. Pass 'debug' to

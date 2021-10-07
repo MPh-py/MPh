@@ -18,11 +18,7 @@ server = None
 
 def teardown_module():
     if server and server.running():
-        try:
-            server.stop()
-            assert False
-        except Exception:
-            pass
+        server.stop()
 
 
 ########################################
