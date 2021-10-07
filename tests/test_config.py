@@ -27,10 +27,12 @@ def test_option():
     with logging_disabled():
         try:
             mph.option('non-existing')
+            assert False
         except LookupError:
             pass
         try:
             mph.option('non-existing', 'assigned value')
+            assert False
         except LookupError:
             pass
 

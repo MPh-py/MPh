@@ -17,13 +17,14 @@ CodeCov for each published release or even commit.
 from subprocess import run
 from pathlib import Path
 
+tests = ['config', 'discovery', 'server', 'session', 'standalone',
+         'client', 'node', 'model', 'processes']
+
 here = Path(__file__).resolve().parent
 root = here.parent
 file = root/'coverage.xml'
 if not file.exists():
     command = ['pytest', '--cov', '--cov-append', '--cov-report', 'xml']
-    tests   = ['config', 'discovery', 'server', 'client', 'client-server',
-               'stand-alone', 'node', 'model', 'processes']
     for test in tests:
         run(command + [f'tests/test_{test}.py'], cwd=root)
 else:

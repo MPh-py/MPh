@@ -21,17 +21,13 @@ def test_start():
         try:
             mph.option('session', 'invalid')
             mph.start()
+            assert False
         except ValueError:
             pass
     mph.option('session', 'client-server')
     client = mph.start(cores=1)
     assert client.java is not None
     assert client.cores == 1
-    with logging_disabled():
-        try:
-            mph.start()
-        except NotImplementedError:
-            pass
 
 
 ########################################

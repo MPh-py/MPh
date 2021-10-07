@@ -48,6 +48,7 @@ def test_init():
     with logging_disabled():
         try:
             Node(model, False)
+            assert False
         except TypeError:
             pass
 
@@ -69,6 +70,7 @@ def test_truediv():
     with logging_disabled():
         try:
             Node(model, 'functions')/False
+            assert False
         except TypeError:
             pass
 
@@ -149,10 +151,12 @@ def test_rename():
     with logging_disabled():
         try:
             Node(model, '').rename('something')
+            assert False
         except PermissionError:
             pass
         try:
             Node(model, 'functions').rename('something')
+            assert False
         except PermissionError:
             pass
     node = Node(model, 'functions/step')
@@ -171,14 +175,17 @@ def test_retag():
     with logging_disabled():
         try:
             Node(model, '').retag('something')
+            assert False
         except PermissionError:
             pass
         try:
             Node(model, 'functions').retag('something')
+            assert False
         except PermissionError:
             pass
         try:
             Node(model, 'functions/non-existing').retag('something')
+            assert False
         except Exception:
             pass
     node = Node(model, 'functions/step')
@@ -304,6 +311,7 @@ def test_toggle():
     with logging_disabled():
         try:
             Node(model, 'functions/non-existing').toggle()
+            assert False
         except LookupError:
             pass
 
@@ -317,10 +325,12 @@ def test_run():
     with logging_disabled():
         try:
             Node(model, 'functions/non-existing').run()
+            assert False
         except LookupError:
             pass
         try:
             Node(model, 'functions').run()
+            assert False
         except RuntimeError:
             pass
 
@@ -337,6 +347,7 @@ def test_create():
     with logging_disabled():
         try:
             Node(model, '').create()
+            assert False
         except PermissionError:
             pass
         try:
@@ -359,14 +370,17 @@ def test_remove():
     with logging_disabled():
         try:
             Node(model, '').remove()
+            assert False
         except PermissionError:
             pass
         try:
             Node(model, 'function').remove()
+            assert False
         except PermissionError:
             pass
         try:
             Node(model, 'function/non-existing').remove()
+            assert False
         except LookupError:
             pass
 
@@ -431,19 +445,23 @@ def test_cast():
         try:
             array3d = array([[[1,2], [3,4]], [[5,6], [7,8]]], dtype=object)
             node.cast(array3d)
+            assert False
         except TypeError:
             pass
         try:
             three_rows = array([[1,2], [3,4], [5,6]], dtype=object)
             node.cast(three_rows)
+            assert False
         except TypeError:
             pass
         try:
             node.cast(array([1+1j, 1-1j]))
+            assert False
         except TypeError:
             pass
         try:
             node.cast({1, 2, 3})
+            assert False
         except TypeError:
             pass
 

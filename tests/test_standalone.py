@@ -21,23 +21,13 @@ def test_start():
     if system() != 'Windows':
         return
     client = mph.start(cores=1)
-    assert client.java is not None
-    assert client.cores == 1
-    with logging_disabled():
-        try:
-            mph.start()
-        except NotImplementedError:
-            pass
-        try:
-            client.disconnect()
-        except RuntimeError:
-            pass
+    assert client.java
 
 
 def test_remove():
     if system() != 'Windows':
         return
-    client = mph.session.client
+    client = mph.start()
     model = client.create('empty')
     assert 'empty' in client.names()
     assert model in client.models()
@@ -48,12 +38,14 @@ def test_remove():
     message = ''
     try:
         model.java.component()
+        assert False
     except Exception as error:
         message = error.getMessage()
     assert 'is_removed' in message
     with logging_disabled():
         try:
             client.remove(model)
+            assert False
         except ValueError:
             pass
 
@@ -72,3 +64,4 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     test_start()
+    test_remove()

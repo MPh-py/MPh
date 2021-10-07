@@ -76,6 +76,7 @@ def test_truediv():
     with logging_disabled():
         try:
             model/False
+            assert False
         except TypeError:
             pass
 
@@ -182,18 +183,22 @@ def test_build():
     with logging_disabled():
         try:
             model.build(model/'function'/'step')
+            assert False
         except ValueError:
             pass
         try:
             model.build('non-existing')
+            assert False
         except LookupError:
             pass
         try:
             model.build(False)
+            assert False
         except TypeError:
             pass
         try:
             empty.build()
+            assert False
         except RuntimeError:
             pass
 
@@ -205,18 +210,22 @@ def test_mesh():
     with logging_disabled():
         try:
             model.mesh(model/'function'/'step')
+            assert False
         except ValueError:
             pass
         try:
             model.mesh('non-existing')
+            assert False
         except LookupError:
             pass
         try:
             model.mesh(False)
+            assert False
         except TypeError:
             pass
         try:
             empty.mesh()
+            assert False
         except RuntimeError:
             pass
 
@@ -228,18 +237,22 @@ def test_solve():
     with logging_disabled():
         try:
             model.solve(model/'function'/'step')
+            assert False
         except ValueError:
             pass
         try:
             model.solve('non-existing')
+            assert False
         except LookupError:
             pass
         try:
             model.solve(False)
+            assert False
         except TypeError:
             pass
         try:
             empty.solve()
+            assert False
         except RuntimeError:
             pass
 
@@ -256,16 +269,19 @@ def test_inner():
     with logging_disabled():
         try:
             model.inner('non-existing')
+            assert False
         except ValueError:
             pass
         try:
             model.inner(False)
+            assert False
         except TypeError:
             pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
         try:
             model.inner(no_solution)
+            assert False
         except RuntimeError:
             pass
         no_solution.remove()
@@ -282,16 +298,19 @@ def test_outer():
     with logging_disabled():
         try:
             model.outer('non-existing')
+            assert False
         except ValueError:
             pass
         try:
             model.outer(False)
+            assert False
         except TypeError:
             pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
         try:
             model.outer(no_solution)
+            assert False
         except RuntimeError:
             pass
         no_solution.remove()
@@ -367,20 +386,24 @@ def test_evaluate():
         assert model.evaluate('U', dataset=model/'datasets'/'electrostatic')
         try:
             model.evaluate('U', dataset='non-existing')
+            assert False
         except ValueError:
             pass
         try:
             model.evaluate('U', dataset=False)
+            assert False
         except TypeError:
             pass
         try:
             empty.evaluate('U')
+            assert False
         except RuntimeError:
             pass
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
         try:
             model.evaluate('U', dataset=no_solution)
+            assert False
         except RuntimeError:
             pass
         no_solution.remove()
@@ -388,6 +411,7 @@ def test_evaluate():
         solution.java.clearSolution()
         try:
             model.evaluate('U')
+            assert False
         except RuntimeError:
             pass
         model.solve('static')
@@ -395,12 +419,14 @@ def test_evaluate():
     with logging_disabled():
         try:
             model.evaluate('U', dataset='time-dependent', inner='invalid')
+            assert False
         except TypeError:
             pass
     # Test argument "outer".
     with logging_disabled():
         try:
             model.evaluate('U', dataset='parametric sweep', outer='invalid')
+            assert False
         except TypeError:
             pass
     # Test particle tracing (if that add-on module is installed).
@@ -447,10 +473,12 @@ def test_parameter():
     with logging_disabled():
         try:
             model.parameter('non-existing')
+            assert False
         except ValueError:
             pass
         try:
             model.parameter('non-existing', evaluate=True)
+            assert False
         except RuntimeError:
             pass
     with warnings_disabled():
@@ -622,6 +650,7 @@ def test_export():
     with logging_disabled():
         try:
             model.export('non-existing')
+            assert False
         except ValueError:
             pass
 
@@ -668,10 +697,12 @@ def test_save():
     with logging_disabled():
         try:
             model.save('model.invalid')
+            assert False
         except ValueError:
             pass
         try:
             model.save('model.mph', format='invalid')
+            assert False
         except ValueError:
             pass
 
@@ -686,6 +717,7 @@ def test_features():
         with logging_disabled():
             try:
                 model.features('non-existing')
+                assert False
             except LookupError:
                 pass
 
@@ -706,10 +738,12 @@ def test_toggle():
         with logging_disabled():
             try:
                 model.toggle('non-existing', 'feature')
+                assert False
             except LookupError:
                 pass
             try:
                 model.toggle('electrostatic', 'non-existing')
+                assert False
             except LookupError:
                 pass
 
@@ -729,6 +763,7 @@ def test_load():
         with logging_disabled():
             try:
                 model.load('image.png', 'non-existing')
+                assert False
             except LookupError:
                 pass
 

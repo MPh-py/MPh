@@ -15,8 +15,9 @@ from pathlib    import Path
 from timeit     import default_timer as now
 import sys
 
-tests = ['config', 'discovery', 'server', 'client', 'client-server',
-          'stand-alone', 'node', 'model', 'processes']
+tests = ['config', 'discovery', 'server', 'session', 'standalone',
+         'client', 'node', 'model', 'processes']
+
 folder = Path(__file__).parent.parent / 'tests'
 python = sys.executable
 arguments = sys.argv[1:]
