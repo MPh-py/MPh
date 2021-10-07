@@ -43,6 +43,15 @@ def test_init():
             pass
 
 
+def test_connect():
+    new_server_1 = mph.Server()
+    client.connect('localhost', new_server_1.port)
+    client.connect('localhost', new_server_1.port, force=True)
+    if mph.option('session') == 'client-server':
+        client.disconnect()
+        new_server_2 = mph.Server()
+        client.connect('localhost', new_server_2.port)
+
 def test_load():
     global model
     assert demo.is_file()
@@ -60,7 +69,7 @@ def test_create():
 
 def test_repr():
     if client.port:
-        assert repr(client) == f'Client(port={client.port})'
+        assert repr(client) == f'Client(host={client.host}, port={client.port})'
     else:
         assert repr(client) == 'Client(stand-alone)'
 
@@ -187,6 +196,7 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     test_init()
+    test_connect()
     test_load()
     test_create()
     test_repr()

@@ -122,10 +122,12 @@ class Client:
             graphics = True
             java.initStandalone(graphics)
             logger.info('Stand-alone client initialized.')
+            self.standalone = True
         # Otherwise skip stand-alone initialization and connect to server.
         else:
             logger.info(f'Connecting to server "{host}" at port {port}.')
             java.connect(host, port)
+            self.standalone = False
 
         # Log number of used processor cores as reported by Comsol instance.
         cores = java.getPreference('cluster.processor.numberofprocessors')
@@ -155,7 +157,12 @@ class Client:
         self.java    = java
 
     def __repr__(self):
-        connection = f'port={self.port}' if self.port else 'stand-alone'
+        if self.standalone:
+            connection = 'stand-alone'
+        else:
+            if self.port: connection = f'host={self.host}, port={self.port}'
+            else: connection = 'disconnected'
+
         return f"{self.__class__.__name__}({connection})"
 
     def __contains__(self, item):
@@ -201,6 +208,70 @@ class Client:
     ####################################
     # Interaction                      #
     ####################################
+
+    def connect(self, host, port, cores=None, force=False):
+        """
+        Connects a client to a new server. Host and port must be specified.
+        If force is set to true, the current client will be forcefully
+        disconnected before connecting to a new server.
+
+        If mode is stand-alone, this wont work and thus will be disabled with
+        a warning issued.
+        """
+        if self.standalone:
+            logger.warning(
+                'Standalone Clients cant be reconnected to a new server.')
+            return
+
+        if self.port == port and self.host == host:
+            logger.info(f'Already connected to {host}:{port}')
+            return
+
+        if self.port:
+            if force:
+                self.disconnect()
+            else:
+                logger.info(
+                    'Client already connected. Please disconnect first '
+                    'or force reconnection')
+                return
+
+        # Instruct Comsol to limit number of processor cores to use.
+        if cores:
+            os.environ['COMSOL_NUM_THREADS'] = str(cores)
+
+        # Going back means that most likely the Server ended - this is the
+        # default case if multi option was off and the client disconnects.
+        # Raise an info so this will not create confusion. I have no good idea
+        # how to check if there's a local server running. Options might be
+        # regexping the exceptions or a package-wide storage for server
+        # instances - both ways are not elegant. As this is most likely a rare
+        # case, I would leave it to the user to re-create their local server.
+        if host == 'localhost':
+            logger.warning(
+                'If you are going back to localhost please '
+                'acknowledge that your inital local server was lost '
+                'on disconnect - please create a new local server '
+                'if exceptions occur on connect.')
+
+        logger.info(f'Connecting to server "{host}" at port {port}.')
+        try:
+            self.java.connect(host, port)
+        except Exception:
+            logger.exception(
+                'Connection Error: This is most likely a wrong host'
+                'address or a mismatch in client-server version.')
+
+        # Log number of used processor cores as reported by Comsol instance.
+        cores = self.java.getPreference('cluster.processor.numberofprocessors')
+        cores = int(str(cores))
+        noun = 'core' if cores == 1 else 'cores'
+        logger.info(f'Running on {cores} processor {noun}.')
+
+        # Save useful information in instance attributes.
+        self.cores = cores
+        self.host = host
+        self.port = port
 
     def load(self, file):
         """Loads a model from the given `file` and returns it."""
@@ -290,6 +361,7 @@ class Client:
             self.java.disconnect()
             self.host = None
             self.port = None
+            logger.debug('Client disconnected')
         else:
             error = 'The client is not connected to a server.'
             logger.error(error)
