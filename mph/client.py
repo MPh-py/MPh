@@ -81,18 +81,23 @@ class Client:
     ####################################
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
+
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
             logger.error(error)
             raise NotImplementedError(error)
 
+        # Initialize instance attributes.
+        self.version    = None
+        self.port       = None
+        self.host       = None
+        self.java       = None
+        self.standalone = None
+
         # Discover Comsol back-end.
         backend = discovery.backend(version)
-
-        # Instruct Comsol to limit number of processor cores to use.
-        if cores:
-            os.environ['COMSOL_NUM_THREADS'] = str(cores)
+        self.version = backend['name']
 
         # On Windows, turn off fault handlers if enabled.
         # Without this, pyTest will crash when starting the Java VM.
@@ -114,56 +119,63 @@ class Client:
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
 
-        # Initialize a stand-alone client if no server port given.
+        # Import Comsol client object, a static class, i.e. singleton. See:
+        # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
+        # /comsol/model/util/ModelUtil.html
         from com.comsol.model.util import ModelUtil as java
-        if port is None:
-            logger.info('Initializing stand-alone client.')
-            check_environment(backend)
-            graphics = True
-            java.initStandalone(graphics)
-            logger.info('Stand-alone client initialized.')
-            self.standalone = True
-        # Otherwise skip stand-alone initialization and connect to server.
-        else:
-            logger.info(f'Connecting to server "{host}" at port {port}.')
-            java.connect(host, port)
+        self.java = java
+
+        # Connect to server if port given.
+        if port:
             self.standalone = False
+            self.connect(port, host)
 
-        # Log number of used processor cores as reported by Comsol instance.
-        cores = java.getPreference('cluster.processor.numberofprocessors')
-        cores = int(str(cores))
-        noun = 'core' if cores == 1 else 'cores'
-        logger.info(f'Running on {cores} processor {noun}.')
+        # Otherwise initialize a stand-alone client.
+        else:
+            self.standalone = True
+            logger.info('Initializing stand-alone client.')
 
-        # Load Comsol settings from disk so as to not just use defaults.
-        java.loadPreferences()
+            # Instruct Comsol to limit number of processor cores to use.
+            if cores:
+                os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
-        # Override certain settings not useful in headless operation.
-        java.setPreference('updates.update.check', 'off')
-        java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
-        java.setPreference('tempfiles.recovery.autosave', 'off')
-        try:
-            # Preference not defined on certain systems, see issue #39.
-            java.setPreference('tempfiles.recovery.checkforrecoveries', 'off')
-        except Exception:
-            logger.debug('Could not turn off check for recovery files.')
-        java.setPreference('tempfiles.saving.optimize', 'filesize')
+            # Check correct setup of process environment on Linux/macOS.
+            check_environment(backend)
 
-        # Save useful information in instance attributes.
-        self.version = backend['name']
-        self.cores   = cores
-        self.host    = host
-        self.port    = port
-        self.java    = java
+            # Initialize the environment with GUI support disabled. See:
+            # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
+            # /comsol/model/util/ModelUtil.html#initStandalone-boolean-
+            java.initStandalone(False)
+
+            # Load Comsol settings from disk so as to not just use defaults.
+            # This is needed in stand-alone mode, see:
+            # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
+            # /comsol/model/util/ModelUtil.html#loadPreferences--
+            java.loadPreferences()
+
+            # Override certain settings not useful in headless operation.
+            java.setPreference('updates.update.check', 'off')
+            java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
+            java.setPreference('tempfiles.recovery.autosave', 'off')
+            try:
+                # Preference not defined on certain systems, see issue #39.
+                java.setPreference('tempfiles.recovery.checkforrecoveries',
+                                   'off')
+            except Exception:
+                logger.debug('Could not turn off check for recovery files.')
+            java.setPreference('tempfiles.saving.optimize', 'filesize')
+
+            # Log that we're done so the start-up time can be inspected.
+            logger.info('Stand-alone client initialized.')
 
     def __repr__(self):
         if self.standalone:
             connection = 'stand-alone'
+        elif self.port:
+            connection = f'host={self.host}, port={self.port}'
         else:
-            if self.port: connection = f'host={self.host}, port={self.port}'
-            else: connection = 'disconnected'
-
-        return f"{self.__class__.__name__}({connection})"
+            connection = 'disconnected'
+        return f'{self.__class__.__name__}({connection})'
 
     def __contains__(self, item):
         if isinstance(item, str):
@@ -193,6 +205,13 @@ class Client:
     # Inspection                       #
     ####################################
 
+    @property
+    def cores(self):
+        """Number of processor cores (threads) the client session is using."""
+        cores = self.java.getPreference('cluster.processor.numberofprocessors')
+        cores = int(str(cores))
+        return cores
+
     def models(self):
         """Returns all models currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
@@ -208,70 +227,6 @@ class Client:
     ####################################
     # Interaction                      #
     ####################################
-
-    def connect(self, host, port, cores=None, force=False):
-        """
-        Connects a client to a new server. Host and port must be specified.
-        If force is set to true, the current client will be forcefully
-        disconnected before connecting to a new server.
-
-        If mode is stand-alone, this wont work and thus will be disabled with
-        a warning issued.
-        """
-        if self.standalone:
-            logger.warning(
-                'Standalone Clients cant be reconnected to a new server.')
-            return
-
-        if self.port == port and self.host == host:
-            logger.info(f'Already connected to {host}:{port}')
-            return
-
-        if self.port:
-            if force:
-                self.disconnect()
-            else:
-                logger.info(
-                    'Client already connected. Please disconnect first '
-                    'or force reconnection')
-                return
-
-        # Instruct Comsol to limit number of processor cores to use.
-        if cores:
-            os.environ['COMSOL_NUM_THREADS'] = str(cores)
-
-        # Going back means that most likely the Server ended - this is the
-        # default case if multi option was off and the client disconnects.
-        # Raise an info so this will not create confusion. I have no good idea
-        # how to check if there's a local server running. Options might be
-        # regexping the exceptions or a package-wide storage for server
-        # instances - both ways are not elegant. As this is most likely a rare
-        # case, I would leave it to the user to re-create their local server.
-        if host == 'localhost':
-            logger.warning(
-                'If you are going back to localhost please '
-                'acknowledge that your inital local server was lost '
-                'on disconnect - please create a new local server '
-                'if exceptions occur on connect.')
-
-        logger.info(f'Connecting to server "{host}" at port {port}.')
-        try:
-            self.java.connect(host, port)
-        except Exception:
-            logger.exception(
-                'Connection Error: This is most likely a wrong host'
-                'address or a mismatch in client-server version.')
-
-        # Log number of used processor cores as reported by Comsol instance.
-        cores = self.java.getPreference('cluster.processor.numberofprocessors')
-        cores = int(str(cores))
-        noun = 'core' if cores == 1 else 'cores'
-        logger.info(f'Running on {cores} processor {noun}.')
-
-        # Save useful information in instance attributes.
-        self.cores = cores
-        self.host = host
-        self.port = port
 
     def load(self, file):
         """Loads a model from the given `file` and returns it."""
@@ -355,13 +310,46 @@ class Client:
         logger.debug('Clearing all models from memory.')
         self.java.clear()
 
-    def disconnect(self):
-        """Disconnects the client from the server."""
+    ####################################
+    # Remote                           #
+    ####################################
+
+    def connect(self, port, host='localhost'):
+        """
+        Connects the client to a server.
+
+        The Comsol server must be listening at the given `port` for
+        client connections. The `host` address defaults to `'localhost'`,
+        but could be any domain name or IP address.
+
+        This will fail for stand-alone clients or if the client is already
+        connected to a server. In the latter case, `disconnect()` first.
+        """
+        if self.standalone:
+            error = 'Stand-alone clients cannot connect to a server.'
+            logger.error(error)
+            raise RuntimeError(error)
         if self.port:
+            error = 'Client already connected to a server. Disconnect first.'
+            logger.error(error)
+            raise RuntimeError(error)
+        logger.info(f'Connecting to server "{host}" at port {port}.')
+        self.java.connect(host, port)
+        self.host = host
+        self.port = port
+
+    def disconnect(self):
+        """
+        Disconnects the client from the server.
+
+        Note that the server, unless started with the command-line option
+        `-multi on`, will shut down when the client disconnects.
+        """
+        if self.port:
+            logger.debug('Disconnecting from server.')
             self.java.disconnect()
             self.host = None
             self.port = None
-            logger.debug('Client disconnected')
         else:
             error = 'The client is not connected to a server.'
             logger.error(error)

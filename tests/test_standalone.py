@@ -24,6 +24,16 @@ def test_start():
     assert client.java
 
 
+def test_cores():
+    client = mph.start()
+    assert client.cores == 1
+
+
+def test_repr():
+    client = mph.start()
+    assert repr(client) == 'Client(stand-alone)'
+
+
 def test_remove():
     if system() != 'Windows':
         return
@@ -50,6 +60,30 @@ def test_remove():
             pass
 
 
+def test_connect():
+    if system() != 'Windows':
+        return
+    client = mph.start()
+    with logging_disabled():
+        try:
+            client.connect(2036)
+            assert False
+        except RuntimeError:
+            pass
+
+
+def test_disconnect():
+    if system() != 'Windows':
+        return
+    client = mph.start()
+    with logging_disabled():
+        try:
+            client.disconnect()
+            assert False
+        except RuntimeError:
+            pass
+
+
 ########################################
 # Main                                 #
 ########################################
@@ -64,4 +98,8 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     test_start()
+    test_cores()
+    test_repr()
     test_remove()
+    test_connect()
+    test_disconnect()
