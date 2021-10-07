@@ -1,6 +1,4 @@
 ﻿"""Provides the wrapper class for a model node."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #
@@ -17,7 +15,6 @@ from json import load as json_load     # JSON decoder
 from difflib import get_close_matches  # fuzzy matching
 from functools import lru_cache        # function cache
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #

@@ -1,6 +1,4 @@
 ﻿"""Tests the `session` module in client–server mode."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

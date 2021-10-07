@@ -1,6 +1,4 @@
 ﻿"""Tests the `discovery` module."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

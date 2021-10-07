@@ -1,6 +1,4 @@
 ﻿"""Tests the `session` module in stand-alone mode."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

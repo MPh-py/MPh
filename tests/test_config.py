@@ -1,6 +1,4 @@
 ﻿"""Tests the `config` module."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

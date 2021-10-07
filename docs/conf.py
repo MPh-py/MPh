@@ -15,8 +15,6 @@ for `.md` files is MyST. For doc-strings it is CommonMark, which
 supports basic text formating, but no advanced features such as cross
 references.
 """
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

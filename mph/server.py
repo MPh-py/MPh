@@ -1,13 +1,10 @@
 ﻿"""Provides the wrapper for Comsol server instances."""
-__license__ = 'MIT'
-
 
 ########################################
 # Components                           #
 ########################################
 from . import discovery                # back-end discovery
 from .config import option             # configuration
-
 
 ########################################
 # Dependencies                         #
@@ -19,7 +16,6 @@ from re import match as regex          # regular expression
 from time import perf_counter as now   # wall-clock time
 from sys import version_info           # Python version
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #

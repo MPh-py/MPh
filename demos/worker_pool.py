@@ -8,8 +8,6 @@ several independent subprocesses ("workers") that communicate with
 the parent process ("boss") via inter-process queues to pass job
 instructions and results back and forth.
 """
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

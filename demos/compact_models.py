@@ -5,8 +5,6 @@ Loads each Comsol model (`.mph` file) in the current folder, removes
 solution and mesh data, resets the modeling history, then saves the
 model file under its original name, effectively compacting its size.
 """
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

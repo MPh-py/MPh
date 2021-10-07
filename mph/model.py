@@ -1,12 +1,9 @@
 ﻿"""Provides the wrapper for Comsol model objects."""
-__license__ = 'MIT'
-
 
 ########################################
 # Components                           #
 ########################################
 from .node import Node                 # model node
-
 
 ########################################
 # Dependencies                         #
@@ -17,7 +14,6 @@ from pathlib import Path               # file-system path
 from re import match                   # pattern matching
 from warnings import warn              # user warning
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #

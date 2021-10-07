@@ -1,6 +1,4 @@
 ﻿"""Tests running subprocesses."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

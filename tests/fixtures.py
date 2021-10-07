@@ -1,6 +1,4 @@
 ﻿"""Fixtures used by the test suite."""
-__license__ = 'MIT'
-
 
 import logging
 import warnings

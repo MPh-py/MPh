@@ -1,6 +1,4 @@
 ﻿"""Provides the wrapper for a Comsol client instance."""
-__license__ = 'MIT'
-
 
 ########################################
 # Components                           #
@@ -8,7 +6,6 @@ __license__ = 'MIT'
 from . import discovery                # back-end discovery
 from .model import Model               # model class
 from .config import option             # configuration
-
 
 ########################################
 # Dependencies                         #
@@ -20,7 +17,6 @@ import os                              # operating system
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
 import faulthandler                    # traceback dumps
-
 
 ########################################
 # Globals                              #

@@ -4,8 +4,6 @@ Creates the demonstration model "capacitor" from scratch.
 The code below uses the higher-level Python layer as much as possible
 and falls back to the Java layer when functionality is (still) missing.
 """
-__license__ = 'MIT'
-
 
 import mph
 

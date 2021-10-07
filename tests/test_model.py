@@ -1,6 +1,4 @@
 ﻿"""Tests the `model` module."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #

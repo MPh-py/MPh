@@ -1,6 +1,4 @@
 ﻿"""Starts and stops the local Comsol session."""
-__license__ = 'MIT'
-
 
 ########################################
 # Components                           #
@@ -8,7 +6,6 @@ __license__ = 'MIT'
 from .client import Client             # client class
 from .server import Server             # server class
 from .config import option             # configuration
-
 
 ########################################
 # Dependencies                         #
@@ -19,7 +16,6 @@ import sys                             # system specifics
 import platform                        # platform information
 import threading                       # multi-threading
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #

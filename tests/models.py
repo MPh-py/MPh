@@ -1,6 +1,4 @@
 ﻿"""Creates models used by the test suite."""
-__license__ = 'MIT'
-
 
 import mph
 from jpype import JInt

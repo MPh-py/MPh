@@ -1,6 +1,4 @@
 ﻿"""Manages configuration options."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #
@@ -10,7 +8,6 @@ import os                              # operating system
 import platform                        # platform information
 from pathlib import Path               # file-system path
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #

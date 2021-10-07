@@ -9,8 +9,6 @@ On Windows, the discovery mechanism relies on the Registry to provide
 information about install locations. On Linux and macOS, Comsol is
 expected to be installed at its respective default location.
 """
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #
@@ -22,7 +20,6 @@ from functools import lru_cache        # function cache
 from pathlib import Path               # file paths
 from sys import version_info           # Python version
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #
