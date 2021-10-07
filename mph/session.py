@@ -88,7 +88,7 @@ def start(cores=None, version=None, port=0):
         raise RuntimeError(error)
 
     if client:
-        logger.warning('mph.start() returning the existing client instance.')
+        logger.info('mph.start() returning the existing client instance.')
         return client
 
     session = option('session')
