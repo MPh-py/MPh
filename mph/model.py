@@ -712,6 +712,13 @@ class Model:
         in the node's properties will be used. If called without any
         arguments, all export nodes defined in the model are run using
         the default file names.
+        
+        Note that some export nodes, namely animations, require a
+        property other than `filename` to be set, and therefore passing
+        a `file` argument will fail. This may be corrected in a future
+        release. See [issue #43].
+        
+        [issue #43]: https://github.com/MPh-py/MPh/issues/43
         """
         if node is None:
             for node in self/'exports':
