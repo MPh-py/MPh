@@ -15,6 +15,7 @@ import atexit                          # exit handler
 import sys                             # system specifics
 import platform                        # platform information
 import threading                       # multi-threading
+import faulthandler                    # traceback dumps
 from logging import getLogger          # event logging
 
 ########################################
@@ -158,6 +159,7 @@ def cleanup():
         logger.info('Exiting the Java virtual machine.')
         sys.stdout.flush()
         sys.stderr.flush()
+        faulthandler.disable()
         jpype.java.lang.Runtime.getRuntime().exit(exit_code)
         # No code is reached from here on due to the hard exit of the JVM.
         logger.info('Java virtual machine has exited.')
