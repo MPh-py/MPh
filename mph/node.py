@@ -70,7 +70,7 @@ class Node:
        ├─ initial values
        ├─ anode
        └─ cathode
-   ```
+    ```
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
@@ -641,19 +641,109 @@ def get(java, name):
 # Inspection                           #
 ########################################
 
+def tree(node, levels=[], max_depth=None):
+    """
+    Displays the model tree.
+
+    This is a convenience function to visualize, in an interactive
+    Python session, the branch of the model tree underneath a given
+    `node`. It produces console output such as this:
+    ```console
+    >>> mph.tree(model/'physics')
+    physics
+    ├─ electrostatic
+    │  ├─ Laplace equation
+    │  ├─ zero charge
+    │  ├─ initial values
+    │  ├─ anode
+    │  └─ cathode
+    └─ electric currents
+       ├─ current conservation
+       ├─ insulation
+       ├─ initial values
+       ├─ anode
+       └─ cathode
+    ```
+
+    Often the node would refer to the model's root in order to inspect
+    the entire model tree. The model object itself is therefore also
+    accepted as an argument.
+
+    `levels` is used internally when traversing the model tree recursively.
+    Specify `max_depth` to possibly limit the number of lower branches.
+
+    Note that this function performs poorly in client–server mode, the
+    default on Linux and macOS, especially for complex models. The
+    client–server communication introduces inefficiencies that do not
+    occur in stand-alone mode, the default on Windows, where the model
+    tree, i.e. the hierarchy of related Java objects, can be traversed
+    reasonably fast.
+    """
+    if not isinstance(node, Node):
+        # Support passing the model directly instead of a node.
+        node = node/None
+    if max_depth and len(levels) > max_depth:
+        return
+    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
+    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
+    print(f'{markers}{node.name()}')
+    children = node.children()
+    last = len(children) - 1
+    for (index, child) in enumerate(children):
+        tree(child, levels + [index == last], max_depth)
+
+
 def inspect(java):
     """
     Inspects a Java node object.
 
-    This is basically a "pretty-fied" version of the output from the
-    built-in `dir` command. It displays (prints to the console) the
-    methods of a model node (as given by the Comsol API) as well as
-    the node's properties (if any are defined).
+    This is a convenience function to facilitate exploring Comsol's
+    Java API in an interactive Python session. It expects a Java
+    node object, such as the one returned by the `.java` property
+    of an existing node reference, which would implement the
+    [com.comsol.model.ModelEntity][1] interface.
+
+    Like any object, it could also be inspected with Python's built-in
+    `dir` command. This function here outputs a "pretty-fied" version
+    of that. It displays (prints to the console) the methods implemented
+    by the Java node as well as its properties, if any are defined.
+
+    ```console
+    >>> mph.inspect((model/'studies').java)
+    name:    StudyList
+    tag:     study
+    display: StudyList
+    doc:     StudyList
+    methods:
+      clear
+      copy
+      copyTo
+      create
+      duplicate
+      duplicateTo
+      equals
+      forEach
+      get
+      getContainer
+      index
+      iterator
+      model
+      move
+      remove
+      scope
+      size
+      spliterator
+      tags
+      uniquetag
+    ```
 
     The node's name, tag, and documentation reference marker are
     listed first. These access methods and a few others, which are
     common to all objects, are suppressed in the method list further
     down, for the sake of clarity.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/ModelEntity.html
     """
 
     # Also accept Node and Model instances.
@@ -709,33 +799,3 @@ def inspect(java):
         if name.startswith('_') or name in suppress:
             continue
         print(f'  {name}')
-
-
-def tree(node, levels=[], max_depth=None):
-    """
-    Displays the model tree.
-
-    This function displays a representation of the model tree in the
-    console. `node` would typically be the model's root node. `levels`
-    is used internally when traversing the model tree recursively.
-    Specify `max_depth` to possibly limit the number of lower branches.
-
-    Note that this function performs poorly in client–server mode, the
-    default on Linux and macOS, especially for complex models. The
-    client–server communication introduces inefficiencies that do not
-    occur in stand-alone mode, the default on Windows, where the model
-    tree, i.e. the hierarchy of related Java objects, can be traversed
-    reasonably fast.
-    """
-    if not isinstance(node, Node):
-        # Support passing the model directly instead of a node.
-        node = node/None
-    if max_depth and len(levels) > max_depth:
-        return
-    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
-    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
-    print(f'{markers}{node.name()}')
-    children = node.children()
-    last = len(children) - 1
-    for (index, child) in enumerate(children):
-        tree(child, levels + [index == last], max_depth)
