@@ -18,7 +18,7 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 
 ########################################
@@ -188,28 +188,28 @@ class Model:
         if geometry is None:
             if not geometries.children():
                 error = 'No geometry sequence defined in the model.'
-                logger.error(error)
+                log.error(error)
                 raise RuntimeError(error)
         elif isinstance(geometry, str):
             geometry = geometries/geometry
         elif isinstance(geometry, Node):
             if not geometry.parent() == self/'geometries':
                 error = f'Node "{geometry}" is not a geometry node.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
         else:
             error = f'Geometry {geometry!r} is neither string nor node.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         if geometry and not geometry.exists():
             error = f'Geometry sequence "{geometry.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         nodes = [geometry] if geometry else geometries.children()
         for node in nodes:
-            logger.info(f'Running geometry sequence "{node.name()}".')
+            log.info(f'Running geometry sequence "{node.name()}".')
             node.run()
-            logger.info('Finished geometry sequence.')
+            log.info('Finished geometry sequence.')
 
     def mesh(self, mesh=None):
         """Runs the named mesh sequence, or all of them if none given."""
@@ -217,28 +217,28 @@ class Model:
         if mesh is None:
             if not meshes.children():
                 error = 'No mesh sequences defined in the model.'
-                logger.error(error)
+                log.error(error)
                 raise RuntimeError(error)
         elif isinstance(mesh, str):
             mesh = meshes/mesh
         elif isinstance(mesh, Node):
             if not mesh.parent() == self/'meshes':
                 error = f'Node "{mesh}" is not a mesh node.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
         else:
             error = f'Mesh {mesh!r} is neither string nor node.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         if mesh and not mesh.exists():
             error = f'Mesh sequence "{mesh.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         nodes = [mesh] if mesh else meshes.children()
         for node in nodes:
-            logger.info(f'Running mesh sequence "{node.name()}".')
+            log.info(f'Running mesh sequence "{node.name()}".')
             node.run()
-            logger.info('Finished mesh sequence.')
+            log.info('Finished mesh sequence.')
 
     def solve(self, study=None):
         """Solves the named study, or all of them if none given."""
@@ -246,28 +246,28 @@ class Model:
         if study is None:
             if not studies.children():
                 error = 'No studies defined in the model.'
-                logger.error(error)
+                log.error(error)
                 raise RuntimeError(error)
         elif isinstance(study, str):
             study = studies/study
         elif isinstance(study, Node):
             if not study.parent() == self/'studies':
                 error = f'Node "{study}" is not a study node.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
         else:
             error = f'Study {study!r} is neither string nor node.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         if study and not study.exists():
             error = f'Study "{study.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         nodes = [study] if study else studies.children()
         for node in nodes:
-            logger.info(f'Running study "{node.name()}".')
+            log.info(f'Running study "{node.name()}".')
             node.run()
-            logger.info('Finished solving study.')
+            log.info('Finished solving study.')
 
     ####################################
     # Evaluation                       #
@@ -291,11 +291,11 @@ class Model:
                     dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
-                logger.error(error)
+                log.error(error)
                 raise TypeError(error)
         if not dataset.exists():
             error = f'Dataset "{dataset.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise ValueError(error)
 
         # Find corresponding solution.
@@ -308,7 +308,7 @@ class Model:
                 break
         else:
             error = f'Dataset "{dataset.name()}" does not refer to a solution.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
         # Get indices from solution info and values from solution itself.
@@ -336,11 +336,11 @@ class Model:
                     dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
-                logger.error(error)
+                log.error(error)
                 raise TypeError(error)
         if not dataset.exists():
             error = f'Dataset "{dataset.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise ValueError(error)
 
         # Find corresponding solution.
@@ -353,7 +353,7 @@ class Model:
                 break
         else:
             error = f'Dataset "{dataset.name()}" does not refer to a solution.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
         # Get indices and values from solution info.
@@ -399,7 +399,7 @@ class Model:
                     dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
-                logger.error(error)
+                log.error(error)
                 raise TypeError(error)
         if not (inner is None
                 or (isinstance(inner, str) and inner in ('first', 'last'))
@@ -408,11 +408,11 @@ class Model:
                 or (isinstance(inner, ndarray) and inner.dtype.kind == 'i')):
             error = ('Argument "inner", if specified, must be either '
                      '"first", "last", or a list/array of integers.')
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         if outer is not None and not isinstance(outer, (int, integer)):
             error = 'Argument "outer", if specified, must be an integer index.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
 
         # Find the default dataset if nothing specified.
@@ -425,14 +425,14 @@ class Model:
                     break
             else:
                 error = 'Could not determine default dataset.'
-                logger.error(error)
+                log.error(error)
                 raise RuntimeError(error)
 
         if not dataset.exists():
             error = f'Dataset "{dataset.name()}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise ValueError(error)
-        logger.info(f'Evaluating "{expression}" '
+        log.info(f'Evaluating "{expression}" '
                     f'on dataset "{dataset.name()}".')
 
         # Find corresponding solution.
@@ -445,13 +445,13 @@ class Model:
                 break
         else:
             error = f'Dataset "{dataset.name()}" does not refer to a solution.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
         # Make sure solution has actually been computed.
         if solution.java.isEmpty():
             error = 'The solution has not been computed.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
         # Try to perform a global evaluation, which may fail.
@@ -463,14 +463,14 @@ class Model:
         if outer is not None:
             eval.property('outersolnum', outer)
         try:
-            logger.debug('Trying global evaluation.')
+            log.debug('Trying global evaluation.')
             java = eval.java
             results = array(java.getData())
             if java.isComplex():
                 results = results.astype('complex')
                 results += 1j * array(java.getImagData())
             eval.remove()
-            logger.info('Finished global evaluation.')
+            log.info('Finished global evaluation.')
             if inner is None:
                 pass
             elif inner == 'first':
@@ -484,7 +484,7 @@ class Model:
             return results.squeeze()
         # Move on if this fails. Seems to not be a global expression then.
         except Exception:
-            logger.debug('Global evaluation failed. Moving on.')
+            log.debug('Global evaluation failed. Moving on.')
 
         # For particle datasets, create an "EvalPoint" feature.
         if dataset.type() == 'Particle':
@@ -507,7 +507,7 @@ class Model:
             eval.property('outersolnum', outer)
 
         # Retrieve the data.
-        logger.info('Retrieving data.')
+        log.info('Retrieving data.')
         java = eval.java
         if dataset.type() == 'Particle':
             results = array(java.getReal())
@@ -530,7 +530,7 @@ class Model:
                 if isinstance(inner, list):
                     inner = array(inner)
                 results = results[:, inner-1, :]
-        logger.info('Finished retrieving data.')
+        log.info('Finished retrieving data.')
 
         # Remove the temporary evaluation feature we added to the model.
         eval.remove()
@@ -590,7 +590,7 @@ class Model:
                     return str(self.java.param().get(name))
                 except Exception:
                     error = f'Parameter "{name}" is not defined.'
-                    logger.error(error)
+                    log.error(error)
                     raise ValueError(error) from None
             else:
                 try:
@@ -601,7 +601,7 @@ class Model:
                         return complex(value[0], value[1])
                     except Exception:
                         error = f'Evaluation of parameter "{name}" failed.'
-                        logger.error(error)
+                        log.error(error)
                         raise RuntimeError(error) from None
         else:
             if isinstance(value, complex):
@@ -703,11 +703,11 @@ class Model:
         `import` statement.
         """
         file = Path(file)
-        logger.info(f'Loading external data from file "{file.name}".')
+        log.info(f'Loading external data from file "{file.name}".')
         node.java.discardData()
         node.property('filename', f'{file}')
         node.java.importData()
-        logger.info('Finished loading external data.')
+        log.info('Finished loading external data.')
 
     def export(self, node=None, file=None):
         """
@@ -727,9 +727,9 @@ class Model:
         """
         if node is None:
             for node in self/'exports':
-                logger.info(f'Running export node "{node.name()}".')
+                log.info(f'Running export node "{node.name()}".')
                 node.run()
-                logger.info('Finished running export.')
+                log.info('Finished running export.')
         else:
             if isinstance(node, str):
                 if '/' in node:
@@ -738,33 +738,33 @@ class Model:
                     node = self/'exports'/node
             if not node.exists():
                 error = f'Node "{node}" does not exist in model tree.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
             if file:
                 node.property('filename', str(file))
-            logger.info(f'Running export node "{node.name()}".')
+            log.info(f'Running export node "{node.name()}".')
             node.run()
-            logger.info('Finished running export.')
+            log.info('Finished running export.')
 
     def clear(self):
         """Clears stored solution, mesh, and plot data."""
-        logger.info('Clearing stored plot data.')
+        log.info('Clearing stored plot data.')
         (self/'plots').java.clearStoredPlotData()
-        logger.info('Finished clearing plots.')
-        logger.info('Clearing solution data.')
+        log.info('Finished clearing plots.')
+        log.info('Clearing solution data.')
         for solution in self/'solutions':
             solution.java.clearSolution()
-        logger.info('Finished clearing solutions.')
-        logger.info('Clearing mesh data.')
+        log.info('Finished clearing solutions.')
+        log.info('Clearing mesh data.')
         for mesh in self/'meshes':
             mesh.java.clearMesh()
-        logger.info('Finished clearing meshes.')
+        log.info('Finished clearing meshes.')
 
     def reset(self):
         """Resets the modeling history."""
-        logger.info('Resetting modeling history.')
+        log.info('Resetting modeling history.')
         self.java.resetHist()
-        logger.info('Finished resetting history.')
+        log.info('Finished resetting history.')
 
     def save(self, path=None, format=None):
         """
@@ -802,7 +802,7 @@ class Model:
                 format = 'VBA'
             else:
                 error = f'Cannot deduce file format from ending "{suffix}".'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
 
         # Allow synonyms for format and map to Comsol's file type.
@@ -816,7 +816,7 @@ class Model:
             (format, type) = ('VBA', 'vba')
         else:
             error = f'Invalid file format "{format}".'
-            logger.error(error)
+            log.error(error)
             raise ValueError(error)
 
         # Use model name if no file name specified.
@@ -824,18 +824,18 @@ class Model:
             file = self.file()
             if format == 'Comsol':
                 if file.is_file():
-                    logger.info(f'Saving model "{self}".')
+                    log.info(f'Saving model "{self}".')
                     self.java.save()
                 elif file.is_dir():
                     file = file/f'{self}.{type}'
-                    logger.info(f'Saving model as "{file.name}".')
+                    log.info(f'Saving model as "{file.name}".')
                     self.java.save(str(file))
             else:
                 if file.is_file():
                     file = file.with_suffix(f'.{type}')
                 elif file.is_dir():
                     file = file/f'{self}.{type}'
-                logger.info(f'Saving model as "{file.name}".')
+                log.info(f'Saving model as "{file.name}".')
                 self.java.save(str(file), type)
         # Otherwise save at given path.
         else:
@@ -843,12 +843,12 @@ class Model:
                 file = (path/self.name()).with_suffix(f'.{type}')
             else:
                 file = path.with_suffix(f'.{type}')
-            logger.info(f'Saving model as "{file.name}".')
+            log.info(f'Saving model as "{file.name}".')
             if format == 'Comsol':
                 self.java.save(str(file))
             else:
                 self.java.save(str(file), type)
-        logger.info('Finished saving model.')
+        log.info('Finished saving model.')
 
     ####################################
     # Deprecation                      #
@@ -863,7 +863,7 @@ class Model:
         warn('Model.features() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
@@ -881,14 +881,14 @@ class Model:
         warn('Model.toggle() is deprecated. Use the Node class instead.')
         if physics not in self.physics():
             error = f'No physics interface named "{physics}".'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         node = self.java.physics(ptag)
         if feature not in self.features(physics):
             error = f'No feature named "{feature}" in physics "{physics}".'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         tags = [tag for tag in node.feature().tags()]
         ftag = tags[self.features(physics).index(feature)]
@@ -908,11 +908,11 @@ class Model:
                 break
         else:
             error = f'Interpolation function "{interpolation}" does not exist.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         file = Path(file)
-        logger.info(f'Loading external data from file "{file.name}".')
+        log.info(f'Loading external data from file "{file.name}".')
         self.java.func(tag).discardData()
         self.java.func(tag).set('filename', f'{file}')
         self.java.func(tag).importData()
-        logger.info('Finished loading external data.')
+        log.info('Finished loading external data.')

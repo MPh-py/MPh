@@ -24,7 +24,7 @@ from logging import getLogger          # event logging
 client = None                          # client instance
 server = None                          # server instance
 thread = None                          # current thread
-logger = getLogger(__package__)        # event logger
+log    = getLogger(__package__)        # event log
 
 
 ########################################
@@ -81,11 +81,11 @@ def start(cores=None, version=None, port=0):
         thread = threading.current_thread()
     elif thread is not threading.current_thread():
         error = 'Cannot access client instance from different thread.'
-        logger.error(error)
+        log.error(error)
         raise RuntimeError(error)
 
     if client:
-        logger.info('mph.start() returning the existing client instance.')
+        log.info('mph.start() returning the existing client instance.')
         return client
 
     session = option('session')
@@ -95,7 +95,7 @@ def start(cores=None, version=None, port=0):
         else:
             session = 'client-server'
 
-    logger.info('Starting local Comsol session.')
+    log.info('Starting local Comsol session.')
     if session == 'stand-alone':
         client = Client(cores=cores, version=version)
     elif session == 'client-server':
@@ -103,7 +103,7 @@ def start(cores=None, version=None, port=0):
         client = Client(cores=cores, version=version, port=server.port)
     else:
         error = f'Invalid session type "{session}".'
-        logger.error(error)
+        log.error(error)
         raise ValueError(error)
     return client
 
@@ -152,14 +152,14 @@ def cleanup():
             client.disconnect()
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
-            logger.exception(error)
+            log.exception(error)
     if server and server.running():
         server.stop()
     if jpype.isJVMStarted():
-        logger.info('Exiting the Java virtual machine.')
+        log.info('Exiting the Java virtual machine.')
         sys.stdout.flush()
         sys.stderr.flush()
         faulthandler.disable()
         jpype.java.lang.Runtime.getRuntime().exit(exit_code)
         # No code is reached from here on due to the hard exit of the JVM.
-        logger.info('Java virtual machine has exited.')
+        log.info('Java virtual machine has exited.')

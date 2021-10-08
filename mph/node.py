@@ -19,7 +19,7 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 
 ########################################
@@ -110,7 +110,7 @@ class Node:
             path = path.path
         else:
             error = f'Node path {path!r} is not a string or Node instance.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         self.model = model
         """Model object this node refers to."""
@@ -283,11 +283,11 @@ class Node:
         """Renames the node."""
         if self.is_root():
             error = 'Cannot rename the root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if self.is_group():
             error = 'Cannot rename a built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         java = self.java
         if java:
@@ -298,16 +298,16 @@ class Node:
         """Assigns a new tag to the node."""
         if self.is_root():
             error = 'Cannot change tag of root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if self.is_group():
             error = 'Cannot change tag of built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         java = self.java
         if not java:
             error = f'Node "{self}" does not exist in model tree.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         java.tag(tag)
 
@@ -344,7 +344,7 @@ class Node:
         java = self.java
         if not java:
             error = f'Node "{self}" does not exist in model tree.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         if action == 'flip':
             java.active(not java.isActive())
@@ -358,11 +358,11 @@ class Node:
         java = self.java
         if not java:
             error = f'Node "{self}" does not exist in model tree.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         if not hasattr(java, 'run'):
             error = f'Node "{self}" does not implement "run" operation.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
         java.run()
 
@@ -380,7 +380,7 @@ class Node:
         """
         if self.is_root():
             error = 'Cannot create nodes at root of model tree.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         java = self.java
         container = None
@@ -393,7 +393,7 @@ class Node:
             container = java.feature()
         if not hasattr(container, 'uniquetag'):
             error = f'Node {self} does not support feature creation.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
         for argument in arguments:
             if isinstance(argument, str):
@@ -426,7 +426,7 @@ class Node:
                 tag = container.uniquetag(pattern)
             else:
                 tag = pattern
-            logger.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
+            log.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
             child.retag(tag)
         return child
 
@@ -434,15 +434,15 @@ class Node:
         """Removes the node from the model tree."""
         if self.is_root():
             error = 'Cannot remove the root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if self.is_group():
             error = 'Cannot remove a built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if not self.exists():
             error = f'Node "{self}" does not exist in model tree.'
-            logger.error(error)
+            log.error(error)
             raise LookupError(error)
         parent = self.parent()
         container = parent.java if parent.is_group() else parent.java.feature()
@@ -562,21 +562,21 @@ def cast(value):
         elif value.dtype.kind == 'O':
             if value.ndim > 2:
                 error = 'Cannot cast object arrays of dimension higher than 2.'
-                logger.error(error)
+                log.error(error)
                 raise TypeError(error)
             if len(value) > 2:
                 error = 'Will not cast object arrays with more than two rows.'
-                logger.error(error)
+                log.error(error)
                 raise TypeError(error)
             rows = [row.astype(float) for row in value]
             return JArray(JDouble, 2)(rows)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
     else:
         error = f'Cannot cast values of data type "{type(value).__name__}".'
-        logger.error(error)
+        log.error(error)
         raise TypeError(error)
 
 
@@ -605,7 +605,7 @@ def get(java, name):
             rows = [array(value[0]), array(value[1])]
         else:
             error = 'Cannot convert double-row matrix with more than two rows.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         return array(rows, dtype=object)
     elif datatype == 'File':
@@ -633,7 +633,7 @@ def get(java, name):
             return [[]]
     else:
         error = f'Cannot convert Java data type "{datatype}".'
-        logger.error(error)
+        log.error(error)
         raise TypeError(error)
 
 

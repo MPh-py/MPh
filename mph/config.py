@@ -12,7 +12,7 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 options = {
     'session':  'platform-dependent',
@@ -38,7 +38,7 @@ def option(name=None, value=None):
         return options
     if name not in options:
         error = f'Configuration option "{name}" does not exist.'
-        logger.error(error)
+        log.error(error)
         raise LookupError(error)
     if value is None:
         return options[name]
@@ -87,15 +87,15 @@ def load(file=None):
             if file.exists():
                 break
         else:
-            logger.debug('Using default configuration.')
+            log.debug('Using default configuration.')
             return
-    logger.debug(f'Loading configuration from "{file}".')
+    log.debug(f'Loading configuration from "{file}".')
     parser = configparser.RawConfigParser(interpolation=None)
     parser.optionxform = str
     parser.read(file, encoding='UTF-8')
     section = 'config'
     if section not in parser.sections():
-        logger.debug(f'Section [{section}] missing in configuration file.')
+        log.debug(f'Section [{section}] missing in configuration file.')
         return
     for (key, value) in options.items():
         if key in parser[section]:

@@ -21,7 +21,7 @@ import faulthandler                    # traceback dumps
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 
 ########################################
@@ -91,7 +91,7 @@ class Client:
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
-            logger.error(error)
+            log.error(error)
             raise NotImplementedError(error)
 
         # Discover Comsol back-end.
@@ -103,20 +103,20 @@ class Client:
         # See "Errors reported by Python fault handler" in JPype docs.
         # The problem may be the SIGSEGV signal, see JPype issue #886.
         if platform.system() == 'Windows' and faulthandler.is_enabled():
-            logger.debug('Turning off Python fault handlers.')
+            log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
 
         # Start the Java virtual machine.
-        logger.debug(f'JPype version is {jpype.__version__}.')
-        logger.info('Starting Java virtual machine.')
+        log.debug(f'JPype version is {jpype.__version__}.')
+        log.info('Starting Java virtual machine.')
         java_args = [str(backend['jvm'])]
         if option('classkit'):
             java_args += ['-Dcs.ckl']
-        logger.debug(f'JVM arguments: {java_args}')
+        log.debug(f'JVM arguments: {java_args}')
         jpype.startJVM(*java_args,
                        classpath=str(backend['root']/'plugins'/'*'),
                        convertStrings=False)
-        logger.info('Java virtual machine has started.')
+        log.info('Java virtual machine has started.')
 
         # Import Comsol client object, a static class, i.e. singleton.
         # See `ModelUtil()` constructor in [1].
@@ -131,7 +131,7 @@ class Client:
         # Otherwise initialize a stand-alone client.
         else:
             self.standalone = True
-            logger.info('Initializing stand-alone client.')
+            log.info('Initializing stand-alone client.')
 
             # Instruct Comsol to limit number of processor cores to use.
             if cores:
@@ -158,11 +158,11 @@ class Client:
                 java.setPreference('tempfiles.recovery.checkforrecoveries',
                                    'off')
             except Exception:
-                logger.debug('Could not turn off check for recovery files.')
+                log.debug('Could not turn off check for recovery files.')
             java.setPreference('tempfiles.saving.optimize', 'filesize')
 
             # Log that we're done so the start-up time can be inspected.
-            logger.info('Stand-alone client initialized.')
+            log.info('Stand-alone client initialized.')
 
         # Document instance attributes.
         # The doc-strings are so awkwardly placed at the end here, instead
@@ -208,7 +208,7 @@ class Client:
                     break
             else:
                 error = f'Model "{name}" has not been loaded by client.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
             return model
         return NotImplemented
@@ -244,12 +244,12 @@ class Client:
         """Loads a model from the given `file` and returns it."""
         file = Path(file).resolve()
         if self.caching() and file in self.files():
-            logger.info(f'Retrieving "{file.name}" from cache.')
+            log.info(f'Retrieving "{file.name}" from cache.')
             return self.models()[self.files().index(file)]
         tag = self.java.uniquetag('model')
-        logger.info(f'Loading model "{file.name}".')
+        log.info(f'Loading model "{file.name}".')
         model = Model(self.java.load(tag, str(file)))
-        logger.info('Finished loading model.')
+        log.info('Finished loading model.')
         return model
 
     def caching(self, state=None):
@@ -270,7 +270,7 @@ class Client:
             option('caching', state)
         else:
             error = 'Caching state can only be set to either True or False.'
-            logger.error(error)
+            log.error(error)
             raise ValueError(error)
 
     def create(self, name=None):
@@ -286,7 +286,7 @@ class Client:
             model.rename(name)
         else:
             name = model.name()
-        logger.debug(f'Created model "{name}" with tag "{java.tag()}".')
+        log.debug(f'Created model "{name}" with tag "{java.tag()}".')
         return model
 
     def remove(self, model):
@@ -294,7 +294,7 @@ class Client:
         if isinstance(model, str):
             if model not in self.names():
                 error = f'No model named "{model}" exists.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
             model = self/model
         elif isinstance(model, Model):
@@ -302,24 +302,24 @@ class Client:
                 model.java.tag()
             except Exception:
                 error = 'Model does not exist.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
             if model not in self.models():
                 error = 'Model does not exist.'
-                logger.error(error)
+                log.error(error)
                 raise ValueError(error)
         else:
             error = 'Model must either be a model name or Model instance.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         name = model.name()
         tag  = model.java.tag()
-        logger.debug(f'Removing model "{name}" with tag "{tag}".')
+        log.debug(f'Removing model "{name}" with tag "{tag}".')
         self.java.remove(tag)
 
     def clear(self):
         """Removes all loaded models from memory."""
-        logger.debug('Clearing all models from memory.')
+        log.debug('Clearing all models from memory.')
         self.java.clear()
 
     ####################################
@@ -339,13 +339,13 @@ class Client:
         """
         if self.standalone:
             error = 'Stand-alone clients cannot connect to a server.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
         if self.port:
             error = 'Client already connected to a server. Disconnect first.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
-        logger.info(f'Connecting to server "{host}" at port {port}.')
+        log.info(f'Connecting to server "{host}" at port {port}.')
         self.java.connect(host, port)
         self.host = host
         self.port = port
@@ -358,13 +358,13 @@ class Client:
         `-multi on`, will shut down when the client disconnects.
         """
         if self.port:
-            logger.debug('Disconnecting from server.')
+            log.debug('Disconnecting from server.')
             self.java.disconnect()
             self.host = None
             self.port = None
         else:
             error = 'The client is not connected to a server.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
 
@@ -383,30 +383,30 @@ def check_environment(backend):
         var = 'LD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         path = os.environ[var].split(os.pathsep)
         lib = root/'lib'/'glnxa64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         gcc = root/'lib'/'glnxa64'/'gcc'
         if gcc.exists() and str(gcc) not in path:
-            logger.warning(f'Folder "{gcc}" missing in library search path.')
+            log.warning(f'Folder "{gcc}" missing in library search path.')
         gra = str(root/'ext'/'graphicsmagick'/'glnxa64')
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'glnxa64'
         if cad.exists() and str(cad) not in path:
-            logger.warning(f'Folder "{cad}" missing in library search path.')
+            log.warning(f'Folder "{cad}" missing in library search path.')
     elif system == 'Darwin':
         var = 'DYLD_LIBRARY_PATH'
         if var not in os.environ:
             error = f'Library search path {var} not set in environment.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         if var in os.environ:
             path = os.environ[var].split(os.pathsep)
@@ -415,13 +415,13 @@ def check_environment(backend):
         lib = root/'lib'/'maci64'
         if str(lib) not in path:
             error = f'Folder "{lib}" missing in library search path.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         gra = root/'ext'/'graphicsmagick'/'maci64'
         if str(gra) not in path:
             error = f'Folder "{gra}" missing in library search path.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error + '\n' + help)
         cad = root/'ext'/'cadimport'/'maci64'
         if cad.exists() and str(cad) not in path:
-            logger.warning(f'Folder "{cad}" missing in library search path.')
+            log.warning(f'Folder "{cad}" missing in library search path.')

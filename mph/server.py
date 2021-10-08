@@ -20,7 +20,7 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 
 ########################################
@@ -71,14 +71,14 @@ class Server:
         # Start Comsol server as an external process.
         backend = discovery.backend(version)
         server  = backend['server']
-        logger.info('Starting external server process.')
+        log.info('Starting external server process.')
         arguments = ['-login', 'auto', '-graphics']
         if option('classkit'):
             arguments += ['-ckl']
         if cores:
             arguments += ['-np', str(cores)]
             noun = 'core' if cores == 1 else 'cores'
-            logger.info(f'Server restricted to {cores} processor {noun}.')
+            log.info(f'Server restricted to {cores} processor {noun}.')
         if port is not None:
             arguments += ['-port', str(port)]
         command = server + arguments
@@ -103,7 +103,7 @@ class Server:
                 break
             if now() - t0 > timeout:
                 error = 'Sever failed to start within time-out period.'
-                logger.error(error)
+                log.error(error)
                 raise TimeoutError(error)
 
         # Bail out if server exited with an error.
@@ -114,14 +114,14 @@ class Server:
         # actual error message.
         if port is None:
             error = f'Starting server failed: {lines[-1]}'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
-        logger.info(f'Server listening on port {port}.')
+        log.info(f'Server listening on port {port}.')
 
         # Verify port number is correct if a specific one was requested.
         if requested and port != requested:
             error = f'Server port is {port}, but {requested} was requested.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
 
         # Save information in instance attributes.
@@ -144,13 +144,13 @@ class Server:
     def stop(self, timeout=10):
         """Shuts down the server."""
         if not self.running():
-            logger.error(f'Server on port {self.port} has already stopped.')
+            log.error(f'Server on port {self.port} has already stopped.')
             return
-        logger.info(f'Telling the server on port {self.port} to shut down.')
+        log.info(f'Telling the server on port {self.port} to shut down.')
         try:
             self.process.communicate(input='close', timeout=timeout)
-            logger.info(f'Server on port {self.port} has stopped.')
+            log.info(f'Server on port {self.port} has stopped.')
         except TimeoutExpired:
-            logger.warning('Server did not shut down within time-out period.')
-            logger.info('Trying to forcefully terminate server process.')
+            log.warning('Server did not shut down within time-out period.')
+            log.info('Trying to forcefully terminate server process.')
             self.process.kill()
