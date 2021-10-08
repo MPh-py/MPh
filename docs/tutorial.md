@@ -356,7 +356,9 @@ that record.
 Most functionality that the library offers is covered in this tutorial.
 The few things that were left out can be gleaned from the [API
 documentation](api). A number of use-case examples are showcased in
-chapter [Demonstrations](demonstrations).
+chapter [Demonstrations](demonstrations). That chapter and the API
+documentation also explain how to go beyond the scope of this library
+and access the full Comsol API from Python, if needed.
 
 
 [capa]:  https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph

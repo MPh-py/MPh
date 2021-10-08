@@ -28,11 +28,10 @@ class Model:
     """
     Represents a Comsol model.
 
-    This is a Python wrapper for the Comsol model's Java API. The
-    class is not intended to be instantiated directly. Rather, the
+    The class is not intended to be instantiated directly. Rather, the
     model would be loaded from a file by the client.
 
-    Example:
+    Example usage:
     ```python
         import mph
         client = mph.start()
@@ -51,17 +50,21 @@ class Model:
     structure, though some such functionality is offered here, and
     even more of it through the `Node` class.
 
-    The full set of features offered by the Comsol Java API can however
-    be accessed indirectly, via the instance attribute `.java`. Refer
-    to the Comsol Programming Manual for guidance.
+    This class is a wrapper around the [com.comsol.model.Model][1]
+    Java class, which itself is wrapped by JPype and can be accessed
+    directly via the `.java` attribute. The full Comsol functionality is
+    thus available if needed.
 
     The `parent` argument to the constructor is usually that internal
-    Java object around which this class here is wrapped. But in order
-    to simplify extending the class with custom functionality, the
-    constructor also accepts instances of this class or a child class.
-    In that case, it will preserve the original `.java` object throughout
-    the class hierarchy so that you can simply "type-cast" an existing
-    `Model` instance (as loaded by the client) to a derived child class.
+    Java object. But in order to simplify extending the class with
+    custom functionality, the constructor also accepts instances of
+    this very class or a child class. In that case, it will preserve
+    the original `.java` reference throughout the class hierarchy so
+    that it is possible to "type-cast" an existing `Model` instance
+    (as loaded by the client) to a derived child class.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/Model.html
     """
 
     ####################################
@@ -70,9 +73,11 @@ class Model:
 
     def __init__(self, parent):
         if isinstance(parent, Model):
-            self.java = parent.java
+            java = parent.java
         else:
-            self.java = parent
+            java = parent
+        self.java = java
+        """Java object that this instance is wrapped around."""
 
     def __str__(self):
         return self.name()
@@ -712,12 +717,12 @@ class Model:
         in the node's properties will be used. If called without any
         arguments, all export nodes defined in the model are run using
         the default file names.
-        
+
         Note that some export nodes, namely animations, require a
         property other than `filename` to be set, and therefore passing
         a `file` argument will fail. This may be corrected in a future
         release. See [issue #43].
-        
+
         [issue #43]: https://github.com/MPh-py/MPh/issues/43
         """
         if node is None:

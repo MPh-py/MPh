@@ -38,7 +38,7 @@ def start(cores=None, version=None, port=0):
     running a Comsol session on the local machine, i.e. *not* have a
     client connect to a remote server elsewhere on the network.
 
-    Example:
+    Example usage:
     ```python
         import mph
         client = mph.start(cores=1)

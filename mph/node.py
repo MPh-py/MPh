@@ -29,9 +29,14 @@ class Node:
     """
     Represents a model node.
 
-    Nodes work similarly to `pathlib.Path` objects from Python's
-    standard library. They support string concatenation to the right
-    with the division operator in order to reference child nodes:
+    This class makes it possible to navigate the model tree, inspect a
+    node, namely its properties, and manipulate it, like toggling it
+    on/off, creating child nodes, or "running" it.
+
+    Instances of this class reference a node in the model tree and work
+    similarly to `pathlib.Path` objects from Python's standard library.
+    They support string concatenation to the right with the division
+    operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -48,6 +53,25 @@ class Node:
     False
     ```
 
+    In interactive sessions, the convenience function `mph.tree()` may
+    prove useful to see the node's branch in the model tree at a glance:
+    ```console
+    >>> mph.tree(model/'physics')
+    physics
+    ├─ electrostatic
+    │  ├─ Laplace equation
+    │  ├─ zero charge
+    │  ├─ initial values
+    │  ├─ anode
+    │  └─ cathode
+    └─ electric currents
+       ├─ current conservation
+       ├─ insulation
+       ├─ initial values
+       ├─ anode
+       └─ cathode
+   ```
+
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
     demo model from the Tutorial. These literal forward slashes can be
@@ -60,12 +84,17 @@ class Node:
     Node('datasets')
     ```
 
-    This class allows inspecting a node, such as its properties and
-    child nodes, as well as manipulating it to some extent, like
-    toggling it on/off, creating child nodes, or "running" it. Not all
-    actions made available by Comsol are exposed here. Those missing can
-    however be triggered in the Java layer, which is accessible via the
-    `.java` property.
+    If the node refers to an existing model feature, then the instance
+    wraps the corresponding Java object, which could belong to a variety
+    of classes, but would necessarily implement the
+    [com.comsol.model.ModelEntity][1] interface. That Java object
+    can be accessed directly via the `.java` property. The full Comsol
+    functionality is thus available if needed. The convenience function
+    `mph.inspect()` is provided for introspection of the Java object in
+    an interactive session.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/ModelEntity.html
     """
 
     ####################################
@@ -74,39 +103,15 @@ class Node:
 
     def __init__(self, model, path=None):
         if path is None:
-            self.path = ('',)
+            path = ('',)
         elif isinstance(path, str):
-            self.path = parse(path)
+            path = parse(path)
         elif isinstance(path, Node):
-            self.path = path.path
+            path = path.path
         else:
             error = f'Node path {path!r} is not a string or Node instance.'
             logger.error(error)
             raise TypeError(error)
-        self.alias = {
-            'parameter':  'parameters',
-            'function':   'functions',
-            'component':  'components',
-            'geometry':   'geometries',
-            'view':       'views',
-            'selection':  'selections',
-            'variable':   'variables',
-            'coupling':   'couplings',
-            'material':   'materials',
-            'mesh':       'meshes',
-            'study':      'studies',
-            'solution':   'solutions',
-            'batch':      'batches',
-            'dataset':    'datasets',
-            'evaluation': 'evaluations',
-            'table':      'tables',
-            'plot':       'plots',
-            'result':     'plots',
-            'results':    'plots',
-            'export':     'exports',
-        }
-        if self.path[0] in self.alias:
-            self.path = (self.alias[self.path[0]],) + self.path[1:]
         self.groups = {
             'parameters':   'self.model.java.param().group()',
             'functions':    'self.model.java.func()',
@@ -130,7 +135,36 @@ class Node:
             'plots':        'self.model.java.result()',
             'exports':      'self.model.java.result().export()',
         }
+        """Mapping of the built-in groups to corresponding Java objects."""
+        self.alias = {
+            'parameter':  'parameters',
+            'function':   'functions',
+            'component':  'components',
+            'geometry':   'geometries',
+            'view':       'views',
+            'selection':  'selections',
+            'variable':   'variables',
+            'coupling':   'couplings',
+            'material':   'materials',
+            'mesh':       'meshes',
+            'study':      'studies',
+            'solution':   'solutions',
+            'batch':      'batches',
+            'dataset':    'datasets',
+            'evaluation': 'evaluations',
+            'table':      'tables',
+            'plot':       'plots',
+            'result':     'plots',
+            'results':    'plots',
+            'export':     'exports',
+        }
+        """Accepted aliases for the names of built-in groups."""
         self.model = model
+        """Model object this node refers to."""
+        if path[0] in self.alias:
+            path = (self.alias[path[0]],) + path[1:]
+        self.path = path
+        """Path of this node reference from the model's root."""
 
     def __str__(self):
         return join(self.path)
@@ -162,7 +196,7 @@ class Node:
     @property
     def java(self):
         """
-        Returns the Java object this node maps to.
+        Java object this node maps to, if any.
 
         Note that this is a property, not an attribute. Internally,
         it is a function that performs a top-down search of the model

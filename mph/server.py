@@ -28,14 +28,14 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Server:
     """
-    Manages a Comsol server instance.
+    Manages a Comsol server process.
 
     Instances of this class start and eventually stop Comsol servers
     running on the local machine. Clients, either running on the same
     machine or elsewhere on the network, can then connect to the
-    server at the port it exposes for that purpose.
+    server at the network port it exposes for that purpose.
 
-    Example:
+    Example usage:
     ```python
         import mph
         server = mph.Server(cores=1)
@@ -53,12 +53,13 @@ class Server:
     The server can be instructed to use a specific network `port` for
     communication with clients by passing the number of a free port
     explicitly. If `port=None`, the default, the server will try to
-    use the default port 2036 or, in case it is blocked by another
-    server, will try subsequent numbers until it finds a free port.
-    (This is not robust and may lead to start-up failures if multiple
-    servers are spun up at once.) If `port=0`, the server will select
-    a random free port. The actual port number of a server instance
-    can be accessed via its `port` attribute once it has started.
+    use port 2036 or, in case it is blocked by another server already
+    running, will try subsequent numbers until it finds a free port.
+    This is also Comsol's default behavior. It is however not robust
+    and may lead to start-up failures if multiple servers are spinning
+    up at the same time. Pass `port=0` to work around this issue. The
+    server will then select a random free port, which will almost always
+    avoid collisions.
 
     A `timeout` can be set for the server start-up. The default is 60
     seconds. `TimeoutError` is raised if the server failed to start
@@ -123,11 +124,15 @@ class Server:
             logger.error(error)
             raise RuntimeError(error)
 
-        # Save useful information in instance attributes.
+        # Save information in instance attributes.
         self.version = backend['name']
-        self.cores   = cores
-        self.port    = port
+        """Comsol version (e.g., `'5.3a'`) the server is running on."""
+        self.cores = cores
+        """Number of processor cores the server was requested to use."""
+        self.port = port
+        """Port number the server is listening on for client connections."""
         self.process = process
+        """Subprocess that the server is running in."""
 
     def __repr__(self):
         return f"{self.__class__.__name__}(port={self.port})"

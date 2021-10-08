@@ -32,10 +32,10 @@ class Client:
     Manages the Comsol client instance.
 
     A client can either be a stand-alone instance or it could connect
-    to a Comsol server instance started independently, possibly on a
-    different machine on the network.
+    to a Comsol server started independently, possibly on a different
+    machine on the network.
 
-    Example:
+    Example usage:
     ```python
         import mph
         client = mph.Client(cores=1)
@@ -45,21 +45,13 @@ class Client:
         client.remove(model)
     ```
 
-    Due to limitations of the Java bridge, provided by the JPype
-    library, only one client can be instantiated at a time. This is
-    because JPype cannot manage more than one Java virtual machine
-    within the same Python session. Separate Python processes would
-    have to be started, or spawned, to work around this limitation.
-    `NotImplementedError` is therefore raised if another client is
-    already running.
-
     The number of `cores` (threads) the client instance uses can
     be restricted by specifying a number. Otherwise all available
     cores are used.
 
     A specific Comsol `version` can be selected if several are
     installed, for example `version='5.3a'`. Otherwise the latest
-    version is used, and reported via the `.version` attribute.
+    version is used.
 
     Initializes a stand-alone Comsol session if no `port` number is
     specified. Otherwise tries to connect to the Comsol server
@@ -67,9 +59,20 @@ class Client:
     address defaults to `'localhost'`, but could be any domain name
     or IP address.
 
-    Internally, the client is a wrapper around the `ModelUtil` object
-    provided by Comsol's Java API, which may also be accessed directly
-    via the instance attribute `.java`.
+    This class is a wrapper around the [com.comsol.model.util.ModelUtil][1]
+    Java class, which itself is wrapped by JPype and can be accessed
+    directly via the `.java` attribute. The full Comsol functionality is
+    thus available if needed.
+
+    However, as that Comsol class is a singleton, i.e. a static class
+    that cannot be instantiated, we can only run one client within the
+    same Python process. Separate Python processes would have to be
+    created and coordinated in order to work around this limitation.
+    Within the same process, `NotImplementedError` is raised if a client
+    is already running.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/util/ModelUtil.html
     """
 
     ####################################
@@ -86,10 +89,10 @@ class Client:
 
         # Initialize instance attributes.
         self.version    = None
+        self.standalone = None
         self.port       = None
         self.host       = None
         self.java       = None
-        self.standalone = None
 
         # Discover Comsol back-end.
         backend = discovery.backend(version)
@@ -164,6 +167,18 @@ class Client:
             # Log that we're done so the start-up time can be inspected.
             logger.info('Stand-alone client initialized.')
 
+        # Document instance attributes.
+        self.version = self.version
+        """Comsol version (e.g., `'5.3a'`) the client is running on."""
+        self.standalone = self.standalone
+        """Whether this is a stand-alone client or connected to a server."""
+        self.port = self.port
+        """Port number on which the client has connected to the server."""
+        self.host = self.host
+        """Host name or IP address of the server the client is connected to."""
+        self.java = self.java
+        """Java object that this class is wrapped around."""
+
     def __repr__(self):
         if self.standalone:
             connection = 'stand-alone'
@@ -203,7 +218,7 @@ class Client:
 
     @property
     def cores(self):
-        """Number of processor cores (threads) the client session is using."""
+        """Number of processor cores (threads) the Comsol session is using."""
         cores = self.java.getPreference('cluster.processor.numberofprocessors')
         cores = int(str(cores))
         return cores
