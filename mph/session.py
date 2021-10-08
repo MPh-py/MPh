@@ -126,24 +126,12 @@ def exception_hook_sys(exc_type, exc_value, exc_traceback):
     exception_handler_sys(exc_type, exc_value, exc_traceback)
 
 
-def exception_hook_threads(info):
-    """Sets exit code to 1 if exception raised in any other thread."""
-    global exit_code
-    exit_code = 1
-    exception_handler_threads(info)
-
-
 exit_code = 0
 exit_function = sys.exit
 sys.exit = exit_hook
 
 exception_handler_sys = sys.excepthook
 sys.excepthook = exception_hook_sys
-
-# Only available as of Python 3.8, see bugs.python.org/issue1230540.
-if hasattr(threading, 'excepthook'):
-    exception_handler_threads = threading.excepthook
-    threading.excepthook = exception_hook_threads
 
 
 @atexit.register
