@@ -17,7 +17,7 @@ CodeCov for each published release or even commit.
 from subprocess import run
 from pathlib import Path
 
-tests = ['config', 'discovery', 'server', 'session', 'standalone',
+tests = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
          'client', 'node', 'model', 'processes']
 
 here = Path(__file__).resolve().parent

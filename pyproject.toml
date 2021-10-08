@@ -27,7 +27,7 @@ dependencies = ['JPype1', 'NumPy']
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
+docs = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
 test = ['pyTest', 'pyTest-cov', 'flake8']
 
 [project.urls]

@@ -1,5 +1,5 @@
 ﻿Steps to take when releasing a new version:
-* Bump version number and enter current date in `mph/__init__.py`.
+* Bump version number and enter current date in `mph/meta.py`.
 * Add the release notes to `docs/releases.md`.
 * Add a dedicated commit for the version bump.
 * Push to GitHub: `git push origin main`.

@@ -16,7 +16,7 @@ from pathlib    import Path
 from timeit     import default_timer as now
 import sys
 
-tests = ['config', 'discovery', 'server', 'session', 'standalone',
+tests = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
          'client', 'node', 'model', 'processes']
 
 folder = Path(__file__).parent.parent / 'tests'

@@ -33,17 +33,16 @@ extensions = [
     'sphinx.ext.mathjax',              # Render math via JavaScript.
 ]
 
+# Mock external dependencies so they are not required at build time.
+for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
+    sys.modules[package] = MagicMock()
+
 # Add the project folder to the module search path.
 main = Path(__file__).absolute().parent.parent
 sys.path.insert(0, str(main))
 
-# Mock external dependencies so they are not required at build time.
-autodoc_mock_imports = ['jpype', 'numpy']
-for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
-    sys.modules[package] = MagicMock()
-
-# Import package to make meta data available.
-import mph as meta
+# Make the package's meta data available.
+from mph import meta
 
 
 ########################################
@@ -69,13 +68,11 @@ def setup(app):
 ########################################
 
 # Meta information
-project   = meta.__title__
-version   = meta.__version__
-release   = meta.__version__
-date      = meta.__date__
-author    = meta.__author__
-copyright = meta.__copyright__
-license   = meta.__license__
+project   = meta.title
+author    = meta.author
+copyright = meta.copyright
+version   = meta.version
+release   = version
 
 # Logo
 html_logo    = 'images/logo-96px.png'  # documentation logo
