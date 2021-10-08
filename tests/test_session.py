@@ -6,6 +6,7 @@
 import parent # noqa F401
 import mph
 from fixtures import logging_disabled
+from pytest import raises
 from sys import argv
 import logging
 
@@ -16,12 +17,9 @@ import logging
 
 def test_start():
     with logging_disabled():
-        try:
+        with raises(ValueError):
             mph.option('session', 'invalid')
             mph.start()
-            assert False
-        except ValueError:
-            pass
     mph.option('session', 'client-server')
     client = mph.start(cores=1)
     assert client.java is not None

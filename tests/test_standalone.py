@@ -21,22 +21,8 @@ def test_start():
         return
     client = mph.start(cores=1)
     assert client.java
-
-
-def test_cores():
-    client = mph.start()
     assert client.cores == 1
-
-
-def test_repr():
-    client = mph.start()
     assert repr(client) == 'Client(stand-alone)'
-
-
-def test_remove():
-    if system() != 'Windows':
-        return
-    client = mph.start()
     model = client.create('empty')
     assert 'empty' in client.names()
     assert model in client.models()
@@ -49,21 +35,9 @@ def test_remove():
     with logging_disabled():
         with raises(ValueError):
             client.remove(model)
-
-
-def test_connect():
-    if system() != 'Windows':
-        return
-    client = mph.start()
     with logging_disabled():
         with raises(RuntimeError):
             client.connect(2036)
-
-
-def test_disconnect():
-    if system() != 'Windows':
-        return
-    client = mph.start()
     with logging_disabled():
         with raises(RuntimeError):
             client.disconnect()
@@ -83,8 +57,3 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     test_start()
-    test_cores()
-    test_repr()
-    test_remove()
-    test_connect()
-    test_disconnect()

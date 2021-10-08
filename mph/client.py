@@ -81,18 +81,18 @@ class Client:
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
 
-        # Make sure this is the one and only client.
-        if jpype.isJVMStarted():
-            error = 'Only one client can be instantiated at a time.'
-            logger.error(error)
-            raise NotImplementedError(error)
-
         # Initialize instance attributes.
         self.version    = None
         self.standalone = None
         self.port       = None
         self.host       = None
         self.java       = None
+
+        # Make sure this is the one and only client.
+        if jpype.isJVMStarted():
+            error = 'Only one client can be instantiated at a time.'
+            logger.error(error)
+            raise NotImplementedError(error)
 
         # Discover Comsol back-end.
         backend = discovery.backend(version)
@@ -118,9 +118,8 @@ class Client:
                        convertStrings=False)
         logger.info('Java virtual machine has started.')
 
-        # Import Comsol client object, a static class, i.e. singleton. See:
-        # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
-        # /comsol/model/util/ModelUtil.html
+        # Import Comsol client object, a static class, i.e. singleton.
+        # See `ModelUtil()` constructor in [1].
         from com.comsol.model.util import ModelUtil as java
         self.java = java
 
@@ -141,15 +140,13 @@ class Client:
             # Check correct setup of process environment on Linux/macOS.
             check_environment(backend)
 
-            # Initialize the environment with GUI support disabled. See:
-            # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
-            # /comsol/model/util/ModelUtil.html#initStandalone-boolean-
+            # Initialize the environment with GUI support disabled.
+            # See `initStandalone()` method in [1].
             java.initStandalone(False)
 
             # Load Comsol settings from disk so as to not just use defaults.
-            # This is needed in stand-alone mode, see:
-            # https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com
-            # /comsol/model/util/ModelUtil.html#loadPreferences--
+            # This is needed in stand-alone mode, see `loadPreferences()`
+            # method in [1].
             java.loadPreferences()
 
             # Override certain settings not useful in headless operation.
@@ -168,6 +165,10 @@ class Client:
             logger.info('Stand-alone client initialized.')
 
         # Document instance attributes.
+        # The doc-strings are so awkwardly placed at the end here, instead
+        # of the first block where we initialize the attributes, because
+        # then, for some reason, Sphinx does not put them in source-code
+        # order. So this works around it. The assignments are just no-ops.
         self.version = self.version
         """Comsol version (e.g., `'5.3a'`) the client is running on."""
         self.standalone = self.standalone

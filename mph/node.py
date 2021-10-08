@@ -112,6 +112,8 @@ class Node:
             error = f'Node path {path!r} is not a string or Node instance.'
             logger.error(error)
             raise TypeError(error)
+        self.model = model
+        """Model object this node refers to."""
         self.groups = {
             'parameters':   'self.model.java.param().group()',
             'functions':    'self.model.java.func()',
@@ -159,8 +161,6 @@ class Node:
             'export':     'exports',
         }
         """Accepted aliases for the names of built-in groups."""
-        self.model = model
-        """Model object this node refers to."""
         if path[0] in self.alias:
             path = (self.alias[path[0]],) + path[1:]
         self.path = path
