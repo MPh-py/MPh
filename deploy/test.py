@@ -17,7 +17,7 @@ from timeit     import default_timer as now
 import sys
 
 tests = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
-         'client', 'node', 'model', 'exit']
+         'client', 'multi', 'node', 'model', 'exit']
 
 folder = Path(__file__).parent.parent / 'tests'
 python = sys.executable

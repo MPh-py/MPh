@@ -14,7 +14,6 @@ from subprocess import PIPE            # I/O redirection
 from subprocess import TimeoutExpired  # communication time-out
 from re import match as regex          # regular expression
 from time import perf_counter as now   # wall-clock time
-from sys import version_info           # Python version
 from logging import getLogger          # event logging
 
 ########################################
@@ -61,12 +60,18 @@ class Server:
     server will then select a random free port, which will almost always
     avoid collisions.
 
+    If `multi` is `False` or `'off'` or `None` (the default), then
+    the server will shut down as soon as the first connected clients
+    disconnects itself. If it is `True` or `'on'`, the server process
+    will stay alive and accept multiple client connections.
+
     A `timeout` can be set for the server start-up. The default is 60
     seconds. `TimeoutError` is raised if the server failed to start
     within that period.
     """
 
-    def __init__(self, cores=None, version=None, port=None, timeout=60):
+    def __init__(self, cores=None, version=None, port=None,
+                       multi=None, timeout=60):
 
         # Start Comsol server as an external process.
         backend = discovery.backend(version)
@@ -81,9 +86,17 @@ class Server:
             log.info(f'Server restricted to {cores} processor {noun}.')
         if port is not None:
             arguments += ['-port', str(port)]
+        if multi:
+            if multi in (True, 'on'):
+                arguments += ['-multi', 'on']
+            elif multi in (False, 'off'):
+                arguments += ['-multi', 'off']
+            else:
+                error = f'Invalid value "{multi}" for option "multi".'
+                log.error(error)
+                raise ValueError(error)
         command = server + arguments
-        if version_info < (3, 8):
-            command[0] = str(command[0])
+        command[0] = str(command[0])   # Required for Python 3.6 and 3.7.
         process = start(command, stdin=PIPE, stdout=PIPE, errors='ignore')
 
         # Remember the requested port (if any).

@@ -18,7 +18,7 @@ from subprocess import run
 from pathlib import Path
 
 tests = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
-         'client', 'node', 'model', 'exit']
+         'client', 'multi', 'node', 'model', 'exit']
 
 here = Path(__file__).resolve().parent
 root = here.parent

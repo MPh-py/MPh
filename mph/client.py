@@ -354,8 +354,8 @@ class Client:
         """
         Disconnects the client from the server.
 
-        Note that the server, unless started with the command-line option
-        `-multi on`, will shut down when the client disconnects.
+        Note that the server, unless started with the option `multi`
+        set to `'on'`, will shut down as soon as the client disconnects.
         """
         if self.port:
             log.debug('Disconnecting from server.')
