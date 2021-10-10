@@ -81,13 +81,6 @@ class Client:
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
 
-        # Initialize instance attributes.
-        self.version    = None
-        self.standalone = None
-        self.port       = None
-        self.host       = None
-        self.java       = None
-
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
             error = 'Only one client can be instantiated at a time.'
@@ -96,7 +89,6 @@ class Client:
 
         # Discover Comsol back-end.
         backend = discovery.backend(version)
-        self.version = backend['name']
 
         # On Windows, turn off fault handlers if enabled.
         # Without this, pyTest will crash when starting the Java VM.
@@ -121,23 +113,19 @@ class Client:
         # Import Comsol client object, a static class, i.e. singleton.
         # See `ModelUtil()` constructor in [1].
         from com.comsol.model.util import ModelUtil as java
-        self.java = java
 
-        # Connect to server if port given.
-        if port:
-            self.standalone = False
-            self.connect(port, host)
+        # This is a stand-alone client if no port given.
+        standalone = not port
 
-        # Otherwise initialize a stand-alone client.
-        else:
-            self.standalone = True
+        # Possibly initialize the stand-alone client.
+        if standalone:
             log.info('Initializing stand-alone client.')
 
             # Instruct Comsol to limit number of processor cores to use.
             if cores:
                 os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
-            # Check correct setup of process environment on Linux/macOS.
+            # Check correct setup of process environment if on Linux/macOS.
             check_environment(backend)
 
             # Initialize the environment with GUI support disabled.
@@ -161,24 +149,28 @@ class Client:
                 log.debug('Could not turn off check for recovery files.')
             java.setPreference('tempfiles.saving.optimize', 'filesize')
 
-            # Log that we're done so the start-up time can be inspected.
+            # Log that we're done so the start-up time may be inspected.
             log.info('Stand-alone client initialized.')
 
-        # Document instance attributes.
-        # The doc-strings are so awkwardly placed at the end here, instead
-        # of the first block where we initialize the attributes, because
-        # then, for some reason, Sphinx does not put them in source-code
-        # order. So this works around it. The assignments are just no-ops.
-        self.version = self.version
+        # Save and document instance attributes.
+        # It seems to be necessary to document the instance attributes here
+        # towards the end of the method. If done earlier, Sphinx would not
+        # render them in source-code order, even though that's what we
+        # request in the configuration. This might be a bug in Sphinx.
+        self.version = backend['name']
         """Comsol version (e.g., `'5.3a'`) the client is running on."""
-        self.standalone = self.standalone
+        self.standalone = standalone
         """Whether this is a stand-alone client or connected to a server."""
-        self.port = self.port
+        self.port = None
         """Port number on which the client has connected to the server."""
-        self.host = self.host
+        self.host = None
         """Host name or IP address of the server the client is connected to."""
-        self.java = self.java
-        """Java object that this class is wrapped around."""
+        self.java = java
+        """Java model object that this class instance is wrapped around."""
+
+        # Try to connect to server if not a stand-alone client.
+        if not standalone:
+            self.connect(port, host)
 
     def __repr__(self):
         if self.standalone:
