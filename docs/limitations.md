@@ -42,7 +42,7 @@ second approach is slower to start up and relies on the inter-process
 communication to be robust, but would also work across the network,
 i.e., for remote sessions where the client runs locally and delegates
 the heavy lifting to a server running on another machine. If we
-instantiate the [`Client`](api/mph.Client) class without providing a
+instantiate the [`Client`](mph.Client) class without providing a
 value for the host address and network port, it will create a
 stand-alone client. Otherwise it will run in client–server mode.
 
@@ -81,21 +81,21 @@ process. Or have the Python program run the Comsol session in another
 Python subprocess. However, none of this is ideal. Starting the client
 should work without any of these detours.
 
-The function [`mph.start()`](api/mph.start) exists to navigate these
+The function [`mph.start()`](mph.start) exists to navigate these
 platform differences. On Windows, it starts a stand-alone client in
 order to profit from the better start-up performance. On Linux and
 macOS, it creates a local session in client–server mode so that no
 shell configuration is required up front. This behavior is reflected
 in the configuration option `'session'`, accessible via
-[`mph.option()`](api/mph.config), which is set to `'platform-dependent'`
+[`mph.option()`](mph.config), which is set to `'platform-dependent'`
 by default. It could also be set to `'stand-alone'` or `'client-server'`
-before calling [`start()`](api/mph.start) in order to override the
+before calling [`start()`](mph.start) in order to override the
 default behavior.
 
 Performance in client–server mode is noticeably worse in certain
 scenarios, not just at start-up. If functions access the Java API
 frequently, such as when navigating the model tree, perhaps even
-recursively as [`mph.tree()`](api/mph.tree) does, then client–server
+recursively as [`mph.tree()`](mph.tree) does, then client–server
 mode can be slower by a large factor compared to a stand-alone client.
 Rest assured however that simulation run-times are not affected.
 

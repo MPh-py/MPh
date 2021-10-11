@@ -27,9 +27,9 @@ the client was Comsol. So let there be a Comsol client.
 >>> client = mph.start(cores=1)
 ```
 
-The [`start()`](api/mph.start) function returns a client object, i.e.
-an instance of the [`Client`](api/mph.Client) class. It takes roughly
-ten seconds for the client to spin up.
+The [`start()`](mph.start) function returns a client object, i.e. an
+instance of the [`Client`](mph.Client) class. It takes roughly ten
+seconds for the client to spin up.
 
 In this example, the Comsol back-end is instructed to use but one
 processor core. If the optional parameter is omitted, it will use all
@@ -51,10 +51,10 @@ model file.
 >>> model = client.load('capacitor.mph')
 ```
 
-It returns a model object, i.e. an instance of the
-[`Model`](api/mph.Model) class. We will learn what to do with it
-further down. For now, it was simply loaded into memory. We can
-list the names of all models the client currently manages.
+It returns a model object, i.e. an instance of the [`Model`](mph.Model)
+class. We will learn what to do with it further down. For now, it was
+simply loaded into memory. We can list the names of all models the
+client currently manages.
 ```python
 >>> client.names()
 ['capacitor']
@@ -219,7 +219,7 @@ evaluations such as this one could be readily cast to a regular Python
 [`float`][float].
 
 We might also ask where the electric field is strongest and have
-[`evaluate()`](api/mph.Model) perform a "local" evaluation.
+[`evaluate()`](mph.Model.evaluate) perform a "local" evaluation.
 ```python
 >>> (x, y, E) = model.evaluate(['x', 'y', 'es.normE'])
 >>> E.max()
