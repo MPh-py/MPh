@@ -5,9 +5,10 @@
 ########################################
 import parent # noqa F401
 import mph
+from fixtures import logging_disabled
+from pytest import raises
 from sys import argv
 from time import sleep
-from pytest import raises
 import logging
 
 
@@ -31,8 +32,9 @@ def teardown_module():
 
 def test_multi():
     global server
-    with raises(ValueError):
-        server = mph.Server(multi='invalid')
+    with logging_disabled():
+        with raises(ValueError):
+            server = mph.Server(multi='invalid')
     server = mph.Server(cores=1, multi=False)
     assert server.running()
     assert server.port

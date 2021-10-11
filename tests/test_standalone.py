@@ -30,15 +30,13 @@ def test_start():
     client.remove(model)
     assert 'empty' not in client.names()
     assert model not in client.models()
-    with raises(Exception, match='Model node X is removed'):
-        model.java.component()
     with logging_disabled():
+        with raises(Exception, match='Model node X is removed'):
+            model.java.component()
         with raises(ValueError):
             client.remove(model)
-    with logging_disabled():
         with raises(RuntimeError):
             client.connect(2036)
-    with logging_disabled():
         with raises(RuntimeError):
             client.disconnect()
 

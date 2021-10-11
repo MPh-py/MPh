@@ -126,9 +126,9 @@ def test_remove():
     assert 'empty' in client.names()
     client.remove('empty')
     assert 'empty' not in client.names()
-    with raises(Exception, match='is no longer in the model'):
-        model.java.component()
     with logging_disabled():
+        with raises(Exception, match='is no longer in the model'):
+            model.java.component()
         with raises(ValueError):
             client.remove(model)
         with raises(ValueError):
