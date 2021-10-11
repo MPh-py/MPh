@@ -295,7 +295,7 @@ class Client:
             except Exception:
                 error = 'Model does not exist.'
                 log.error(error)
-                raise ValueError(error)
+                raise ValueError(error) from None
             if model not in self.models():
                 error = 'Model does not exist.'
                 log.error(error)
