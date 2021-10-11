@@ -366,6 +366,25 @@ class Node:
             raise RuntimeError(error)
         java.run()
 
+    def import_(self, file):
+        """
+        Imports external data from the given `file`.
+
+        Note the trailing underscore in the method name. It is needed
+        so that the Python parser does not treat the name as an
+        `import` statement.
+        """
+        file = Path(file)
+        if not file.exists():
+            error = f'File "{file}" does not exist.'
+            log.error(error)
+            raise IOError(error)
+        log.info(f'Loading external data from file "{file.name}".')
+        self.property('filename', f'{file}')
+        self.java.discardData()
+        self.java.importData()
+        log.info('Finished loading external data.')
+
     def create(self, *arguments, name=None):
         """
         Creates a new child node.

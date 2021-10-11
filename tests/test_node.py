@@ -304,6 +304,12 @@ def test_run():
             Node(model, 'functions').run()
 
 
+def test_import():
+    # Skip here as we will test this for the `Model` class anyway and
+    # would have to create nodes first, which is the test to follow.
+    pass
+
+
 def test_create():
     functions = Node(model, 'functions')
     functions.create('Analytic')

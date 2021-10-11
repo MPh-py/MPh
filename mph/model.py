@@ -702,12 +702,13 @@ class Model:
         so that the Python parser does not treat the name as an
         `import` statement.
         """
-        file = Path(file)
-        log.info(f'Loading external data from file "{file.name}".')
-        node.java.discardData()
-        node.property('filename', f'{file}')
-        node.java.importData()
-        log.info('Finished loading external data.')
+        if isinstance(node, str):
+            node = self/node
+        if not node.exists():
+            error = f'Node "{node}" does not exist in model tree.'
+            log.error(error)
+            raise ValueError(error)
+        node.import_(file)
 
     def export(self, node=None, file=None):
         """
