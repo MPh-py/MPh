@@ -1,2 +1,0 @@
-jpype1
-numpy
