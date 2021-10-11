@@ -62,9 +62,10 @@ code. It displays more status information and also resets the modeling
 history.
 
 Note that we could easily go through all sub-directories recursively
-by replacing [`glob`][glob] with [`rglob`][rglob]. However, this should
-be used with caution so as to not accidentally modify models in folders
-that were not meant to be included.
+by replacing [`glob`](python:pathlib.Path.glob) with
+[`rglob`](python:pathlib.Path.rglob). However, this should be used
+with caution so as to not accidentally modify models in folders that
+were not meant to be included.
 
 
 ## Multiple processes
@@ -72,16 +73,17 @@ that were not meant to be included.
 As explained in [Limitations](limitations), we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
 multiple Python processes in parallel if we leverage the
-[`multiprocessing`][multi] module from the standard library.
+[`multiprocessing`](python:multiprocessing) module from the standard
+library.
 ```python
 import mph
 import multiprocessing
 import queue
 ```
 
-Additionally, we have imported the [`queue`][queue] module, also from
-the standard library, though only for the [`queue.Empty`][empty] exception
-type that it provides.
+Additionally, we have imported the [`queue`](python:queue) module, also
+from the standard library, though only for the [`queue.Empty`](
+python:queue.Empty) exception type that it provides.
 
 In this demonstration, we will solve the model [`capacitor.mph`][capa]
 from the [Tutorial](tutorial). We want to sweep the electrode distance
@@ -188,13 +190,13 @@ do in fact come in out of order.
 ```
 
 A more advanced implementation may use a class derived from
-[`multiprocessing.Process`][mproc] instead of a mere function, just to
-be able to save state. For long-running simulations it would make sense
-to store jobs and results on disk, rather than in memory, so that the
-execution of the queue may be resumed after a possible interruption.
-In that case one may, or may not, find the [`subprocess`][sproc]
-module from the standard library more convenient for starting the
-external processes. The worker implementation would then be in a
+[`multiprocessing.Process`](python:multiprocessing.Process) instead
+of a mere function, just to be able to save state. For long-running
+simulations it would make sense to store jobs and results on disk,
+rather than in memory, so that the execution of the queue may be resumed
+after a possible interruption. In that case one may, or may not, find
+the [`subprocess`](python:subprocess) module more convenient for starting
+the external processes. The worker implementation would then be in a
 separate module that is run as a script.
 
 
@@ -284,8 +286,8 @@ The advantage of using Python over Java is:
 * You can use Python introspection to understand how Comsol models
   are "created in code". The Comsol documentation explains a lot of
   things, but not every little detail. Either use Python's built-in
-  [`dir()`][dir] or call [`mph.inspect()`](mph.inspect) to see a
-  pretty-fied representation of a Java object in the model tree.
+  [`dir()`](python:dir) or call [`mph.inspect()`](mph.inspect) to see
+  a pretty-fied representation of a Java object in the model tree.
 
 To save the model created in the above example, we do:
 ```python
@@ -337,8 +339,8 @@ So far, we have used strings to refer to nodes. We could also use the
 functionality. Instances of that class are returned by
 [`model.create()`](mph.Model) for convenience. But they can be
 generated from scratch by string concatenation with the division
-operator — much like [`pathlib.Path`][path] objects from Python's
-standard library.
+operator — much like [`pathlib.Path`](python:pathlib.Path) objects
+from Python's standard library.
 ```python
 import mph
 client = mph.start()
@@ -433,15 +435,5 @@ the demonstration model used in the [Tutorial](tutorial).
 
 [jpype]:   https://jpype.readthedocs.io/en/stable
 [new]:     https://www.javatpoint.com/new-keyword-in-java
-
-[glob]:    https://docs.python.org/3/library/pathlib.html#pathlib.Path.glob
-[rglob]:   https://docs.python.org/3/library/pathlib.html#pathlib.Path.rglob
-[multi]:   https://docs.python.org/3/library/multiprocessing.html
-[queue]:   https://docs.python.org/3/library/queue.html
-[empty]:   https://docs.python.org/3/library/queue.html#queue.Empty
-[mproc]:   https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process
-[sproc]:   https://docs.python.org/3/library/subprocess.html
-[path]:    https://docs.python.org/3/library/pathlib.html
-[dir]:     https://docs.python.org/3/library/functions.html#dir
 
 [ga]:      https://en.wikipedia.org/wiki/Genetic_algorithm

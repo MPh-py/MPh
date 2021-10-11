@@ -26,8 +26,8 @@ demonstration.
 Additionally, there are some known, but unresolved issues with JPype's
 shutdown of the Java virtual machine. Notably, pressing <kbd>Ctrl+C</kbd>
 to interrupt an ongoing operation will usually crash the Python session.
-So do not rely on catching [`KeyboardInterrupt`][kbint] exceptions in
-application code.
+So do not rely on catching [`KeyboardInterrupt`](python:KeyboardInterrupt)
+exceptions in application code.
 
 
 ## Platform differences
@@ -108,5 +108,4 @@ where this works reliably.
 [jpype]:  https://github.com/jpype-project/jpype
 [japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [jnius]:  https://pyjnius.readthedocs.io
-[kbint]:  https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt
 [issue8]: https://github.com/MPh-py/MPh/issues/8

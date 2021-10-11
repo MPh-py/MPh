@@ -214,9 +214,9 @@ i.e. at zero time or infinite frequency.
 array(1.31948342)
 ```
 
-All results are returned as [NumPy arrays][array]. Though "global"
-evaluations such as this one could be readily cast to a regular Python
-[`float`][float].
+All results are returned as [NumPy arrays](numpy:numpy.array). Though
+"global" evaluations such as this one could be readily cast to a
+regular Python [`float`](python:float).
 
 We might also ask where the electric field is strongest and have
 [`evaluate()`](mph.Model.evaluate) perform a "local" evaluation.
@@ -361,6 +361,4 @@ documentation also explain how to go beyond the scope of this library
 and access the full Comsol API from Python, if needed.
 
 
-[capa]:  https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
-[array]: https://numpy.org/doc/stable/reference/generated/numpy.array.html
-[float]: https://docs.python.org/3/library/functions.html#float
+[capa]: https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph

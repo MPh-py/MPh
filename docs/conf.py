@@ -29,8 +29,8 @@ extensions = [
     'myst_parser',                     # Accept Markdown as input.
     'sphinx.ext.autodoc',              # Get documentation from doc-strings.
     'sphinx.ext.autosummary',          # Create summaries automatically.
-    'sphinx.ext.viewcode',             # Add links to highlighted source code.
-    'sphinx.ext.mathjax',              # Render math via JavaScript.
+    'sphinx.ext.viewcode',             # Include highlighted source code.
+    'sphinx.ext.intersphinx',          # Support short-hand web links.
 ]
 
 # Mock external dependencies so they are not required at build time.
@@ -90,6 +90,12 @@ autodoc_default_options = {
 }
 autosummary_generate = False           # Stub files are created by hand.
 add_module_names = False               # Don't prefix members with module name.
+
+# Short-hand web links
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3',    None),
+    'numpy':  ('https://numpy.org/doc/stable', None),
+}
 
 # Rendering options
 myst_heading_anchors = 2               # Generate link anchors for sections.
