@@ -23,6 +23,67 @@ import faulthandler                    # traceback dumps
 ########################################
 log = getLogger(__package__)           # event log
 
+########################################
+# Constants                            #
+########################################
+
+# See table on page 40 of Comsol 5.6's Programming Reference Manual.
+# The following dictionary is essentially the same table with the two
+# columns swapped. It maps vendor strings to product names, except that
+# we shorten the product names somewhat (drop "Module" everywhere) and
+# leave out the pointless trademark symbols. The dictionary keys (vendor
+# strings) are what we need to query the `ModelUtil.hasProduct()`.
+
+modules = {
+    'COMSOL':                   'Comsol core',
+    'ACDC':                     'AC/DC',
+    'ACOUSTICS':                'Acoustics',
+    'BATTERYDESIGN':            'Battery Design',
+    'CADIMPORT':                'CAD Import',
+    'CFD':                      'CFD',
+    'CHEM':                     'Chemical Reaction Engineering',
+    'CLUSTERNODE':              'Cluster Computing',
+    'COMPOSITEMATERIALS':       'Composite Materials',
+    'CORROSION':                'Corrosion',
+    'DESIGN':                   'Design',
+    'ECADIMPORT':               'ECAD Import',
+    'ELECTROCHEMISTRY':         'Electrochemistry',
+    'ELECTRODEPOSITION':        'Electrodeposition',
+    'FATIGUE':                  'Fatigue',
+    'CATIA5':                   'File Import for Catia v5',
+    'FUELCELLANDELECTROLYZER':  'Fuel Cell & Electrolyzer',
+    'GEOMECHANICS':             'Geomechanics',
+    'HEATTRANSFER':             'Heat Transfer',
+    'LIQUIDANDGASPROPERTIES':   'Liquid & Gas Properties',
+    'LLAUTOCAD':                'LiveLink AutoCAD',
+    'LLCREOPARAMETRIC':         'LiveLink PTC Creo Parametric',
+    'LLEXCEL':                  'LiveLink Excel',
+    'LLINVENTOR':               'LiveLink Inventor',
+    'LLMATLAB':                 'LiveLink Matlab',
+    'LLREVIT':                  'LiveLink Revit',
+    'LLPROENGINEER':            'LiveLink PTC Pro/ENGINEER',
+    'LLSOLIDEDGE':              'LiveLink Solid Edge',
+    'LLSOLIDWORKS':             'LiveLink SolidWorks',
+    'MEMS':                     'MEMS',
+    'MICROFLUIDICS':            'Microfluidics',
+    'MIXER':                    'Mixer',
+    'MOLECULARFLOW':            'Molecular Flow',
+    'MULTIBODYDYNAMICS':        'Multibody Dynamics',
+    'NONLINEARSTRUCTMATERIALS': 'Nonlinear Structural Materials',
+    'OPTIMIZATION':             'Optimization',
+    'PARTICLETRACING':          'Particle Tracing',
+    'PIPEFLOW':                 'Pipe Flow',
+    'PLASMA':                   'Plasma',
+    'POLYMERFLOW':              'Polymer Flow',
+    'RAYOPTICS':                'Ray Optics',
+    'RF':                       'RF',
+    'ROTORDYNAMICS':            'Rotordynamics',
+    'SEMICONDUCTOR':            'Semiconductor',
+    'STRUCTURALMECHANICS':      'Structural Mechanics',
+    'SUBSURFACEFLOW':           'Subsurface Flow',
+    'WAVEOPTICS':               'Wave Optics',
+}
+
 
 ########################################
 # Client                               #
@@ -227,6 +288,17 @@ class Client:
     def files(self):
         """Returns the file-system paths of all loaded models."""
         return [model.file() for model in self.models()]
+
+    def modules(self):
+        """Returns the names of available licensed modules/products."""
+        names = []
+        for (key, value) in modules.items():
+            try:
+                if self.java.hasProduct(key):
+                    names.append(value)
+            except Exception:
+                pass
+        return names
 
     ####################################
     # Interaction                      #

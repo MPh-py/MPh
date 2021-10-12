@@ -20,6 +20,65 @@ from logging import getLogger          # event logging
 ########################################
 log = getLogger(__package__)           # event log
 
+########################################
+# Constants                            #
+########################################
+
+# See table on page 40 of Comsol 5.6's Programming Reference Manual.
+# The following dictionary maps the product names returned by
+# `model.getUsedProducts()` to the same sanitized names used in the
+# `clients` module.
+
+modules = {
+    'AC/DC Module':                          'AC/DC',
+    'Acoustics Module':                      'Acoustics',
+    'Battery Design Module':                 'Battery Design',
+    'CAD Import Module':                     'CAD Import',
+    'CFD Module':                            'CFD',
+    'COMSOL Multiphysics':                   'Comsol core',
+    'Chemical Reaction Engineering Module':  'Chemical Reaction Engineering',
+    'Cluster Computing Module':              'Cluster Computing',
+    'Composite Materials Module':            'Composite Materials',
+    'Corrosion Module':                      'Corrosion',
+    'Design Module':                         'Design',
+    'ECAD Import Module':                    'ECAD Import',
+    'Electrochemistry Module':               'Electrochemistry',
+    'Electrodeposition Module':              'Electrodeposition',
+    'Fatigue Module':                        'Fatigue',
+    'File Import for CATIA V5':              'File Import for Catia v5',
+    'Fuel Cell & Electrolyzer Module':       'Fuel Cell & Electrolyzer',
+    'Geomechanics Module':                   'Geomechanics',
+    'Heat Transfer Module':                  'Heat Transfer',
+    'Liquid & Gas Properties Module':        'Liquid & Gas Properties',
+    'LiveLink™ for AutoCAD®':                'LiveLink AutoCAD',
+    'LiveLink™ for PTC® Creo® Parametric™':  'LiveLink PTC Creo Parametric',
+    'LiveLink™ for Excel®':                  'LiveLink Excel',
+    'LiveLink™ for Inventor®':               'LiveLink Inventor',
+    'LiveLink™ for MATLAB®':                 'LiveLink Matlab',
+    'LiveLink™ for Revit®':                  'LiveLink Revit',
+    'LiveLink™ for PTC® Pro/ENGINEER®':      'LiveLink PTC Pro/ENGINEER',
+    'LiveLink™ for Solid Edge®':             'LiveLink Solid Edge',
+    'LiveLink™ for SOLIDWORKS®':             'LiveLink SolidWorks',
+    'MEMS Module':                           'MEMS',
+    'Microfluidics Module':                  'Microfluidics',
+    'Mixer Module':                          'Mixer',
+    'Molecular Flow Module':                 'Molecular Flow',
+    'Multibody Dynamics Module':             'Multibody Dynamics',
+    'Nonlinear Structural Materials Module': 'Nonlinear Structural Materials',
+    'Optimization Module':                   'Optimization',
+    'Particle Tracing Module':               'Particle Tracing',
+    'Pipe Flow Module':                      'Pipe Flow',
+    'Plasma Module':                         'Plasma',
+    'Polymer Flow Module':                   'Polymer Flow',
+    'Ray Optics Module':                     'Ray Optics',
+    'RF Module':                             'RF',
+    'Rotordynamics Module':                  'Rotordynamics',
+    'Semiconductor Module':                  'Semiconductor',
+    'Structural Mechanics Module':           'Structural Mechanics',
+    'Subsurface Flow Module':                'Subsurface Flow',
+    'Wave Optics Module':                    'Wave Optics',
+}
+
 
 ########################################
 # Model                                #
@@ -177,6 +236,10 @@ class Model:
     def exports(self):
         """Returns the names of all exports."""
         return [child.name() for child in self/'exports']
+
+    def modules(self):
+        """Returns the names of modules/products required to be licensed."""
+        return [modules.get(key, key) for key in self.java.getUsedProducts()]
 
     ####################################
     # Solving                          #
@@ -707,7 +770,7 @@ class Model:
         if not node.exists():
             error = f'Node "{node}" does not exist in model tree.'
             log.error(error)
-            raise ValueError(error)
+            raise LookupError(error)
         node.import_(file)
 
     def export(self, node=None, file=None):

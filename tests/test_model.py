@@ -172,6 +172,12 @@ def test_exports():
     assert 'image' in model.exports()
 
 
+def test_modules():
+    assert 'Comsol core' in model.modules()
+    for value in mph.model.modules.values():
+        assert value in mph.client.modules.values()
+
+
 def test_build():
     model.build()
     model.build('geometry')
@@ -482,7 +488,7 @@ def test_import():
     # Import image with file name specified as string and Path.
     here = Path(__file__).resolve().parent
     assert image.property('sourcetype') == 'user'
-    model.import_(image, str(here/'gaussian.tif'))
+    model.import_('functions/image', str(here/'gaussian.tif'))
     assert image.property('sourcetype') == 'model'
     image.java.discardData()
     assert image.property('sourcetype') == 'user'
@@ -521,6 +527,12 @@ def test_import():
     (E_re, y_re) = (E.max(), y[E.argmax()])
     assert (E_re - E_pre) < 1
     assert (y_re - y_pre) < 0.001
+    # Test error handling.
+    with logging_disabled():
+        with raises(LookupError):
+            model.import_('functions/does_not_exist', here/'gaussian.tif')
+        with raises(IOError):
+            model.import_(image, here/'does_not_exist.tif')
     # Remove test fixtures.
     model.remove('functions/image')
     model.remove('functions/table')

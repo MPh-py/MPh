@@ -102,6 +102,17 @@ def test_files():
     assert demo in client.files()
 
 
+def test_modules():
+    assert 'Comsol core' in client.modules()
+    for key in mph.client.modules.keys():
+        assert client.java.hasProduct(key) in (True, False)
+    for value in mph.client.modules.values():
+        assert value in mph.model.modules.values()
+    mph.client.modules['invalid'] = 'invalid'
+    client.modules()
+    del mph.client.modules['invalid']
+
+
 def test_caching():
     assert not client.caching()
     copy = client.load(demo)
