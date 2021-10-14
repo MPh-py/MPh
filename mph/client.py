@@ -178,7 +178,7 @@ class Client:
         from com.comsol.model.util import ModelUtil as java
 
         # This is a stand-alone client if no port given.
-        standalone = not port
+        standalone = host and not port
 
         # Possibly initialize the stand-alone client.
         if standalone:
@@ -232,14 +232,14 @@ class Client:
         """Java model object that this class instance is wrapped around."""
 
         # Try to connect to server if not a stand-alone client.
-        if not standalone:
+        if not standalone and host:
             self.connect(port, host)
 
     def __repr__(self):
         if self.standalone:
             connection = 'stand-alone'
         elif self.port:
-            connection = f'host={self.host}, port={self.port}'
+            connection = f"port={self.port}, host='{self.host}'"
         else:
             connection = 'disconnected'
         return f'{self.__class__.__name__}({connection})'

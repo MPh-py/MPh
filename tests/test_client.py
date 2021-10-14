@@ -60,7 +60,7 @@ def test_create():
 
 
 def test_repr():
-    assert repr(client) == f'Client(host=localhost, port={client.port})'
+    assert repr(client) == f"Client(port={client.port}, host='localhost')"
 
 
 def test_contains():
