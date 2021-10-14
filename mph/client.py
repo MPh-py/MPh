@@ -164,13 +164,12 @@ class Client:
         # Start the Java virtual machine.
         log.debug(f'JPype version is {jpype.__version__}.')
         log.info('Starting Java virtual machine.')
-        java_args = [str(backend['jvm'])]
+        root = backend['root']
+        args = [str(backend['jvm'])]
         if option('classkit'):
-            java_args += ['-Dcs.ckl']
-        log.debug(f'JVM arguments: {java_args}')
-        jpype.startJVM(*java_args,
-                       classpath=str(backend['root']/'plugins'/'*'),
-                       convertStrings=False)
+            args += ['-Dcs.ckl']
+        log.debug(f'JVM arguments: {args}')
+        jpype.startJVM(*args, classpath=str(root/'plugins'/'*'))
         log.info('Java virtual machine has started.')
 
         # Import Comsol client object, a static class, i.e. singleton.
