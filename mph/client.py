@@ -23,16 +23,18 @@ import faulthandler                    # traceback dumps
 ########################################
 log = getLogger(__package__)           # event log
 
+
 ########################################
 # Constants                            #
 ########################################
 
-# See table on page 40 of Comsol 5.6's Programming Reference Manual.
-# The following dictionary is essentially the same table with the two
-# columns swapped. It maps vendor strings to product names, except that
-# we shorten the product names somewhat (drop "Module" everywhere) and
-# leave out the pointless trademark symbols. The dictionary keys (vendor
-# strings) are what we need to query the `ModelUtil.hasProduct()`.
+# The following look-up table is used by the `modules()` method. It is
+# based on the table on page 40 of Comsol 5.6's Programming Reference
+# Manual, with the two columns swapped. It thus maps vendor strings to
+# product names (add-on modules), except that we also shorten the names
+# somewhat (drop "Module" everywhere) and leave out the pointless
+# trademark symbols. The vendor strings are what we need to query the
+# `ModelUtil.hasProduct()` Java method.
 
 modules = {
     'COMSOL':                   'Comsol core',

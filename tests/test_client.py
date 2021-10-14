@@ -103,11 +103,11 @@ def test_files():
 
 
 def test_modules():
-    assert 'Comsol core' in client.modules()
     for key in mph.client.modules.keys():
         assert client.java.hasProduct(key) in (True, False)
     for value in mph.client.modules.values():
         assert value in mph.model.modules.values()
+    assert 'Comsol core' in client.modules()
     mph.client.modules['invalid'] = 'invalid'
     client.modules()
     del mph.client.modules['invalid']

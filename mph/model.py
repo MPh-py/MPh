@@ -24,10 +24,13 @@ log = getLogger(__package__)           # event log
 # Constants                            #
 ########################################
 
-# See table on page 40 of Comsol 5.6's Programming Reference Manual.
-# The following dictionary maps the product names returned by
-# `model.getUsedProducts()` to the same sanitized names used in the
-# `clients` module.
+# The following look-up table is used by the `modules()` method. It maps
+# the product names (add-on modules) returned by `model.getUsedProducts()`
+# to the same sanitized names used in the look-up table in the `clients`
+# module. So it essentially drops the Unicode trademark symbols as well
+# as the redundant "Module". The strings returned by `getUsedProducts()`
+# seem to correspond exactly to the product names in the left column
+# of the table on page 40 of Comsol 5.6's Programming Reference Manual.
 
 modules = {
     'AC/DC Module':                          'AC/DC',

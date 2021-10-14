@@ -357,7 +357,7 @@ def test_evaluate():
         with raises(TypeError):
             model.evaluate('U', dataset='parametric sweep', outer='invalid')
     # Test particle tracing (if that add-on module is installed).
-    if client.java.hasProduct('PARTICLETRACING'):
+    if 'Particle Tracing' in client.modules():
         needle = models.needle()
         needle.solve()
         (qx, qy, qz) = needle.evaluate(['qx', 'qy', 'qz'], dataset='electrons')
