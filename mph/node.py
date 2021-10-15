@@ -9,6 +9,8 @@ from jpype import JInt                 # Java integer
 from jpype import JDouble              # Java float
 from jpype import JString              # Java string
 from jpype import JArray               # Java array
+from jpype import JClass               # Java class
+from numpy import integer              # NumPy integer
 from pathlib import Path               # file-system path
 from re import split                   # string splitting
 from json import load as json_load     # JSON decoder
@@ -331,6 +333,108 @@ class Node:
         names = sorted(str(name) for name in java.properties())
         return {name: get(java, name) for name in names}
 
+    def select(self, entity):
+        """
+        Assigns `entity` as the node's selection.
+
+        `entity` can either be another node representing a selection
+        feature, in which case a "named" selection is created. Or it
+        can be a list/array of integers denoting domain, boundary,
+        edge, or point numbers (depending on which of those the selection
+        requires), producing a "manual" selection. It may also be `'all'`
+        to select everything or `None` to clear the selection.
+
+        Raises `NotImplementedError` if the node (that this method is
+        called on) is a geometry node. These may be supported in a
+        future release. Meanwhile, access their Java methods directly.
+        Raises `TypeError` if the node does not have a selection and
+        is not itself an "explicit" selection.
+        """
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if isinstance(java, JClass('com.comsol.model.GeomFeature')):
+            error = "Use the Java layer to change a geometry node's selection."
+            log.error(error)
+            raise NotImplementedError(error)
+        try:
+            java = java.selection()
+        except Exception:
+            if any(not hasattr(java, attr) for attr in ('set', 'all')):
+                error = f'Node "{self}" has no and is no (explicit) selection.'
+                log.error(error)
+                raise TypeError(error) from None
+        if isinstance(entity, Node):
+            if not hasattr(java, 'named'):
+                error = f'Node "{self}" does not support named selections.'
+                log.error(error)
+                raise TypeError(error)
+            node = entity
+            if not node.exists():
+                error = f'Assigned node "{node}" does not exist.'
+                log.error(error)
+                raise LookupError(error)
+            java.named(node.tag())
+        elif isinstance(entity, (list, ndarray)):
+            java.set(cast(entity) if len(entity) else None)
+        elif isinstance(entity, (int, integer)):
+            java.set(cast(entity))
+        elif entity == 'all':
+            java.all()
+        elif entity is None:
+            java.set(cast(None))
+        else:
+            error = "Entity must be a node, 'all', or an array of integers."
+            log.error(error)
+            raise ValueError(error)
+
+    def selection(self):
+        """
+        Returns the entity or entities the node has selected.
+
+        If it is a "named" selection, the corresponding selection node
+        is returned. If it is a "manual" selection, an array of domain,
+        boundary, edge, or point numbers is returned (depending on
+        which of those the selection holds). `None` is returned if
+        nothing is selected.
+
+        Raises `NotImplementedError` if the node is a geometry node.
+        These may be supported in a future release. Meanwhile, access
+        their Java methods directly. Raises `TypeError` if the node
+        does not have a selection and is not itself a selection.
+        """
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if isinstance(java, JClass('com.comsol.model.GeomFeature')):
+            error = "Use the Java layer to query a geometry node's selection."
+            log.error(error)
+            raise NotImplementedError(error)
+        try:
+            java = java.selection()
+        except Exception:
+            if not hasattr(java, 'entities'):
+                error = f'Node "{self}" has no and is no selection.'
+                log.error(error)
+                raise TypeError(error) from None
+        tag = str(java.named()) if hasattr(java, 'named') else None
+        if tag:
+            for node in self.model/'selections':
+                if tag == node.tag():
+                    break
+            else:
+                error = f'Found no selection with reported tag "{tag}".'
+                log.error(error)
+                raise LookupError(error)
+            return node
+        else:
+            entities = java.entities()
+            return array(entities) if entities else None
+
     def toggle(self, action='flip'):
         """
         Enables or disables the node.
@@ -547,10 +651,14 @@ def cast(value):
     """Casts a value from its Python data type to a suitable Java data type."""
     if isinstance(value, Node):
         return JString(value.tag())
+    elif value is None:
+        return value
     elif isinstance(value, bool):
         return JBoolean(value)
     elif isinstance(value, int):
         return JInt(value)
+    elif isinstance(value, integer):
+        return JInt(int(value))
     elif isinstance(value, float):
         return JDouble(value)
     elif isinstance(value, str):

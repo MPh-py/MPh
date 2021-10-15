@@ -274,6 +274,61 @@ def test_properties():
     assert ('funcname', 'step') in function.properties().items()
 
 
+def test_select():
+    with logging_disabled():
+        with raises(LookupError):
+            Node(model, 'selections/non-existing').select(None)
+        with raises(NotImplementedError):
+            Node(model, 'geometries/geometry/rounded').select(None)
+        with raises(TypeError):
+            Node(model, 'parameters').select(None)
+        with raises(TypeError):
+            Node(model, 'functions/step').select(None)
+        with raises(TypeError):
+            Node(model, 'selections/domains').select(Node(model, ''))
+        cathode = Node(model, 'physics/electrostatic/cathode')
+        with raises(LookupError):
+            cathode.select(Node(model, 'selections/non-existing'))
+        with raises(ValueError):
+            cathode.select('invalid argument')
+
+
+def test_selection():
+    cathode = Node(model, 'physics/electrostatic/cathode')
+    surface = Node(model, 'selections/cathode surface')
+    cathode.select(surface)
+    assert cathode.selection() == surface
+    cathode.select([1, 2, 3])
+    assert (cathode.selection() == array([1, 2, 3])).all()
+    cathode.select(array([1, 2, 3]))
+    assert (cathode.selection() == array([1, 2, 3])).all()
+    cathode.select(1)
+    assert (cathode.selection() == array([1])).all()
+    cathode.select(array([1])[0])
+    assert (cathode.selection() == array([1])).all()
+    cathode.select(None)
+    assert cathode.selection() is None
+    cathode.select('all')
+    assert (cathode.selection() == array(range(1, 27))).all()
+    domains = Node(model, 'selections/domains')
+    assert (domains.selection() == array([1, 2, 3, 4])).all()
+    domains.select([1, 2, 3])
+    assert (domains.selection() == array([1, 2, 3])).all()
+    domains.select(None)
+    assert domains.selection() is None
+    domains.select('all')
+    assert (domains.selection() == array([1, 2, 3, 4])).all()
+    with logging_disabled():
+        with raises(LookupError):
+            Node(model, 'selections/non-existing').selection()
+        with raises(NotImplementedError):
+            Node(model, 'geometries/geometry/rounded').selection()
+        with raises(TypeError):
+            Node(model, 'parameters').selection()
+        with raises(TypeError):
+            Node(model, 'functions/step').selection()
+
+
 def test_toggle():
     node = Node(model, 'functions/step')
     assert node.java.isActive()
@@ -496,6 +551,8 @@ if __name__ == '__main__':
     test_rename()
     test_property()
     test_properties()
+    test_select()
+    test_selection()
     test_toggle()
     test_run()
     test_create()
