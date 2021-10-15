@@ -62,30 +62,32 @@ code. It displays more status information and also resets the modeling
 history.
 
 Note that we could easily go through all sub-directories recursively
-by replacing [`glob`][glob] with [`rglob`][rglob]. However, this should
-be used with caution so as to not accidentally modify models in folders
-that were not meant to be included.
+by replacing [`glob`](python:pathlib.Path.glob) with
+[`rglob`](python:pathlib.Path.rglob). However, this should be used
+with caution so as to not accidentally modify models in folders that
+were not meant to be included.
 
 
 ## Multiple processes
 
 As explained in [Limitations](limitations), we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
-multiple Python processes in parallel, thanks to the
-[`multiprocessing`][multi] module that is part of the standard library.
-
-So, other than MPh itself, we are going to need [`multiprocessing`][multi],
-as well as [`queue`][queue], also from the standard library, though
-only for the [`queue.Empty`][empty] exception type that it provides.
+multiple Python processes in parallel if we leverage the
+[`multiprocessing`](python:multiprocessing) module from the standard
+library.
 ```python
 import mph
 import multiprocessing
 import queue
 ```
 
+Additionally, we have imported the [`queue`](python:queue) module, also
+from the standard library, though only for the [`queue.Empty`](
+python:queue.Empty) exception type that it provides.
+
 In this demonstration, we will solve the model [`capacitor.mph`][capa]
 from the [Tutorial](tutorial). We want to sweep the electrode distance
-d and calculate the capacitance C for each value of the distance,
+*d* and calculate the capacitance *C* for each value of the distance,
 ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
@@ -155,7 +157,7 @@ results = multiprocessing.Queue()
 Then we can start a number of workers, say four:
 ```python
 for _ in range(4):
-    process = multiprocessing.Process(target=worker, args=(jobs, results)
+    process = multiprocessing.Process(target=worker, args=(jobs, results))
     process.start()
 ```
 
@@ -188,13 +190,13 @@ do in fact come in out of order.
 ```
 
 A more advanced implementation may use a class derived from
-[`multiprocessing.Process`][mproc] instead of a mere function, just to
-be able to save state. For long-running simulations it would make sense
-to store jobs and results on disk, rather than in memory, so that the
-execution of the queue may be resumed after a possible interruption.
-In that case one may, or may not, find the [`subprocess`][sproc]
-module from the standard library more convenient for starting the
-external processes. The worker implementation would then be in a
+[`multiprocessing.Process`](python:multiprocessing.Process) instead
+of a mere function, just to be able to save state. For long-running
+simulations it would make sense to store jobs and results on disk,
+rather than in memory, so that the execution of the queue may be resumed
+after a possible interruption. In that case one may, or may not, find
+the [`subprocess`](python:subprocess) module more convenient for starting
+the external processes. The worker implementation would then be in a
 separate module that is run as a script.
 
 
@@ -209,9 +211,9 @@ some limitations.
 
 However, any and all functionality offered by the [Comsol Java API][japi]
 is accessible via the "pythonized" Java layer provided by [JPype][jpype],
-which is exposed as the `.java` attribute of [`Client`](api/mph.Client)
+which is exposed as the `.java` attribute of [`Client`](mph.Client)
 instances, mapping to Comsol's `ModelUtil`, as well as of
-[`Model`](api/mph.Model) instances, mapping to Comsol's `model`.
+[`Model`](mph.Model) instances, mapping to Comsol's `model`.
 
 Let's take this Comsol blog post as an example: ["Automate your modeling
 tasks with the Comsol API for use with Java"][blog]. It starts with the
@@ -267,11 +269,12 @@ list of three strings. So we replaced the expression with
 of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
-documentation — or a blog post, as the case was here —, you will have
-to amend code lines such as the one above. But they are few and far
-between. The error messages you might receive should point you in the
-right direction and the [JPype documentation][jpype] would offer help
-on issues with type conversion.
+documentation, or a blog post as the case was here, or which Comsol
+generated from your model when you saved it as a Java/Matlab file,
+you will have to amend code lines such as the one above. But they are
+few and far between. The error messages you might receive should point
+you in the right direction and the [JPype documentation][jpype] would
+offer help on issues with type conversion.
 
 The advantage of using Python over Java is:
 * You don't really need to know Java. Just a little, to understand that
@@ -281,11 +284,10 @@ The advantage of using Python over Java is:
   don't need to bother with compiling Java source code to Java classes
   via `comsolcompile`.
 * You can use Python introspection to understand how Comsol models
-  are "created in code". This may be the most productive feature. The
-  Comsol documentation explains a lot of things, but not every little
-  detail. The function [`mph.inspect()`](api/mph.inspect) makes
-  introspection even easier, as it formats the output more nicely than
-  Python's built-in [`dir()`][dir].
+  are "created in code". The Comsol documentation explains a lot of
+  things, but not every little detail. Either use Python's built-in
+  [`dir()`](python:dir) or call [`mph.inspect()`](mph.inspect) to see
+  a pretty-fied representation of a Java object in the model tree.
 
 To save the model created in the above example, we do:
 ```python
@@ -300,9 +302,9 @@ Java, or Matlab project.
 
 ## Creating models: Python style
 
-The example from the previous section can be expressed in more
-"pythonic" syntax if we ignore the Java layer and only use methods
-from the [`Model`](api/mph.Model) class.
+The example from the previous section can be expressed in much more
+idiomatic Python syntax if we ignore the Java layer and only use
+methods from the [`Model`](mph.Model) class.
 ```python
 import mph
 client = mph.start()
@@ -314,7 +316,7 @@ model.build('Geometry 1')
 ```
 
 This, again, hides all tags in application code. Instead, we refer to
-the nodes in the model tree by name. In the example, these names were
+nodes in the model tree by name. In the example, these names were
 generated automatically, in the same way the Comsol GUI does it. We
 could also supply names of our choice.
 ```python
@@ -327,18 +329,18 @@ model.property('geometries/geometry/ice block', 'size', ('0.1', '0.2', '0.5'))
 model.build('geometry')
 ```
 
-If [`model.create()`](api/mph.Model) receives a reference to a node
-that does not exist yet, such as `geometries/geometry` in the example,
-it creates that node in its parent group, here the built-in group
+If [`model.create()`](mph.Model) receives a reference to a node that
+does not exist yet, such as `geometries/geometry` in the example, it
+creates that node in its parent group, here the built-in group
 `geometries`, and gives it the name we supplied, here `geometry`.
 
 So far, we have used strings to refer to nodes. We could also use the
-[`Node`](api/mph.Node) class, which offers more flexibility and extra
+[`Node`](mph.Node) class, which offers more flexibility and extra
 functionality. Instances of that class are returned by
-[`model.create()`](api/mph.Model) for convenience. But they can be
+[`model.create()`](mph.Model) for convenience. But they can be
 generated from scratch by string concatenation with the division
-operator — much like [`pathlib.Path`][path] objects from the standard
-library.
+operator — much like [`pathlib.Path`](python:pathlib.Path) objects
+from Python's standard library.
 ```python
 import mph
 client = mph.start()
@@ -350,7 +352,32 @@ block.property('size', ('0.1', '0.2', '0.5'))
 model.build(geometry)
 ```
 
-The latter two code examples produce the following model tree:
+The division operator is the Swiss army knife for accessing nodes in
+the model tree. It even works with `client` as root. Within that last
+example, the following notations
+```python
+client/'block of ice'/'geometries'/'geometry'/'ice block'
+model/'geometries'/'geometry'/'ice block'
+geometries/'geometry'/'ice block'
+geometry/'ice block'
+block
+```
+
+all refer to the same geometry element in the model. We could also
+include the forward slash in a string expression instead of using it as
+an operator, just like we did in the first and second example.
+```python
+model/'geometries/geometry/ice block'
+```
+
+The model's root node can be referenced with either `model/''` or
+`model/None`. If any of the node names in the hierarchy contain a
+forward slash themselves, that forward slash can be escaped (i.e.,
+marked to be interpreted literally) by doubling it, for instance:
+`geometry/'ice//frozen water'`.
+
+The example model discussed here produces the following model
+[tree](mph.tree):
 ```python
 >>> mph.tree(model)
 block of ice
@@ -369,6 +396,7 @@ block of ice
 ├─ coordinates
 │  └─ Boundary System 1
 ├─ variables
+├─ couplings
 ├─ physics
 ├─ multiphysics
 ├─ materials
@@ -381,9 +409,6 @@ block of ice
 ├─ tables
 ├─ plots
 └─ exports
-
->>> mph.tree(model)
-block of ice
 ```
 
 The parameter group, model component, default view and coordinate
@@ -410,15 +435,5 @@ the demonstration model used in the [Tutorial](tutorial).
 
 [jpype]:   https://jpype.readthedocs.io/en/stable
 [new]:     https://www.javatpoint.com/new-keyword-in-java
-
-[glob]:    https://docs.python.org/3/library/pathlib.html#pathlib.Path.glob
-[rglob]:   https://docs.python.org/3/library/pathlib.html#pathlib.Path.rglob
-[multi]:   https://docs.python.org/3/library/multiprocessing.html
-[queue]:   https://docs.python.org/3/library/queue.html
-[empty]:   https://docs.python.org/3/library/queue.html#queue.Empty
-[mproc]:   https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process
-[sproc]:   https://docs.python.org/3/library/subprocess.html
-[path]:    https://docs.python.org/3/library/pathlib.html
-[dir]:     https://docs.python.org/3/library/functions.html#dir
 
 [ga]:      https://en.wikipedia.org/wiki/Genetic_algorithm

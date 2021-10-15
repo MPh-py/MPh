@@ -1,6 +1,4 @@
 ﻿"""Starts and stops the local Comsol session."""
-__license__ = 'MIT'
-
 
 ########################################
 # Components                           #
@@ -8,7 +6,6 @@ __license__ = 'MIT'
 from .client import Client             # client class
 from .server import Server             # server class
 from .config import option             # configuration
-
 
 ########################################
 # Dependencies                         #
@@ -18,15 +15,16 @@ import atexit                          # exit handler
 import sys                             # system specifics
 import platform                        # platform information
 import threading                       # multi-threading
+import faulthandler                    # traceback dumps
 from logging import getLogger          # event logging
-
 
 ########################################
 # Globals                              #
 ########################################
 client = None                          # client instance
 server = None                          # server instance
-logger = getLogger(__package__)        # event logger
+thread = None                          # current thread
+log    = getLogger(__package__)        # event log
 
 
 ########################################
@@ -41,7 +39,7 @@ def start(cores=None, version=None, port=0):
     running a Comsol session on the local machine, i.e. *not* have a
     client connect to a remote server elsewhere on the network.
 
-    Example:
+    Example usage:
     ```python
         import mph
         client = mph.start(cores=1)
@@ -60,11 +58,10 @@ def start(cores=None, version=None, port=0):
     chapter "Limitations".
 
     Only one client can be instantiated at a time. This is a limitation
-    of the Python-to-Java bridge JPype, which cannot manage more than
-    one Java virtual machine within the same Python process. Therefore
-    `start()` can only be called once. Subsequent calls will raise
-    `NotImplementedError`. Separate Python processes have to be started
-    to work around this issue. Refer to documentation chapter
+    of the Comsol API. Subsequent calls to `start()` will return the
+    client instance created in the first call. In order to work around
+    this limitation, separate Python processes have to be started. Refer
+    to section "Multiple processes" in documentation chapter
     "Demonstrations" for guidance.
 
     The number of `cores` (threads) the Comsol instance uses can be
@@ -78,12 +75,18 @@ def start(cores=None, version=None, port=0):
     The server `port` can be specified if client–server mode is used.
     If omitted, the server chooses a random free port.
     """
-    global client, server
+    global client, server, thread
 
-    if client or server:
-        error = 'Only one Comsol session can be started in the same process.'
-        logger.error(error)
-        raise NotImplementedError(error)
+    if not thread:
+        thread = threading.current_thread()
+    elif thread is not threading.current_thread():
+        error = 'Cannot access client instance from different thread.'
+        log.error(error)
+        raise RuntimeError(error)
+
+    if client:
+        log.info('mph.start() returning the existing client instance.')
+        return client
 
     session = option('session')
     if session == 'platform-dependent':
@@ -92,7 +95,7 @@ def start(cores=None, version=None, port=0):
         else:
             session = 'client-server'
 
-    logger.info('Starting local Comsol session.')
+    log.info('Starting local Comsol session.')
     if session == 'stand-alone':
         client = Client(cores=cores, version=version)
     elif session == 'client-server':
@@ -100,7 +103,7 @@ def start(cores=None, version=None, port=0):
         client = Client(cores=cores, version=version, port=server.port)
     else:
         error = f'Invalid session type "{session}".'
-        logger.error(error)
+        log.error(error)
         raise ValueError(error)
     return client
 
@@ -124,24 +127,12 @@ def exception_hook_sys(exc_type, exc_value, exc_traceback):
     exception_handler_sys(exc_type, exc_value, exc_traceback)
 
 
-def exception_hook_threads(info):
-    """Sets exit code to 1 if exception raised in any other thread."""
-    global exit_code
-    exit_code = 1
-    exception_handler_threads(info)
-
-
 exit_code = 0
 exit_function = sys.exit
 sys.exit = exit_hook
 
 exception_handler_sys = sys.excepthook
 sys.excepthook = exception_hook_sys
-
-# Only available as of Python 3.8, see bugs.python.org/issue1230540.
-if hasattr(threading, 'excepthook'):
-    exception_handler_threads = threading.excepthook
-    threading.excepthook = exception_hook_threads
 
 
 @atexit.register
@@ -161,13 +152,14 @@ def cleanup():
             client.disconnect()
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
-            logger.exception(error)
+            log.exception(error)
     if server and server.running():
         server.stop()
     if jpype.isJVMStarted():
-        logger.info('Exiting the Java virtual machine.')
+        log.info('Exiting the Java virtual machine.')
         sys.stdout.flush()
         sys.stderr.flush()
+        faulthandler.disable()
         jpype.java.lang.Runtime.getRuntime().exit(exit_code)
         # No code is reached from here on due to the hard exit of the JVM.
-        logger.info('Java virtual machine has exited.')
+        log.info('Java virtual machine has exited.')

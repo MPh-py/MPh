@@ -1,5 +1,24 @@
 ﻿# Releases
 
+## 1.0.4
+* Added missing support for installations with classkit license. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Added name validation of available configuration options. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Added support for persistent configuration storage to [`mph.config`](https://mph.readthedocs.io/en/1.0/api/mph.config.html).
+* Fixed: No preference `checkforrecoveries` on certain installations. ([#39](https://github.com/MPh-py/MPh/issues/39))
+* Fixed: Unclear error message when requested version is not installed. ([#42](https://github.com/MPh-py/MPh/issues/42))
+
+## 1.0.3
+* [Published](https://pypi.org/project/MPh/1.0.3) on May 5, 2021.
+* Fixes: [`Client.remove()`](https://mph.readthedocs.io/en/1.0/api/mph.Client.html#mph.Client.remove) did not accept model by name.
+* Fixes: Node names were not escaped when creating new features.
+* Fixes: [`Model.save()`](https://mph.readthedocs.io/en/1.0/api/mph.Model.html#mph.Model.save) failed when `format` given, but not `path`.
+* Fixes: [`Model.save()`](https://mph.readthedocs.io/en/1.0/api/mph.Model.html#mph.Model.save) without `path` given did not save new models.
+* Fixes: [`Model.parameters(evaluate=True)`](https://mph.readthedocs.io/en/1.0/api/mph.Model.html#mph.Model.parameters) returned strings, not numbers.
+* Fixes off-by-one error when passing `inner` indices to [`Model.evaluate()`](https://mph.readthedocs.io/en/1.0/api/mph.Model.html#mph.Model.evaluate).
+* Comsol expects 1-based indices, as opposed to Python's 0-based indexing.
+* Adds missing built-in group `'couplings'`.
+* [`mph.start()`](https://mph.readthedocs.io/en/1.0/api/mph.start.html) now returns existing client instance on subsequent calls.
+
 ## 1.0.2
 * [Published](https://pypi.org/project/MPh/1.0.2) on April 28, 2021.
 * Assigns more typical tag names when creating new model features.

@@ -1,6 +1,4 @@
 ﻿"""Provides the wrapper class for a model node."""
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #
@@ -11,6 +9,8 @@ from jpype import JInt                 # Java integer
 from jpype import JDouble              # Java float
 from jpype import JString              # Java string
 from jpype import JArray               # Java array
+from jpype import JClass               # Java class
+from numpy import integer              # NumPy integer
 from pathlib import Path               # file-system path
 from re import split                   # string splitting
 from json import load as json_load     # JSON decoder
@@ -18,11 +18,10 @@ from difflib import get_close_matches  # fuzzy matching
 from functools import lru_cache        # function cache
 from logging import getLogger          # event logging
 
-
 ########################################
 # Globals                              #
 ########################################
-logger = getLogger(__package__)        # event logger
+log = getLogger(__package__)           # event log
 
 
 ########################################
@@ -30,11 +29,16 @@ logger = getLogger(__package__)        # event logger
 ########################################
 class Node:
     """
-    Represents a model mode.
+    Represents a model node.
 
-    Nodes work similarly to `pathlib.Path` objects from Python's
-    standard library. They support string concatenation to the right
-    with the division operator  in order to reference child nodes:
+    This class makes it possible to navigate the model tree, inspect a
+    node, namely its properties, and manipulate it, like toggling it
+    on/off, creating child nodes, or "running" it.
+
+    Instances of this class reference a node in the model tree and work
+    similarly to `pathlib.Path` objects from Python's standard library.
+    They support string concatenation to the right with the division
+    operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -51,6 +55,25 @@ class Node:
     False
     ```
 
+    In interactive sessions, the convenience function `mph.tree()` may
+    prove useful to see the node's branch in the model tree at a glance:
+    ```console
+    >>> mph.tree(model/'physics')
+    physics
+    ├─ electrostatic
+    │  ├─ Laplace equation
+    │  ├─ zero charge
+    │  ├─ initial values
+    │  ├─ anode
+    │  └─ cathode
+    └─ electric currents
+       ├─ current conservation
+       ├─ insulation
+       ├─ initial values
+       ├─ anode
+       └─ cathode
+    ```
+
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
     demo model from the Tutorial. These literal forward slashes can be
@@ -63,12 +86,17 @@ class Node:
     Node('datasets')
     ```
 
-    This class allows inspecting a node, such as its properties and
-    child nodes, as well as manipulating it to some extent, like
-    toggling it on/off, creating child nodes, or "running" it. Not all
-    actions made available by Comsol are exposed here. Those missing can
-    however be triggered in the Java layer, which is accessible via the
-    `.java` property.
+    If the node refers to an existing model feature, then the instance
+    wraps the corresponding Java object, which could belong to a variety
+    of classes, but would necessarily implement the
+    [com.comsol.model.ModelEntity][1] interface. That Java object
+    can be accessed directly via the `.java` property. The full Comsol
+    functionality is thus available if needed. The convenience function
+    `mph.inspect()` is provided for introspection of the Java object in
+    an interactive session.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/ModelEntity.html
     """
 
     ####################################
@@ -77,38 +105,17 @@ class Node:
 
     def __init__(self, model, path=None):
         if path is None:
-            self.path = ('',)
+            path = ('',)
         elif isinstance(path, str):
-            self.path = parse(path)
+            path = parse(path)
         elif isinstance(path, Node):
-            self.path = path.path
+            path = path.path
         else:
             error = f'Node path {path!r} is not a string or Node instance.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
-        self.alias = {
-            'parameter':  'parameters',
-            'function':   'functions',
-            'component':  'components',
-            'geometry':   'geometries',
-            'view':       'views',
-            'selection':  'selections',
-            'variable':   'variables',
-            'material':   'materials',
-            'mesh':       'meshes',
-            'study':      'studies',
-            'solution':   'solutions',
-            'batch':      'batches',
-            'dataset':    'datasets',
-            'evaluation': 'evaluations',
-            'table':      'tables',
-            'plot':       'plots',
-            'result':     'plots',
-            'results':    'plots',
-            'export':     'exports',
-        }
-        if self.path[0] in self.alias:
-            self.path = (self.alias[self.path[0]],) + self.path[1:]
+        self.model = model
+        """Model object this node refers to."""
         self.groups = {
             'parameters':   'self.model.java.param().group()',
             'functions':    'self.model.java.func()',
@@ -118,6 +125,7 @@ class Node:
             'selections':   'self.model.java.selection()',
             'coordinates':  'self.model.java.coordSystem()',
             'variables':    'self.model.java.variable()',
+            'couplings':    'self.model.java.cpl()',
             'physics':      'self.model.java.physics()',
             'multiphysics': 'self.model.java.multiphysics()',
             'materials':    'self.model.java.material()',
@@ -131,7 +139,34 @@ class Node:
             'plots':        'self.model.java.result()',
             'exports':      'self.model.java.result().export()',
         }
-        self.model = model
+        """Mapping of the built-in groups to corresponding Java objects."""
+        self.alias = {
+            'parameter':  'parameters',
+            'function':   'functions',
+            'component':  'components',
+            'geometry':   'geometries',
+            'view':       'views',
+            'selection':  'selections',
+            'variable':   'variables',
+            'coupling':   'couplings',
+            'material':   'materials',
+            'mesh':       'meshes',
+            'study':      'studies',
+            'solution':   'solutions',
+            'batch':      'batches',
+            'dataset':    'datasets',
+            'evaluation': 'evaluations',
+            'table':      'tables',
+            'plot':       'plots',
+            'result':     'plots',
+            'results':    'plots',
+            'export':     'exports',
+        }
+        """Accepted aliases for the names of built-in groups."""
+        if path[0] in self.alias:
+            path = (self.alias[path[0]],) + path[1:]
+        self.path = path
+        """Path of this node reference from the model's root."""
 
     def __str__(self):
         return join(self.path)
@@ -163,7 +198,7 @@ class Node:
     @property
     def java(self):
         """
-        Returns the Java object this node maps to.
+        Java object this node maps to, if any.
 
         Note that this is a property, not an attribute. Internally,
         it is a function that performs a top-down search of the model
@@ -250,11 +285,11 @@ class Node:
         """Renames the node."""
         if self.is_root():
             error = 'Cannot rename the root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if self.is_group():
             error = 'Cannot rename a built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         java = self.java
         if java:
@@ -263,21 +298,20 @@ class Node:
 
     def retag(self, tag):
         """Assigns a new tag to the node."""
-        java = self.java
         if self.is_root():
             error = 'Cannot change tag of root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
-        elif self.is_group():
+        if self.is_group():
             error = 'Cannot change tag of built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
-        elif java:
-            java.tag(tag)
-        else:
-            error = 'Cannot change tag as node does not exist.'
-            logger.error(error)
-            raise RuntimeError(error)
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        java.tag(tag)
 
     def property(self, name, value=None):
         """
@@ -299,6 +333,108 @@ class Node:
         names = sorted(str(name) for name in java.properties())
         return {name: get(java, name) for name in names}
 
+    def select(self, entity):
+        """
+        Assigns `entity` as the node's selection.
+
+        `entity` can either be another node representing a selection
+        feature, in which case a "named" selection is created. Or it
+        can be a list/array of integers denoting domain, boundary,
+        edge, or point numbers (depending on which of those the selection
+        requires), producing a "manual" selection. It may also be `'all'`
+        to select everything or `None` to clear the selection.
+
+        Raises `NotImplementedError` if the node (that this method is
+        called on) is a geometry node. These may be supported in a
+        future release. Meanwhile, access their Java methods directly.
+        Raises `TypeError` if the node does not have a selection and
+        is not itself an "explicit" selection.
+        """
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if isinstance(java, JClass('com.comsol.model.GeomFeature')):
+            error = "Use the Java layer to change a geometry node's selection."
+            log.error(error)
+            raise NotImplementedError(error)
+        try:
+            java = java.selection()
+        except Exception:
+            if any(not hasattr(java, attr) for attr in ('set', 'all')):
+                error = f'Node "{self}" has no and is no (explicit) selection.'
+                log.error(error)
+                raise TypeError(error) from None
+        if isinstance(entity, Node):
+            if not hasattr(java, 'named'):
+                error = f'Node "{self}" does not support named selections.'
+                log.error(error)
+                raise TypeError(error)
+            node = entity
+            if not node.exists():
+                error = f'Assigned node "{node}" does not exist.'
+                log.error(error)
+                raise LookupError(error)
+            java.named(node.tag())
+        elif isinstance(entity, (list, ndarray)):
+            java.set(cast(entity) if len(entity) else None)
+        elif isinstance(entity, (int, integer)):
+            java.set(cast(entity))
+        elif entity == 'all':
+            java.all()
+        elif entity is None:
+            java.set(cast(None))
+        else:
+            error = "Entity must be a node, 'all', or an array of integers."
+            log.error(error)
+            raise ValueError(error)
+
+    def selection(self):
+        """
+        Returns the entity or entities the node has selected.
+
+        If it is a "named" selection, the corresponding selection node
+        is returned. If it is a "manual" selection, an array of domain,
+        boundary, edge, or point numbers is returned (depending on
+        which of those the selection holds). `None` is returned if
+        nothing is selected.
+
+        Raises `NotImplementedError` if the node is a geometry node.
+        These may be supported in a future release. Meanwhile, access
+        their Java methods directly. Raises `TypeError` if the node
+        does not have a selection and is not itself a selection.
+        """
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if isinstance(java, JClass('com.comsol.model.GeomFeature')):
+            error = "Use the Java layer to query a geometry node's selection."
+            log.error(error)
+            raise NotImplementedError(error)
+        try:
+            java = java.selection()
+        except Exception:
+            if not hasattr(java, 'entities'):
+                error = f'Node "{self}" has no and is no selection.'
+                log.error(error)
+                raise TypeError(error) from None
+        tag = str(java.named()) if hasattr(java, 'named') else None
+        if tag:
+            for node in self.model/'selections':
+                if tag == node.tag():
+                    break
+            else:
+                error = f'Found no selection with reported tag "{tag}".'
+                log.error(error)
+                raise LookupError(error)
+            return node
+        else:
+            entities = java.entities()
+            return array(entities) if entities else None
+
     def toggle(self, action='flip'):
         """
         Enables or disables the node.
@@ -311,8 +447,8 @@ class Node:
         """
         java = self.java
         if not java:
-            error = f'Node {self} does not exist in model tree.'
-            logger.error(error)
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
             raise LookupError(error)
         if action == 'flip':
             java.active(not java.isActive())
@@ -324,11 +460,34 @@ class Node:
     def run(self):
         """Performs the "run" action if the node implements it."""
         java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
         if not hasattr(java, 'run'):
-            error = 'Node "{self}" does not implement "run" operation.'
-            logger.error(error)
+            error = f'Node "{self}" does not implement "run" operation.'
+            log.error(error)
             raise RuntimeError(error)
         java.run()
+
+    def import_(self, file):
+        """
+        Imports external data from the given `file`.
+
+        Note the trailing underscore in the method name. It is needed
+        so that the Python parser does not treat the name as an
+        `import` statement.
+        """
+        file = Path(file)
+        if not file.exists():
+            error = f'File "{file}" does not exist.'
+            log.error(error)
+            raise IOError(error)
+        log.info(f'Loading external data from file "{file.name}".')
+        self.property('filename', f'{file}')
+        self.java.discardData()
+        self.java.importData()
+        log.info('Finished loading external data.')
 
     def create(self, *arguments, name=None):
         """
@@ -344,19 +503,20 @@ class Node:
         """
         if self.is_root():
             error = 'Cannot create nodes at root of model tree.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         java = self.java
+        container = None
         if self.is_group():
             if not hasattr(java, 'uniquetag') and hasattr(java, 'feature'):
                 container = java.feature()
-            else:
+            elif hasattr(java, 'uniquetag') and hasattr(java, 'create'):
                 container = java
-        else:
+        elif hasattr(java, 'feature'):
             container = java.feature()
         if not hasattr(container, 'uniquetag'):
             error = f'Node {self} does not support feature creation.'
-            logger.error(error)
+            log.error(error)
             raise RuntimeError(error)
         for argument in arguments:
             if isinstance(argument, str):
@@ -376,9 +536,9 @@ class Node:
         else:
             container.create(tag, *[cast(argument) for argument in arguments])
         if name:
-            container.get(tag).name(name)
+            container.get(tag).name(unescape(name))
         else:
-            name = str(container.get(tag).name())
+            name = escape(container.get(tag).name())
         child = self/name
         check = tag_pattern(feature_path(child))
         if pattern != check:
@@ -389,7 +549,7 @@ class Node:
                 tag = container.uniquetag(pattern)
             else:
                 tag = pattern
-            logger.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
+            log.debug(f'Retagging "{child}": "{child.tag()}" → "{tag}".')
             child.retag(tag)
         return child
 
@@ -397,15 +557,15 @@ class Node:
         """Removes the node from the model tree."""
         if self.is_root():
             error = 'Cannot remove the root node.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if self.is_group():
             error = 'Cannot remove a built-in group.'
-            logger.error(error)
+            log.error(error)
             raise PermissionError(error)
         if not self.exists():
-            error = 'Node does not exist in model tree.'
-            logger.error(error)
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
             raise LookupError(error)
         parent = self.parent()
         container = parent.java if parent.is_group() else parent.java.feature()
@@ -423,7 +583,9 @@ def parse(string):
     string = str(string)
     # Remove all leading and trailing forward slashes.
     string = string.lstrip('/').rstrip('/')
-    return tuple(unescape(name) for name in split(r'(?<!/)/(?!/)', string))
+    # Split at forward slashes, but not double forward slashes.
+    path = tuple(unescape(name) for name in split(r'(?<!/)/(?!/)', string))
+    return path
 
 
 def join(path):
@@ -478,7 +640,7 @@ def tag_pattern(feature_path):
     elif type != '?':
         return type.lower()[:3] + '*'
     else:
-        return 'tag'
+        return 'tag*'
 
 
 ########################################
@@ -489,10 +651,14 @@ def cast(value):
     """Casts a value from its Python data type to a suitable Java data type."""
     if isinstance(value, Node):
         return JString(value.tag())
+    elif value is None:
+        return value
     elif isinstance(value, bool):
         return JBoolean(value)
     elif isinstance(value, int):
         return JInt(value)
+    elif isinstance(value, integer):
+        return JInt(int(value))
     elif isinstance(value, float):
         return JDouble(value)
     elif isinstance(value, str):
@@ -523,26 +689,21 @@ def cast(value):
         elif value.dtype.kind == 'O':
             if value.ndim > 2:
                 error = 'Cannot cast object arrays of dimension higher than 2.'
-                logger.error(error)
+                log.error(error)
+                raise TypeError(error)
+            if len(value) > 2:
+                error = 'Will not cast object arrays with more than two rows.'
+                log.error(error)
                 raise TypeError(error)
             rows = [row.astype(float) for row in value]
-            if len(rows) > 2:
-                error = 'Will not cast object arrays with more than two rows.'
-                logger.error(error)
-                raise TypeError(error)
-            for row in rows:
-                if row.ndim > 1:
-                    error = 'Rows in object arrays must be one-dimensional.'
-                    logger.error(error)
-                    raise TypeError(error)
             return JArray(JDouble, 2)(rows)
         else:
             error = f'Cannot cast arrays of data type "{value.dtype}".'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
     else:
         error = f'Cannot cast values of data type "{type(value).__name__}".'
-        logger.error(error)
+        log.error(error)
         raise TypeError(error)
 
 
@@ -571,7 +732,7 @@ def get(java, name):
             rows = [array(value[0]), array(value[1])]
         else:
             error = 'Cannot convert double-row matrix with more than two rows.'
-            logger.error(error)
+            log.error(error)
             raise TypeError(error)
         return array(rows, dtype=object)
     elif datatype == 'File':
@@ -599,7 +760,7 @@ def get(java, name):
             return [[]]
     else:
         error = f'Cannot convert Java data type "{datatype}".'
-        logger.error(error)
+        log.error(error)
         raise TypeError(error)
 
 
@@ -607,19 +768,109 @@ def get(java, name):
 # Inspection                           #
 ########################################
 
+def tree(node, levels=[], max_depth=None):
+    """
+    Displays the model tree.
+
+    This is a convenience function to visualize, in an interactive
+    Python session, the branch of the model tree underneath a given
+    `node`. It produces console output such as this:
+    ```console
+    >>> mph.tree(model/'physics')
+    physics
+    ├─ electrostatic
+    │  ├─ Laplace equation
+    │  ├─ zero charge
+    │  ├─ initial values
+    │  ├─ anode
+    │  └─ cathode
+    └─ electric currents
+       ├─ current conservation
+       ├─ insulation
+       ├─ initial values
+       ├─ anode
+       └─ cathode
+    ```
+
+    Often the node would refer to the model's root in order to inspect
+    the entire model tree. The model object itself is therefore also
+    accepted as an argument.
+
+    `levels` is used internally when traversing the model tree recursively.
+    Specify `max_depth` to possibly limit the number of lower branches.
+
+    Note that this function performs poorly in client–server mode, the
+    default on Linux and macOS, especially for complex models. The
+    client–server communication introduces inefficiencies that do not
+    occur in stand-alone mode, the default on Windows, where the model
+    tree, i.e. the hierarchy of related Java objects, can be traversed
+    reasonably fast.
+    """
+    if not isinstance(node, Node):
+        # Support passing the model directly instead of a node.
+        node = node/None
+    if max_depth and len(levels) > max_depth:
+        return
+    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
+    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
+    print(f'{markers}{node.name()}')
+    children = node.children()
+    last = len(children) - 1
+    for (index, child) in enumerate(children):
+        tree(child, levels + [index == last], max_depth)
+
+
 def inspect(java):
     """
     Inspects a Java node object.
 
-    This is basically a "pretty-fied" version of the output from the
-    built-in `dir` command. It displays (prints to the console) the
-    methods of a model node (as given by the Comsol API) as well as
-    the node's properties (if any are defined).
+    This is a convenience function to facilitate exploring Comsol's
+    Java API in an interactive Python session. It expects a Java
+    node object, such as the one returned by the `.java` property
+    of an existing node reference, which would implement the
+    [com.comsol.model.ModelEntity][1] interface.
+
+    Like any object, it could also be inspected with Python's built-in
+    `dir` command. This function here outputs a "pretty-fied" version
+    of that. It displays (prints to the console) the methods implemented
+    by the Java node as well as its properties, if any are defined.
+
+    ```console
+    >>> mph.inspect((model/'studies').java)
+    name:    StudyList
+    tag:     study
+    display: StudyList
+    doc:     StudyList
+    methods:
+      clear
+      copy
+      copyTo
+      create
+      duplicate
+      duplicateTo
+      equals
+      forEach
+      get
+      getContainer
+      index
+      iterator
+      model
+      move
+      remove
+      scope
+      size
+      spliterator
+      tags
+      uniquetag
+    ```
 
     The node's name, tag, and documentation reference marker are
     listed first. These access methods and a few others, which are
     common to all objects, are suppressed in the method list further
     down, for the sake of clarity.
+
+    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+/com/comsol/model/ModelEntity.html
     """
 
     # Also accept Node and Model instances.
@@ -629,10 +880,8 @@ def inspect(java):
     # Display general information about the feature.
     print(f'name:    {java.name()}')
     print(f'tag:     {java.tag()}')
-    try:
+    if hasattr(java, 'getType'):
         print(f'type:    {java.getType()}')
-    except AttributeError:
-        pass
     print(f'display: {java.getDisplayString()}')
     print(f'doc:     {java.docMarker()}')
 
@@ -642,11 +891,8 @@ def inspect(java):
         print(f'comment: {comments}')
     if not java.isActive():
         print('This feature is currently deactivated.')
-    try:
-        if java.hasWarning():
-            print('This feature has warnings.')
-    except AttributeError:
-        pass
+    if hasattr(java, 'hasWarning') and java.hasWarning():
+        print('This feature has warnings.')
 
     # Introspect the feature's attributes.
     attributes = [attribute for attribute in dir(java)]
@@ -680,33 +926,3 @@ def inspect(java):
         if name.startswith('_') or name in suppress:
             continue
         print(f'  {name}')
-
-
-def tree(node, levels=[], max_depth=None):
-    """
-    Displays the model tree.
-
-    This function displays a representation of the model tree in the
-    console. `node` would typically be the model's root node. `levels`
-    is used internally when traversing the model tree recursively.
-    Specify `max_depth` to possibly limit the number of lower branches.
-
-    Note that this function performs poorly in client–server mode, the
-    default on Linux and macOS, especially for complex models. The
-    client–server communication introduces inefficiencies that do not
-    occur in stand-alone mode, the default on Windows, where the model
-    tree, i.e. the hierarchy of related Java objects, can be traversed
-    reasonably fast.
-    """
-    if not isinstance(node, Node):
-        # Support passing the model directly instead of a node.
-        node = node/None
-    if max_depth and len(levels) > max_depth:
-        return
-    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
-    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
-    print(f'{markers}{node.name()}')
-    children = node.children()
-    last = len(children) - 1
-    for (index, child) in enumerate(children):
-        tree(child, levels + [index == last], max_depth)

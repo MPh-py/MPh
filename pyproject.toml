@@ -1,20 +1,17 @@
-[build-system]
-requires = ["flit_core >=2,<4"]
-build-backend = "flit_core.buildapi"
+# Meta information: PyPI and pip
 
-[tool.flit.metadata]
-dist-name = 'MPh'
-module = 'mph'
-author = 'John Hennig'
-requires = ['JPype1', 'NumPy']
-requires-python = '>=3.6'
-license = 'MIT'
-home-page = 'https://github.com/MPh-py/MPh'
-description-file = 'pypi.md'
-keywords = 'finite elements, computer simulation, physics, multiphysics, Comsol'
+[project]
+name = 'MPh'
+authors = [{name='John Hennig'}]
+license = {file='license.txt'}
+keywords = ['finite elements', 'computer simulation', 'physics',
+            'multiphysics', 'Comsol']
 classifiers = [
     'Development Status :: 5 - Production/Stable',
-    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',
     'Operating System :: MacOS :: MacOS X',
@@ -22,10 +19,71 @@ classifiers = [
     'Intended Audience :: Science/Research',
     'Natural Language :: English',
     'License :: OSI Approved :: MIT License']
+readme = 'pypi.md'
+requires-python = '>=3.6'
+dependencies = ['JPype1', 'NumPy']
+dynamic = ['version', 'description']
 
-[tool.flit.metadata.requires-extra]
-doc = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
+[project.optional-dependencies]
+docs = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
+test = ['pyTest', 'pyTest-cov', 'flake8', 'pyproject-flake8']
 
-[tool.flit.metadata.urls]
+[project.urls]
 Documentation = 'https://mph.readthedocs.io'
 Source = 'https://github.com/MPh-py/MPh'
+
+
+# Wheel builder: flit
+
+[build-system]
+requires = ['flit_core>=3.2,<4']
+build-backend = 'flit_core.buildapi'
+
+[tool.flit.module]
+name = 'mph'
+
+
+# Code linter: flake8 (via pyproject-flake8)
+
+[tool.flake8]
+exclude = [
+    '.git',
+    '__pycache__',
+    'develop',
+]
+ignore = [
+    'E127', 'E128',
+    'E201', 'E202',
+    'E221', 'E222',
+    'E226',
+    'E231',
+    'E241',
+    'E251',
+    'E261',
+    'E271', 'E272',
+    'E402',
+    'W503',
+]
+per-file-ignores = ['mph/__init__.py:F401']
+
+
+# Test runner: pyTest
+
+[tool.pytest.ini_options]
+addopts = '--verbose'
+testpaths = ['tests']
+
+
+# Code coverage: Coverage.py
+
+[tool.coverage.run]
+source = ['mph/']
+omit = ['mph/discovery.py']
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    'pragma: no cover',
+    'def check_environment',
+    'def location',
+]

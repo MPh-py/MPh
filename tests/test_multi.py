@@ -1,4 +1,4 @@
-﻿"""Tests the `server` module."""
+﻿"""Tests multiple client connections to the same server."""
 
 ########################################
 # Dependencies                         #
@@ -6,8 +6,10 @@
 import parent # noqa F401
 import mph
 from fixtures import logging_disabled
-import logging
+from pytest import raises
 from sys import argv
+from time import sleep
+import logging
 
 
 ########################################
@@ -18,32 +20,41 @@ server = None
 
 def teardown_module():
     if server and server.running():
-        server.stop()
+        try:
+            server.stop()
+        except Exception:
+            pass
 
 
 ########################################
 # Tests                                #
 ########################################
 
-def test_init():
+def test_multi():
     global server
-    server = mph.Server(cores=1, port=2035)
-    assert server.port == 2035
-
-
-def test_repr():
-    assert repr(server) == f'Server(port={server.port})'
-
-
-def test_running():
-    assert server.running()
-
-
-def test_stop():
-    server.stop()
-    assert not server.running()
     with logging_disabled():
-        server.stop()
+        with raises(ValueError):
+            server = mph.Server(multi='invalid')
+    server = mph.Server(cores=1, multi=False)
+    assert server.running()
+    assert server.port
+    client = mph.Client(port=server.port)
+    assert not client.standalone
+    assert client.version == server.version
+    assert client.cores == server.cores
+    assert client.port == server.port
+    client.disconnect()
+    sleep(3)
+    assert not server.running()
+    server = mph.Server(cores=1, multi=True)
+    client.connect(port=server.port)
+    assert client.version == server.version
+    assert client.cores == server.cores
+    assert client.port == server.port
+    client.disconnect()
+    sleep(3)
+    assert server.running()
+    server.stop()
 
 
 ########################################
@@ -60,9 +71,6 @@ if __name__ == '__main__':
             datefmt = '%H:%M:%S')
 
     try:
-        test_init()
-        test_repr()
-        test_running()
-        test_stop()
+        test_multi()
     finally:
         teardown_module()

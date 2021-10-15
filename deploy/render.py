@@ -1,5 +1,4 @@
 ﻿"""Renders the documentation."""
-__license__ = 'MIT'
 
 from subprocess import run
 from pathlib import Path

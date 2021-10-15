@@ -1,4 +1,4 @@
-﻿"""Tests the `session` module in client–server mode."""
+﻿"""Tests the `session` module in stand-alone mode."""
 
 ########################################
 # Dependencies                         #
@@ -7,6 +7,7 @@ import parent # noqa F401
 import mph
 from fixtures import logging_disabled
 from pytest import raises
+from platform import system
 from sys import argv
 import logging
 
@@ -16,14 +17,28 @@ import logging
 ########################################
 
 def test_start():
-    with logging_disabled():
-        with raises(ValueError):
-            mph.option('session', 'invalid')
-            mph.start()
-    mph.option('session', 'client-server')
+    if system() != 'Windows':
+        return
     client = mph.start(cores=1)
-    assert client.java is not None
+    assert client.java
     assert client.cores == 1
+    assert repr(client) == 'Client(stand-alone)'
+    model = client.create('empty')
+    assert 'empty' in client.names()
+    assert model in client.models()
+    (model/'components').create(True)
+    client.remove(model)
+    assert 'empty' not in client.names()
+    assert model not in client.models()
+    with logging_disabled():
+        with raises(Exception, match='Model node X is removed'):
+            model.java.component()
+        with raises(ValueError):
+            client.remove(model)
+        with raises(RuntimeError):
+            client.connect(2036)
+        with raises(RuntimeError):
+            client.disconnect()
 
 
 ########################################

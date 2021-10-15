@@ -15,8 +15,6 @@ for `.md` files is MyST. For doc-strings it is CommonMark, which
 supports basic text formating, but no advanced features such as cross
 references.
 """
-__license__ = 'MIT'
-
 
 ########################################
 # Dependencies                         #
@@ -31,21 +29,20 @@ extensions = [
     'myst_parser',                     # Accept Markdown as input.
     'sphinx.ext.autodoc',              # Get documentation from doc-strings.
     'sphinx.ext.autosummary',          # Create summaries automatically.
-    'sphinx.ext.viewcode',             # Add links to highlighted source code.
-    'sphinx.ext.mathjax',              # Render math via JavaScript.
+    'sphinx.ext.viewcode',             # Include highlighted source code.
+    'sphinx.ext.intersphinx',          # Support short-hand web links.
 ]
+
+# Mock external dependencies so they are not required at build time.
+for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
+    sys.modules[package] = MagicMock()
 
 # Add the project folder to the module search path.
 main = Path(__file__).absolute().parent.parent
 sys.path.insert(0, str(main))
 
-# Mock external dependencies so they are not required at build time.
-autodoc_mock_imports = ['jpype', 'numpy']
-for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
-    sys.modules[package] = MagicMock()
-
-# Import package to make meta data available.
-import mph as meta
+# Make the package's meta data available.
+from mph import meta
 
 
 ########################################
@@ -71,16 +68,15 @@ def setup(app):
 ########################################
 
 # Meta information
-project   = meta.__title__
-version   = meta.__version__
-release   = meta.__version__
-date      = meta.__date__
-author    = meta.__author__
-copyright = meta.__copyright__
-license   = meta.__license__
+project   = meta.title
+author    = meta.author
+copyright = meta.copyright
+version   = meta.version
+release   = version
 
-# Logo
-html_logo    = 'images/logo-96px.png'  # documentation logo
+# Web site
+html_title   = f'{project} {version}'  # document title
+html_logo    = 'images/logo-96px.png'  # project logo
 html_favicon = 'images/logo-256px.png' # browser icon
 
 # Source parsing
@@ -92,7 +88,14 @@ autodoc_default_options = {
     'members':       True,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
+autosummary_generate = False           # Stub files are created by hand.
 add_module_names = False               # Don't prefix members with module name.
+
+# Short-hand web links
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3',    None),
+    'numpy':  ('https://numpy.org/doc/stable', None),
+}
 
 # Rendering options
 myst_heading_anchors = 2               # Generate link anchors for sections.
@@ -104,6 +107,5 @@ html_show_sphinx     = False           # Show Sphinx blurb in footer?
 html_theme          = 'furo'           # custom theme with light and dark mode
 pygments_style      = 'friendly'       # syntax highlight style in light mode
 pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
-templates_path      = ['templates']    # style template overrides
 html_static_path    = ['style']        # folders to include in output
 html_css_files      = ['custom.css']   # extra style files to apply
