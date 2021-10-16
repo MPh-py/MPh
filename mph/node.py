@@ -278,6 +278,22 @@ class Node:
         return (self.java is not None)
 
     ####################################
+    # Inspection                       #
+    ####################################
+
+    def comment(self, text=None):
+        """Returns or sets the comment attached to the node."""
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if text is None:
+            return str(java.comments())
+        else:
+            java.comments(text)
+
+    ####################################
     # Interaction                      #
     ####################################
 

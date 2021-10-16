@@ -140,6 +140,19 @@ def test_exists():
     assert not Node(model, 'functions/new').exists()
 
 
+def test_comment():
+    node = Node(model, 'datasets/sweep//solution')
+    assert node.exists()
+    text = node.comment()
+    assert text
+    node.comment('test')
+    assert node.comment() == 'test'
+    node.comment('')
+    assert node.comment() == ''
+    node.comment(text)
+    assert node.comment() == text
+
+
 def test_rename():
     with logging_disabled():
         with raises(PermissionError):
@@ -548,6 +561,8 @@ if __name__ == '__main__':
     test_is_group()
     test_exists()
 
+    test_comment()
+
     test_rename()
     test_property()
     test_properties()
@@ -555,6 +570,7 @@ if __name__ == '__main__':
     test_selection()
     test_toggle()
     test_run()
+    test_import()
     test_create()
     test_remove()
 

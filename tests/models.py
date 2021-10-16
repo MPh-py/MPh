@@ -254,7 +254,7 @@ def capacitor():
     (datasets/'static//electrostatic solution').rename('electrostatic')
     (datasets/'relaxation//time-dependent solution').rename('time-dependent')
     (datasets/'sweep//parametric solution').rename('sweep/solution')
-    (datasets/'sweep//solution').java.comments(
+    (datasets/'sweep//solution').comment(
         'This auto-generated feature could be removed, as it is not '
         'really needed. It was left in the model for the purpose of '
         'testing MPh. Its name contains a forward slash, which MPh '
