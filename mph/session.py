@@ -153,8 +153,6 @@ def cleanup():
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
             log.exception(error)
-    if server and server.running():
-        server.stop()
     if jpype.isJVMStarted():
         log.info('Exiting the Java virtual machine.')
         sys.stdout.flush()
