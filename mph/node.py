@@ -217,7 +217,7 @@ class Node:
         container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
-            if name == escape(member.name()):
+            if name == escape(member.label()):
                 return member
 
     ####################################
@@ -258,9 +258,9 @@ class Node:
         if self.is_root():
             return [Node(self.model, group) for group in self.groups]
         elif self.is_group():
-            return [self/escape(java.get(tag).name()) for tag in java.tags()]
+            return [self/escape(java.get(tag).label()) for tag in java.tags()]
         elif hasattr(java, 'feature'):
-            return [self/escape(java.feature(tag).name())
+            return [self/escape(java.feature(tag).label())
                     for tag in java.feature().tags()]
         else:
             return []
@@ -293,7 +293,7 @@ class Node:
             raise PermissionError(error)
         java = self.java
         if java:
-            java.name(name)
+            java.label(name)
         self.path = self.path[:-1] + (name,)
 
     def retag(self, tag):
@@ -536,9 +536,9 @@ class Node:
         else:
             container.create(tag, *[cast(argument) for argument in arguments])
         if name:
-            container.get(tag).name(unescape(name))
+            container.get(tag).label(unescape(name))
         else:
-            name = escape(container.get(tag).name())
+            name = escape(container.get(tag).label())
         child = self/name
         check = tag_pattern(feature_path(child))
         if pattern != check:
@@ -878,7 +878,7 @@ def inspect(java):
         java = java.java
 
     # Display general information about the feature.
-    print(f'name:    {java.name()}')
+    print(f'name:    {java.label()}')
     print(f'tag:     {java.tag()}')
     if hasattr(java, 'getType'):
         print(f'type:    {java.getType()}')
