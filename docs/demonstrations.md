@@ -200,20 +200,19 @@ the external processes. The worker implementation would then be in a
 separate module that is run as a script.
 
 
-
-## Creating models: Java style
+## Access the full Comsol API
 
 The primary focus of MPh is to automate the simulation workflow, like
 running parameter sweeps or optimization routines with customized,
-Python-powered post-processing. Creating and altering models is
-possible, see [next section](#creating-models-python-style), but has
+Python-powered post-processing. Navigating and altering models is
+possible, see [next section](#navigate-and-alter-the-model), but has
 some limitations.
 
-However, any and all functionality offered by the [Comsol Java API][japi]
-is accessible via the "pythonized" Java layer provided by [JPype][jpype],
+However, any and all functionality offered by the [Comsol API][proman]
+is accessible via the "pythonized" Java layer provided by [JPype],
 which is exposed as the `.java` attribute of [`Client`](mph.Client)
-instances, mapping to Comsol's `ModelUtil`, as well as of
-[`Model`](mph.Model) instances, mapping to Comsol's `model`.
+instances, mapping to Comsol's [`ModelUtil`], as well as of
+[`Model`](mph.Model) instances, mapping to Comsol's [`model`].
 
 Let's take this Comsol blog post as an example: ["Automate your modeling
 tasks with the Comsol API for use with Java"][blog]. It starts with the
@@ -258,23 +257,21 @@ model.geom("geom1").feature("blk1").set("size", ["0.1", "0.2", "0.5"]);
 model.geom("geom1").run("fin");
 ```
 
-Note how the *functional* Java code (excluding Java-specific syntax
-elements) was essentially copied and pasted, even the semicolons,
-which Python simply ignores. We named the Python wrapper `pymodel`
-and assigned `model` to the underlying Java object just so we could
-do this. We had to replace `new String[]{"0.1", "0.2", "0.5"}` because
-Python does not know what [`new`][new] means. There, Java expects a
-list of three strings. So we replaced the expression with
-`["0.1", "0.2", "0.5"]`, the Python equivalent of just that: a list
-of these three strings.
+Note how the *functional* Java code (excluding the Java boilerplate)
+was essentially copied and pasted, even the semicolons, which Python
+simply ignores. We named the Python wrapper `pymodel` and assigned
+`model` to the underlying Java object just so we could do this. We had
+to replace `new String[]{"0.1", "0.2", "0.5"}` because Python does not
+know what [`new`][new] means. There, Java expects a list of three
+strings. So we replaced the expression with `["0.1", "0.2", "0.5"]`,
+the Python equivalent of just that: a list of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
-documentation, or a blog post as the case was here, or which Comsol
-generated from your model when you saved it as a Java/Matlab file,
-you will have to amend code lines such as the one above. But they are
-few and far between. The error messages you might receive should point
-you in the right direction and the [JPype documentation][jpype] would
-offer help on issues with type conversion.
+documentation, or a blog post as the case was here, you will have to
+amend code lines such as the one above. But they are few and far between.
+The error messages you might receive should point you in the right
+direction and the [JPype] documentation would offer help on issues with
+type conversion.
 
 The advantage of using Python over Java is:
 * You don't really need to know Java. Just a little, to understand that
@@ -298,9 +295,15 @@ This stores a file named `model.mph` in the working directory, which
 may then be opened in the Comsol GUI or be used in any other Python,
 Java, or Matlab project.
 
+Comsol can be very helpful in creating the Java code corresponding to
+changes we make to a model. Not only does the GUI provide a function to
+"copy as code to clipboard" on any node, it also let's us save the
+entire model as Java source code. And if we "compact the history" right
+before making changes, the new code can conveniently be found at the
+very end of the Java file.
 
 
-## Creating models: Python style
+## Navigate and alter the model
 
 The example from the previous section can be expressed in much more
 idiomatic Python syntax if we ignore the Java layer and only use
@@ -318,7 +321,7 @@ model.build('Geometry 1')
 This, again, hides all tags in application code. Instead, we refer to
 nodes in the model tree by name. In the example, these names were
 generated automatically, in the same way the Comsol GUI does it. We
-could also supply names of our choice.
+could also supply names of our choosing.
 ```python
 import mph
 client = mph.start()
@@ -421,19 +424,21 @@ more advanced features than in the simple example here: It generates
 the demonstration model used in the [Tutorial](tutorial).
 
 
-[repo]:    https://github.com/MPh-py/MPh
-[demos]:   https://github.com/MPh-py/MPh/tree/main/demos
-[capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
-[compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
-[pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
-[create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
+[repo]:        https://github.com/MPh-py/MPh
+[demos]:       https://github.com/MPh-py/MPh/tree/main/demos
+[capa]:        https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
+[compact]:     https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
+[pool]:        https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
+[create]:      https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
 
-[japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[intro]:   https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
-[busbar]:  https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
-[blog]:    https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
+[ga]:          https://en.wikipedia.org/wiki/Genetic_algorithm
 
-[jpype]:   https://jpype.readthedocs.io/en/stable
-[new]:     https://www.javatpoint.com/new-keyword-in-java
+[proman]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[`ModelUtil`]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
+[`model`]:     https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com/comsol/model/Model.html
+[intro]:       https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
+[busbar]:      https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
+[blog]:        https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
-[ga]:      https://en.wikipedia.org/wiki/Genetic_algorithm
+[JPype]:       https://jpype.readthedocs.io/en/stable
+[new]:         https://www.javatpoint.com/new-keyword-in-java
