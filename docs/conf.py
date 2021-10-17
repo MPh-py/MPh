@@ -46,24 +46,6 @@ from mph import meta
 
 
 ########################################
-# Doc-strings                          #
-########################################
-
-def docstring(app, what, name, obj, options, lines):
-    """Converts doc-strings from (CommonMark) Markdown to reStructuredText."""
-    md  = '\n'.join(lines)
-    ast = commonmark.Parser().parse(md)
-    rst = commonmark.ReStructuredTextRenderer().render(ast)
-    lines.clear()
-    lines += rst.splitlines()
-
-
-def setup(app):
-    """Sets up customized text processing."""
-    app.connect('autodoc-process-docstring', docstring)
-
-
-########################################
 # Configuration                        #
 ########################################
 
@@ -109,3 +91,21 @@ pygments_style      = 'friendly'       # syntax highlight style in light mode
 pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
 html_static_path    = ['style']        # folders to include in output
 html_css_files      = ['custom.css']   # extra style files to apply
+
+
+########################################
+# Doc-strings                          #
+########################################
+
+def docstring(app, what, name, obj, options, lines):
+    """Converts doc-strings from (CommonMark) Markdown to reStructuredText."""
+    md  = '\n'.join(lines)
+    ast = commonmark.Parser().parse(md)
+    rst = commonmark.ReStructuredTextRenderer().render(ast)
+    lines.clear()
+    lines += rst.splitlines()
+
+
+def setup(app):
+    """Sets up customized text processing."""
+    app.connect('autodoc-process-docstring', docstring)

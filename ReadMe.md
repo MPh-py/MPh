@@ -30,7 +30,7 @@ Find the full [documentation on Read-the-Docs][docs].
     https://zenodo.org/badge/264718959.svg)](
     https://zenodo.org/badge/latestdoi/264718959)
 [![license](
-    https://img.shields.io/badge/License-MIT-green.svg)](
+    https://img.shields.io/badge/License-MIT-green.svg?label=license)](
     https://opensource.org/licenses/MIT)
 [![release](
     https://img.shields.io/pypi/v/mph.svg)](
