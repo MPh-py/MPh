@@ -1,0 +1,83 @@
+﻿<!--
+© 2021 John Hennig
+
+This logo is NOT subject to the MIT license that the library's source
+code is published under. It is to be used exclusively in order to promote
+this very open-source project: MPh, a "Pythonic scripting interface for
+Comsol Multiphysics", currently (as of October 2021) hosted on GitHub at
+https://github.com/MPh-py/MPh. Usage in any other context, namely for
+derived work, requires the express permission of the copyright holder.
+-->
+
+<svg
+    id      = 'MPh logo'
+    xmlns   = 'http://www.w3.org/2000/svg'
+    viewBox = '0 0 100 100'
+    width   = '100'
+    height  = '100'
+>
+
+<defs>
+    <linearGradient id='jet'
+        x1 = '0'
+        x2 = '1'
+        y1 = '0'
+        y2 = '0'
+    >
+        <stop offset =   '0%' stop-color='#000080'/>
+        <stop offset =  '11%' stop-color='#0000ff'/>
+        <stop offset =  '12%' stop-color='#0000ff'/>
+        <stop offset =  '34%' stop-color='#00dcfe'/>
+        <stop offset =  '35%' stop-color='#00e4f8'/>
+        <stop offset =  '38%' stop-color='#16ffe1'/>
+        <stop offset =  '64%' stop-color='#eeff09'/>
+        <stop offset =  '65%' stop-color='#f8f500'/>
+        <stop offset =  '66%' stop-color='#feed00'/>
+        <stop offset =  '89%' stop-color='#ff1300'/>
+        <stop offset =  '91%' stop-color='#e80000'/>
+        <stop offset = '100%' stop-color='#800000'/>
+    </linearGradient>
+</defs>
+
+<rect id = 'background'
+    x      = '0'
+    y      = '0'
+    width  = '100'
+    height = '100'
+    stroke = 'none'
+    fill   = 'none'
+/>
+
+<path id = 'snake'
+    fill         = 'url(#jet)'
+    stroke       = 'blue'
+    stroke-width = '0'
+    d='
+        M   5 95
+        C   4 94   14 90   15 85
+        C  15 80   10  5   30  5
+        C  40  5   45 30   50 30
+        C  55 30   60  5   70  5
+        C  90  5   85 75   90 83
+        C  95 80   98 92   95 95
+        C  92 97   82 88   87 85
+        C  80 78   80 20   70 20
+        C  65 20   60 50   50 50
+        C  40 50   35 20   30 20
+        C  20 20   25 80   20 85
+        C  15 90    6 95    5 95
+    '
+/>
+
+<text id = 'letters'
+    x           = '50'
+    y           = '70'
+    fill        = 'none'
+    text-anchor = 'middle'
+    font-family = 'DejaVu Sans'
+    font-size   = '20'
+>
+    Ph
+</text>
+
+</svg>

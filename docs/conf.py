@@ -58,8 +58,8 @@ release   = version
 
 # Web site
 html_title   = f'{project} {version}'  # document title
-html_logo    = 'images/logo-96px.png'  # project logo
-html_favicon = 'images/logo-256px.png' # browser icon
+html_logo    = 'images/logo.svg'       # project logo
+html_favicon = 'images/logo.svg'       # browser icon
 
 # Source parsing
 master_doc = 'index'                   # start page
