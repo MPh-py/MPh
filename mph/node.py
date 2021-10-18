@@ -932,7 +932,7 @@ def inspect(java):
                 'getString',  'getStringArray',  'getStringMatrix',
                 'version', 'author', 'resetAuthor', 'lastModifiedBy',
                 'dateCreated', 'dateModified', 'timeCreated', 'timeModified',
-                'active', 'isActive', 'isactive', 'hasWarning',
+                'active', 'isActive', 'isactive',
                 'class_', 'getClass', 'hashCode',
                 'notify', 'notifyAll', 'wait']
 
