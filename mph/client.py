@@ -161,6 +161,12 @@ class Client:
             log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
 
+        # On Windows, prepend the Java folder to the library search path.
+        # See issue #49.
+        if platform.system() == 'Windows':
+            path = os.environ['PATH']
+            os.environ['PATH'] = str(backend['java']) + os.pathsep + path
+
         # Start the Java virtual machine.
         log.debug(f'JPype version is {jpype.__version__}.')
         log.info('Starting Java virtual machine.')
@@ -211,7 +217,7 @@ class Client:
                 try:
                     java.setPreference(name, value)
                 except Exception:
-                    log.info(f'Preference {name} does not exist.')
+                    log.info(f'Preference "{name}" does not exist.')
 
             # Log that we're done so the start-up time may be inspected.
             log.info('Stand-alone client initialized.')

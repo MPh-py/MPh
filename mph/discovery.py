@@ -188,6 +188,7 @@ def search_Windows():
             'patch':  patch,
             'build':  build,
             'root':   root,
+            'java':   java,
             'jvm':    jvm,
             'server': [server],
         })
@@ -277,6 +278,7 @@ def search_Linux():
             'build':  build,
             'root':   root,
             'jvm':    jvm,
+            'java':   java,
             'server': [comsol, 'mphserver'],
         })
 
@@ -367,6 +369,7 @@ def search_macOS():
             'build':  build,
             'root':   root,
             'jvm':    jvm,
+            'java':   java,
             'server': [comsol, 'mphserver'],
         })
 
