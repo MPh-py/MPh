@@ -487,14 +487,6 @@ def test_get():
     pass
 
 
-def test_inspect():
-    node = Node(model, 'datasets/sweep//solution')
-    node.toggle('off')
-    with capture_stdout() as output:
-        mph.inspect(node)
-    assert output.text().strip().startswith('name:')
-
-
 def test_tree():
     with capture_stdout() as output:
         mph.tree(model, max_depth=1)
@@ -523,6 +515,14 @@ def test_tree():
     └─ exports
     '''
     assert output.text().strip() == dedent(expected).strip()
+
+
+def test_inspect():
+    node = Node(model, 'datasets/sweep//solution')
+    node.toggle('off')
+    with capture_stdout() as output:
+        mph.inspect(node)
+    assert output.text().strip().startswith('name:')
 
 
 ########################################
@@ -585,5 +585,5 @@ if __name__ == '__main__':
 
     test_cast()
     test_get()
-    test_inspect()
     test_tree()
+    test_inspect()
