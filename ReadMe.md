@@ -33,7 +33,7 @@ Find the full [documentation on Read-the-Docs][docs].
     https://img.shields.io/badge/License-MIT-green.svg?label=license)](
     https://opensource.org/licenses/MIT)
 [![release](
-    https://img.shields.io/pypi/v/mph.svg)](
+    https://img.shields.io/pypi/v/mph.svg?label=release)](
     https://pypi.python.org/pypi/mph)
 [![downloads](
     https://img.shields.io/pypi/dm/MPh)](
