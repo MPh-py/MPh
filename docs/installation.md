@@ -12,8 +12,9 @@ Java API][japi] and [NumPy][numpy] for returning (fast) numerical arrays.
 if missing.
 
 Comsol, obviously, you need to license and install yourself. Versions
-from Comsol 5.1 onward are expected to work. A separate Java run-time
-environment is *not* required as Comsol ships with one already built in.
+from Comsol 5.1 onward are expected to work, though only Comsol 5.5 and
+newer have been rigorously tested. A separate Java run-time environment
+is *not* required as Comsol ships with one already built in.
 
 On Linux and macOS, Comsol is expected to be found in its respective
 default location. On Windows, any custom install location is supported,
