@@ -3,6 +3,8 @@ Creates the demonstration model "capacitor" from scratch.
 
 The code below uses the higher-level Python layer as much as possible
 and falls back to the Java layer when functionality is (still) missing.
+
+Requires Comsol 5.4 or newer.
 """
 
 import mph
@@ -95,7 +97,7 @@ medium2.property('r', 'd/10')
 media = selections.create('Union', name='media')
 media.property('input', [medium1, medium2])
 domains = selections.create('Explicit', name='domains')
-domains.java.all()
+domains.select('all')
 exterior = selections.create('Adjacent', name='exterior')
 exterior.property('input', [domains])
 axis = selections.create('Box', name='axis')
@@ -120,34 +122,34 @@ probe2.property('r', 'd/10')
 physics = model/'physics'
 es = physics.create('Electrostatics', geometry, name='electrostatic')
 es.java.field('electricpotential').field('V_es')
-es.java.selection().named(media.tag())
+es.select(media)
 es.java.prop('d').set('d', 'l')
 (es/'Charge Conservation 1').rename('Laplace equation')
 (es/'Zero Charge 1').rename('zero charge')
 (es/'Initial Values 1').rename('initial values')
 anode = es.create('ElectricPotential', 1, name='anode')
-anode.java.selection().named(anode_surface.tag())
+anode.select(anode_surface)
 anode.property('V0', '+U/2')
 cathode = es.create('ElectricPotential', 1, name='cathode')
-cathode.java.selection().named(cathode_surface.tag())
+cathode.select(cathode_surface)
 cathode.property('V0', '-U/2')
 ec = physics.create('ConductiveMedia', geometry, name='electric currents')
 ec.java.field('electricpotential').field('V_ec')
-ec.java.selection().named(media.tag())
+ec.select(media)
 ec.java.prop('d').set('d', 'l')
 (ec/'Current Conservation 1').rename('current conservation')
 (ec/'Electric Insulation 1').rename('insulation')
 (ec/'Initial Values 1').rename('initial values')
 anode = ec.create('ElectricPotential', 1, name='anode')
-anode.java.selection().named(anode_surface.tag())
+anode.select(anode_surface)
 anode.property('V0', '+U/2*step(t[1/s])')
 cathode = ec.create('ElectricPotential', 1, name='cathode')
-cathode.java.selection().named(cathode_surface.tag())
+cathode.select(cathode_surface)
 cathode.property('V0', '-U/2*step(t[1/s])')
 
 materials = model/'materials'
 medium1 = materials.create('Common', name='medium 1')
-medium1.java.selection().named((model/'selections'/'medium 1').tag())
+medium1.select(model/'selections'/'medium 1')
 medium1.java.propertyGroup('def').set('relpermittivity',
     ['1', '0', '0', '0', '1', '0', '0', '0', '1'])
 medium1.java.propertyGroup('def').set('relpermittivity_symmetry', '0')
@@ -155,7 +157,7 @@ medium1.java.propertyGroup('def').set('electricconductivity',
     ['1e-10', '0', '0', '0', '1e-10', '0', '0', '0', '1e-10'])
 medium1.java.propertyGroup('def').set('electricconductivity_symmetry', '0')
 medium2 = materials.create('Common', name='medium 2')
-medium2.java.selection().named((model/'selections'/'medium 2').tag())
+medium2.select(model/'selections'/'medium 2')
 medium2.java.propertyGroup('def').set('relpermittivity',
     ['2', '0', '0', '0', '2', '0', '0', '0', '2'])
 medium2.java.propertyGroup('def').set('relpermittivity_symmetry', '0')
@@ -255,7 +257,7 @@ datasets = model/'datasets'
 (datasets/'static//electrostatic solution').rename('electrostatic')
 (datasets/'relaxation//time-dependent solution').rename('time-dependent')
 (datasets/'sweep//parametric solution').rename('sweep/solution')
-(datasets/'sweep//solution').java.comments(
+(datasets/'sweep//solution').comment(
     'This auto-generated feature could be removed, as it is not '
     'really needed. It was left in the model for the purpose of '
     'testing MPh. Its name contains a forward slash, which MPh '
@@ -331,7 +333,7 @@ plot.property('xlabelactive', True)
 plot.property('ylabel', '|E| (V/m)')
 plot.property('ylabelactive', True)
 graph = plot.create('PointGraph', name='medium 1')
-graph.java.selection().named((selections/'probe 1').tag())
+graph.select(selections/'probe 1')
 graph.property('expr', 'ec.normE')
 graph.property('linecolor', 'blue')
 graph.property('linewidth', 3)
@@ -341,7 +343,7 @@ graph.property('legend', True)
 graph.property('legendmethod', 'manual')
 graph.property('legends', ['medium 1'])
 graph = plot.create('PointGraph', name='medium 2')
-graph.java.selection().named((selections/'probe 2').tag())
+graph.select(selections/'probe 2')
 graph.property('expr', 'ec.normE')
 graph.property('linecolor', 'red')
 graph.property('linewidth', 3)
