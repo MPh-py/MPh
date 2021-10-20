@@ -23,8 +23,8 @@ def run_script(name):
     assert file.is_file()
     assert file.suffix == '.py'
     root = here.parent
-    process = run([python, file], cwd=root,
-                  stdout=PIPE, stderr=PIPE, text=True)
+    process = run([python, str(file)], cwd=root,
+                  stdout=PIPE, stderr=PIPE, universal_newlines=True)
     return process
 
 
