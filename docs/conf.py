@@ -11,7 +11,7 @@ The rendered HTML then ends up in the `output` folder, wherein
 The documentation source comprises the `.md` files here, of which
 `index.md` maps to the start page, as well as the doc-strings in the
 package's source code for the API documentation. The Markdown parser
-for `.md` files is MyST. For doc-strings it is CommonMark, which
+for `.md` files is MyST. For doc-strings it is Commonmark, which
 supports basic text formating, but no advanced features such as cross
 references.
 """
@@ -34,7 +34,7 @@ extensions = [
 ]
 
 # Mock external dependencies so they are not required at build time.
-for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
+for package in ('jpype', 'jpype.imports', 'numpy'):
     sys.modules[package] = MagicMock()
 
 # Add the project folder to the module search path.
