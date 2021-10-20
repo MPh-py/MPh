@@ -180,7 +180,7 @@ class Node:
     def __truediv__(self, other):
         if isinstance(other, str):
             other = other.lstrip('/')
-            return Node(self.model, join(parse(f'{self}/{other}')))
+            return self.__class__(self.model, join(parse(f'{self}/{other}')))
         return NotImplemented
 
     def __contains__(self, node):
@@ -250,13 +250,13 @@ class Node:
         if self.is_root():
             return None
         else:
-            return Node(self.model, join(self.path[:-1]))
+            return self.__class__(self.model, join(self.path[:-1]))
 
     def children(self):
         """Returns all child nodes."""
         java = self.java
         if self.is_root():
-            return [Node(self.model, group) for group in self.groups]
+            return [self.__class__(self.model, group) for group in self.groups]
         elif self.is_group():
             return [self/escape(java.get(tag).label()) for tag in java.tags()]
         elif hasattr(java, 'feature'):
