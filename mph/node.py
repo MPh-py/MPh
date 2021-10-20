@@ -293,6 +293,53 @@ class Node:
         else:
             java.comments(text)
 
+    def problems(self):
+        """
+        Returns problems reported by the node and its descendants.
+
+        The problems are returned as a list of dictionaries, each with
+        an entry for `'message'` (the warning or error message),
+        `'category'` (either `'warning'` or `'error'`), `'node'` (either
+        this one or a node beneath it in the model tree), and
+        `'selection'` (an empty string if not applicable).
+
+        Calling this method on the root node returns all warnings and
+        errors in geometry, mesh, and solver sequences.
+        """
+        java = self.java
+        stack = []
+        if hasattr(java, 'problem'):
+            for tag in java.problem().tags():
+                stack.append( (self, java, java.problem(tag)) )
+        items = []
+        while stack:
+            (node, parent, problem) = stack.pop()
+            item = {
+                'message':   '',
+                'category':  '',
+                'node':      node,
+                'selection': '',
+            }
+            if hasattr(problem, 'message'):
+                item['message'] = str(problem.message()).strip()
+            elif problem.hasProperty('message'):
+                item['message'] = str(problem.getString('message')).strip()
+            if 'error' in str(problem.getType()).lower():
+                item['category'] = 'error'
+            elif 'warning' in str(problem.getType()).lower():
+                item['category'] = 'warning'
+            if hasattr(problem, 'hasSelection') and problem.hasSelection():
+                item['selection'] = str(problem.selection())
+            else:
+                item['selection'] = ''
+            items.append(item)
+            if hasattr(problem, 'problem'):
+                for tag in problem.problem().tags():
+                    stack.append( (node, problem, problem.problem(tag)) )
+        for child in self.children():
+            items += child.problems()
+        return items
+
     ####################################
     # Interaction                      #
     ####################################
@@ -907,8 +954,6 @@ def inspect(java):
         print(f'comment: {comments}')
     if not java.isActive():
         print('This feature is currently deactivated.')
-    if hasattr(java, 'hasWarning') and java.hasWarning():
-        print('This feature has warnings.')
 
     # Introspect the feature's attributes.
     attributes = [attribute for attribute in dir(java)]
