@@ -140,6 +140,114 @@ def test_exists():
     assert not Node(model, 'functions/new').exists()
 
 
+def test_comment():
+    node = Node(model, 'datasets/sweep//solution')
+    assert node.exists()
+    text = node.comment()
+    assert text
+    node.comment('test')
+    assert node.comment() == 'test'
+    node.comment('')
+    assert node.comment() == ''
+    node.comment(text)
+    assert node.comment() == text
+    with logging_disabled(), raises(LookupError):
+        node = Node(model, 'functions/non-existing')
+        node.comment('test')
+
+
+def test_problems():
+    # Test errors and warnings in geometry sequence.
+    root = Node(model, '')
+    geometry = root/'geometries/geometry'
+    rounded = geometry/'rounded'
+    geometry.java.run((geometry/'rounded').tag())
+    empty = geometry.create('ExplicitSelection', name='empty')
+    empty.java.selection('selection').set('fil1(1)', 1)
+    geometry.run()
+    empty.java.selection('selection').clear()
+    geometry.run()
+    rounded.java.selection('point').clear()
+    try:
+        geometry.run()
+    except Exception:
+        pass
+    problems = root.problems()
+    assert problems
+    rounded_has_error = False
+    for problem in problems:
+        if problem['node'] == rounded and problem['category'] == 'error':
+            rounded_has_error = True
+            break
+    assert rounded_has_error
+    empty_has_warning = False
+    for problem in problems:
+        if problem['node'] == empty and problem['category'] == 'warning':
+            empty_has_warning = True
+            break
+    assert empty_has_warning
+    empty.remove()
+    vertices = geometry/'vertices'
+    rounded.java.selection('point').named(vertices.tag())
+    geometry.run()
+    assert not root.problems()
+    # Test errors and warnings in mesh sequence.
+    root = Node(client.create('mesh_problems'), None)
+    (root/'components').create(True, name='component')
+    geometry = (root/'geometries').create(3, name='geometry')
+    cylinder1 = geometry.create('Cylinder', name='cylinder 1')
+    cylinder1.property('h', 3.0)
+    cylinder2 = geometry.create('Cylinder', name='cylinder 2')
+    cylinder2.property('h', 3.0)
+    cylinder2.property('r', 0.95)
+    difference = geometry.create('Difference', name='difference')
+    difference.java.selection('input').set(cylinder1.tag())
+    difference.java.selection('input2').set(cylinder2.tag())
+    mesh = (root/'meshes').create(geometry, name='mesh')
+    size = mesh/'Size'
+    size.property('hauto', 9)
+    surface = mesh.create('FreeTri', name='surface')
+    surface.java.selection().geom(2).set(1, 2, 7, 10)
+    volume = mesh.create('FreeTet', name='volume')
+    volume.create('Size', name='size')
+    try:
+        mesh.run()
+    except Exception:
+        pass
+    problems = root.problems()
+    assert problems
+    assert len(problems) == 5
+    assert all([problem['message'] for problem in problems])
+    assert any([problem['category'] == 'error' for problem in problems])
+    assert any([problem['category'] == 'warning' for problem in problems])
+    assert all([problem['node'] == volume for problem in problems])
+    assert all([problem['selection'] for problem in problems])
+    # Test error in solver sequence.
+    root = Node(model, '')
+    anode = root/'physics'/'electrostatic'/'anode'
+    anode.property('V0', '+Ua/2')
+    study = root/'studies'/'static'
+    try:
+        study.run()
+    except Exception:
+        pass
+    problems = root.problems()
+    assert problems
+    solver_has_error = False
+    solver = root/'solutions'/'electrostatic solution'/'stationary solver'
+    for problem in problems:
+        if problem['node'] == solver and problem['category'] == 'error':
+            solver_has_error = True
+            break
+    assert solver_has_error
+    assert 'Undefined variable' in problem['message']
+    assert not problem['selection']
+    anode.property('V0', '+U/2')
+    study.run()
+    assert not root.problems()
+    solver.parent().java.clearSolution()
+
+
 def test_rename():
     with logging_disabled():
         with raises(PermissionError):
@@ -474,14 +582,6 @@ def test_get():
     pass
 
 
-def test_inspect():
-    node = Node(model, 'datasets/sweep//solution')
-    node.toggle('off')
-    with capture_stdout() as output:
-        mph.inspect(node)
-    assert output.text().strip().startswith('name:')
-
-
 def test_tree():
     with capture_stdout() as output:
         mph.tree(model, max_depth=1)
@@ -510,6 +610,14 @@ def test_tree():
     └─ exports
     '''
     assert output.text().strip() == dedent(expected).strip()
+
+
+def test_inspect():
+    node = Node(model, 'datasets/sweep//solution')
+    node.toggle('off')
+    with capture_stdout() as output:
+        mph.inspect(node)
+    assert output.text().strip().startswith('name:')
 
 
 ########################################
@@ -548,6 +656,9 @@ if __name__ == '__main__':
     test_is_group()
     test_exists()
 
+    test_comment()
+    test_problems()
+
     test_rename()
     test_property()
     test_properties()
@@ -555,6 +666,7 @@ if __name__ == '__main__':
     test_selection()
     test_toggle()
     test_run()
+    test_import()
     test_create()
     test_remove()
 
@@ -569,5 +681,5 @@ if __name__ == '__main__':
 
     test_cast()
     test_get()
-    test_inspect()
     test_tree()
+    test_inspect()

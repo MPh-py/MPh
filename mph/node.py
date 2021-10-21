@@ -180,7 +180,7 @@ class Node:
     def __truediv__(self, other):
         if isinstance(other, str):
             other = other.lstrip('/')
-            return Node(self.model, join(parse(f'{self}/{other}')))
+            return self.__class__(self.model, join(parse(f'{self}/{other}')))
         return NotImplemented
 
     def __contains__(self, node):
@@ -217,7 +217,7 @@ class Node:
         container = java if parent.is_group() else java.feature()
         for tag in container.tags():
             member = container.get(tag)
-            if name == escape(member.name()):
+            if name == escape(member.label()):
                 return member
 
     ####################################
@@ -250,17 +250,17 @@ class Node:
         if self.is_root():
             return None
         else:
-            return Node(self.model, join(self.path[:-1]))
+            return self.__class__(self.model, join(self.path[:-1]))
 
     def children(self):
         """Returns all child nodes."""
         java = self.java
         if self.is_root():
-            return [Node(self.model, group) for group in self.groups]
+            return [self.__class__(self.model, group) for group in self.groups]
         elif self.is_group():
-            return [self/escape(java.get(tag).name()) for tag in java.tags()]
+            return [self/escape(java.get(tag).label()) for tag in java.tags()]
         elif hasattr(java, 'feature'):
-            return [self/escape(java.feature(tag).name())
+            return [self/escape(java.feature(tag).label())
                     for tag in java.feature().tags()]
         else:
             return []
@@ -278,6 +278,69 @@ class Node:
         return (self.java is not None)
 
     ####################################
+    # Inspection                       #
+    ####################################
+
+    def comment(self, text=None):
+        """Returns or sets the comment attached to the node."""
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        if text is None:
+            return str(java.comments())
+        else:
+            java.comments(text)
+
+    def problems(self):
+        """
+        Returns problems reported by the node and its descendants.
+
+        The problems are returned as a list of dictionaries, each with
+        an entry for `'message'` (the warning or error message),
+        `'category'` (either `'warning'` or `'error'`), `'node'` (either
+        this one or a node beneath it in the model tree), and
+        `'selection'` (an empty string if not applicable).
+
+        Calling this method on the root node returns all warnings and
+        errors in geometry, mesh, and solver sequences.
+        """
+        java = self.java
+        stack = []
+        if hasattr(java, 'problem'):
+            for tag in java.problem().tags():
+                stack.append( (self, java, java.problem(tag)) )
+        items = []
+        while stack:
+            (node, parent, problem) = stack.pop()
+            item = {
+                'message':   '',
+                'category':  '',
+                'node':      node,
+                'selection': '',
+            }
+            if hasattr(problem, 'message'):
+                item['message'] = str(problem.message()).strip()
+            elif problem.hasProperty('message'):
+                item['message'] = str(problem.getString('message')).strip()
+            if 'error' in str(problem.getType()).lower():
+                item['category'] = 'error'
+            elif 'warning' in str(problem.getType()).lower():
+                item['category'] = 'warning'
+            if hasattr(problem, 'hasSelection') and problem.hasSelection():
+                item['selection'] = str(problem.selection())
+            else:
+                item['selection'] = ''
+            items.append(item)
+            if hasattr(problem, 'problem'):
+                for tag in problem.problem().tags():
+                    stack.append( (node, problem, problem.problem(tag)) )
+        for child in self.children():
+            items += child.problems()
+        return items
+
+    ####################################
     # Interaction                      #
     ####################################
 
@@ -293,7 +356,7 @@ class Node:
             raise PermissionError(error)
         java = self.java
         if java:
-            java.name(name)
+            java.label(name)
         self.path = self.path[:-1] + (name,)
 
     def retag(self, tag):
@@ -536,9 +599,9 @@ class Node:
         else:
             container.create(tag, *[cast(argument) for argument in arguments])
         if name:
-            container.get(tag).name(unescape(name))
+            container.get(tag).label(unescape(name))
         else:
-            name = escape(container.get(tag).name())
+            name = escape(container.get(tag).label())
         child = self/name
         check = tag_pattern(feature_path(child))
         if pattern != check:
@@ -878,7 +941,7 @@ def inspect(java):
         java = java.java
 
     # Display general information about the feature.
-    print(f'name:    {java.name()}')
+    print(f'name:    {java.label()}')
     print(f'tag:     {java.tag()}')
     if hasattr(java, 'getType'):
         print(f'type:    {java.getType()}')
@@ -891,8 +954,6 @@ def inspect(java):
         print(f'comment: {comments}')
     if not java.isActive():
         print('This feature is currently deactivated.')
-    if hasattr(java, 'hasWarning') and java.hasWarning():
-        print('This feature has warnings.')
 
     # Introspect the feature's attributes.
     attributes = [attribute for attribute in dir(java)]
@@ -916,7 +977,7 @@ def inspect(java):
                 'getString',  'getStringArray',  'getStringMatrix',
                 'version', 'author', 'resetAuthor', 'lastModifiedBy',
                 'dateCreated', 'dateModified', 'timeCreated', 'timeModified',
-                'active', 'isActive', 'isactive', 'hasWarning',
+                'active', 'isActive', 'isactive',
                 'class_', 'getClass', 'hashCode',
                 'notify', 'notifyAll', 'wait']
 

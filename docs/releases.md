@@ -1,11 +1,28 @@
 ﻿# Releases
 
+## 1.1.0
+* [Published](https://pypi.org/project/MPh/1.1.0) on October 20, 2021.
+* Client instances may now re-[`connect()`](https://mph.readthedocs.io/en/1.1/api/mph.Client.html#mph.Client.connect) to a different server. ([#41](https://github.com/MPh-py/MPh/pull/41))
+* [`Server`](https://mph.readthedocs.io/en/1.1/api/mph.Server.html) instances can be started with the `multi` option.
+* Module licenses can be queried with [`Client.modules()`](https://mph.readthedocs.io/en/1.1/api/mph.Client.html#mph.Client.modules) and [`Model.modules()`](https://mph.readthedocs.io/en/1.1/api/mph.Model.html#mph.Model.modules).
+* Node selections can be set and queried with [`.select()`](https://mph.readthedocs.io/en/1.1/api/mph.Node.html#mph.Node.select) and [`.selection()`](https://mph.readthedocs.io/en/1.1/api/mph.Node.html#mph.Node.selection).
+* Warnings and errors are reported by [`Node.problems()`](https://mph.readthedocs.io/en/1.1/api/mph.Node.html#mph.Node.problems).
+* User comments on model nodes can be accessed with [`Node.comment()`](https://mph.readthedocs.io/en/1.1/api/mph.Node.html#mph.Node.comment).
+* The [`import_()`](https://mph.readthedocs.io/en/1.1/api/mph.Node.html#mph.Node.import_) method is now also available on nodes.
+* No longer logs warning when [`mph.start()`](https://mph.readthedocs.io/en/1.1/api/mph.start.html) returns existing client instance.
+* Fixes: Java DLL not found if another program is first on the Windows search path. ([#49](https://github.com/MPh-py/MPh/issues/49))
+* Fixes: Certain preferences not defined on older Comsol installations. ([#50](https://github.com/MPh-py/MPh/issues/50))
+* Added documentation note regarding issue with export of animation. ([#43](https://github.com/MPh-py/MPh/issues/43))
+* Improved API documentation. Cross-referenced [Comsol API docs](https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api).
+* Added new logo. (Not subject to the source code's MIT license.)
+
 ## 1.0.4
-* Added missing support for installations with classkit license. ([#40](https://github.com/MPh-py/MPh/pull/40))
-* Added name validation of available configuration options. ([#40](https://github.com/MPh-py/MPh/pull/40))
-* Added support for persistent configuration storage to [`mph.config`](https://mph.readthedocs.io/en/1.0/api/mph.config.html).
-* Fixed: No preference `checkforrecoveries` on certain installations. ([#39](https://github.com/MPh-py/MPh/issues/39))
-* Fixed: Unclear error message when requested version is not installed. ([#42](https://github.com/MPh-py/MPh/issues/42))
+* [Published](https://pypi.org/project/MPh/1.0.4) on May 23, 2021.
+* Adds missing support for installations with classkit license. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Adds name validation of available configuration options. ([#40](https://github.com/MPh-py/MPh/pull/40))
+* Adds support for persistent configuration storage to [`mph.config`](https://mph.readthedocs.io/en/1.0/api/mph.config.html).
+* Fixes: No preference `checkforrecoveries` on certain installations. ([#39](https://github.com/MPh-py/MPh/issues/39))
+* Fixes: Unclear error message when requested version is not installed. ([#42](https://github.com/MPh-py/MPh/issues/42))
 
 ## 1.0.3
 * [Published](https://pypi.org/project/MPh/1.0.3) on May 5, 2021.

@@ -11,7 +11,7 @@ The rendered HTML then ends up in the `output` folder, wherein
 The documentation source comprises the `.md` files here, of which
 `index.md` maps to the start page, as well as the doc-strings in the
 package's source code for the API documentation. The Markdown parser
-for `.md` files is MyST. For doc-strings it is CommonMark, which
+for `.md` files is MyST. For doc-strings it is Commonmark, which
 supports basic text formating, but no advanced features such as cross
 references.
 """
@@ -34,7 +34,7 @@ extensions = [
 ]
 
 # Mock external dependencies so they are not required at build time.
-for package in ('jpype', 'jpype.types', 'jpype.imports', 'numpy'):
+for package in ('jpype', 'jpype.imports', 'numpy'):
     sys.modules[package] = MagicMock()
 
 # Add the project folder to the module search path.
@@ -43,24 +43,6 @@ sys.path.insert(0, str(main))
 
 # Make the package's meta data available.
 from mph import meta
-
-
-########################################
-# Doc-strings                          #
-########################################
-
-def docstring(app, what, name, obj, options, lines):
-    """Converts doc-strings from (CommonMark) Markdown to reStructuredText."""
-    md  = '\n'.join(lines)
-    ast = commonmark.Parser().parse(md)
-    rst = commonmark.ReStructuredTextRenderer().render(ast)
-    lines.clear()
-    lines += rst.splitlines()
-
-
-def setup(app):
-    """Sets up customized text processing."""
-    app.connect('autodoc-process-docstring', docstring)
 
 
 ########################################
@@ -76,8 +58,8 @@ release   = version
 
 # Web site
 html_title   = f'{project} {version}'  # document title
-html_logo    = 'images/logo-96px.png'  # project logo
-html_favicon = 'images/logo-256px.png' # browser icon
+html_logo    = 'images/logo.svg'       # project logo
+html_favicon = 'images/logo.svg'       # browser icon
 
 # Source parsing
 master_doc = 'index'                   # start page
@@ -109,3 +91,21 @@ pygments_style      = 'friendly'       # syntax highlight style in light mode
 pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
 html_static_path    = ['style']        # folders to include in output
 html_css_files      = ['custom.css']   # extra style files to apply
+
+
+########################################
+# Doc-strings                          #
+########################################
+
+def docstring(app, what, name, obj, options, lines):
+    """Converts doc-strings from (CommonMark) Markdown to reStructuredText."""
+    md  = '\n'.join(lines)
+    ast = commonmark.Parser().parse(md)
+    rst = commonmark.ReStructuredTextRenderer().render(ast)
+    lines.clear()
+    lines += rst.splitlines()
+
+
+def setup(app):
+    """Sets up customized text processing."""
+    app.connect('autodoc-process-docstring', docstring)

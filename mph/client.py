@@ -161,6 +161,12 @@ class Client:
             log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
 
+        # On Windows, prepend the Java folder to the library search path.
+        # See issue #49.
+        if platform.system() == 'Windows':
+            path = os.environ['PATH']
+            os.environ['PATH'] = str(backend['java']) + os.pathsep + path
+
         # Start the Java virtual machine.
         log.debug(f'JPype version is {jpype.__version__}.')
         log.info('Starting Java virtual machine.')
@@ -200,16 +206,18 @@ class Client:
             java.loadPreferences()
 
             # Override certain settings not useful in headless operation.
-            java.setPreference('updates.update.check', 'off')
-            java.setPreference('tempfiles.saving.warnifoverwriteolder', 'off')
-            java.setPreference('tempfiles.recovery.autosave', 'off')
-            try:
-                # Preference not defined on certain systems, see issue #39.
-                java.setPreference('tempfiles.recovery.checkforrecoveries',
-                                   'off')
-            except Exception:
-                log.debug('Could not turn off check for recovery files.')
-            java.setPreference('tempfiles.saving.optimize', 'filesize')
+            preferences = (
+                ('updates.update.check', 'off'),
+                ('tempfiles.saving.warnifoverwriteolder', 'off'), # issue #50
+                ('tempfiles.recovery.autosave', 'off'),
+                ('tempfiles.recovery.checkforrecoveries', 'off'), # issue #39
+                ('tempfiles.saving.optimize', 'filesize'),
+            )
+            for (name, value) in preferences:
+                try:
+                    java.setPreference(name, value)
+                except Exception:
+                    log.info(f'Preference "{name}" does not exist.')
 
             # Log that we're done so the start-up time may be inspected.
             log.info('Stand-alone client initialized.')

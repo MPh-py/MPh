@@ -174,7 +174,7 @@ class Model:
 
     def name(self):
         """Returns the model's name."""
-        name = str(self.java.name())
+        name = str(self.java.label())
         if name.endswith('.mph'):
             name = name.rsplit('.', maxsplit=1)[0]
         return name
@@ -616,7 +616,7 @@ class Model:
 
     def rename(self, name):
         """Assigns a new name to the model."""
-        self.java.name(name)
+        self.java.label(name)
 
     def parameter(self, name, value=None, unit=None, description=None,
                         evaluate=False):
@@ -935,7 +935,7 @@ class Model:
         tags = [tag for tag in self.java.physics().tags()]
         ptag = tags[self.physics().index(physics)]
         tags = [tag for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(ftag).name())
+        return [str(self.java.physics(ptag).feature(ftag).label())
                 for ftag in tags]
 
     def toggle(self, physics, feature, action='flip'):

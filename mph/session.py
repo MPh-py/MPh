@@ -153,13 +153,23 @@ def cleanup():
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
             log.exception(error)
-    if server and server.running():
-        server.stop()
     if jpype.isJVMStarted():
         log.info('Exiting the Java virtual machine.')
+        # Work around Unix-style "lazy writing" before we pull the plug.
         sys.stdout.flush()
         sys.stderr.flush()
-        faulthandler.disable()
+        # Only deactivate fault handler on Windows, just like we do in
+        # `Client.__init__()`. pyTest seems to turn them back on right
+        # before entering the exit sequence. On Linux, we do get the
+        # occasional segmentation fault when running tests, just as
+        # pyTest exits. But disabling the fault handler doesn't help,
+        # so let's not touch it. It does seem to have some effect on
+        # Windows, but even there the benefit is fairly unclear.
+        if platform.system() == 'Windows' and faulthandler.is_enabled():
+            log.debug('Turning off Python fault handlers.')
+            faulthandler.disable()
+        # Exit the hard way as Comsol leaves us no choice. See issue #38.
         jpype.java.lang.Runtime.getRuntime().exit(exit_code)
-        # No code is reached from here on due to the hard exit of the JVM.
-        log.info('Java virtual machine has exited.')
+        # No Python code is reached from here on.
+        # We would like to log that the Java VM has exited, but we can't.
+        # log.info('Java virtual machine has exited.')

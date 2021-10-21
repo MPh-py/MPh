@@ -1,4 +1,4 @@
-# Meta information: PyPI and pip
+# Meta information: PyPI and Pip
 
 [project]
 name = 'MPh'
@@ -12,6 +12,7 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',
     'Operating System :: MacOS :: MacOS X',
@@ -25,15 +26,15 @@ dependencies = ['JPype1', 'NumPy']
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-docs = ['Sphinx', 'Furo', 'MyST-parser', 'CommonMark']
-test = ['pyTest', 'pyTest-cov', 'flake8', 'pyproject-flake8']
+docs = ['Sphinx', 'Furo', 'MyST-parser', 'Commonmark']
+test = ['pyTest', 'pyTest-cov', 'Flake8', 'pyproject-Flake8']
 
 [project.urls]
 Documentation = 'https://mph.readthedocs.io'
 Source = 'https://github.com/MPh-py/MPh'
 
 
-# Wheel builder: flit
+# Wheel builder: Flit
 
 [build-system]
 requires = ['flit_core>=3.2,<4']
@@ -43,7 +44,7 @@ build-backend = 'flit_core.buildapi'
 name = 'mph'
 
 
-# Code linter: flake8 (via pyproject-flake8)
+# Code linter: Flake8 (via pyproject-Flake8)
 
 [tool.flake8]
 exclude = [
@@ -64,7 +65,7 @@ ignore = [
     'E402',
     'W503',
 ]
-per-file-ignores = ['mph/__init__.py:F401']
+per-file-ignores = ['__init__.py:F401']
 
 
 # Test runner: pyTest

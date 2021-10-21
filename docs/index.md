@@ -27,13 +27,13 @@ and sells the simulation software.
     https://zenodo.org/badge/264718959.svg)](
     https://zenodo.org/badge/latestdoi/264718959)
 [![license](
-    https://img.shields.io/badge/License-MIT-green.svg)](
+    https://img.shields.io/badge/License-MIT-green.svg?label=license)](
     https://opensource.org/licenses/MIT)
 [![release](
-    https://img.shields.io/pypi/v/mph.svg)](
+    https://img.shields.io/pypi/v/mph.svg?label=PyPI)](
     https://pypi.python.org/pypi/mph)
 [![source](
-    https://img.shields.io/github/stars/MPh-py/MPh?style=social)](
+    https://img.shields.io/github/stars/MPh-py/MPh?label=GitHub&style=social)](
     https://github.com/MPh-py/MPh)
 
 ```{toctree}
