@@ -310,14 +310,14 @@ class Node:
         stack = []
         if hasattr(java, 'problem'):
             for tag in java.problem().tags():
-                stack.append( (self, java.problem(tag)) )
+                stack.append(java.problem(tag))
         items = []
         while stack:
-            (node, problem) = stack.pop()
+            problem = stack.pop()
             item = {
                 'message':   '',
                 'category':  '',
-                'node':      node,
+                'node':      self,
                 'selection': '',
             }
             if hasattr(problem, 'message'):
@@ -333,7 +333,7 @@ class Node:
             items.append(item)
             if hasattr(problem, 'problem'):
                 for tag in problem.problem().tags():
-                    stack.append( (node, problem.problem(tag)) )
+                    stack.append(problem.problem(tag))
         for child in self.children():
             items += child.problems()
         return items
