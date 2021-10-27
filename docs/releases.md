@@ -113,9 +113,8 @@
 
 ## 0.8.2
 * [Published](https://pypi.org/project/MPh/0.8.2) on February 13, 2021.
-* Works around issue of [incorrect exit behavior](https://github.com/MPh-py/MPh/issues/15).
-* Fixes: Exit code was always 0, even when terminating with `sys.exit(2)`.
-* Fixes: Exit code was 0, not 1, when exiting due to unhandled exception.
+* Fixes: Exit code was always 0, even when terminating with `sys.exit(2)`. ([#15](https://github.com/MPh-py/MPh/issues/15))
+* Fixes: Exit code was 0, not 1, when exiting due to unhandled exception. ([#15](https://github.com/MPh-py/MPh/issues/15))
 
 ## 0.8.1
 * [Published](https://pypi.org/project/MPh/0.8.1) on February 9, 2021.
@@ -144,7 +143,6 @@
 * Performs a regular shutdown of the Java VM, as opposed to releases to follow.
 * Respects user-set Comsol preferences when starting [`Client`](https://mph.readthedocs.io/en/0.7/api/mph.Client.html).
 * Adds screen-shot of Comsol demonstration model to [Tutorial](https://mph.readthedocs.io/en/0.7/tutorial.html).
-* Adds [deployment](https://github.com/MPh-py/MPh/tree/a86f77a7b26e24e314c01639b846a3ee927f1e6d/deploy) instructions for developers.
 
 ## 0.7.4
 * [Published](https://pypi.org/project/MPh/0.7.4) on July 17, 2020.
@@ -165,8 +163,8 @@
 
 ## 0.7.1
 * [Published](https://pypi.org/project/MPh/0.7.1) on May 17, 2020… later that day.
-* Fixes meta information [on PyPI](https://pypi.org/project/MPh).
+* Fixes meta information on PyPI.
 
 ## 0.7.0
 * [Published](https://pypi.org/project/MPh/0.7.0) on May 17, 2020.
-* First open-source release [published on PyPI](https://pypi.org/project/MPh#history).
+* First open-source release published on PyPI.
