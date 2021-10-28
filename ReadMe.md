@@ -26,25 +26,21 @@ Find the full [documentation on Read-the-Docs][docs].
 [jpype]:  https://github.com/jpype-project/jpype
 [docs]:   https://mph.readthedocs.io
 
-[![citation](
-    https://zenodo.org/badge/264718959.svg)](
-    https://zenodo.org/badge/latestdoi/264718959)
-[![license](
-    https://img.shields.io/badge/License-MIT-green.svg?label=license)](
-    https://opensource.org/licenses/MIT)
 [![release](
     https://img.shields.io/pypi/v/mph.svg?label=release)](
     https://pypi.python.org/pypi/mph)
 [![downloads](
     https://img.shields.io/pypi/dm/MPh)](
     https://pepy.tech/project/mph)
-
+[![cite](
+    https://zenodo.org/badge/264718959.svg)](
+    https://zenodo.org/badge/latestdoi/264718959)
 [![coverage](
     https://img.shields.io/codecov/c/github/MPh-py/MPh?token=02ZZ8ZJH3M)](
     https://codecov.io/gh/MPh-py/MPh)
 [![quality](
     https://img.shields.io/lgtm/grade/python/github/MPh-py/MPh?label=quality)](
     https://lgtm.com/projects/g/MPh-py/MPh)
-[![documentation](
+[![docs](
     https://readthedocs.org/projects/mph/badge/?version=latest)](
     https://mph.readthedocs.io/en/latest)
