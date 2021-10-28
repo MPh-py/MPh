@@ -59,11 +59,10 @@ would add the following lines at the end of the shell configuration
 file `.bashrc`.
 ```shell
 # Help MPh find Comsol's shared libraries.
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH\
-:/usr/local/comsol56/multiphysics/lib/glnxa64\
-:/usr/local/comsol56/multiphysics/lib/glnxa64/gcc\
-:/usr/local/comsol56/multiphysics/ext/graphicsmagick/glnxa64\
-:/usr/local/comsol56/multiphysics/ext/cadimport/glnxa64
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
+/usr/local/comsol56/multiphysics/lib/glnxa64:\
+/usr/local/comsol56/multiphysics/ext/graphicsmagick/glnxa64:\
+/usr/local/comsol56/multiphysics/ext/cadimport/glnxa64
 ```
 
 On macOS, the root folder is `/Applications/COMSOL56/Multiphysics`.
