@@ -41,12 +41,12 @@ def start(cores=None, version=None, port=0):
 
     Example usage:
     ```python
-        import mph
-        client = mph.start(cores=1)
-        model = client.load('model.mph')
-        model.solve()
-        model.save()
-        client.remove(model)
+    import mph
+    client = mph.start(cores=1)
+    model = client.load('model.mph')
+    model.solve()
+    model.save()
+    client.remove(model)
     ```
 
     Depending on the platform, this may either be a stand-alone client

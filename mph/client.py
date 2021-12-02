@@ -100,12 +100,12 @@ class Client:
 
     Example usage:
     ```python
-        import mph
-        client = mph.Client(cores=1)
-        model = client.load('model.mph')
-        model.solve()
-        model.save()
-        client.remove(model)
+    import mph
+    client = mph.Client(cores=1)
+    model = client.load('model.mph')
+    model.solve()
+    model.save()
+    client.remove(model)
     ```
 
     The number of `cores` (threads) the client instance uses can

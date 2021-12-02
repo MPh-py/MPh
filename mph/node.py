@@ -387,7 +387,12 @@ class Node:
             self.java.set(name, cast(value))
 
     def properties(self):
-        """Returns names and values of all node properties as a dictionary."""
+        """
+        Returns names and values of all node properties as a dictionary.
+
+        In the Comsol GUI, properties are displayed in the Settings tab
+        of the model node.
+        """
         java = self.java
         if not hasattr(java, 'properties'):
             return {}
@@ -552,7 +557,7 @@ class Node:
 
     def create(self, *arguments, name=None):
         """
-        Creates a new child node.
+        Creates a new child node and returns that node instance.
 
         Refer to the Comsol documentation for the values of valid
         `arguments`. It is often just the feature type of the child

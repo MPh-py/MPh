@@ -95,14 +95,14 @@ class Model:
 
     Example usage:
     ```python
-        import mph
-        client = mph.start()
-        model = client.load('capacitor.mph')
-        model.parameter('U', '1 [V]')
-        model.parameter('d', '1 [mm]')
-        model.solve()
-        C = model.evaluate('2*es.intWe/U^2', 'pF')
-        print(f'capacitance C = {C:.3f} pF')
+    import mph
+    client = mph.start()
+    model = client.load('capacitor.mph')
+    model.parameter('U', '1 [V]')
+    model.parameter('d', '1 [mm]')
+    model.solve()
+    C = model.evaluate('2*es.intWe/U^2', 'pF')
+    print(f'capacitance C = {C:.3f} pF')
     ```
 
     The focus of the functionality exposed by this class is to

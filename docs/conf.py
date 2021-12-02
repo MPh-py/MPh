@@ -62,8 +62,8 @@ html_logo    = 'images/logo.svg'       # project logo
 html_favicon = 'images/logo.svg'       # browser icon
 
 # Source parsing
-master_doc = 'index'                   # start page
-nitpicky   = True                      # Warn about missing references?
+root_doc = 'index'                     # start page
+nitpicky = True                        # Warn about missing references?
 
 # Code documentation
 autodoc_default_options = {

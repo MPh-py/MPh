@@ -3,13 +3,6 @@ p {
     text-align: justify;
 }
 
-/* Furo theme does not actually respect the `:align: center` image option. */
-img.align-center {
-    display:      block;
-    margin-left:  auto;
-    margin-right: auto;
-}
-
 /* Push bulleted lists a little closer to lead-in paragraph. */
 p + ul.simple {
     margin-top: -6px;

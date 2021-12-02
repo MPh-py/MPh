@@ -36,10 +36,10 @@ class Server:
 
     Example usage:
     ```python
-        import mph
-        server = mph.Server(cores=1)
-        print(f'Server listing on port {server.port}.')
-        server.stop()
+    import mph
+    server = mph.Server(cores=1)
+    print(f'Server listing on port {server.port}.')
+    server.stop()
     ```
 
     The number of processor `cores` the server makes use of may be
