@@ -20,8 +20,12 @@ On Linux and macOS, Comsol is expected to be found in its respective
 default location. On Windows, any custom install location is supported,
 as the installer stores that information in the central registry.
 
+Though if, on Linux, you do have Comsol installed in a custom location,
+[create a symbolic link][symlink] in `~/.local`, have it point to that
+Comsol folder, and give it a name that starts with `comsol`.
 
-[pypi]:  https://pypi.python.org/pypi/mph
-[jpype]: https://jpype.readthedocs.io
-[japi]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[numpy]: https://numpy.org
+[pypi]:    https://pypi.python.org/pypi/mph
+[jpype]:   https://jpype.readthedocs.io
+[japi]:    https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[numpy]:   https://numpy.org
+[symlink]: https://www.howtogeek.com/287014
