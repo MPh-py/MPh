@@ -1,5 +1,9 @@
 ﻿# Releases
 
+## 1.1.1
+* [Published](https://pypi.org/project/MPh/1.1.1) on December 2, 2021.
+* Supports custom Comsol install locations on Linux via symbolic links in `~/.local`. ([#62](https://github.com/MPh-py/MPh/issues/62))
+
 ## 1.1.0
 * [Published](https://pypi.org/project/MPh/1.1.0) on October 21, 2021.
 * Client instances may now re-[`connect()`](https://mph.readthedocs.io/en/1.1/api/mph.Client.html#mph.Client.connect) to a different server. ([#41](https://github.com/MPh-py/MPh/pull/41))
