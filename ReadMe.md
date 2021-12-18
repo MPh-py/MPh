@@ -31,7 +31,7 @@ Find the full [documentation on Read-the-Docs][docs].
     https://pypi.python.org/pypi/mph)
 [![downloads](
     https://img.shields.io/pypi/dm/MPh)](
-    https://pepy.tech/project/mph)
+    https://pypistats.org/packages/mph)
 [![cite](
     https://zenodo.org/badge/264718959.svg)](
     https://zenodo.org/badge/latestdoi/264718959)
