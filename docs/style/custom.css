@@ -12,3 +12,8 @@ p + ul.simple {
 p + ol.simple {
     margin-top: -6px;
 }
+
+/* Make `html_show_sphinx = False` work as intended. */
+footer div.related-information {
+    visibility: hidden;
+}
