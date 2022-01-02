@@ -1,4 +1,0 @@
-﻿config
-======
-
-.. automodule:: mph.config
