@@ -112,7 +112,7 @@ class Model:
     structure, though some such functionality is offered here, and
     even more of it through the `Node` class.
 
-    This class is a wrapper around the [com.comsol.model.Model][1]
+    This class is a wrapper around the [`com.comsol.model.Model`][1]
     Java class, which itself is wrapped by JPype and can be accessed
     directly via the `.java` attribute. The full Comsol functionality is
     thus available if needed.

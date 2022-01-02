@@ -89,7 +89,7 @@ class Node:
     If the node refers to an existing model feature, then the instance
     wraps the corresponding Java object, which could belong to a variety
     of classes, but would necessarily implement the
-    [com.comsol.model.ModelEntity][1] interface. That Java object
+    [`com.comsol.model.ModelEntity`][1] interface. That Java object
     can be accessed directly via the `.java` property. The full Comsol
     functionality is thus available if needed. The convenience function
     `mph.inspect()` is provided for introspection of the Java object in
@@ -894,7 +894,7 @@ def inspect(java):
     Java API in an interactive Python session. It expects a Java
     node object, such as the one returned by the `.java` property
     of an existing node reference, which would implement the
-    [com.comsol.model.ModelEntity][1] interface.
+    [`com.comsol.model.ModelEntity`][1] interface.
 
     Like any object, it could also be inspected with Python's built-in
     `dir` command. This function here outputs a "pretty-fied" version

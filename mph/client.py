@@ -122,7 +122,7 @@ class Client:
     address defaults to `'localhost'`, but could be any domain name
     or IP address.
 
-    This class is a wrapper around the [com.comsol.model.util.ModelUtil][1]
+    This class is a wrapper around the [`com.comsol.model.util.ModelUtil`][1]
     Java class, which itself is wrapped by JPype and can be accessed
     directly via the `.java` attribute. The full Comsol functionality is
     thus available if needed.
