@@ -329,7 +329,7 @@ class Client:
         """
         Enables or disables caching of previously loaded models.
 
-        Caching means that the `load()` method will check if a model
+        Caching means that the {meth}`load` method will check if a model
         has been previously loaded from the same file-system path and,
         if so, return the in-memory model object instead of reloading
         it from disk. By default (at start-up) caching is disabled.
@@ -348,7 +348,7 @@ class Client:
 
     def create(self, name=None):
         """
-        Creates a new model and returns it as a `Model` instance.
+        Creates a new model and returns it as a {class}`Model` instance.
 
         An optional `name` can be supplied. Otherwise the model will
         retain its automatically generated name, like "Model 1".
@@ -363,7 +363,7 @@ class Client:
         return model
 
     def remove(self, model):
-        """Removes the given `model` from memory."""
+        """Removes the given {class}`model <Model>` from memory."""
         if isinstance(model, str):
             if model not in self.names():
                 error = f'No model named "{model}" exists.'
@@ -407,8 +407,9 @@ class Client:
         client connections. The `host` address defaults to `'localhost'`,
         but could be any domain name or IP address.
 
-        This will fail for stand-alone clients or if the client is already
-        connected to a server. In the latter case, `disconnect()` first.
+        This will fail for stand-alone clients or if the client is
+        already connected to a server. In the latter case, call
+        {meth}`disconnect` first.
         """
         if self.standalone:
             error = 'Stand-alone clients cannot connect to a server.'
@@ -427,8 +428,9 @@ class Client:
         """
         Disconnects the client from the server.
 
-        Note that the server, unless started with the option `multi`
-        set to `'on'`, will shut down as soon as the client disconnects.
+        Note that the {class}`server <Server>`, unless started with
+        the option `multi` set to `'on'`, will shut down as soon as
+        the client disconnects.
         """
         if self.port:
             log.debug('Disconnecting from server.')

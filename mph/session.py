@@ -57,12 +57,13 @@ def start(cores=None, version=None, port=0):
     systems, and thus not the default. Find more details in documentation
     chapter "Limitations".
 
-    Only one client can be instantiated at a time. This is a limitation
-    of the Comsol API. Subsequent calls to `start()` will return the
-    client instance created in the first call. In order to work around
-    this limitation, separate Python processes have to be started. Refer
-    to section "Multiple processes" in documentation chapter
-    "Demonstrations" for guidance.
+    Returns a {class}`Client` instance. Only one client can be
+    instantiated at a time. This is a limitation of the Comsol API.
+    Subsequent calls to `start()` will return the client instance
+    created in the first call. In order to work around this limitation,
+    separate Python processes have to be started. Refer to section
+    "[Multiple processes](demonstrations.md#multiple-processes)" for
+    guidance.
 
     The number of `cores` (threads) the Comsol instance uses can be
     restricted by specifying a number. Otherwise all available cores

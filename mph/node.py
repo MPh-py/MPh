@@ -36,9 +36,9 @@ class Node:
     on/off, creating child nodes, or "running" it.
 
     Instances of this class reference a node in the model tree and work
-    similarly to `pathlib.Path` objects from Python's standard library.
-    They support string concatenation to the right with the division
-    operator in order to reference child nodes:
+    similarly to [`Path`](python:pathlib.Path) objects from Python's
+    standard library. They support string concatenation to the right
+    with the division operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -47,16 +47,17 @@ class Node:
     Node('functions/step')
     ```
 
-    Note how the `model` object also supports the division operator in
-    order to generate node references. As mere references, nodes must
-    must not necessarily exist in the model tree:
+    Note how the {class}`model <Model>` object also supports the division
+    operator in order to generate node references. As mere references,
+    nodes must must not necessarily exist in the model tree:
     ```python
     >>> (node/'new function').exists()
     False
     ```
 
-    In interactive sessions, the convenience function `mph.tree()` may
-    prove useful to see the node's branch in the model tree at a glance:
+    In interactive sessions, the convenience function {func}`mph.tree`
+    may prove useful to see the node's branch in the model tree at a
+    glance:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -76,8 +77,8 @@ class Node:
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
-    demo model from the Tutorial. These literal forward slashes can be
-    escaped by doubling the character:
+    demo model from the [Tutorial](../tutorial.md). These literal
+    forward slashes can be escaped by doubling the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()
@@ -92,8 +93,8 @@ class Node:
     [`com.comsol.model.ModelEntity`][1] interface. That Java object
     can be accessed directly via the `.java` property. The full Comsol
     functionality is thus available if needed. The convenience function
-    `mph.inspect()` is provided for introspection of the Java object in
-    an interactive session.
+    {func}`mph.inspect` is provided for introspection of the Java object
+    in an interactive session.
 
     [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html

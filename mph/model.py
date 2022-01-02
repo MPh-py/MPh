@@ -91,7 +91,7 @@ class Model:
     Represents a Comsol model.
 
     The class is not intended to be instantiated directly. Rather, the
-    model would be loaded from a file by the client.
+    model would be loaded from a file by the [client](mph.Client.md).
 
     Example usage:
     ```python
@@ -110,12 +110,12 @@ class Model:
     model, then evaluate the results. The intention is not *per se*
     to create the model from scratch or to extensively modify its
     structure, though some such functionality is offered here, and
-    even more of it through the `Node` class.
+    even more of it through the {class}`Node` class.
 
     This class is a wrapper around the [`com.comsol.model.Model`][1]
     Java class, which itself is wrapped by JPype and can be accessed
-    directly via the `.java` attribute. The full Comsol functionality is
-    thus available if needed.
+    directly via the `.java` attribute. The full Comsol functionality
+    is thus available if needed.
 
     The `parent` argument to the constructor is usually that internal
     Java object. But in order to simplify extending the class with
@@ -438,7 +438,8 @@ class Model:
         `unit` must be given correspondingly. If omitted, default
         units are used. The expression may be a global one, or a scalar
         field, or particle data. Results are returned as (lists of)
-        NumPy arrays, of whichever dimensionality they may then have.
+        [NumPy arrays](numpy:ndarray), of whichever dimensionality they
+        may then have.
 
         A `dataset` may be specified. Otherwise the expression will
         be evaluated on the default dataset. If the solution stored in

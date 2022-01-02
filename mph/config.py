@@ -76,7 +76,7 @@ def load(file=None):
 
     If `file` is not given, looks for a configuration file named
     `MPh.ini` in the current directory, or in the folder inside the
-    user profile as returned by `location()`, or in this library's
+    user profile as returned by {func}`location`, or in this library's
     folder, in that order. If no such file is found, the hard-coded
     default values are used.
     """
@@ -114,7 +114,7 @@ def save(file=None):
     Saves the configuration in the given `.ini` file.
 
     If `file` is not given, saves the configuration in `MPh.ini`
-    inside the default folder returned by `location()`.
+    inside the default folder returned by {func}`location`.
     """
     if not file:
         file = location()/'MPh.ini'
