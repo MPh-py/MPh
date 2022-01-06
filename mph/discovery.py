@@ -227,7 +227,7 @@ def search_Linux():
             continue
 
         # Get version information from Comsol server.
-        process = run([comsol, 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'mphserver', '--version'], stdout=PIPE)
         if process.returncode != 0:
             log.debug('Querying version information failed.')
             continue
@@ -316,7 +316,7 @@ def search_macOS():
             continue
 
         # Get version information from Comsol server.
-        process = run([comsol, 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'mphserver', '--version'], stdout=PIPE)
         if process.returncode != 0:
             log.debug('Querying version information failed.')
             continue
