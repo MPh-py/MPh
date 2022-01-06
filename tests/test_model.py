@@ -230,8 +230,8 @@ def test_inner():
     assert (indices == list(range(1,102))).all()
     assert values[0] == 0
     assert values[-1] == 1
-    assert model.inner('datasets/time-dependent')
     assert model.inner(model/'datasets'/'time-dependent')
+    assert model.inner('sweep//solution')
     with logging_disabled():
         with raises(ValueError):
             model.inner('non-existing')
@@ -250,8 +250,8 @@ def test_outer():
     assert values.dtype.kind  == 'f'
     assert (indices == list(range(1,4))).all()
     assert (values == (1.0, 2.0, 3.0)).all()
-    assert model.outer('datasets/parametric sweep')
     assert model.outer(model/'datasets'/'parametric sweep')
+    assert model.outer('sweep//solution')
     with logging_disabled():
         with raises(ValueError):
             model.outer('non-existing')
@@ -330,8 +330,8 @@ def test_evaluate():
     with logging_disabled():
         assert model.evaluate('U')
         assert model.evaluate('U', dataset='electrostatic')
-        assert model.evaluate('U', dataset='datasets/electrostatic')
         assert model.evaluate('U', dataset=model/'datasets'/'electrostatic')
+        assert model.evaluate('U', dataset='sweep//solution').all()
         with raises(ValueError):
             model.evaluate('U', dataset='non-existing')
         with raises(TypeError):

@@ -351,10 +351,7 @@ class Model:
         # Validate dataset argument.
         if dataset is not None:
             if isinstance(dataset, str):
-                if '/' in dataset:
-                    dataset = self/dataset
-                else:
-                    dataset = self/'datasets'/dataset
+                dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
                 log.error(error)
@@ -396,10 +393,7 @@ class Model:
         # Validate dataset argument.
         if dataset is not None:
             if isinstance(dataset, str):
-                if '/' in dataset:
-                    dataset = self/dataset
-                else:
-                    dataset = self/'datasets'/dataset
+                dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
                 log.error(error)
@@ -460,10 +454,7 @@ class Model:
         # Validate input arguments.
         if dataset is not None:
             if isinstance(dataset, str):
-                if '/' in dataset:
-                    dataset = self/dataset
-                else:
-                    dataset = self/'datasets'/dataset
+                dataset = self/'datasets'/dataset
             if not isinstance(dataset, Node):
                 error = 'Dataset must be a dataset name or dataset node.'
                 log.error(error)
@@ -499,8 +490,7 @@ class Model:
             error = f'Dataset "{dataset.name()}" does not exist.'
             log.error(error)
             raise ValueError(error)
-        log.info(f'Evaluating "{expression}" '
-                    f'on dataset "{dataset.name()}".')
+        log.info(f'Evaluating "{expression}" on dataset "{dataset.name()}".')
 
         # Find corresponding solution.
         if 'solution' in dataset.properties():
