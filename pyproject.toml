@@ -4,8 +4,8 @@
 name = 'MPh'
 authors = [{name='John Hennig'}]
 license = {file='license.txt'}
-keywords = ['finite elements', 'computer simulation', 'physics',
-            'multiphysics', 'Comsol']
+keywords = ['Comsol', 'multiphysics', 'physics', 'finite elements',
+            'computer simulation']
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python :: 3.6',
@@ -26,7 +26,7 @@ dependencies = ['JPype1', 'NumPy']
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
-docs = ['Sphinx', 'Furo', 'MyST-parser', 'Commonmark']
+docs = ['Sphinx', 'Furo', 'MyST-parser']
 test = ['pyTest', 'pyTest-cov', 'Flake8', 'pyproject-Flake8']
 
 [project.urls]
