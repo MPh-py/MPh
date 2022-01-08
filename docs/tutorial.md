@@ -69,8 +69,9 @@ objects can be recalled as follows:
 ```
 
 We will generally not need to bother with these lists, as we would
-rather hold on to the `model` reference we received from the client.
-But to free up memory, we could remove a specific model.
+rather hold on to the `model` reference we received from the client
+in the first place. But to free up memory, we could remove a specific
+model.
 ```python
 >>> client.remove(model)
 ```
@@ -168,8 +169,7 @@ This particular model's only geometry sequence
 ```
 is set up to depend on that very value. So it will effectively change
 the next time it is rebuilt. This will happen automatically once we
-solve the model. But we may also trigger the geometry rebuild right
-away.
+solve the model. But we may also trigger the geometry build right away.
 ```python
 >>> model.build()
 ```
@@ -230,8 +230,8 @@ We might also ask where the electric field is strongest and have
 ```
 
 Note how this time we did not specify any units. When left out, values
-are returned in default units. Here specifically, the field strength
-in V/m and its coordinates in meters.
+are returned in the model's default units. Here specifically, the field
+strength in V/m and its coordinates in meters.
 
 We also did not specify the dataset, even though there are three
 different studies that have separate solutions and datasets associated

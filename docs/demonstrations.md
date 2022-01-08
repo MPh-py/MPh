@@ -375,8 +375,9 @@ model/'geometries/geometry/ice block'
 The model's root node can be referenced with either `model/''` or
 `model/None`. If any of the node names in the hierarchy contain a
 forward slash themselves, that forward slash can be escaped (i.e.,
-marked to be interpreted literally) by doubling it, for instance:
-`geometry/'ice//frozen water'`.
+marked to be interpreted literally) by doubling it. For instance,
+a geometry node displayed as "ice/frozen water" in the Comsol GUI
+would be referred to as `geometry/'ice//frozen water'`.
 
 The example model discussed here produces the following model
 [tree](mph.tree):
