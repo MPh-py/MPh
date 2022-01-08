@@ -1,5 +1,9 @@
 ﻿# Releases
 
+## 1.1.2
+* [Published](https://pypi.org/project/MPh/1.1.2) on January 8, 2022.
+* Fixes evaluation error for datasets with slash in name. ([#66](https://github.com/MPh-py/MPh/issues/66))
+
 ## 1.1.1
 * [Published](https://pypi.org/project/MPh/1.1.1) on December 2, 2021.
 * Supports custom Comsol install locations on Linux via symbolic links in `~/.local`. ([#62](https://github.com/MPh-py/MPh/issues/62))
