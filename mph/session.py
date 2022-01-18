@@ -113,6 +113,11 @@ def start(cores=None, version=None, port=0):
 # Stop                                 #
 ########################################
 
+exit_code = 0
+exit_function = sys.exit
+exception_handler = sys.excepthook
+
+
 def exit_hook(code=None):
     """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
     global exit_code
@@ -121,19 +126,15 @@ def exit_hook(code=None):
     exit_function(code)
 
 
-def exception_hook_sys(exc_type, exc_value, exc_traceback):
+def exception_hook(exc_type, exc_value, exc_traceback):
     """Sets exit code to 1 if exception raised in main thread."""
     global exit_code
     exit_code = 1
-    exception_handler_sys(exc_type, exc_value, exc_traceback)
+    exception_handler(exc_type, exc_value, exc_traceback)
 
 
-exit_code = 0
-exit_function = sys.exit
 sys.exit = exit_hook
-
-exception_handler_sys = sys.excepthook
-sys.excepthook = exception_hook_sys
+sys.excepthook = exception_hook
 
 
 @atexit.register
