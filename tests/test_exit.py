@@ -3,12 +3,10 @@
 ########################################
 # Dependencies                         #
 ########################################
-import parent # noqa F401
+from fixtures import setup_logging
 from subprocess import run, PIPE
 from pathlib import Path
-from sys import argv
 from sys import executable as python
-import logging
 
 
 ########################################
@@ -61,14 +59,7 @@ def test_exit_client_exc():
 ########################################
 
 if __name__ == '__main__':
-
-    arguments = argv[1:]
-    if 'log' in arguments:
-        logging.basicConfig(
-            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
-            format  = '[%(asctime)s.%(msecs)03d] %(message)s',
-            datefmt = '%H:%M:%S')
-
+    setup_logging()
     test_exit_nojvm_sys()
     test_exit_nojvm_exc()
     test_exit_client_sys()

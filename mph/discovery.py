@@ -7,7 +7,9 @@ available simulation back-ends, and locates the installation folders.
 
 On Windows, the discovery mechanism relies on the Registry to provide
 information about install locations. On Linux and macOS, Comsol is
-expected to be installed at its respective default location.
+expected to be installed at its respective default location. Though on
+Linux, the folder `.local` in the user's home directory is also
+searched to allow symbolic linking to a custom location.
 """
 
 ########################################
@@ -203,10 +205,12 @@ def search_Linux():
     # Collect all information in a list.
     backends = []
 
-    # Loop over Comsol folders in /usr/local.
-    pattern = re.compile('(?i)Comsol')
-    folders = [item for item in Path('/usr/local').iterdir()
-               if item.is_dir() and pattern.match(item.name)]
+    # Loop over Comsol folders in `/usr/local` and `~/.local`.
+    pattern   = re.compile('(?i)Comsol')
+    locations = [Path('/usr/local'), Path.home()/'.local']
+    folders   = [item for location in locations
+                      for item in location.iterdir()
+                      if item.is_dir() and pattern.match(item.name)]
     for folder in folders:
 
         # Root folder is the sub-directory "multiphysics".
@@ -223,7 +227,7 @@ def search_Linux():
             continue
 
         # Get version information from Comsol server.
-        process = run([comsol, 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'mphserver', '--version'], stdout=PIPE)
         if process.returncode != 0:
             log.debug('Querying version information failed.')
             continue
@@ -312,7 +316,7 @@ def search_macOS():
             continue
 
         # Get version information from Comsol server.
-        process = run([comsol, 'server', '--version'], stdout=PIPE)
+        process = run([comsol, 'mphserver', '--version'], stdout=PIPE)
         if process.returncode != 0:
             log.debug('Querying version information failed.')
             continue

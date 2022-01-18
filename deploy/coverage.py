@@ -11,7 +11,7 @@ plug-in enabled, and generate the coverage report incrementally.
 If the coverage report file (`coverage.xml`) already exists, we instead
 render it as HTML for inspection. This is helpful during development.
 The coverage report may also be uploaded to an online service such as
-CodeCov for each published release or even commit.
+CodeCov for each published release or even commit, see `codecov.py`.
 """
 
 from subprocess import run

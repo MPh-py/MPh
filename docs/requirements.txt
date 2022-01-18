@@ -1,4 +1,3 @@
-sphinx>=2.1
+sphinx
 furo
 myst-parser
-commonmark

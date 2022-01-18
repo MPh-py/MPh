@@ -1,4 +1,0 @@
-﻿Node
-====
-
-.. autoclass:: mph.Node

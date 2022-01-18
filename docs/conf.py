@@ -8,27 +8,31 @@ triggered when running  `sphinx-build . output` on the command line.
 The rendered HTML then ends up in the `output` folder, wherein
 `index.html` is the start page.
 
-The documentation source comprises the `.md` files here, of which
-`index.md` maps to the start page, as well as the doc-strings in the
-package's source code for the API documentation. The Markdown parser
-for `.md` files is MyST. For doc-strings it is Commonmark, which
-supports basic text formating, but no advanced features such as cross
-references.
+The documentation source is written in Markdown. It comprises the `.md`
+files here, of which `index.md` maps to the start page, as well as the
+doc-strings in the package's source code for the API documentation. The
+Markdown parser is MyST. Doc-string support for MyST is added by custom
+Sphinx extensions.
 """
 
 ########################################
 # Dependencies                         #
 ########################################
 
-import commonmark                      # Markdown parser
-from unittest.mock import MagicMock    # mock imports
 import sys                             # system specifics
 from pathlib import Path               # file-system path
+from unittest.mock import MagicMock    # mock imports
 
+# Modify module search path.
+here = Path(__file__).absolute().parent
+sys.path.insert(0, str(here.parent))
+sys.path.insert(0, str(here/'extensions'))
+
+# Load Sphinx extensions.
 extensions = [
     'myst_parser',                     # Accept Markdown as input.
-    'sphinx.ext.autodoc',              # Get documentation from doc-strings.
-    'sphinx.ext.autosummary',          # Create summaries automatically.
+    'myst_docstring',                  # Get documentation from doc-strings.
+    'myst_summary',                    # Create summaries automatically.
     'sphinx.ext.viewcode',             # Include highlighted source code.
     'sphinx.ext.intersphinx',          # Support short-hand web links.
 ]
@@ -36,10 +40,6 @@ extensions = [
 # Mock external dependencies so they are not required at build time.
 for package in ('jpype', 'jpype.imports', 'numpy'):
     sys.modules[package] = MagicMock()
-
-# Add the project folder to the module search path.
-main = Path(__file__).absolute().parent.parent
-sys.path.insert(0, str(main))
 
 # Make the package's meta data available.
 from mph import meta
@@ -62,8 +62,8 @@ html_logo    = 'images/logo.svg'       # project logo
 html_favicon = 'images/logo.svg'       # browser icon
 
 # Source parsing
-master_doc = 'index'                   # start page
-nitpicky   = True                      # Warn about missing references?
+root_doc = 'index'                     # start page
+nitpicky = True                        # Warn about missing references?
 
 # Code documentation
 autodoc_default_options = {
@@ -91,21 +91,3 @@ pygments_style      = 'friendly'       # syntax highlight style in light mode
 pygments_dark_style = 'stata-dark'     # syntax highlight style in dark mode
 html_static_path    = ['style']        # folders to include in output
 html_css_files      = ['custom.css']   # extra style files to apply
-
-
-########################################
-# Doc-strings                          #
-########################################
-
-def docstring(app, what, name, obj, options, lines):
-    """Converts doc-strings from (CommonMark) Markdown to reStructuredText."""
-    md  = '\n'.join(lines)
-    ast = commonmark.Parser().parse(md)
-    rst = commonmark.ReStructuredTextRenderer().render(ast)
-    lines.clear()
-    lines += rst.splitlines()
-
-
-def setup(app):
-    """Sets up customized text processing."""
-    app.connect('autodoc-process-docstring', docstring)

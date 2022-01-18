@@ -1,0 +1,4 @@
+﻿# discovery
+
+```{automodule} mph.discovery
+```

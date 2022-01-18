@@ -3,13 +3,6 @@ p {
     text-align: justify;
 }
 
-/* Furo theme does not actually respect the `:align: center` image option. */
-img.align-center {
-    display:      block;
-    margin-left:  auto;
-    margin-right: auto;
-}
-
 /* Push bulleted lists a little closer to lead-in paragraph. */
 p + ul.simple {
     margin-top: -6px;
@@ -18,4 +11,9 @@ p + ul.simple {
 /* Push ordered lists a little closer to lead-in paragraph. */
 p + ol.simple {
     margin-top: -6px;
+}
+
+/* Make `html_show_sphinx = False` work as intended. */
+footer div.related-information {
+    visibility: hidden;
 }

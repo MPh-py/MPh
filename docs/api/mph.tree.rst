@@ -1,4 +1,0 @@
-﻿tree
-====
-
-.. autofunction:: mph.tree

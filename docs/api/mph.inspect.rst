@@ -1,4 +1,0 @@
-﻿inspect
-=======
-
-.. autofunction:: mph.inspect

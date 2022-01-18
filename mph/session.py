@@ -41,12 +41,12 @@ def start(cores=None, version=None, port=0):
 
     Example usage:
     ```python
-        import mph
-        client = mph.start(cores=1)
-        model = client.load('model.mph')
-        model.solve()
-        model.save()
-        client.remove(model)
+    import mph
+    client = mph.start(cores=1)
+    model = client.load('model.mph')
+    model.solve()
+    model.save()
+    client.remove(model)
     ```
 
     Depending on the platform, this may either be a stand-alone client
@@ -57,12 +57,13 @@ def start(cores=None, version=None, port=0):
     systems, and thus not the default. Find more details in documentation
     chapter "Limitations".
 
-    Only one client can be instantiated at a time. This is a limitation
-    of the Comsol API. Subsequent calls to `start()` will return the
-    client instance created in the first call. In order to work around
-    this limitation, separate Python processes have to be started. Refer
-    to section "Multiple processes" in documentation chapter
-    "Demonstrations" for guidance.
+    Returns a {class}`Client` instance. Only one client can be
+    instantiated at a time. This is a limitation of the Comsol API.
+    Subsequent calls to `start()` will return the client instance
+    created in the first call. In order to work around this limitation,
+    separate Python processes have to be started. Refer to section
+    "[Multiple processes](demonstrations.md#multiple-processes)" for
+    guidance.
 
     The number of `cores` (threads) the Comsol instance uses can be
     restricted by specifying a number. Otherwise all available cores
@@ -112,6 +113,11 @@ def start(cores=None, version=None, port=0):
 # Stop                                 #
 ########################################
 
+exit_code = 0
+exit_function = sys.exit
+exception_handler = sys.excepthook
+
+
 def exit_hook(code=None):
     """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
     global exit_code
@@ -120,19 +126,15 @@ def exit_hook(code=None):
     exit_function(code)
 
 
-def exception_hook_sys(exc_type, exc_value, exc_traceback):
+def exception_hook(exc_type, exc_value, exc_traceback):
     """Sets exit code to 1 if exception raised in main thread."""
     global exit_code
     exit_code = 1
-    exception_handler_sys(exc_type, exc_value, exc_traceback)
+    exception_handler(exc_type, exc_value, exc_traceback)
 
 
-exit_code = 0
-exit_function = sys.exit
 sys.exit = exit_hook
-
-exception_handler_sys = sys.excepthook
-sys.excepthook = exception_hook_sys
+sys.excepthook = exception_hook
 
 
 @atexit.register

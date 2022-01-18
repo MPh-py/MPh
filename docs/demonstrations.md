@@ -1,6 +1,6 @@
 ﻿# Demonstrations
 
-## Busbar
+## Busbar example
 
 ["Electrical Heating in a Busbar"][busbar] is an example model featured
 in the tutorial of ["Introduction to Comsol Multiphysics"][intro] and
@@ -29,7 +29,7 @@ Tmax = 330.42 K at (0.105000, -0.024899, 0.053425)
 Tmin = 322.41 K at (0.063272, 0.000000, 0.000000)
 ```
 
-You could now sweep the model's parameters, for example the length `L`
+We could now sweep the model's parameters, for example the length `L`
 or width `wbb` of the busbar.
 
 
@@ -56,10 +56,9 @@ for file in Path.cwd().glob('*.mph'):
     model.save()
 ```
 
-The script [`compact_models.py`][compact] in the [`demos`][demos] folder
-of the source-code [repository][repo] is a refined version of the above
-code. It displays more status information and also resets the modeling
-history.
+The script [`compact_models.py`][compact] in the `demos` folder of the
+source-code repository is a refined version of the above code. It
+displays more status information and also resets the modeling history.
 
 Note that we could easily go through all sub-directories recursively
 by replacing [`glob`](python:pathlib.Path.glob) with
@@ -178,11 +177,11 @@ it is we do with simulation results.
 
 The complete script [`worker_pool.py`][pool], which implements all of
 the above and also irons out some wrinkles not covered here for the
-sake of brevity, can be found in the [`demos`][demos] folder of the
-source-code [repository][repo]. As it runs, it displays a live plot
-such as the one that follows. It is reproduced here preserving the real
-time from a run with two workers. Observe how the first two data points
-do in fact come in out of order.
+sake of brevity, can be found in the `demos` folder of the source-code
+repository. As it runs, it displays a live plot such as the one that
+follows. It is reproduced here preserving the real time from a run with
+two workers. Observe how the first two data points do in fact come in
+out of order.
 
 ```{image} images/worker_pool.gif
 :alt: Live plot of worker pool demo
@@ -297,10 +296,10 @@ Java, or Matlab project.
 
 Comsol can be very helpful in creating the Java code corresponding to
 changes we make to a model. Not only does the GUI provide a function to
-"copy as code to clipboard" on any node, it also let's us save the
-entire model as Java source code. And if we "compact the history" right
-before making changes, the new code can conveniently be found at the
-very end of the Java file.
+"copy as code to clipboard" on any node, it also lets us save the entire
+model as Java source code. And if we "compact the history" right before
+making changes, the new code can conveniently be found at the very end
+of the Java file.
 
 
 ## Navigate and alter the model
@@ -339,11 +338,11 @@ creates that node in its parent group, here the built-in group
 
 So far, we have used strings to refer to nodes. We could also use the
 [`Node`](mph.Node) class, which offers more flexibility and extra
-functionality. Instances of that class are returned by
-[`model.create()`](mph.Model) for convenience. But they can be
-generated from scratch by string concatenation with the division
-operator — much like [`pathlib.Path`](python:pathlib.Path) objects
-from Python's standard library.
+functionality. Instances of that class are returned by `model.create()`
+for convenience. But they can be generated from scratch by string
+concatenation with the division operator — much like
+[`pathlib.Path`](python:pathlib.Path) objects from Python's standard
+library.
 ```python
 import mph
 client = mph.start()
@@ -376,8 +375,9 @@ model/'geometries/geometry/ice block'
 The model's root node can be referenced with either `model/''` or
 `model/None`. If any of the node names in the hierarchy contain a
 forward slash themselves, that forward slash can be escaped (i.e.,
-marked to be interpreted literally) by doubling it, for instance:
-`geometry/'ice//frozen water'`.
+marked to be interpreted literally) by doubling it. For instance,
+a geometry node displayed as "ice/frozen water" in the Comsol GUI
+would be referred to as `geometry/'ice//frozen water'`.
 
 The example model discussed here produces the following model
 [tree](mph.tree):
@@ -424,8 +424,6 @@ more advanced features than in the simple example here: It generates
 the demonstration model used in the [Tutorial](tutorial).
 
 
-[repo]:        https://github.com/MPh-py/MPh
-[demos]:       https://github.com/MPh-py/MPh/tree/main/demos
 [capa]:        https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
 [compact]:     https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
 [pool]:        https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
