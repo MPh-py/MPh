@@ -3,15 +3,13 @@
 ########################################
 # Dependencies                         #
 ########################################
-import parent # noqa F401
 import mph
 import models
 from fixtures import logging_disabled
 from fixtures import warnings_disabled
+from fixtures import setup_logging
 from pytest import raises
 from pathlib import Path
-from sys import argv
-import logging
 
 
 ########################################
@@ -679,21 +677,10 @@ def test_load():
 ########################################
 
 if __name__ == '__main__':
-
-    arguments = argv[1:]
-    if 'stand-alone' in arguments:
-        mph.option('session', 'stand-alone')
-    if 'client-server' in arguments:
-        mph.option('session', 'client-server')
-    if 'log' in arguments:
-        logging.basicConfig(
-            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
-            format  = '[%(asctime)s.%(msecs)03d] %(message)s',
-            datefmt = '%H:%M:%S')
-
+    setup_logging()
     setup_module()
-    try:
 
+    try:
         test_str()
         test_repr()
         test_eq()

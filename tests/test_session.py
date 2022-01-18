@@ -3,12 +3,10 @@
 ########################################
 # Dependencies                         #
 ########################################
-import parent # noqa F401
 import mph
 from fixtures import logging_disabled
+from fixtures import setup_logging
 from pytest import raises
-from sys import argv
-import logging
 
 
 ########################################
@@ -31,12 +29,5 @@ def test_start():
 ########################################
 
 if __name__ == '__main__':
-
-    arguments = argv[1:]
-    if 'log' in arguments:
-        logging.basicConfig(
-            level   = logging.DEBUG if 'debug' in arguments else logging.INFO,
-            format  = '[%(asctime)s.%(msecs)03d] %(message)s',
-            datefmt = '%H:%M:%S')
-
+    setup_logging()
     test_start()
