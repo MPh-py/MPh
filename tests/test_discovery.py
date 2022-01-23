@@ -22,8 +22,12 @@ def test_parse():
 
 
 def test_backend():
-    backends = mph.discovery.backend()
-    assert bool(backends)
+    backend = mph.discovery.backend()
+    assert backend['name']
+    assert backend['root']
+    assert backend['java']
+    assert backend['jvm']
+    assert backend['server']
 
 
 ########################################

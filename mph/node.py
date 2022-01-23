@@ -13,7 +13,7 @@ from jpype import JClass               # Java class
 from numpy import integer              # NumPy integer
 from pathlib import Path               # file-system path
 from re import split                   # string splitting
-from json import load as json_load     # JSON decoder
+from json import load as json_load     # JSON parser
 from difflib import get_close_matches  # fuzzy matching
 from functools import lru_cache        # function cache
 from logging import getLogger          # event logging
