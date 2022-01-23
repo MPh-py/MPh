@@ -6,9 +6,9 @@ from shutil import rmtree
 root = Path(__file__).resolve().parent.parent
 
 folders = [
-    root/'deploy'/'docs',
-    root/'deploy'/'coverage',
-    root/'deploy'/'dist',
+    root/'tools'/'docs',
+    root/'tools'/'coverage',
+    root/'tools'/'dist',
     root/'dist',
 ]
 folder_names = [

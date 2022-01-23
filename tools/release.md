@@ -10,7 +10,7 @@
 * Force `stable` branch to new release tag: `git branch -f stable`.
 * Same for the current documentation branch: `git branch -f 1.1`.
 * Push both branches upstream, e.g. `git push origin stable`.
-* Run code coverage and upload report to CodeCov.
+* Run code coverage: `python tools/coverage.py`.
+* Upload coverage report: `python tools/codecov.py`.
 * Create new release on GitHub and add release notes.
-* Publish to PyPI by running `deploy/publish.py`.
-* Check that meta information is correct on PyPI.
+* Publish to PyPI: `python tools/publish.py`.
