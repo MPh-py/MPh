@@ -392,7 +392,7 @@ class Node:
         Returns names and values of all node properties as a dictionary.
 
         In the Comsol GUI, properties are displayed in the Settings tab
-        of the model node.
+        of the model node (not to be confused with the Properties tab).
         """
         java = self.java
         if not hasattr(java, 'properties'):
@@ -967,7 +967,10 @@ def inspect(java):
         print('properties:')
         names = [str(name) for name in java.properties()]
         for name in names:
-            value = get(java, name)
+            try:
+                value = get(java, name)
+            except Exception as error:
+                value = f'<{error}>'
             print(f'  {name}: {value}')
 
     # Define a list of common methods to be suppressed in the output.
