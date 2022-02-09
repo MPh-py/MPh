@@ -88,8 +88,8 @@ def test_name():
 
 
 def compare_tags(node, other):
-    assert (other/node).exists()
-    assert node.tag() == (other/node).tag() or node.is_root()
+    if not node.is_root() and (other/node).exists():
+        assert node.tag() == (other/node).tag()
     for child in node:
         compare_tags(child, other)
 
