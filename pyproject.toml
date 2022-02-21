@@ -1,4 +1,4 @@
-# Meta information: PyPI and Pip
+# Project information: PyPI and Pip
 
 [project]
 name = 'MPh'
@@ -48,22 +48,25 @@ name = 'mph'
 
 [tool.flake8]
 exclude = [
-    '.git',
-    '__pycache__',
-    'develop',
+    '.git', '__pycache__',
+    'local', 'ignore', 'develop', 'dev',
 ]
 ignore = [
-    'E127', 'E128',
-    'E201', 'E202',
-    'E221', 'E222',
-    'E226',
-    'E231',
-    'E241',
-    'E251',
-    'E261',
-    'E271', 'E272',
-    'E402',
-    'W503',
+    'E127',        # Continuation line over-indented for visual indent.
+    'E128',        # Continuation line under-indented for visual indent.
+    'E201',        # Whitespace after '('.
+    'E202',        # Whitespace before ')'.
+    'E221',        # Multiple spaces before operator.
+    'E222',        # Multiple spaces after operator.
+    'E226',        # Missing whitespace around arithmetic operator.
+    'E231',        # Missing whitespace after ',', ';', or ':'.
+    'E241',        # Multiple spaces after ','.
+    'E251',        # Unexpected spaces around keyword / parameter equals.
+    'E261',        # At least two spaces before inline comment.
+    'E271',        # Multiple spaces after keyword.
+    'E272',        # Multiple spaces before keyword.
+    'E402',        # Module level import not at top of file.
+    'W503',        # Line break occurred before a binary operator.
 ]
 per-file-ignores = ['__init__.py:F401']
 
