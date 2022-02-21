@@ -15,7 +15,7 @@ from pathlib import Path
 ########################################
 client = None
 model  = None
-demo   = Path(__file__).resolve().parent.parent/'demos'/'capacitor.mph'
+demo   = Path(__file__).resolve().parent/'demo.mph'
 
 
 ########################################
@@ -63,7 +63,7 @@ def test_repr():
 
 def test_contains():
     assert model in client
-    assert 'capacitor' in client
+    assert 'demo' in client
     assert 'empty' in client
     assert 'non-existing' not in client
 
@@ -74,7 +74,7 @@ def test_iter():
 
 
 def test_truediv():
-    assert client/'capacitor' == model
+    assert client/'demo' == model
     with logging_disabled():
         with raises(ValueError):
             client/'non-existing'

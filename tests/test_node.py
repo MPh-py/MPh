@@ -99,7 +99,7 @@ def test_tag():
     if not client.port:
         # Skip test in client-server mode where it's fairly slow.
         here = Path(__file__).resolve().parent
-        demo = client.load(here.parent/'demos'/'capacitor.mph')
+        demo = client.load(here/'demo.mph')
         demo.solve()
         root = Node(model, '')
         compare_tags(root, demo)
