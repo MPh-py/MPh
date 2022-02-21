@@ -2,6 +2,7 @@
 * Bump version number in `mph/meta.py`.
 * Add release notes to `docs/releases.md`.
 * Add dedicated commit for the version bump.
+* Run tests for all supported Python versions.
 * Push to GitHub: `git push origin main`.
 * Check documentation build on Read-the-Docs.
 * Tag commit with version number, e.g. `git tag v1.1.1`.
