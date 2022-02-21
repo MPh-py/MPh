@@ -835,7 +835,7 @@ def get(java, name):
 # Inspection                           #
 ########################################
 
-def tree(node, levels=[], max_depth=None):
+def tree(node, max_depth=None):
     """
     Displays the model tree.
 
@@ -859,12 +859,11 @@ def tree(node, levels=[], max_depth=None):
        └─ cathode
     ```
 
+    Specify `max_depth` to possibly limit the number of lower branches.
+
     Often the node would refer to the model's root in order to inspect
     the entire model tree. The model object itself is therefore also
     accepted as an argument.
-
-    `levels` is used internally when traversing the model tree recursively.
-    Specify `max_depth` to possibly limit the number of lower branches.
 
     Note that this function performs poorly in client–server mode, the
     default on Linux and macOS, especially for complex models. The
@@ -873,18 +872,22 @@ def tree(node, levels=[], max_depth=None):
     tree, i.e. the hierarchy of related Java objects, can be traversed
     reasonably fast.
     """
+
+    def traverse(node, levels, max_depth=None):
+        if max_depth and len(levels) > max_depth:
+            return
+        markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
+        markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
+        print(f'{markers}{node.name()}')
+        children = node.children()
+        last = len(children) - 1
+        for (index, child) in enumerate(children):
+            traverse(child, levels + [index == last], max_depth)
+
     if not isinstance(node, Node):
-        # Support passing the model directly instead of a node.
+        # Assume node is actually a model object and traverse from root.
         node = node/None
-    if max_depth and len(levels) > max_depth:
-        return
-    markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
-    markers += '' if not levels else '└─ ' if levels[-1] else '├─ '
-    print(f'{markers}{node.name()}')
-    children = node.children()
-    last = len(children) - 1
-    for (index, child) in enumerate(children):
-        tree(child, levels + [index == last], max_depth)
+    return traverse(node, [], max_depth)
 
 
 def inspect(java):
