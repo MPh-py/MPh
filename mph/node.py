@@ -841,7 +841,7 @@ def tree(node, max_depth=None):
 
     This is a convenience function to visualize, in an interactive
     Python session, the branch of the model tree underneath a given
-    `node`. It produces console output such as this:
+    {class}`node <Node>`. It produces console output such as this:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -862,8 +862,8 @@ def tree(node, max_depth=None):
     Specify `max_depth` to possibly limit the number of lower branches.
 
     Often the node would refer to the model's root in order to inspect
-    the entire model tree. The model object itself is therefore also
-    accepted as an argument.
+    the entire model tree. A {class}`Model` object is therefore also
+    accepted as a value for `node`.
 
     Note that this function performs poorly in client–server mode, the
     default on Linux and macOS, especially for complex models. The

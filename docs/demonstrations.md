@@ -209,9 +209,9 @@ some limitations.
 
 However, any and all functionality offered by the [Comsol API][proman]
 is accessible via the "pythonized" Java layer provided by [JPype],
-which is exposed as the `.java` attribute of [`Client`](mph.Client)
+which is exposed as the `.java` attribute of {class}`~mph.Client`
 instances, mapping to Comsol's [`ModelUtil`], as well as of
-[`Model`](mph.Model) instances, mapping to Comsol's [`model`].
+{class}`~mph.Model` instances, mapping to Comsol's [`model`].
 
 Let's take this Comsol blog post as an example: ["Automate your modeling
 tasks with the Comsol API for use with Java"][blog]. It starts with the
@@ -282,8 +282,8 @@ The advantage of using Python over Java is:
 * You can use Python introspection to understand how Comsol models
   are "created in code". The Comsol documentation explains a lot of
   things, but not every little detail. Either use Python's built-in
-  [`dir()`](python:dir) or call [`mph.inspect()`](mph.inspect) to see
-  a pretty-fied representation of a Java object in the model tree.
+  [`dir()`](python:dir) or call {func}`mph.inspect` to print a
+  pretty-fied representation of a Java object in the model tree.
 
 To save the model created in the above example, we do:
 ```python
@@ -306,7 +306,7 @@ of the Java file.
 
 The example from the previous section can be expressed in much more
 idiomatic Python syntax if we ignore the Java layer and only use
-methods from the [`Model`](mph.Model) class.
+methods from the {class}`~mph.Model` class.
 ```python
 import mph
 client = mph.start()
@@ -331,13 +331,13 @@ model.property('geometries/geometry/ice block', 'size', ('0.1', '0.2', '0.5'))
 model.build('geometry')
 ```
 
-If [`model.create()`](mph.Model) receives a reference to a node that
-does not exist yet, such as `geometries/geometry` in the example, it
-creates that node in its parent group, here the built-in group
+If {func}`model.create() <mph.Model.create>` receives a reference to a
+node that does not exist yet, such as `geometries/geometry` in the example,
+it creates that node in its parent group, here the built-in group
 `geometries`, and gives it the name we supplied, here `geometry`.
 
 So far, we have used strings to refer to nodes. We could also use the
-[`Node`](mph.Node) class, which offers more flexibility and extra
+{class}`~mph.Node` class, which offers more flexibility and extra
 functionality. Instances of that class are returned by `model.create()`
 for convenience. But they can be generated from scratch by string
 concatenation with the division operator — much like
@@ -379,8 +379,8 @@ marked to be interpreted literally) by doubling it. For instance,
 a geometry node displayed as "ice/frozen water" in the Comsol GUI
 would be referred to as `geometry/'ice//frozen water'`.
 
-The example model discussed here produces the following model
-[tree](mph.tree):
+The example model created above ends up having the following model
+[`tree`](mph.tree):
 ```python
 >>> mph.tree(model)
 block of ice

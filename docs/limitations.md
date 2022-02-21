@@ -40,7 +40,7 @@ everything inside the same process. The second approach is slower to
 start up and relies on the inter-process communication to be robust,
 but would also work across the network, i.e., for remote sessions where
 the client runs locally and delegates the heavy lifting to a server
-running on another machine. If we instantiate the [`Client`](mph.Client)
+running on another machine. If we instantiate the {class}`~mph.Client`
 class without providing a value for the network port, it will create a
 stand-alone client. Otherwise it will run as a thin client in
 client–server mode.
@@ -80,22 +80,22 @@ program that sets the environment variable and then runs MPh in a second
 Python subprocess. Clearly, none of this is ideal. Starting the client
 should work without any of these detours.
 
-The function [`mph.start()`](mph.start) exists to navigate these
-platform differences. On Windows, it starts a stand-alone client in
-order to profit from the better start-up performance. On Linux and
-macOS, it creates a local session in client–server mode so that no
-shell configuration is required up front. This behavior is reflected
-in the configuration option `'session'`, accessible via
-[`mph.option()`](mph.config), which is set to `'platform-dependent'`
-by default. It could also be set to `'stand-alone'` or `'client-server'`
-before calling `start()` in order to override the default behavior.
+The function {func}`mph.start` exists to navigate these platform
+differences. On Windows, it starts a stand-alone client in order to
+profit from the better start-up performance. On Linux and macOS, it
+creates a local session in client–server mode so that no shell
+configuration is required up front. This behavior is reflected in the
+configuration option `'session'`, accessible via {func}`mph.option()
+<mph.config.option>`, which is set to `'platform-dependent'` by default.
+It could also be set to `'stand-alone'` or `'client-server'` before
+calling `start()` in order to override the default behavior.
 
 Performance in client–server mode is noticeably worse in certain
 scenarios, not just at start-up. If functions access the Java API
 frequently, such as when navigating the model tree, perhaps even
-recursively as [`mph.tree()`](mph.tree) does, then client–server
-mode can be slower by a large factor compared to a stand-alone client.
-Rest assured however that simulation run-times are not affected.
+recursively as {func}`mph.tree` does, then client–server mode can be
+slower by a large factor compared to a stand-alone client. Rest assured
+however that simulation run-times are not affected.
 
 Conversely, setting up stand-alone mode on Linux or macOS is also
 not a robust solution. Image exports, for example, are known to crash
