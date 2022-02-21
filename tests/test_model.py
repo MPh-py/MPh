@@ -10,6 +10,7 @@ from fixtures import warnings_disabled
 from fixtures import setup_logging
 from pytest import raises
 from pathlib import Path
+from platform import system
 
 
 ########################################
@@ -33,7 +34,10 @@ def teardown_module():
     files = (Path('capacitor.mph'), Path('empty.java'),
              here/'capacitor.mph', here/'model.mph',
              here/'model.java', here/'model.m', here/'model.vba',
-             here/'data.txt', here/'data.vtu', here/'image.png')
+             here/'data.txt', here/'data.vtu', here/'image.png',
+             here/'animation.gif', here/'animation.swf',
+             here/'animation.avi', here/'animation.webm',
+             here/'frame1.png', here/'frame2.png', here/'frame3.png')
     for file in files:
         if file.exists():
             file.unlink()
@@ -538,12 +542,13 @@ def test_import():
 
 def test_export():
     here = Path(__file__).resolve().parent
+    # Test export of text data.
     assert not (here/'data.txt').exists()
     model.export('data', here/'data.txt')
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
     assert not (here/'data.txt').exists()
-    model.export('exports/data')
+    model.export('data')
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
     assert not (here/'data.txt').exists()
@@ -552,29 +557,96 @@ def test_export():
     (here/'data.txt').unlink()
     assert not (here/'data.txt').exists()
     model.property('exports/data', 'exporttype', 'text')
-    model.export('exports/data', here/'data.txt')
+    model.export('data', here/'data.txt')
     assert (here/'data.txt').exists()
     (here/'data.txt').unlink()
+    # Test export of VTK data.
     assert not (here/'data.vtu').exists()
     model.property('exports/data', 'exporttype', 'vtu')
-    model.export('exports/data', here/'data.vtu')
+    model.export('data', here/'data.vtu')
     assert (here/'data.vtu').exists()
     (here/'data.vtu').unlink()
+    # Test export of images.
     assert not (here/'image.png').exists()
     model.export('image', here/'image.png')
     assert (here/'image.png').exists()
     (here/'image.png').unlink()
     assert not (here/'image.png').exists()
+    # Test running all exports at once.
     model.export()
     assert (here/'data.vtu').exists()
     assert (here/'image.png').exists()
     (here/'data.vtu').unlink()
     (here/'image.png').unlink()
-    assert not (here/'data.vtu').exists()
-    assert not (here/'image.png').exists()
+    # Test export of GIF animations.
+    animation = (model/'exports').create('Animation', name='animation')
+    animation.property('plotgroup', model/'plots'/'time-dependent field')
+    animation.property('looplevelinput', 'manual')
+    animation.property('looplevel', [1, 2, 3])
+    assert not (here/'animation.gif').exists()
+    model.export(animation, here/'animation.gif')
+    assert (here/'animation.gif').exists()
+    (here/'animation.gif').unlink()
+    animation.remove()
+    # Test export of Flash animations.
+    animation = (model/'exports').create('Animation', name='animation')
+    animation.property('plotgroup', model/'plots'/'time-dependent field')
+    animation.property('looplevelinput', 'manual')
+    animation.property('looplevel', [1, 2, 3])
+    assert not (here/'animation.swf').exists()
+    model.export(animation, here/'animation.swf')
+    assert (here/'animation.swf').exists()
+    (here/'animation.swf').unlink()
+    animation.remove()
+    # Test export of AVI movies (which Comsol only supports on Windows).
+    if system() == 'Windows':
+        animation = (model/'exports').create('Animation', name='animation')
+        animation.property('plotgroup', model/'plots'/'time-dependent field')
+        animation.property('looplevelinput', 'manual')
+        animation.property('looplevel', [1, 2, 3])
+        assert not (here/'animation.avi').exists()
+        model.export(animation, here/'animation.avi')
+        assert (here/'animation.avi').exists()
+        (here/'animation.avi').unlink()
+        animation.remove()
+    # Test export of WebM movies.
+    animation = (model/'exports').create('Animation', name='animation')
+    animation.property('plotgroup', model/'plots'/'time-dependent field')
+    animation.property('looplevelinput', 'manual')
+    animation.property('looplevel', [1, 2, 3])
+    assert not (here/'animation.webm').exists()
+    model.export(animation, here/'animation.webm')
+    assert (here/'animation.webm').exists()
+    (here/'animation.webm').unlink()
+    animation.remove()
+    # Test export of image sequences.
+    animation = (model/'exports').create('Animation', name='animation')
+    animation.property('plotgroup', model/'plots'/'time-dependent field')
+    animation.property('looplevelinput', 'manual')
+    animation.property('looplevel', [1, 2, 3])
+    assert not (here/'frame1.png').exists()
+    assert not (here/'frame2.png').exists()
+    assert not (here/'frame3.png').exists()
+    model.export(animation, here/'frame.png')
+    assert (here/'frame1.png').exists()
+    assert (here/'frame2.png').exists()
+    assert (here/'frame3.png').exists()
+    (here/'frame1.png').unlink()
+    (here/'frame2.png').unlink()
+    (here/'frame3.png').unlink()
+    animation.remove()
+    # Test error conditions.
     with logging_disabled():
         with raises(ValueError):
             model.export('non-existing')
+        animation = (model/'exports').create('Animation', name='animation')
+        with raises(ValueError):
+            model.export(animation, here/'animation.invalid')
+        animation.remove()
+        with raises(TypeError):
+            model.export(model/'functions'/'step', file='irrelevant.txt')
+        with raises(RuntimeError):
+            model.export(model/'functions'/'step')
 
 
 def test_clear():

@@ -775,34 +775,57 @@ class Model:
         in the node's properties will be used. If called without any
         arguments, all export nodes defined in the model are run using
         the default file names.
-
-        Note that some export nodes, namely animations, require a
-        property other than `filename` to be set, and therefore passing
-        a `file` argument will fail. This may be corrected in a future
-        release. See [issue #43].
-
-        [issue #43]: https://github.com/MPh-py/MPh/issues/43
         """
         if node is None:
             for node in self/'exports':
                 log.info(f'Running export node "{node.name()}".')
                 node.run()
                 log.info('Finished running export.')
-        else:
-            if isinstance(node, str):
-                if '/' in node:
-                    node = self/node
-                else:
-                    node = self/'exports'/node
-            if not node.exists():
-                error = f'Node "{node}" does not exist in model tree.'
-                log.error(error)
-                raise ValueError(error)
-            if file:
+            return
+        if isinstance(node, str):
+            node = self/'exports'/node
+        if not node.exists():
+            error = f'Node "{node}" does not exist in model tree.'
+            log.error(error)
+            raise ValueError(error)
+        if file:
+            file = Path(file)
+            type = node.type()
+            if type in ('Image', 'Data'):
                 node.property('filename', str(file))
-            log.info(f'Running export node "{node.name()}".')
-            node.run()
-            log.info('Finished running export.')
+            elif type == 'Animation':
+                if file.suffix == '.gif':
+                    node.property('type', 'movie')
+                    node.property('movietype', 'gif')
+                    node.property('giffilename', str(file))
+                elif file.suffix == '.swf':
+                    node.property('type', 'movie')
+                    node.property('movietype', 'flash')
+                    node.property('flashfilename', str(file))
+                elif file.suffix == '.avi':
+                    node.property('type', 'movie')
+                    node.property('movietype', 'avi')
+                    node.property('avifilename', str(file))
+                elif file.suffix == '.webm':
+                    node.property('type', 'movie')
+                    node.property('movietype', 'webm')
+                    node.property('webmfilename', str(file))
+                elif file.suffix == '.png':
+                    node.property('type', 'imageseq')
+                    node.property('imagefilename', str(file))
+                else:
+                    error = ('Cannot deduce animation type from file ending '
+                            f'"{file.suffix}" . Should be one of: .gif, .swf, '
+                            f'.avi, .webm, or .png.')
+                    log.error(error)
+                    raise ValueError(error)
+            else:
+                error = f'Node "{node}" is of unexpected type "{type}".'
+                log.error(error)
+                raise TypeError(error)
+        log.info(f'Running export node "{node.name()}".')
+        node.run()
+        log.info('Finished running export.')
 
     def clear(self):
         """Clears stored solution, mesh, and plot data."""
