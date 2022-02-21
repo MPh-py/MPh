@@ -13,7 +13,12 @@ p + ol.simple {
     margin-top: -6px;
 }
 
-/* Make `html_show_sphinx = False` work as intended. */
-footer div.related-information {
+/* Hide edit button. */
+.edit-this-page {
+    visibility: hidden;
+}
+
+/* Hide page footer. */
+.bottom-of-page {
     visibility: hidden;
 }
