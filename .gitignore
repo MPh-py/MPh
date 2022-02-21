@@ -1,22 +1,23 @@
 # Build and test artifacts
 **/__pycache__
 **/.pytest_cache
-/tests/MPh.ini
-/dist/
-/tools/dist/
-/tools/docs/
-/tools/coverage/
+tests/MPh.ini
+dist/
+tools/dist/
+tools/docs/
+tools/coverage/
 .coverage
 coverage.xml
 
-# Local developer notes
-/local/
-/ignore/
-/develop/
-/dev/
+# Local developer tools and notes
+local/
+ignore/
+develop/
+dev/
+.vscode/
+.idea/
 .spyproject
-.idea
 
 # Files auto-created by operating system
-Thumbs.db
-.DS_Store
+**/Thumbs.db
+**/.DS_Store
