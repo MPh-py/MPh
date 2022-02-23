@@ -1,4 +1,4 @@
-﻿"""Builds the installation package."""
+﻿"""Builds the packaged wheel locally."""
 
 from subprocess import run
 from pathlib import Path

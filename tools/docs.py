@@ -1,4 +1,4 @@
-﻿"""Renders the documentation."""
+﻿"""Builds the documentation locally."""
 
 from subprocess import run
 from pathlib import Path
