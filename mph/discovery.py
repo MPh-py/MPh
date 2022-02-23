@@ -256,10 +256,13 @@ def search_Linux():
         if not java.exists():
             log.debug('Did not find Java run-time binaries.')
             continue
-        jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+        jvm = jre/'lib'/'server'/'libjvm.so'
         if not jvm.exists():
-            log.debug('Did not find Java virtual machine.')
-            continue
+            # Old location, up until Comsol 5.6.
+            jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+            if not jvm.exists():
+                log.debug('Did not find Java virtual machine.')
+                continue
         api = root/'plugins'
         if not api.exists():
             log.debug('Did not find Comsol Java API plug-ins.')
@@ -347,10 +350,8 @@ def search_macOS():
             continue
         jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.dylib'
         if not jvm.exists():
-            jvm = jre/'Contents'/'Home'/'lib'/'server'/'libjvm.so'
-            if not jvm.exists():
-                log.debug('Did not find Java virtual machine.')
-                continue
+            log.debug('Did not find Java virtual machine.')
+            continue
         api = root/'plugins'
         if not api.exists():
             log.debug('Did not find Comsol Java API plug-ins.')
