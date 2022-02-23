@@ -21,4 +21,6 @@ p + ol.simple {
 /* Hide page footer. */
 .bottom-of-page {
     visibility: hidden;
+    margin:     0;
+    padding:    0;
 }
