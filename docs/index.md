@@ -28,7 +28,7 @@ and sells the simulation software.
     https://zenodo.org/badge/latestdoi/264718959)
 [![license information](
     https://img.shields.io/badge/License-MIT-green.svg?label=license)](
-    https://opensource.org/licenses/MIT)
+    https://github.com/MPh-py/MPh/blob/main/license.txt)
 [![release page](
     https://img.shields.io/pypi/v/mph.svg?label=PyPI)](
     https://pypi.python.org/pypi/mph)
