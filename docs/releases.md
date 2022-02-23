@@ -1,10 +1,13 @@
 ﻿# Releases
 
+## 1.1.4
+* [Published](https://pypi.org/project/MPh/1.1.4) on February 23, 2022.
+* Fixes discovery of Comsol 6.0 on Linux. ([#67](https://github.com/MPh-py/MPh/issues/67))
+
 ## 1.1.3
 * [Published](https://pypi.org/project/MPh/1.1.3) on February 21, 2022.
 * Adds support for export of animations. ([#43](https://github.com/MPh-py/MPh/issues/43))
-* Catches spurious exceptions when reading properties in
-[`mph.inspect()`](https://mph.readthedocs.io/en/1.1/api/mph.inspect.html). ([#68](https://github.com/MPh-py/MPh/issues/68))
+* Catches spurious exceptions when reading properties in [`mph.inspect()`](https://mph.readthedocs.io/en/1.1/api/mph.inspect.html). ([#68](https://github.com/MPh-py/MPh/issues/68))
 
 ## 1.1.2
 * [Published](https://pypi.org/project/MPh/1.1.2) on January 8, 2022.
