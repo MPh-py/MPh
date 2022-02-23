@@ -132,8 +132,8 @@ which parameter is solved for and when. The parameter values don't
 have to be hard-coded, they could come from user input or be generated
 depending on the outcome of previous simulations. For example, this
 approach lends itself to iterative optimization schemes such as the
-["genetic algorithm"][ga], where a batch of simulations would be run
-for each new "generation".
+[genetic algorithm] or [differential evolution], where a batch of
+simulations would be run for each new "generation".
 
 Note how the returned results also contain the input parameter. As
 the worker processes will run asynchronously in parallel, we cannot
@@ -424,12 +424,13 @@ more advanced features than in the simple example here: It generates
 the demonstration model used in the [Tutorial](tutorial).
 
 
-[capa]:        https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
-[compact]:     https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
-[pool]:        https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
-[create]:      https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
+[capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
+[compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
+[pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
+[create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
 
-[ga]:          https://en.wikipedia.org/wiki/Genetic_algorithm
+[genetic algorithm]:      https://en.wikipedia.org/wiki/Genetic_algorithm
+[differential evolution]: https://stackoverflow.com/questions/65387767/differential-evolution-in-parallel-in-python
 
 [proman]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [`ModelUtil`]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
@@ -438,5 +439,5 @@ the demonstration model used in the [Tutorial](tutorial).
 [busbar]:      https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
 [blog]:        https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
-[JPype]:       https://jpype.readthedocs.io/en/stable
-[new]:         https://www.javatpoint.com/new-keyword-in-java
+[JPype]: https://jpype.readthedocs.io/en/stable
+[new]:   https://www.javatpoint.com/new-keyword-in-java
