@@ -5,7 +5,7 @@
 * Tag commit with version number, e.g. `git tag v1.1.4`.
 * Force `stable` branch to latest commit: `git branch -f stable`.
 * Same for the current documentation branch: `git branch -f 1.1`.
-* Run code linter: `pflake8`.
+* Run code linter: `flake8p`.
 * Test docs build: `python tools/docs.py`.
 * Test wheel build: `python tools/wheel.py`.
 * Run tests for each supported Python/OS: `python3x tools/test.py`.
