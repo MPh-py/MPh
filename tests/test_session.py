@@ -14,10 +14,9 @@ from pytest import raises
 ########################################
 
 def test_start():
-    with logging_disabled():
-        with raises(ValueError):
-            mph.option('session', 'invalid')
-            mph.start()
+    with logging_disabled(), raises(ValueError):
+        mph.option('session', 'invalid')
+        mph.start()
     mph.option('session', 'client-server')
     client = mph.start(cores=1)
     assert client.java is not None

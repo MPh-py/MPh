@@ -25,6 +25,7 @@ log = getLogger(__package__)           # event log
 ########################################
 # Server                               #
 ########################################
+
 class Server:
     """
     Manages a Comsol server process.
@@ -110,9 +111,8 @@ class Server:
             line = process.stdout.readline().strip()
             if line:
                 lines.append(line)
-            match = regex(r'(?i)^Comsol.+?server.+?(\d+)$', line.strip())
-            if match:
-                port = int(match.group(1))
+            port = parse_port(line)
+            if port:
                 break
             if now() - t0 > timeout:
                 error = 'Sever failed to start within time-out period.'
@@ -167,3 +167,17 @@ class Server:
             log.warning('Server did not shut down within time-out period.')
             log.info('Trying to forcefully terminate server process.')
             self.process.kill()
+
+
+########################################
+# Parsing                              #
+########################################
+
+def parse_port(line):
+    """Parses out the port number from a line of server output."""
+    match = regex(r'^COMSOL.* \(.*\) .*?(\d{4,5}).*$', line)
+    if match:
+        port = int(match.group(1))
+        return port
+    else:
+        return None
