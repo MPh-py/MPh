@@ -1,5 +1,9 @@
 ﻿# Releases
 
+## 1.1.5
+* [Published](https://pypi.org/project/MPh/1.1.5) on February 28, 2022.
+* Fixes: Server does not start when language set to Chinese. ([#72](https://github.com/MPh-py/MPh/issues/72))
+
 ## 1.1.4
 * [Published](https://pypi.org/project/MPh/1.1.4) on February 23, 2022.
 * Fixes discovery of Comsol 6.0 on Linux. ([#67](https://github.com/MPh-py/MPh/issues/67))
