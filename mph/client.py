@@ -193,9 +193,6 @@ class Client:
             if cores:
                 os.environ['COMSOL_NUM_THREADS'] = str(cores)
 
-            # Check correct setup of process environment if on Linux/macOS.
-            check_environment(backend)
-
             # Initialize the environment with GUI support disabled.
             # See `initStandalone()` method in [1].
             java.initStandalone(False)
@@ -441,62 +438,3 @@ class Client:
             error = 'The client is not connected to a server.'
             log.error(error)
             raise RuntimeError(error)
-
-
-########################################
-# Environment                          #
-########################################
-
-def check_environment(backend):
-    """Checks the process environment required for a stand-alone client."""
-    system = platform.system()
-    root = backend['root']
-    help = 'Refer to chapter "Limitations" in the documentation for help.'
-    if system == 'Windows':
-        pass
-    elif system == 'Linux':
-        var = 'LD_LIBRARY_PATH'
-        if var not in os.environ:
-            error = f'Library search path {var} not set in environment.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        path = os.environ[var].split(os.pathsep)
-        lib = root/'lib'/'glnxa64'
-        if str(lib) not in path:
-            error = f'Folder "{lib}" missing in library search path.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        gcc = root/'lib'/'glnxa64'/'gcc'
-        if gcc.exists() and str(gcc) not in path:
-            log.warning(f'Folder "{gcc}" missing in library search path.')
-        gra = str(root/'ext'/'graphicsmagick'/'glnxa64')
-        if str(gra) not in path:
-            error = f'Folder "{gra}" missing in library search path.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        cad = root/'ext'/'cadimport'/'glnxa64'
-        if cad.exists() and str(cad) not in path:
-            log.warning(f'Folder "{cad}" missing in library search path.')
-    elif system == 'Darwin':
-        var = 'DYLD_LIBRARY_PATH'
-        if var not in os.environ:
-            error = f'Library search path {var} not set in environment.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        if var in os.environ:
-            path = os.environ[var].split(os.pathsep)
-        else:
-            path = []
-        lib = root/'lib'/'maci64'
-        if str(lib) not in path:
-            error = f'Folder "{lib}" missing in library search path.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        gra = root/'ext'/'graphicsmagick'/'maci64'
-        if str(gra) not in path:
-            error = f'Folder "{gra}" missing in library search path.'
-            log.error(error)
-            raise RuntimeError(error + '\n' + help)
-        cad = root/'ext'/'cadimport'/'maci64'
-        if cad.exists() and str(cad) not in path:
-            log.warning(f'Folder "{cad}" missing in library search path.')
