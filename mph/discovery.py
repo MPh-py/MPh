@@ -1,4 +1,4 @@
-﻿"""
+"""
 Discovers Comsol installations.
 
 This is an internal helper module that is not part of the public API.
@@ -202,29 +202,49 @@ def search_Windows():
 def search_Linux():
     """Searches for Comsol installations on a Linux system."""
 
+    def roots_from_folders():
+        roots = []
+        # Loop over Comsol folders in `/usr/local` and `~/.local`.
+        pattern   = re.compile('(?i)Comsol')
+        locations = [Path('/usr/local'), Path.home()/'.local']
+        folders   = [item for location in locations
+                        for item in location.iterdir()
+                        if item.is_dir() and pattern.match(item.name)]
+        for folder in folders:
+            # Root folder is the sub-directory "multiphysics".
+            root = folder/'multiphysics'
+            if not root.is_dir():
+                log.debug(f'No folder "multiphysics" in "{folder.name}".')
+                continue
+            log.debug(f'Checking installation folder "{root}".')
+
+            # Check that Comsol executable exists.
+            comsol = root/'bin/glnxa64/comsol'
+            if not comsol.exists():
+                log.debug('Did not find Comsol executable.')
+                continue
+            roots.append(root)
+        return roots
+
+    def roots_from_applications():
+        roots = []
+        for app_file in (Path.home()/'.local/share/applications').glob('*.desktop'):
+            for line in app_file.read_text().splitlines():
+                if line.startswith('Exec=') and '/bin/glnxa64/comsol' in line:
+                    comsol = Path(line.split('=')[1].strip())
+                    if comsol.exists():
+                        root = comsol.parents[2]
+                        log.debug(f'Comsol found in "{app_file.name}", adding {root}')
+                        roots.append(root)
+        return roots
+
     # Collect all information in a list.
     backends = []
 
-    # Loop over Comsol folders in `/usr/local` and `~/.local`.
-    pattern   = re.compile('(?i)Comsol')
-    locations = [Path('/usr/local'), Path.home()/'.local']
-    folders   = [item for location in locations
-                      for item in location.iterdir()
-                      if item.is_dir() and pattern.match(item.name)]
-    for folder in folders:
+    roots = roots_from_folders() + roots_from_applications()
 
-        # Root folder is the sub-directory "multiphysics".
-        root = folder/'multiphysics'
-        if not root.is_dir():
-            log.debug(f'No folder "multiphysics" in "{folder.name}".')
-            continue
-        log.debug(f'Checking installation folder "{root}".')
-
-        # Check that Comsol executable exists.
-        comsol = root/'bin'/'glnxa64'/'comsol'
-        if not comsol.exists():
-            log.debug('Did not find Comsol executable.')
-            continue
+    for root in roots:
+        comsol = root/'bin/glnxa64/comsol'
 
         # Get version information from Comsol server.
         process = run([comsol, 'mphserver', '--version'], stdout=PIPE)
@@ -248,7 +268,7 @@ def search_Linux():
             continue
 
         # Verify existence of required files and folders.
-        jre = root/'java'/'glnxa64'/'jre'
+        jre = root/'java/glnxa64/jre'
         if not jre.exists():
             log.debug('Did not find Java run-time environment.')
             continue
@@ -256,10 +276,10 @@ def search_Linux():
         if not java.exists():
             log.debug('Did not find Java run-time binaries.')
             continue
-        jvm = jre/'lib'/'server'/'libjvm.so'
+        jvm = jre/'lib/server/libjvm.so'
         if not jvm.exists():
             # Old location, up until Comsol 5.6.
-            jvm = jre/'lib'/'amd64'/'server'/'libjvm.so'
+            jvm = jre/'lib/amd64/server/libjvm.so'
             if not jvm.exists():
                 log.debug('Did not find Java virtual machine.')
                 continue
@@ -267,11 +287,11 @@ def search_Linux():
         if not api.exists():
             log.debug('Did not find Comsol Java API plug-ins.')
             continue
-        lib = root/'lib'/'glnxa64'
+        lib = root/'lib/glnxa64'
         if not lib.exists():
             log.debug('Did not find Comsol shared libraries.')
             continue
-        gra = root/'ext'/'graphicsmagick'/'glnxa64'
+        gra = root/'ext/graphicsmagick/glnxa64'
         if not gra.exists():
             log.debug('Did not find graphics libraries.')
             continue
