@@ -319,9 +319,25 @@ class Client:
         if self.caching() and file in self.files():
             log.info(f'Retrieving "{file.name}" from cache.')
             return self.models()[self.files().index(file)]
+        lock_file = file.with_suffix('.lock')
+        if lock_file.exists():
+            log.warning(f'Model already opened by "{lock_file.read_text().strip()}"')
+            return None
         tag = self.java.uniquetag('model')
         log.info(f'Loading model "{file.name}".')
         model = Model(self.java.load(tag, str(file)))
+        log.info('Finished loading model.')
+        return model
+
+    def load_copy(self, file):
+        """Loads a copy (read only) of model from the given `file` and returns it."""
+        file = Path(file).resolve()
+        if self.caching() and file in self.files():
+            log.info(f'Retrieving "{file.name}" from cache.')
+            return self.models()[self.files().index(file)]
+        tag = self.java.uniquetag('model')
+        log.info(f'Loading model "{file.name}".')
+        model = Model(self.java.loadCopy(tag, str(file)))
         log.info('Finished loading model.')
         return model
 
