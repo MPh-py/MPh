@@ -319,7 +319,7 @@ class Client:
         if self.caching() and file in self.files():
             log.info(f'Retrieving "{file.name}" from cache.')
             return self.models()[self.files().index(file)]
-        lock_file = file.with_suffix('.lock')
+        lock_file = Path(str(file) + '.lock')
         if lock_file.exists():
             log.warning(f'Model already opened by "{lock_file.read_text().strip()}"')
             return None
