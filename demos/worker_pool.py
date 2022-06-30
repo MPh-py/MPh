@@ -70,7 +70,7 @@ def plot_final():
 def worker(jobs, results):
     """Performs jobs and delivers the results."""
     client = mph.start(cores=1)
-    model = client.load('../tests/capacitor.mph')
+    model = client.load('capacitor.mph')
     while True:
         try:
             d = jobs.get(block=False)
