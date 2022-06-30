@@ -24,3 +24,8 @@ p + ol.simple {
     margin:     0;
     padding:    0;
 }
+
+/* Flush Autosummary table to the left. */
+table.longtable {
+    float: left;
+}
