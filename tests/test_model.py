@@ -34,7 +34,9 @@ def teardown_module():
     files = (Path('capacitor.mph'), Path('empty.java'),
              here/'capacitor.mph', here/'model.mph',
              here/'model.java', here/'model.m', here/'model.vba',
-             here/'data.txt', here/'data.vtu', here/'image.png',
+             here/'data.txt', here/'data.vtu',
+             here/'image.png',
+             here/'mesh.mphbin', here/'mesh.mphtxt',
              here/'animation.gif', here/'animation.swf',
              here/'animation.avi', here/'animation.webm',
              here/'frame1.png', here/'frame2.png', here/'frame3.png')
@@ -578,6 +580,18 @@ def test_export():
     assert (here/'image.png').exists()
     (here/'data.vtu').unlink()
     (here/'image.png').unlink()
+    # Test export of meshes.
+    mesh = (model/'exports').create('Mesh', name='mesh')
+    mesh.java.set('filename', 'mesh')
+    assert not (here/'mesh.mphbin').exists()
+    model.export('mesh', here/'mesh.mphbin')
+    assert (here/'mesh.mphbin').exists()
+    (here/'mesh.mphbin').unlink()
+    assert not (here/'mesh.mphtxt').exists()
+    model.export('mesh', here/'mesh.mphtxt')
+    assert (here/'mesh.mphtxt').exists()
+    (here/'mesh.mphtxt').unlink()
+    mesh.remove()
     # Test export of GIF animations.
     animation = (model/'exports').create('Animation', name='animation')
     animation.property('plotgroup', model/'plots'/'time-dependent field')

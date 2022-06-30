@@ -791,7 +791,8 @@ class Model:
         if file:
             file = Path(file)
             type = node.type()
-            if type in ('Image', 'Data'):
+            if type in ('Image', 'Data', 'Mesh', 'Table', 'Plot',
+                        'Touchstone'):
                 node.property('filename', str(file))
             elif type == 'Animation':
                 if file.suffix == '.gif':
