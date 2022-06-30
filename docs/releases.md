@@ -1,5 +1,10 @@
 ﻿# Releases
 
+## 1.1.6
+* [Published](https://pypi.org/project/MPh/1.1.6) on June 30, 2022.
+* Adds missing support for export of meshes. ([#73](https://github.com/MPh-py/MPh/issues/73))
+* No longer checks process environment in stand-alone mode. ([#13](https://github.com/MPh-py/MPh/issues/13))
+
 ## 1.1.5
 * [Published](https://pypi.org/project/MPh/1.1.5) on February 28, 2022.
 * Fixes: Server does not start when language set to Chinese. ([#72](https://github.com/MPh-py/MPh/issues/72))
