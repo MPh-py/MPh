@@ -83,6 +83,7 @@ modules = {
     'SEMICONDUCTOR':            'Semiconductor',
     'STRUCTURALMECHANICS':      'Structural Mechanics',
     'SUBSURFACEFLOW':           'Subsurface Flow',
+    'UQ':                       'Uncertainty Quantification',
     'WAVEOPTICS':               'Wave Optics',
 }
 

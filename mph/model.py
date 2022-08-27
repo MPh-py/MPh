@@ -80,6 +80,7 @@ modules = {
     'Semiconductor Module':                  'Semiconductor',
     'Structural Mechanics Module':           'Structural Mechanics',
     'Subsurface Flow Module':                'Subsurface Flow',
+    'Uncertainty Quantification Module':     'Uncertainty Quantification',
     'Wave Optics Module':                    'Wave Optics',
 }
 
