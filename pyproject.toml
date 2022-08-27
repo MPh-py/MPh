@@ -21,13 +21,23 @@ classifiers = [
     'Natural Language :: English',
     'License :: OSI Approved :: MIT License']
 readme = 'PyPI.md'
-requires-python = '>=3.6'
-dependencies = ['JPype1', 'NumPy']
 dynamic = ['version', 'description']
+requires-python = '>= 3.6'
+dependencies = [
+    'JPype1',
+    'NumPy',
+]
 
 [project.optional-dependencies]
-docs = ['Sphinx', 'Furo', 'MyST-parser']
-test = ['pyTest', 'pyTest-cov', 'Flake8', 'Flake8-pyproject']
+dev = [
+    'Sphinx',
+    'Furo',
+    'MyST-parser',
+    'pyTest',
+    'pyTest-cov',
+    'Flake8-pyproject',
+    'Flit',
+]
 
 [project.urls]
 Documentation = 'https://mph.readthedocs.io'
@@ -37,38 +47,41 @@ Source = 'https://github.com/MPh-py/MPh'
 # Wheel builder: Flit
 
 [build-system]
-requires = ['flit_core>=3.4,<4']
+requires = ['flit_core >= 3.4, < 4']
 build-backend = 'flit_core.buildapi'
 
 [tool.flit.module]
 name = 'mph'
 
 
-# Code linter: Flake8 (via pyproject-Flake8)
+# Code linter: Flake8
 
 [tool.flake8]
 exclude = [
-    '.git', '__pycache__',
-    'local', 'ignore', 'develop', 'dev',
+    'local',  '.local',
+    'ignore', '.ignore',
+    'venv',   '.venv',
 ]
 ignore = [
-    'E127',        # Continuation line over-indented for visual indent.
-    'E128',        # Continuation line under-indented for visual indent.
-    'E201',        # Whitespace after '('.
-    'E202',        # Whitespace before ')'.
-    'E221',        # Multiple spaces before operator.
-    'E222',        # Multiple spaces after operator.
-    'E226',        # Missing whitespace around arithmetic operator.
-    'E231',        # Missing whitespace after ',', ';', or ':'.
-    'E241',        # Multiple spaces after ','.
-    'E251',        # Unexpected spaces around keyword / parameter equals.
-    'E261',        # At least two spaces before inline comment.
-    'E271',        # Multiple spaces after keyword.
-    'E272',        # Multiple spaces before keyword.
-    'E402',        # Module level import not at top of file.
-    'W503',        # Line break occurred before a binary operator.
+    'E127',                  # Continuation line over-indented.
+    'E128',                  # Continuation line under-indented.
+    'E201',                  # Whitespace after '('.
+    'E202',                  # Whitespace before ')'.
+    'E221',                  # Multiple spaces before operator.
+    'E222',                  # Multiple spaces after operator.
+    'E226',                  # Missing whitespace around arithmetic operator.
+    'E231',                  # Missing whitespace after ',', ';', or ':'.
+    'E241',                  # Multiple spaces after ','.
+    'E251',                  # Unexpected spaces around keyword equals.
+    'E261',                  # At least two spaces before inline comment.
+    'E271',                  # Multiple spaces after keyword.
+    'E272',                  # Multiple spaces before keyword.
+    'E402',                  # Module level import not at top of file.
+    'W503',                  # Line break occurred before a binary operator.
 ]
-per-file-ignores = ['__init__.py:F401']
+per-file-ignores = [
+    '__init__.py:F401',      # Imported but unused.
+]
 
 
 # Test runner: pyTest
@@ -88,6 +101,5 @@ relative_files = true
 [tool.coverage.report]
 exclude_lines = [
     'pragma: no cover',
-    'def check_environment',
     'def location',
 ]
