@@ -12,7 +12,6 @@ from .config import option             # configuration
 ########################################
 import jpype                           # Java bridge
 import jpype.imports                   # Java object imports
-import platform                        # platform information
 import os                              # operating system
 from pathlib import Path               # file-system paths
 from logging import getLogger          # event logging
@@ -158,15 +157,16 @@ class Client:
         # Without this, pyTest will crash when starting the Java VM.
         # See "Errors reported by Python fault handler" in JPype docs.
         # The problem may be the SIGSEGV signal, see JPype issue #886.
-        if platform.system() == 'Windows' and faulthandler.is_enabled():
+        if discovery.system == 'Windows' and faulthandler.is_enabled():
             log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
 
-        # On Windows, prepend the Java folder to the library search path.
+        # On Windows, prepend the JRE bin folder to the library search path.
         # See issue #49.
-        if platform.system() == 'Windows':
+        if discovery.system == 'Windows':
             path = os.environ['PATH']
-            os.environ['PATH'] = str(backend['java']) + os.pathsep + path
+            jre  = backend['jvm'].parent.parent
+            os.environ['PATH'] = str(jre) + os.pathsep + path
 
         # Start the Java virtual machine.
         log.debug(f'JPype version is {jpype.__version__}.')
