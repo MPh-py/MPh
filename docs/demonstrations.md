@@ -297,9 +297,8 @@ Java, or Matlab project.
 Comsol can be very helpful in creating the Java code corresponding to
 changes we make to a model. Not only does the GUI provide a function to
 "copy as code to clipboard" on any node, it also lets us save the entire
-model as Java source code. And if we "compact the history" right before
-making changes, the new code can conveniently be found at the very end
-of the Java file.
+model as a Java source file, in which the new code can conveniently be
+found at the bottom.
 
 
 ## Navigate and alter the model
@@ -421,7 +420,8 @@ for features to be created.
 
 The demo script [`create_capacitor.py`][create] shows how to create
 more advanced features than in the simple example here: It generates
-the demonstration model used in the [Tutorial](tutorial).
+the demonstration model used in the [Tutorial](tutorial) entirely from
+Python code.
 
 
 [capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
