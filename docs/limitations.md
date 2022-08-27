@@ -105,6 +105,6 @@ where this works reliably.
 
 [jpype]:  https://github.com/jpype-project/jpype
 [manual]: https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[api]:    https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api
+[api]:    https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api
 [jnius]:  https://pyjnius.readthedocs.io
 [issue8]: https://github.com/MPh-py/MPh/issues/8

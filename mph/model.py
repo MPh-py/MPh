@@ -30,7 +30,7 @@ log = getLogger(__package__)           # event log
 # module. So it essentially drops the Unicode trademark symbols as well
 # as the redundant "Module". The strings returned by `getUsedProducts()`
 # seem to correspond exactly to the product names in the left column
-# of the table on page 40 of Comsol 5.6's Programming Reference Manual.
+# of the table on page 41 of Comsol 6.0's Programming Reference Manual.
 
 modules = {
     'AC/DC Module':                          'AC/DC',
@@ -41,6 +41,7 @@ modules = {
     'COMSOL Multiphysics':                   'Comsol core',
     'Chemical Reaction Engineering Module':  'Chemical Reaction Engineering',
     'Cluster Computing Module':              'Cluster Computing',
+    'Cluster computing functionality':       'Cluster Computing',
     'Composite Materials Module':            'Composite Materials',
     'Corrosion Module':                      'Corrosion',
     'Design Module':                         'Design',
@@ -125,7 +126,7 @@ class Model:
     that it is possible to "type-cast" an existing `Model` instance
     (as loaded by the client) to a derived child class.
 
-    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+    [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/Model.html
     """
 

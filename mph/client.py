@@ -29,7 +29,7 @@ log = getLogger(__package__)           # event log
 ########################################
 
 # The following look-up table is used by the `modules()` method. It is
-# based on the table on page 40 of Comsol 5.6's Programming Reference
+# based on the table on page 41 of Comsol 6.0's Programming Reference
 # Manual, with the two columns swapped. It thus maps vendor strings to
 # product names (add-on modules), except that we also shorten the names
 # somewhat (drop "Module" everywhere) and leave out the pointless
@@ -134,7 +134,7 @@ class Client:
     Within the same process, `NotImplementedError` is raised if a client
     is already running.
 
-    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+    [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/util/ModelUtil.html
     """
 

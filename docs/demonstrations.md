@@ -433,8 +433,8 @@ Python code.
 [differential evolution]: https://stackoverflow.com/questions/65387767/differential-evolution-in-parallel-in-python
 
 [proman]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[`ModelUtil`]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
-[`model`]:     https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api/com/comsol/model/Model.html
+[`ModelUtil`]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
+[`model`]:     https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api/com/comsol/model/Model.html
 [intro]:       https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
 [busbar]:      https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
 [blog]:        https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java

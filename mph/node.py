@@ -96,7 +96,7 @@ class Node:
     {func}`mph.inspect` is provided for introspection of the Java object
     in an interactive session.
 
-    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+    [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html
     """
 
@@ -939,7 +939,7 @@ def inspect(java):
     common to all objects, are suppressed in the method list further
     down, for the sake of clarity.
 
-    [1]: https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api\
+    [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html
     """
 
