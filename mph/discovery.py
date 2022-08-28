@@ -7,17 +7,18 @@ available simulation back-ends, and locates the installation folders.
 
 On Windows, the discovery mechanism relies on the Registry to provide
 information about install locations. On Linux and macOS, Comsol is
-expected to be installed at its respective default location. Though on
-Linux, the folder `.local` in the user's home directory is also
-searched to allow symbolic linking to a custom location.
+expected to be installed at its respective default location. Though the
+folder `.local` in the user's home directory is also searched to allow
+symbolic linking to a custom location.
 
 In a last step, we also run the shell command `where comsol` (on Windows)
 or `which comsol` (on Linux and macOS) to find a Comsol installation
-that isn't in a default location, but for which the the Comsol
-executable was added to the executable search path. Note, however, that
-duplicate installations will be ignored. That is, a Comsol installation
-found in a later step that reports the same version as one found in an
-earlier step will be ignored, regardless of install location.
+that isn't in a default location, but for which the Comsol executable
+was added to the executable search path.
+
+Note that duplicate installations will be ignored. That is, a Comsol
+installation found in a later step that reports the same version as one
+found in an earlier step will be ignored, regardless of install location.
 """
 
 ########################################
@@ -28,14 +29,18 @@ import subprocess                      # external processes
 import re                              # regular expressions
 from pathlib import Path               # file paths
 from functools import lru_cache        # function cache
-from sys import version_info           # Python version
 from logging import getLogger          # event logging
 
 ########################################
 # Globals                              #
 ########################################
+log = getLogger(__package__)           # event log
 system = platform.system()             # operating system
-log    = getLogger(__package__)        # event log
+architectures = {                      # valid system architecture names
+    'Windows': ['win64'],
+    'Linux':   ['glnxa64'],
+    'Darwin':  ['maci64'],
+}
 
 
 ########################################
@@ -138,11 +143,15 @@ def search_registry():
         root = Path(value[0])
         log.debug(f'Checking installation folder "{root}".')
 
-        # Only add to list if Comsol executable exists in sub-folder.
-        comsol = root/'bin'/'win64'/'comsol.exe'
-        if not comsol.exists():
+        # Only add to list if Comsol executable exists in valid sub-folder.
+        for arch in architectures[system]:
+            comsol = root/'bin'/arch/'comsol.exe'
+            if comsol.is_file():
+                break
+        else:
             log.debug('Did not find Comsol executable.')
             continue
+        log.debug(f'Found Comsol executable "{comsol}".')
         executables.append(comsol)
 
     # Return list with file-system paths of Comsol executables.
@@ -155,7 +164,7 @@ def search_disk():
     log.debug('Searching file system for Comsol executables.')
     executables = []
 
-    # Check folders in following locations, depending on operating system.
+    # Check system-wide and per-user application folders.
     if system == 'Linux':
         locations = [
             Path('/usr/local'),
@@ -165,12 +174,11 @@ def search_disk():
         locations = [
             Path('/Applications'),
             Path.home() / 'Applications',
-            Path.home() / 'Library',
-            Path.home() / '.local',
         ]
 
     # Look for Comsol executables at those locations.
     folders = [item for location in locations
+                    if location.is_dir()
                     for item in location.iterdir()
                     if item.is_dir() and re.match('(?i)comsol', item.name)]
     for folder in folders:
@@ -183,12 +191,12 @@ def search_disk():
             log.debug('No sub-folder named "multiphysics".')
             root = folder
 
-        # Only add to list if Comsol executable exists in correct sub-folder.
-        if system == 'Linux':
-            comsol = root/'bin'/'glnxa64'/'comsol'
-        elif system == 'Darwin':
-            comsol = root/'bin'/'maci64'/'comsol'
-        if not comsol.exists():
+        # Only add to list if Comsol executable exists in valid sub-folder.
+        for arch in architectures[system]:
+            comsol = root/'bin'/arch/'comsol'
+            if comsol.is_file():
+                break
+        else:
             log.debug('Did not find Comsol executable.')
             continue
         log.debug(f'Found Comsol executable "{comsol}".')
@@ -212,7 +220,7 @@ def lookup_comsol():
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             universal_newlines=True, encoding='UTF-8',
         )
-        # Change `universal_newlines` to `text` when dropping Python 3.6.
+        # `universal_newlines` instead of `text` to support Python 3.6.
     except subprocess.CalledProcessError:
         log.debug('Command exited with an error.')
         return
@@ -261,62 +269,46 @@ def find_backends():
 
     # Only accept executable when Java API was found as well.
     for comsol in executables:
-        log.debug(f'Checking executable: "{comsol}".')
+        log.debug(f'Checking executable "{comsol}".')
 
-        # Get folder of executable and root folder of installation.
-        folder = comsol.parent
-        root   = folder.parent.parent
-
-        # Check that Java bridge configuration exists in same folder.
-        ini = folder/'comsol.ini'
-        if not ini.exists():
+        # The Java bridge is configured in a file named "comsol.ini".
+        # That file is usually in the same folder as the Comsol executable.
+        # Though on Linux and macOS, the executable may also be a script
+        # that sits one folder up (for some reason).
+        folders = [comsol.parent]
+        for arch in architectures[system]:
+            folders.append(comsol.parent/arch)
+        for folder in folders:
+            ini = folder/'comsol.ini'
+            if ini.is_file():
+                break
+        else:
             log.debug(f'Did not find Java bridge configuration "{ini.name}".')
             continue
+        log.debug(f'Found Java bridge configuration "{ini}".')
 
-        # Check that folder with Comsol Java API exists.
-        api = root/'plugins'
-        if not api.exists():
-            log.debug('Did not find Comsol Java API plug-ins.')
+        # Make sure that parent folder has name of a valid architecture.
+        arch = ini.parent.name
+        if arch not in architectures[system]:
+            log.debug('Its parent folder does not name a valid architecture.')
+            continue
+        log.debug(f'System architecture is "{arch}".')
+
+        # The actual executable is the one sitting right next to "comsol.ini".
+        comsol = ini.parent/comsol.name
+        if not comsol.is_file():
+            log.debug(f'No Comsol executable alongside "{ini.name}".')
+            continue
 
         # On Windows, check that server executable exists in same folder.
         if system == 'Windows':
-            server = folder/'comsolmphserver.exe'
+            server = ini.parent/'comsolmphserver.exe'
             if not server.exists():
-                log.debug('Did not find "{server.name}" in "{folder}".')
+                log.debug(f'No server executable alongside "{ini.name}".')
+                continue
             server = [server]
         else:
             server = [comsol, 'mphserver']
-
-        # Get version information from Comsol server.
-        command = server + ['--version']
-        if version_info < (3, 8):
-            command[0] = str(command[0])
-        try:
-            arguments = dict(check=True, timeout=5, stdout=subprocess.PIPE)
-            if system == 'Windows':
-                arguments['creationflags'] = 0x08000000
-            process = subprocess.run(command, **arguments)
-        except subprocess.CalledProcessError:
-            log.debug('Querying version information failed.')
-            continue
-        except subprocess.TimeoutExpired:
-            log.debug('Querying version information timed out.')
-            continue
-        version = process.stdout.decode('ascii', errors='ignore').strip()
-        log.debug(f'Reported version information is "{version}".')
-
-        # Parse version information.
-        try:
-            (name, major, minor, patch, build) = parse(version)
-        except ValueError as error:
-            log.debug(error)
-            continue
-        log.debug(f'Assigned name "{name}" to this installation.')
-
-        # Ignore installation if version name is a duplicate.
-        if name in (backend['name'] for backend in backends):
-            log.debug(f'Ignoring duplicate of Comsol version {name}.')
-            continue
 
         # Parse Java bridge configuration.
         with ini.open(encoding='UTF-8') as stream:
@@ -328,18 +320,64 @@ def find_backends():
                 if jvm_on_next_line:
                     jvm_path = line
                     break
-                if line == '-vm':
+                if line.startswith('-vm'):
                     jvm_on_next_line = True
             else:
                 log.debug(f'Did not find Java VM path in "{ini.name}".')
                 continue
-        log.debug(f'Relative path to Java VM: "{jvm_path}".')
+        log.debug(f'Java VM at relative path "{jvm_path}".')
 
         # Resolve Java VM path.
         try:
-            jvm = (folder/jvm_path).resolve(strict=True)
+            jvm = (ini.parent/jvm_path).resolve(strict=True)
         except FileNotFoundError:
-            log.debug('Did not find Java virtual machine.')
+            log.debug('Could not resolve relative path to Java VM.')
+            continue
+
+        # The root folder of the Comsol installation is up two levels.
+        root = ini.parent.parent.parent
+        log.debug(f'Root folder is "{root}".')
+
+        # Check that folder with Comsol Java API exists.
+        api = root/'plugins'
+        if not api.exists():
+            log.debug('Did not find Comsol Java API plug-ins in root folder.')
+            continue
+
+        # Get version information from Comsol server.
+        command = server + ['--version']
+        command[0] = str(command[0])   # Needed to support Python 3.6 and 3.7.
+        try:
+            arguments = dict(
+                check=True, timeout=15,
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                universal_newlines=True, encoding='ascii', errors='ignore',
+            )
+            # `universal_newlines` instead of `text` to support Python 3.6.
+            if system == 'Windows':
+                arguments['creationflags'] = 0x08000000
+            process = subprocess.run(command, **arguments)
+        except subprocess.CalledProcessError:
+            log.debug('Querying version information failed.')
+            continue
+        except subprocess.TimeoutExpired:
+            log.debug('Querying version information timed out.')
+            continue
+        version = process.stdout.strip()
+        log.debug(f'Reported version information is "{version}".')
+
+        # Parse version information.
+        try:
+            (name, major, minor, patch, build) = parse(version)
+        except ValueError as error:
+            log.debug(error)
+            continue
+        log.debug(f'Assigned name "{name}" to this installation.')
+
+        # Ignore installation if version name is a duplicate.
+        names = [backend['name'] for backend in backends]
+        if name in names:
+            log.debug(f'Ignoring duplicate of Comsol version {name}.')
             continue
 
         # Collect all information in a dictionary and add it to the list.
