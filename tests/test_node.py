@@ -365,6 +365,10 @@ def test_property():
     assert plot.property('plotonsecyaxis') == new
     plot.property('plotonsecyaxis', old)
     assert plot.property('plotonsecyaxis') == old
+    # Test changing material properties.
+    assert (material/'Basic').property('relpermittivity') == ['1']
+    (material/'Basic').property('relpermittivity', 2)
+    assert (material/'Basic').property('relpermittivity') == ['2']
     # Read and write back every node property in the model.
     if not client.port:
         # Skip test in client-server mode where it's excruciatingly slow.
@@ -485,6 +489,11 @@ def test_create():
             Node(model, '').create()
         with raises(RuntimeError):
             Node(model, 'components/component').create()
+    material = Node(model, 'materials/medium 1')
+    material.create('custom', name='custom')
+    assert (material/'custom').exists()
+    (material/'custom').property('bulkviscosity', '1')
+    assert (material/'custom').property('bulkviscosity') == '1'
 
 
 def test_remove():
@@ -498,6 +507,9 @@ def test_remove():
     physics = Node(model, 'physics')
     (physics/'Electrostatics 1').remove()
     assert not (physics/'Electrostatics 1').exists()
+    material = Node(model, 'materials/medium 1')
+    (material/'custom').remove()
+    assert not (material/'custom').exists()
     with logging_disabled():
         with raises(PermissionError):
             Node(model, '').remove()
@@ -584,28 +596,38 @@ def test_tree():
     with capture_stdout() as output:
         mph.tree(model, max_depth=1)
     expected = '''
-    capacitor
-    ├─ parameters
-    ├─ functions
-    ├─ components
-    ├─ geometries
-    ├─ views
-    ├─ selections
-    ├─ coordinates
-    ├─ variables
-    ├─ couplings
-    ├─ physics
-    ├─ multiphysics
-    ├─ materials
-    ├─ meshes
-    ├─ studies
-    ├─ solutions
-    ├─ batches
-    ├─ datasets
-    ├─ evaluations
-    ├─ tables
-    ├─ plots
-    └─ exports
+        capacitor
+        ├─ parameters
+        ├─ functions
+        ├─ components
+        ├─ geometries
+        ├─ views
+        ├─ selections
+        ├─ coordinates
+        ├─ variables
+        ├─ couplings
+        ├─ physics
+        ├─ multiphysics
+        ├─ materials
+        ├─ meshes
+        ├─ studies
+        ├─ solutions
+        ├─ batches
+        ├─ datasets
+        ├─ evaluations
+        ├─ tables
+        ├─ plots
+        └─ exports
+    '''
+    assert output.text().strip() == dedent(expected).strip()
+    with capture_stdout() as output:
+        mph.tree(model/'materials')
+    expected = '''
+        materials
+        ├─ medium 1
+        │  └─ Basic
+        └─ medium 2
+           └─ Basic
     '''
     assert output.text().strip() == dedent(expected).strip()
 

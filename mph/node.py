@@ -215,7 +215,12 @@ class Node:
         java = parent.java
         if not java:
             return None
-        container = java if parent.is_group() else java.feature()
+        if parent.is_group():
+            container = java
+        elif hasattr(java, 'propertyGroup'):
+            container = java.propertyGroup()
+        else:
+            container = java.feature()
         for tag in container.tags():
             member = container.get(tag)
             if name == escape(member.label()):
@@ -260,6 +265,9 @@ class Node:
             return [self.__class__(self.model, group) for group in self.groups]
         elif self.is_group():
             return [self/escape(java.get(tag).label()) for tag in java.tags()]
+        elif hasattr(java, 'propertyGroup'):
+            return [self/escape(java.propertyGroup(tag).label())
+                    for tag in java.propertyGroup().tags()]
         elif hasattr(java, 'feature'):
             return [self/escape(java.feature(tag).label())
                     for tag in java.feature().tags()]
@@ -579,6 +587,8 @@ class Node:
                 container = java.feature()
             elif hasattr(java, 'uniquetag') and hasattr(java, 'create'):
                 container = java
+        elif hasattr(java, 'propertyGroup'):
+            container = java.propertyGroup()
         elif hasattr(java, 'feature'):
             container = java.feature()
         if not hasattr(container, 'uniquetag'):
@@ -635,7 +645,13 @@ class Node:
             log.error(error)
             raise LookupError(error)
         parent = self.parent()
-        container = parent.java if parent.is_group() else parent.java.feature()
+        java = parent.java
+        if parent.is_group():
+            container = java
+        elif hasattr(java, 'propertyGroup'):
+            container = java.propertyGroup()
+        else:
+            container = java.feature()
         container.remove(self.java.tag())
 
 
