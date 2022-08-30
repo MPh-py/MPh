@@ -64,6 +64,7 @@ html_favicon = 'images/logo.svg'       # browser icon
 # Source parsing
 root_doc = 'index'                     # start page
 nitpicky = True                        # Warn about missing references?
+exclude_patterns = ['ReadMe.md']       # Ignore ReadMe.md in this folder.
 
 # Code documentation
 autodoc_default_options = {
