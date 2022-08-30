@@ -4,8 +4,13 @@
 name = 'MPh'
 authors = [{name='John Hennig'}]
 license = {file='license.txt'}
-keywords = ['Comsol', 'multiphysics', 'physics', 'finite elements',
-            'computer simulation']
+keywords = [
+    'Comsol',
+    'multiphysics',
+    'physics',
+    'finite elements',
+    'computer simulation',
+]
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python :: 3.6',
@@ -19,7 +24,8 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Physics',
     'Intended Audience :: Science/Research',
     'Natural Language :: English',
-    'License :: OSI Approved :: MIT License']
+    'License :: OSI Approved :: MIT License',
+]
 readme = 'PyPI.md'
 dynamic = ['version', 'description']
 requires-python = '>= 3.6'
@@ -95,11 +101,11 @@ testpaths = ['tests']
 
 [tool.coverage.run]
 source = ['mph/']
-omit = ['mph/discovery.py']
+omit = ['mph/discovery.py']  # Ignore platform-dependent discovery mechanism.
 relative_files = true
 
 [tool.coverage.report]
 exclude_lines = [
     'pragma: no cover',
-    'def location',
+    'def location',          # Ignore platform-dependent configuration search.
 ]
