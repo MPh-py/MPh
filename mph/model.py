@@ -246,6 +246,18 @@ class Model:
         """Returns the names of modules/products required to be licensed."""
         return [modules.get(key, key) for key in self.java.getUsedProducts()]
 
+    def problems(self):
+        """
+        Returns problems reported by nodes in the model.
+
+        See {meth}`Node.problems` on how problems (error/warning
+        messages and their origin) are returned. First and foremost,
+        this method lets users check if any problems are reported
+        throughout the model by testing `if model.problems():` in
+        application code, to then act accordingly.
+        """
+        return (self/None).problems()
+
     ####################################
     # Solving                          #
     ####################################
