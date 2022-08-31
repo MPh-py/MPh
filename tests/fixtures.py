@@ -62,5 +62,6 @@ def setup_logging():
         return
     logging.setLogRecordFactory(timed_records)
     logging.basicConfig(
-        level   = logging.DEBUG,
-        format  = '[%(timestamp)s] %(message)s')
+        level  = logging.DEBUG,
+        format = '[%(timestamp)s] %(message)s',
+    )
