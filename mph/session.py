@@ -24,6 +24,7 @@ from logging import getLogger          # event logging
 client = None                          # client instance
 server = None                          # server instance
 thread = None                          # current thread
+system = platform.system()             # operating system
 log    = getLogger(__package__)        # event log
 
 
@@ -90,7 +91,7 @@ def start(cores=None, version=None, port=0):
 
     session = option('session')
     if session == 'platform-dependent':
-        if platform.system() == 'Windows':
+        if system == 'Windows':
             session = 'stand-alone'
         else:
             session = 'client-server'
@@ -166,7 +167,7 @@ def cleanup():
         # pyTest exits. But disabling the fault handler doesn't help,
         # so let's not touch it. It does seem to have some effect on
         # Windows, but even there the benefit is fairly unclear.
-        if platform.system() == 'Windows' and faulthandler.is_enabled():
+        if system == 'Windows' and faulthandler.is_enabled():
             log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
         # Exit the hard way as Comsol leaves us no choice. See issue #38.

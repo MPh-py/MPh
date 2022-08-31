@@ -12,7 +12,8 @@ from logging import getLogger          # event logging
 ########################################
 # Globals                              #
 ########################################
-log = getLogger(__package__)           # event log
+system = platform.system()             # operating system
+log    = getLogger(__package__)        # event log
 
 options = {
     'session':  'platform-dependent',
@@ -59,7 +60,6 @@ def location():
     in the home directory on Linux, and in `Application Support` on
     macOS.
     """
-    system = platform.system()
     if system == 'Windows':
         return Path(os.environ['APPDATA'])/'MPh'
     elif system == 'Linux':
