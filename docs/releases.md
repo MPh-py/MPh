@@ -1,5 +1,31 @@
 ﻿# Releases
 
+## 1.2.0
+* [Published](https://pypi.org/project/MPh/1.2.0) on August 31, 2022.
+* Includes Comsol installation found on `PATH` in discovery.
+  ([#89](https://github.com/MPh-py/MPh/issues/89))
+  <br>
+  So if the `comsol` command works in the console, the corresponding
+  installation will now be found automatically, even if not in a default
+  location.
+* Adds support for material property groups, which now show up in model tree.
+  ([#78](https://github.com/MPh-py/MPh/issues/78))
+  <br>
+  Material properties can be read and altered by calling
+  [`property()`](https://mph.readthedocs.io/en/1.2/api/mph.Node.html#mph.Node.property)
+  on the node referring to its property group.
+* Adds method
+  [`problems()`](https://mph.readthedocs.io/en/1.2/api/mph.Model.html#mph.Model.problems)
+  to the `Model` class.
+  <br>
+  It does the same as calling
+  [`Node.problems()`](https://mph.readthedocs.io/en/1.2/api/mph.Node.html#mph.Node.problems)
+  on the model's root node, but provides for an easy way to check if
+  there are currently errors or warnings reported anywhere in the model.
+* Adds "Uncertainty Quantification" to list of recognized
+  [`modules`](https://mph.readthedocs.io/en/1.2/api/mph.Client.html#mph.Client.modules).
+* External links to Comsol documentation now refer to Comsol 6.0.
+
 ## 1.1.6
 * [Published](https://pypi.org/project/MPh/1.1.6) on June 30, 2022.
 * Adds missing support for export of meshes. ([#73](https://github.com/MPh-py/MPh/issues/73))
