@@ -709,6 +709,21 @@ def test_save():
             model.save('model.mph', format='invalid')
 
 
+def test_problems():
+    assert not model.problems()
+    anode = model/'physics'/'electrostatic'/'anode'
+    anode.property('V0', '+Ua/2')
+    study = model/'studies'/'static'
+    try:
+        study.run()
+    except Exception:
+        pass
+    assert model.problems()
+    anode.property('V0', '+U/2')
+    study.run()
+    assert not model.problems()
+
+
 def test_features():
     with warnings_disabled():
         assert 'Laplace equation' in model.features('electrostatic')
@@ -790,6 +805,7 @@ if __name__ == '__main__':
         test_datasets()
         test_plots()
         test_exports()
+        test_modules()
 
         test_build()
         test_mesh()
@@ -814,6 +830,8 @@ if __name__ == '__main__':
         test_clear()
         test_reset()
         test_save()
+
+        test_problems()
 
         test_features()
         test_toggle()
