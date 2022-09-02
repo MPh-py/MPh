@@ -39,7 +39,7 @@ We usually save models to disk after we have solved them, which
 includes the solution and mesh data in the file. This is convenient
 so that we can come back to the model later, but don't have to run
 the simulation again, which may take a long time. However, the files
-then require a lot of disk space. After a while, we may want to archive
+then occupy a lot of disk space. After a while, we may want to archive
 the models, but trim the fat before we do that.
 
 To compact all model files in the current working directory, we can
@@ -50,13 +50,13 @@ from pathlib import Path
 
 client = mph.start()
 for file in Path.cwd().glob('*.mph'):
-    print(f'{file}:')
+    print(f'{file}')
     model = client.load(file)
     model.clear()
     model.save()
 ```
 
-The script [`compact_models.py`][compact] in the `demos` folder of the
+The script [`compact_models.py`] in the `demos` folder of the
 source-code repository is a refined version of the above code. It
 displays more status information and also resets the modeling history.
 
@@ -84,9 +84,9 @@ Additionally, we have imported the [`queue`](python:queue) module, also
 from the standard library, though only for the [`queue.Empty`](
 python:queue.Empty) exception type that it provides.
 
-In this demonstration, we will solve the model [`capacitor.mph`][capa]
-from the [Tutorial](tutorial). We want to sweep the electrode distance
-*d* and calculate the capacitance *C* for each value of the distance,
+In this demonstration, we will solve the model [`capacitor.mph`] from
+the [Tutorial](tutorial). We want to sweep the electrode distance *d*
+and calculate the capacitance *C* for each value of the distance,
 ranging from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
@@ -175,9 +175,9 @@ for _ in values:
 We would then display them, plot them, save them to a file, or whatever
 it is we do with simulation results.
 
-The complete script [`worker_pool.py`][pool], which implements all of
-the above and also irons out some wrinkles not covered here for the
-sake of brevity, can be found in the `demos` folder of the source-code
+The complete script [`worker_pool.py`], which implements all of the
+above and also irons out some wrinkles not covered here for the sake
+of brevity, can be found in the `demos` folder of the source-code
 repository. As it runs, it displays a live plot such as the one that
 follows. It is reproduced here preserving the real time from a run with
 two workers. Observe how the first two data points do in fact come in
@@ -203,11 +203,11 @@ separate module that is run as a script.
 
 The primary focus of MPh is to automate the simulation workflow, like
 running parameter sweeps or optimization routines with customized,
-Python-powered post-processing. Navigating and altering models is
-possible, see [next section](#navigate-and-alter-the-model), but has
-some limitations.
+Python-powered post-processing. Navigating and altering models via its
+Python API is possible, see [next section](#navigate-and-alter-the-model),
+but has some limitations.
 
-However, any and all functionality offered by the [Comsol API][proman]
+However, any and all functionality offered by the [Comsol API]
 is accessible via the "pythonized" Java layer provided by [JPype],
 which is exposed as the `.java` attribute of {class}`~mph.Client`
 instances, mapping to Comsol's [`ModelUtil`], as well as of
@@ -261,9 +261,9 @@ was essentially copied and pasted, even the semicolons, which Python
 simply ignores. We named the Python wrapper `pymodel` and assigned
 `model` to the underlying Java object just so we could do this. We had
 to replace `new String[]{"0.1", "0.2", "0.5"}` because Python does not
-know what [`new`][new] means. There, Java expects a list of three
-strings. So we replaced the expression with `["0.1", "0.2", "0.5"]`,
-the Python equivalent of just that: a list of these three strings.
+know what [`new`] means. There, Java expects a list of three strings.
+So we replaced the expression with `["0.1", "0.2", "0.5"]`, the Python
+equivalent of just that: a list of these three strings.
 
 Occasionally when translating Java (or Matlab) code you find in the
 documentation, or a blog post as the case was here, you will have to
@@ -418,21 +418,21 @@ system were created by Comsol automatically. We could rename these
 nodes if we wanted to. Most built-in groups are still empty, waiting
 for features to be created.
 
-The demo script [`create_capacitor.py`][create] shows how to create
-more advanced features than in the simple example here: It generates
+The demo script [`create_capacitor.py`] shows how to create more
+advanced features than in the simple example here: It generates
 the demonstration model used in the [Tutorial](tutorial) entirely from
 Python code.
 
 
-[capa]:    https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
-[compact]: https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
-[pool]:    https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
-[create]:  https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
+[`capacitor.mph`]:       https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
+[`compact_models.py`]:   https://github.com/MPh-py/MPh/blob/main/demos/compact_models.py
+[`worker_pool.py`]:      https://github.com/MPh-py/MPh/blob/main/demos/worker_pool.py
+[`create_capacitor.py`]: https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py
 
 [genetic algorithm]:      https://en.wikipedia.org/wiki/Genetic_algorithm
 [differential evolution]: https://stackoverflow.com/questions/65387767/differential-evolution-in-parallel-in-python
 
-[proman]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[Comsol API]:  https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [`ModelUtil`]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
 [`model`]:     https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api/com/comsol/model/Model.html
 [intro]:       https://www.comsol.com/documentation/IntroductionToCOMSOLMultiphysics.pdf
@@ -440,4 +440,4 @@ Python code.
 [blog]:        https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
 [JPype]: https://jpype.readthedocs.io/en/stable
-[new]:   https://www.javatpoint.com/new-keyword-in-java
+[`new`]: https://www.javatpoint.com/new-keyword-in-java

@@ -2,18 +2,18 @@
 
 ## Java bridge
 
-MPh is built on top of the Python-to-Java bridge [JPype][jpype]. It is
-JPype that allows us to look at Comsol's [Programming Manual][manual]
-or its [API reference][api] and run the same commands from Python. All
-credit to the JPype developers for making this possible.
+MPh is built on top of the Python-to-Java bridge [JPype]. It is
+JPype that allows us to look at Comsol's [Programming Manual] or its
+[API reference] and run the same commands from Python. All credit to
+the JPype developers for making this possible.
 
 Unfortunately, the Comsol API does not support running more than one
 client at a time, i.e. within the same Java program. Meanwhile, JPype
 cannot manage more than one Java virtual machine within the same Python
 process. If it could, it would be easy to work around Comsol's limitation.
-(There is an alternative Java bridge, [pyJNIus][jnius], which is not
-limited to one virtual machine, but then fails in another regard: A number
-of Java methods exposed by Comsol are inexplicably missing from the Python
+(There is an alternative Java bridge, [pyJNIus], which is not limited
+to one virtual machine, but then fails in another regard: A number of
+Java methods exposed by Comsol are inexplicably missing from the Python
 encapsulation.)
 
 Therefore, if several simulations are to be run in parallel, distributed
@@ -35,37 +35,37 @@ The Comsol API offers two distinct ways to run a simulation session on
 the local machine. We can either start a "stand-alone" client, which
 does not require a Comsol server. Or we first start a server and then
 have a "thin" client connect to it via a loop-back network socket. The
-first approach is more lightweight and more reliable, as it keeps
-everything inside the same process. The second approach is slower to
-start up and relies on the inter-process communication to be robust,
-but would also work across the network, i.e., for remote sessions where
-the client runs locally and delegates the heavy lifting to a server
-running on another machine. If we instantiate the {class}`~mph.Client`
-class without providing a value for the network port, it will create a
-stand-alone client. Otherwise it will run as a thin client in
-client–server mode.
+first approach is more lightweight and more reliable, especially on
+Windows, as it keeps everything inside the same process. The second
+approach is slower to start up and relies on the inter-process
+communication to be robust, but would also work across the network,
+i.e., for remote sessions where the client runs locally and delegates
+the heavy lifting to a server running on another machine. If we
+instantiate the {class}`~mph.Client` class without providing a value
+for the network port, it will create a stand-alone client. Otherwise
+it will run as a thin client in client–server mode.
 
 On Linux and macOS, however, the stand-alone mode does not work out of
 the box. This is due to a limitation of Unix-like operating systems
-and explained in more detail in [GitHub issue #8][issue8]. On these
-platforms, if all you did was install MPh, starting the client in
-stand-alone mode will raise a `java.lang.UnsatisfiedLinkError` because
-required external libraries cannot be found. You would have to add the
-full paths of certain shared-library folders to an environment variable
-named `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on macOS.
+and explained in more detail in [GitHub issue #8]. On these platforms,
+if all you did was install MPh, starting the client in stand-alone mode
+will raise a `java.lang.UnsatisfiedLinkError` because required external
+libraries cannot be found. You would have to add the full paths of
+certain shared-library folders to an environment variable named
+`LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on macOS.
 
-For example, for an installation of Comsol 5.6 on Ubuntu Linux, you
+For example, for an installation of Comsol 6.0 on Ubuntu Linux, you
 would add the following lines at the end of the shell configuration
 file `.bashrc`.
 ```shell
 # Help MPh find Comsol's shared libraries.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-/usr/local/comsol56/multiphysics/lib/glnxa64:\
-/usr/local/comsol56/multiphysics/ext/graphicsmagick/glnxa64:\
-/usr/local/comsol56/multiphysics/ext/cadimport/glnxa64
+/usr/local/comsol60/multiphysics/lib/glnxa64:\
+/usr/local/comsol60/multiphysics/ext/graphicsmagick/glnxa64:\
+/usr/local/comsol60/multiphysics/ext/cadimport/glnxa64
 ```
 
-On macOS, the root folder is `/Applications/COMSOL56/Multiphysics`.
+On macOS, the root folder is `/Applications/COMSOL60/Multiphysics`.
 The folder names depend on the installed Comsol version and will have
 to be adapted accordingly.
 
@@ -103,8 +103,8 @@ due to some conflict with external libraries. As opposed to Windows,
 where this works reliably.
 
 
-[jpype]:  https://github.com/jpype-project/jpype
-[manual]: https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
-[api]:    https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api
-[jnius]:  https://pyjnius.readthedocs.io
-[issue8]: https://github.com/MPh-py/MPh/issues/8
+[JPype]:              https://github.com/jpype-project/jpype
+[Programming Manual]: https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
+[API reference]:      https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api
+[pyJNIus]:            https://pyjnius.readthedocs.io
+[GitHub issue #8]:    https://github.com/MPh-py/MPh/issues/8

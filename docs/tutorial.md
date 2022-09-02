@@ -2,8 +2,8 @@
 
 To follow along with this tutorial in an interactive Python session,
 if you wish to do so, make sure you have downloaded the demonstration
-model [`capacitor.mph`][capa] from MPh's source-code repository. Save
-it in the same folder from which you run Python.
+model [`capacitor.mph`] from MPh's source-code repository. Save it in
+the same folder from which you run Python.
 
 It is a model of a non-ideal, inhomogeneous, parallel-plate capacitor,
 in that its electrodes are of finite extent, the edges are rounded
@@ -176,9 +176,9 @@ solve the model. But we may also trigger the geometry build right away.
 
 ## Running simulations
 
-To solve the model, we need to create a mesh. This would also be taken
-care of automatically, but let's make sure this critical step passes
-without a hitch.
+To solve the model, we need to create a mesh. This would also happen
+automatically, but let's make sure this critical step passes without
+a hitch.
 ```python
 >>> model.mesh()
 ```
@@ -235,10 +235,10 @@ strength in V/m and its coordinates in meters.
 
 We also did not specify the dataset, even though there are three
 different studies that have separate solutions and datasets associated
-along with them. When not named specifically, the default dataset is
-used. That generally refers to the study defined first, here "static".
-The default dataset is the one resulting from that study, here —
-inconsistently — named "electrostatic".
+along with them. When not named specifically, Comsol will use what it
+considers the default dataset. That generally refers to the study
+defined first, here "static". The default dataset is the one resulting
+from that study, here — inconsistently — named "electrostatic".
 ```python
 >>> model.datasets()
 ['electrostatic', 'time-dependent', 'parametric sweep', 'sweep//solution']
@@ -320,8 +320,9 @@ paths by adding them as the second argument.
 
 The idea here is to first set up sensible exports in the GUI, such as
 images that illustrate the simulation results, and then trigger them
-from a script for a particular simulation run, the results of which
-may depend on parameter values.
+from a script for a particular simulation run. The results then may
+depend on parameter values, which you could include as part of the
+file name.
 
 
 ## Saving results
@@ -361,4 +362,4 @@ documentation also explain how to go beyond the scope of this library
 and access the full Comsol API from Python, if needed.
 
 
-[capa]: https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
+[`capacitor.mph`]: https://github.com/MPh-py/MPh/blob/main/demos/capacitor.mph
