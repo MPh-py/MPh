@@ -439,5 +439,5 @@ Python code.
 [busbar]:      https://www.comsol.com/model/electrical-heating-in-a-busbar-10206
 [blog]:        https://www.comsol.com/blogs/automate-modeling-tasks-comsol-api-use-java
 
-[JPype]: https://jpype.readthedocs.io/en/stable
+[JPype]: https://jpype.readthedocs.io
 [`new`]: https://www.javatpoint.com/new-keyword-in-java
