@@ -1,32 +1,20 @@
-﻿"""MyST-compatible drop-in replacement for Sphinx's Autodoc extension."""
-__version__ = '0.1.0'
+﻿"""
+MyST-compatible drop-in replacement for Sphinx's Autodoc extension
 
-# This extension essentially overrides all content creation done by
-# Autodoc so that the output is Markdown to be parsed by MyST, instead
-# of the original reStructuredText parsed by Sphinx directly. It is
-# therefore prone to breakage when there are upstream changes.
-#
-# Namely, the overridden methods are `add_line`, `add_directive_header`,
-# and `generate` of Autodoc's `Documenter` class, as well as of all
-# classes derived from it, implementing the various directives for
-# modules, functions, etc. Code comments here only pertain to changes
-# made to the original code for reST, the original comments from the
-# Autodoc source were removed so as to not be a distraction. Type hints
-# were also removed, but could easily be put back in. String interpolation
-# was changed to f-strings. We use our own logger name, but could have
-# kept using Autodoc's. Some variable names were shortened, like `source`
-# instead of `sourcename`, to keep lines under 80 characters.
+This extension overrides Autodoc's generation of [domain directives]
+so that the syntax is what the MyST Markdown parser expects, instead of
+Sphinx's own reStructuredText parser.
+
+Note that this is very much a hack. Ideally, Autodoc would query what
+the document's source parser is and generate output accordingly.
+
+[domain directives]: https://sphinx-experiment.readthedocs.io/en\
+/latest/domains.html
+"""
+__version__ = '0.2.0'
 
 
-import sphinx
 from sphinx.ext import autodoc
-from sphinx.util import inspect
-from sphinx.pycode import ModuleAnalyzer, PycodeError
-from sphinx.ext.autodoc.mock import ismock
-from sphinx.util.typing import get_type_hints, stringify, restify
-import re
-
-logger = sphinx.util.logging.getLogger(__name__)
 
 
 class Documenter(autodoc.Documenter):
@@ -34,187 +22,117 @@ class Documenter(autodoc.Documenter):
     Mix-in to override content generation by `Documenter` class.
 
     All of Autodoc's documenter classes (for modules, functions, etc.)
-    derive from the `Documenter` base. Methods that generate reST will
-    have to be rewritten to output Markdown instead. They are defined
-    here to be mixed into the the various documenter classes.
+    derive from the `Documenter` base class. Two methods are important:
+    * The one that adds the directive header, i.e. opens the directive.
+    * The one that generates the content, which includes the actual
+      doc-string as well as documentation for all child elements, such
+      as methods of a class.
+
+    Problem is, reStructuredText directives need never be explicitly
+    closed, as scopes are designated by indentation. With MyST, however,
+    we have to do just that: add an extra line to close a directive
+    previously opened, as indentation itself is not significant per se.
+
+    To make our life at least somewhat easier, we also use an
+    undocumented feature of MyST, or perhaps Markdown-it: We can nest
+    directives delimited by exactly three back-ticks, ` ``` `, inside
+    directives delimited by three tildes, `~~~`. Then indentation *is*
+    significant, though we still have to close the directive's scope.
+    But at least we don't have to add extra back-ticks on enclosing
+    scopes, just so inner scopes don't mess with the delimitation.
+
+    Ideally, Autodoc would be aware of such structural syntax
+    requirements. But it's not. And it doesn't call out to the parser
+    anyway, it simply generates reStructuredText no matter what. A
+    robust solution would make Autodoc parser-aware, upstream, i.e.
+    in Sphinx.
     """
 
-    def fence(self):
-        """
-        Returns back-ticks fence corresponding to indentation level.
+    def add_directive_header(self, sig):
+        """Adds the directive header and options."""
 
-        The indentation level in the reST output corresponds to the scope
-        of the directive block in Markdown, which is delimited by back-ticks.
-        The further out the scope, the more back-ticks we have to put. This
-        helper function returns a string with the correct number of ticks
-        based on the indentation level in the original reStructuredText.
-        The indentation level is determined by the current indentation and
-        the length of indentation that would be used to nest content.
-        """
-        unit = self.content_indent or '   '
-        (scope, remainder) = divmod(len(self.indent), len(unit))
-        if remainder:
-            raise RuntimeError(f'Indentation not a multiple of {len(unit)}.')
-        if scope > 1:
-            raise NotImplementedError('More than one nested scope in Autodoc '
-                                      'directive.')
-        backticks = '```' + '`'*(2 - scope)
-        return backticks
+        # Defer to super method when not parsing Markdown.
+        parsing_markdown = self.directive.state.__module__.startswith('myst')
+        if not parsing_markdown:
+            super().add_directive_header(sig)
+            return
 
-    def add_line(self, line, source, *lineno):
-        """Appends one line to the generated output."""
-        # Add content, but without the original indentation.
-        self.directive.result.append(line, source, *lineno)
-
-    def add_directive_header(self, signature):
-        """Adds directive header and options to the generated content."""
-        domain    = getattr(self, 'domain', 'py')
+        # This block is unchanged, just copied from the super method.
+        domain = getattr(self, 'domain', 'py')
         directive = getattr(self, 'directivetype', self.objtype)
-        name      = self.format_name()
-        source    = self.get_sourcename()
-        prefix    = self.fence() + '{' + f'{domain}:{directive}' + '} '
-        # This code dealing with multi-line signature was rewritten, for
-        # brevity, but is entirely untested.
-        (first, *rest) = signature.split('\n')
-        self.add_line(f'{prefix}{name}{first}', source)
-        for line in rest:
-            indent = ' '*len(prefix)
-            self.add_line(f'{indent}{name}{first}', source)
-        # Add field-list options, but drop the original indentation.
+        name = self.format_name()
+        sourcename = self.get_sourcename()
+
+        # Modify the directive prefix.
+        markers = '```' if self.indent else '~~~'
+        prefix  = markers + '{' + f'{domain}:{directive}' + '} '
+
+        # Remember we opened this directive.
+        if not hasattr(self, 'directives'):
+            self.directives = []
+        self.directives.append((domain, directive, name, markers))
+
+        # Bail out if we are more than one level deep, which is unexpected.
+        if len(self.directives) > 1:
+            raise RuntimeError('MyST-Docstring cannot handle this project.')
+
+        # Open the directive. (This block is unchanged.)
+        for i, sig_line in enumerate(sig.split("\n")):
+            self.add_line('%s%s%s' % (prefix, name, sig_line), sourcename)
+            if i == 0:
+                prefix = " " * len(prefix)
         if self.options.noindex:
-            self.add_line(':noindex:', source)
+            self.add_line('   :noindex:', sourcename)
         if self.objpath:
-            self.add_line(f':module: {self.modname}', source)
+            self.add_line('   :module: %s' % self.modname, sourcename)
 
-    def generate(self, more_content=None, real_modname=None,
-                       check_module=False, all_members=False):
-        """
-        Generates the Markdown content replacing an Autodoc directive.
+        # Close directive immediately if it is a module.
+        # This approach, of doing that right here, will break certain
+        # corners cases, see `ModuleDocumenter.add_directive_header()`
+        # in `sphinx.ext.autodoc.__init__.py`.
+        if (domain, directive) == ('py', 'module'):
+            self.directives.pop()
+            self.add_line(markers, sourcename)
 
-        We don't call the corresponding method from the parent class,
-        but rather rewrite it with Markdown output. This is done to
-        avoid parsing the generated reStructuredText, which is possible,
-        but might be error-prone.
-        """
+    def generate(self, **arguments):
+        """Generates documentation for the object and its members."""
 
-        # Until noted otherwise, code is the same as in the parent class.
-        # See source code comments there for clarification.
+        # Defer to super method when not parsing Markdown.
+        parsing_markdown = self.directive.state.__module__.startswith('myst')
+        if not parsing_markdown:
+            super().generate(**arguments)
 
-        if not self.parse_name():
-            # Have parent class log the corresponding warning.
-            super().generate(more_content, real_modname, check_module,
-                             all_members)
+        # Generate content as usual, but reset indent afterwards.
+        indent = self.indent
+        super().generate(**arguments)
+        self.indent = indent
+
+        # Close directive if it is one we previously opened.
+        if not hasattr(self, 'directives'):
             return
-
-        if not self.import_object():
+        if not self.directives:
             return
-
-        guess_modname = self.get_real_modname()
-        self.real_modname: str = real_modname or guess_modname
-
-        try:
-            self.analyzer = ModuleAnalyzer.for_module(self.real_modname)
-            self.analyzer.find_attr_docs()
-        except PycodeError as exc:
-            logger.debug(f'[myst-docstring] module analyzer failed: {exc}')
-            self.analyzer = None
-            if hasattr(self.module, '__file__') and self.module.__file__:
-                self.directive.record_dependencies.add(self.module.__file__)
-        else:
-            self.directive.record_dependencies.add(self.analyzer.srcname)
-
-        if self.real_modname != guess_modname:
-            try:
-                analyzer = ModuleAnalyzer.for_module(guess_modname)
-                self.directive.record_dependencies.add(analyzer.srcname)
-            except PycodeError:
-                pass
-
-        docstrings = sum(self.get_doc() or [], [])
-        if ismock(self.object) and not docstrings:
-            logger.warning(
-                sphinx.locale.__(f'A mocked object is detected: {self.name}'),
-                type='myst-docstring')
-        if check_module:
-            if not self.check_module():
-                return
-
-        source = self.get_sourcename()
-        self.add_line('', source)
-        try:
-            signature = self.format_signature()
-        except Exception as exc:
-            logger.warning(
-                sphinx.locale.__('Error while formatting signature for '
-                                 f'{self.fullname}: {exc}'),
-                type='myst-docstring')
+        (domain, directive, name, markers) = self.directives[-1]
+        if domain != getattr(self, 'domain', 'py'):
             return
-
-        # From here on, we make changes to accommodate the Markdown syntax.
-
-        # Generate the directive header and options.
-        self.add_directive_header(signature)
-        self.add_line('', source)
-
-        # Some directives don't have body content, namely modules. Then
-        # there is nothing to indent in reST and the `content_indent`
-        # attribute of the corresponding Autodoc class will be an empty
-        # string. In Markdown, we have to close these directives right
-        # after the signature. The actual content, think members of a
-        # module, still follows, but is not syntactically part of the
-        # directive block.
-        fence = self.fence()
-        if not self.content_indent:
-            self.add_line(fence, source)
-
-        # Document this object and its members.
-        save_indent = self.indent
-        self.indent += self.content_indent
-        self.add_content(more_content)
-        self.document_members(all_members)
-        self.indent = save_indent
-
-        # Close directive block, unless closed previously.
-        if self.content_indent:
-            self.add_line(fence, source)
-
-
-def mystify(cls):
-    """Convert Python class to a MyST reference."""
-    # This helper function is entirely untested.
-    return re.sub(r':py:(\w+?):`(.+?)`', r'{py:\1}`\2`', restify(cls))
+        if directive != getattr(self, 'directivetype', self.objtype):
+            return
+        if name != self.format_name():
+            return
+        self.directives.pop()
+        sourcename = self.get_sourcename()
+        self.add_line(markers, sourcename)
 
 
 # Mix the modified Documenter class back in with each directive defined
-# by Autodoc, so that they all use the methods overridden above. Unless
-# these classes override the same methods themselves, in which case we
-# have to redefine them as well, since super() would otherwise resolve
-# them incorrectly. (It may be possible to override the method resolution
-# order by means of a meta class, but that's a lot of black magic.)
+# by Autodoc, so that they all use the methods overridden above.
 
 class ModuleDocumenter(Documenter, autodoc.ModuleDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        super().add_directive_header(signature)
-        source = self.get_sourcename()
-        if self.options.synopsis:
-            self.add_line(f':synopsis: {self.options.synopsis}', source)
-        if self.options.platform:
-            self.add_line(f':platform: {self.options.platform}', source)
-        if self.options.deprecated:
-            self.add_line(':deprecated:', source)
+    pass
 
 
 class FunctionDocumenter(Documenter, autodoc.FunctionDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        source = self.get_sourcename()
-        super().add_directive_header(signature)
-        if (inspect.iscoroutinefunction(self.object)
-              or inspect.isasyncgenfunction(self.object)):
-            self.add_line(':async:', source)
+    pass
 
 
 class DecoratorDocumenter(Documenter, autodoc.DecoratorDocumenter):
@@ -222,93 +140,15 @@ class DecoratorDocumenter(Documenter, autodoc.DecoratorDocumenter):
 
 
 class ClassDocumenter(Documenter, autodoc.ClassDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        source = self.get_sourcename()
-        if self.doc_as_attr:
-            self.directivetype = 'attribute'
-        super().add_directive_header(signature)
-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.finals:
-            self.add_line(':final:', source)
-        canonical_fullname = self.get_canonical_fullname()
-        if (not self.doc_as_attr
-              and canonical_fullname
-              and self.fullname != canonical_fullname):
-            self.add_line(f':canonical: {canonical_fullname}', source)
-        if not self.doc_as_attr and self.options.show_inheritance:
-            if inspect.getorigbases(self.object):
-                bases = list(self.object.__orig_bases__)
-            elif (hasattr(self.object, '__bases__')
-                    and len(self.object.__bases__)):
-                bases = list(self.object.__bases__)
-            else:
-                bases = []
-            self.env.events.emit('autodoc-process-bases', self.fullname,
-                                 self.object, self.options, bases)
-            # Replaced `restify` with `mystify`.
-            base_classes = [mystify(cls) for cls in bases]
-            source = self.get_sourcename()
-            self.add_line('', source)
-            self.add_line(
-                sphinx.locale._(f'Bases: {", ".join(base_classes)}'),
-                source)
-
-    def generate(self, more_content=None, real_modname=None,
-                       check_module=False, all_members=False):
-        # Unchanged. See original source-code comment for clarification.
-        return super().generate(more_content=more_content,
-                                check_module=check_module,
-                                all_members=all_members)
+    pass
 
 
 class MethodDocumenter(Documenter, autodoc.MethodDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        super().add_directive_header(signature)
-        source = self.get_sourcename()
-        obj = self.parent.__dict__.get(self.object_name, self.object)
-        if inspect.isabstractmethod(obj):
-            self.add_line(':abstractmethod:', source)
-        if inspect.iscoroutinefunction(obj) or inspect.isasyncgenfunction(obj):
-            self.add_line(':async:', source)
-        if inspect.isclassmethod(obj):
-            self.add_line(':classmethod:', source)
-        if inspect.isstaticmethod(obj, cls=self.parent, name=self.object_name):
-            self.add_line(':staticmethod:', source)
-        if self.analyzer and '.'.join(self.objpath) in self.analyzer.finals:
-            self.add_line(':final:', source)
+    pass
 
 
 class AttributeDocumenter(Documenter, autodoc.AttributeDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        super().add_directive_header(signature)
-        source = self.get_sourcename()
-        if (self.options.annotation is autodoc.SUPPRESS
-              or self.should_suppress_directive_header()):
-            pass
-        elif self.options.annotation:
-            self.add_line(f':annotation: {self.options.annotation}', source)
-        else:
-            if self.config.autodoc_typehints != 'none':
-                annotations = get_type_hints(self.parent, None,
-                                             self.config.autodoc_type_aliases)
-                if self.objpath[-1] in annotations:
-                    objrepr = stringify(annotations.get(self.objpath[-1]))
-                    self.add_line(f':type: {objrepr}', source)
-            try:
-                if (self.options.no_value
-                      or self.should_suppress_value_header()
-                      or ismock(self.object)):
-                    pass
-                else:
-                    objrepr = inspect.object_description(self.object)
-                    self.add_line(f':value: {objrepr}', source)
-            except ValueError:
-                pass
+    pass
 
 
 class NewTypeAttributeDocumenter(Documenter,
@@ -317,36 +157,7 @@ class NewTypeAttributeDocumenter(Documenter,
 
 
 class PropertyDocumenter(Documenter, autodoc.PropertyDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        super().add_directive_header(signature)
-        source = self.get_sourcename()
-        if inspect.isabstractmethod(self.object):
-            self.add_line(':abstractmethod:', source)
-        if self.isclassmethod:
-            self.add_line(':classmethod:', source)
-        if inspect.safe_getattr(self.object, 'fget', None):
-            func = self.object.fget
-        elif inspect.safe_getattr(self.object, 'func', None):
-            func = self.object.func
-        else:
-            func = None
-        if func and self.config.autodoc_typehints != 'none':
-            try:
-                signature = inspect.signature(func,
-                                type_aliases=self.config.autodoc_type_aliases)
-                if signature.return_annotation is not inspect.Parameter.empty:
-                    objrepr = stringify(signature.return_annotation)
-                    self.add_line(f':type: {objrepr}', source)
-            except TypeError as exc:
-                logger.warning(
-                    sphinx.locale.__('Failed to get a function signature for '
-                                     f'{self.fullname}:{exc}'),
-                    type='myst-docstring')
-                return None
-            except ValueError:
-                return None
+    pass
 
 
 class ExceptionDocumenter(Documenter, autodoc.ExceptionDocumenter):
@@ -354,37 +165,7 @@ class ExceptionDocumenter(Documenter, autodoc.ExceptionDocumenter):
 
 
 class DataDocumenter(Documenter, autodoc.DataDocumenter):
-
-    def add_directive_header(self, signature):
-        # Add field-list options, but drop the original indentation.
-        super().add_directive_header(signature)
-        source = self.get_sourcename()
-        if (self.options.annotation is autodoc.SUPPRESS
-              or self.should_suppress_directive_header()):
-            pass
-        elif self.options.annotation:
-            self.add_line(f':annotation: {self.options.annotation}', source)
-        else:
-            if self.config.autodoc_typehints != 'none':
-                annotations = get_type_hints(self.parent, None,
-                                             self.config.autodoc_type_aliases)
-                if self.objpath[-1] in annotations:
-                    objrepr = stringify(annotations.get(self.objpath[-1]))
-                    self.add_line(f':type: {objrepr}', source)
-            try:
-                if (self.options.no_value
-                      or self.should_suppress_value_header()
-                      or ismock(self.object)):
-                    pass
-                else:
-                    objrepr = inspect.object_description(self.object)
-                    # Added quotation marks to avoid errors with values
-                    # that happen to contain curly braces. This does not
-                    # seem to be necessary in reST, but apparently is
-                    # in Markdown.
-                    self.add_line(f':value: "{objrepr}"', source)
-            except ValueError:
-                pass
+    pass
 
 
 class NewTypeDataDocumenter(Documenter, autodoc.NewTypeDataDocumenter):
@@ -395,10 +176,11 @@ def setup(app):
     """
     Sets up the extension.
 
-    Sphinx calls this function if the user named the extension in `conf.py`.
-    It then sets up the Autodoc extension that ships with Sphinx and
-    overrides whatever necessary to produce Markdown to be parsed by MyST
-    instead of reStructuredText parsed by Sphinx/Docutils.
+    Sphinx calls this function if the user named this extension in
+    `conf.py`. We then set up the Autodoc extension that ships with
+    Sphinx and override the generation of domain directives, so that
+    the syntax is compatible with the Markdown extension provided by
+    MyST instead of the reStructuredText syntax expected by Sphinx.
     """
     app.setup_extension('sphinx.ext.autodoc')
     app.add_autodocumenter(ModuleDocumenter, override=True)
