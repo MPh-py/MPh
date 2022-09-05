@@ -1,15 +1,15 @@
 ﻿"""
 MyST-compatible drop-in replacement for Sphinx's Autodoc extension
 
-This extension overrides Autodoc's generation of [domain directives]
+This extension overrides Autodoc's generation of [domain] directives
 so that the syntax is what the MyST Markdown parser expects, instead of
 Sphinx's own reStructuredText parser.
 
 Note that this is very much a hack. Ideally, Autodoc would query what
 the document's source parser is and generate output accordingly.
 
-[domain directives]: https://sphinx-experiment.readthedocs.io/en\
-/latest/domains.html
+[domain]: https://www.sphinx-doc.org/en/master/usage/restructuredtext\
+/domains.html
 """
 __version__ = '0.2.0'
 
@@ -39,7 +39,8 @@ class Documenter(autodoc.Documenter):
     directives delimited by three tildes, `~~~`. Then indentation *is*
     significant, though we still have to close the directive's scope.
     But at least we don't have to add extra back-ticks on enclosing
-    scopes, just so inner scopes don't mess with the delimitation.
+    scopes, just so inner scopes don't mess with the delimitation,
+    which we would have to do otherwise.
 
     Ideally, Autodoc would be aware of such structural syntax
     requirements. But it's not. And it doesn't call out to the parser
@@ -52,8 +53,9 @@ class Documenter(autodoc.Documenter):
         """Adds the directive header and options."""
 
         # Defer to super method when not parsing Markdown.
-        parsing_markdown = self.directive.state.__module__.startswith('myst')
-        if not parsing_markdown:
+        # Hack. There must be a better way to find out if MyST is the parser.
+        parser_is_myst = self.directive.state.__module__.startswith('myst')
+        if not parser_is_myst:
             super().add_directive_header(sig)
             return
 
@@ -98,8 +100,9 @@ class Documenter(autodoc.Documenter):
         """Generates documentation for the object and its members."""
 
         # Defer to super method when not parsing Markdown.
-        parsing_markdown = self.directive.state.__module__.startswith('myst')
-        if not parsing_markdown:
+        # Hack. There must be a better way to find out if MyST is the parser.
+        parser_is_myst = self.directive.state.__module__.startswith('myst')
+        if not parser_is_myst:
             super().generate(**arguments)
 
         # Generate content as usual, but reset indent afterwards.
@@ -151,8 +154,10 @@ class AttributeDocumenter(Documenter, autodoc.AttributeDocumenter):
     pass
 
 
-class NewTypeAttributeDocumenter(Documenter,
-                                 autodoc.NewTypeAttributeDocumenter):
+class NewTypeAttributeDocumenter(
+    Documenter,
+    autodoc.NewTypeAttributeDocumenter
+):
     pass
 
 

@@ -1,4 +1,17 @@
-"""MyST-compatible drop-in replacement for Sphinx's Autosummary extension"""
+"""
+MyST-compatible drop-in replacement for Sphinx's Autosummary extension
+
+This extension monkey-patches Autosummary's generation of [domain]
+references (roles) so that the syntax is what the MyST Markdown parser
+expects, instead of Sphinx's own reStructuredText parser.
+
+Needless to say, this is a hack. Autosummary should be aware of the
+the document parser it creates content for, but it's not. That would
+require substantial upstream changes.
+
+[domain]: https://www.sphinx-doc.org/en/master/usage/restructuredtext\
+/domains.html
+"""
 __version__ = '0.2.0'
 
 
@@ -17,9 +30,12 @@ class Autosummary(autosummary.Autosummary):
         `{py:obj}` if MyST is the document parser.
         """
 
+        # Find out if parser is MyST.
+        # The way we do this is a hack. There must be a better way.
+        parser_is_myst = self.state.__module__.startswith('myst')
+
         # Install our parser hook.
-        parsing_markdown = self.state.__module__.startswith('myst')
-        if parsing_markdown:
+        if parser_is_myst:
             myst_parse = self.state.nested_parse
 
             def shim(block, offset, node, **arguments):
@@ -31,8 +47,8 @@ class Autosummary(autosummary.Autosummary):
         # Let Autosummary do its thing.
         (table_spec, table) = super().get_table(items)
 
-        # Uninstall our hook again so me don't mess with anything else.
-        if parsing_markdown:
+        # Uninstall our hook so we don't mess with anything else.
+        if parser_is_myst:
             self.state.nested_parse = myst_parse
 
         # Return the Autosummary table.
