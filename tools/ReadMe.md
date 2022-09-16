@@ -27,7 +27,7 @@ virtual environment:
 ```console
 python -m venv venv --upgrade-deps
 venv/Scripts/activate                  # Windows
-venv/bin/activate                      # Linux/macOS
+source venv/bin/activate               # Linux/macOS
 pip install --editable .[dev]
 ```
 
