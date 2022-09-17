@@ -150,20 +150,20 @@ cathode.property('V0', '-U/2*step(t[1/s])')
 materials = model/'materials'
 medium1 = materials.create('Common', name='medium 1')
 medium1.select(model/'selections'/'medium 1')
-medium1.java.propertyGroup('def').set('relpermittivity',
+(medium1/'Basic').property('relpermittivity',
     ['1', '0', '0', '0', '1', '0', '0', '0', '1'])
-medium1.java.propertyGroup('def').set('relpermittivity_symmetry', '0')
-medium1.java.propertyGroup('def').set('electricconductivity',
+(medium1/'Basic').property('relpermittivity_symmetry', '0')
+(medium1/'Basic').property('electricconductivity',
     ['1e-10', '0', '0', '0', '1e-10', '0', '0', '0', '1e-10'])
-medium1.java.propertyGroup('def').set('electricconductivity_symmetry', '0')
+(medium1/'Basic').property('electricconductivity_symmetry', '0')
 medium2 = materials.create('Common', name='medium 2')
 medium2.select(model/'selections'/'medium 2')
-medium2.java.propertyGroup('def').set('relpermittivity',
+(medium2/'Basic').property('relpermittivity',
     ['2', '0', '0', '0', '2', '0', '0', '0', '2'])
-medium2.java.propertyGroup('def').set('relpermittivity_symmetry', '0')
-medium2.java.propertyGroup('def').set('electricconductivity',
+(medium2/'Basic').property('relpermittivity_symmetry', '0')
+(medium2/'Basic').property('electricconductivity',
     ['1e-10', '0', '0', '0', '1e-10', '0', '0', '0', '1e-10'])
-medium2.java.propertyGroup('def').set('electricconductivity_symmetry', '0')
+(medium2/'Basic').property('electricconductivity_symmetry', '0')
 
 meshes = model/'meshes'
 meshes.create(geometry, name='mesh')
