@@ -380,7 +380,7 @@ would be referred to as `geometry/'ice//frozen water'`.
 
 The example model created above ends up having the following model
 [`tree`](mph.tree):
-```python
+```pycon
 >>> mph.tree(model)
 block of ice
 ├─ parameters

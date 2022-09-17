@@ -22,7 +22,7 @@ Comsol platform, but not for any add-on module beyond that.
 
 In the beginning was the client. And the client was with Comsol. And
 the client was Comsol. So let there be a Comsol client.
-```python
+```pycon
 >>> import mph
 >>> client = mph.start(cores=1)
 ```
@@ -47,7 +47,7 @@ processes](demonstrations.md#multiple-processes), one for each client.
 
 Now that we have the client up and running, we can tell it to load a
 model file.
-```python
+```pycon
 >>> model = client.load('capacitor.mph')
 ```
 
@@ -55,7 +55,7 @@ It returns a model object, i.e. an instance of the {class}`~mph.Model`
 class. We will learn what to do with it further down. For now, it was
 simply loaded into memory. We can list the names of all models the
 client currently manages.
-```python
+```pycon
 >>> client.names()
 ['capacitor']
 ```
@@ -63,7 +63,7 @@ client currently manages.
 If we were to load more models, that list would be longer. Note that
 the above simply displays the names of the models. The actual model
 objects can be recalled as follows:
-```python
+```pycon
 >>> client.models()
 [Model('capacitor')]
 ```
@@ -72,12 +72,12 @@ We will generally not need to bother with these lists, as we would
 rather hold on to the `model` reference we received from the client
 in the first place. But to free up memory, we could remove a specific
 model.
-```python
+```pycon
 >>> client.remove(model)
 ```
 
 Or we could remove all models at once — restart from a clean slate.
-```python
+```pycon
 >>> client.clear()
 >>> client.names()
 []
@@ -87,13 +87,13 @@ Or we could remove all models at once — restart from a clean slate.
 ## Inspecting models
 
 Let's have a look at the parameters defined in the model:
-```python
+```pycon
 >>> model.parameters()
 {'U': '1[V]', 'd': '2[mm]', 'l': '10[mm]', 'w': '2[mm]'}
 ```
 
 With a little more typing, we can include the parameter descriptions:
-```python
+```pycon
 >>> for (name, value) in model.parameters().items():
 ...     description = model.description(name)
 ...     print(f'{description:20} {name} = {value}')
@@ -105,19 +105,19 @@ plate width          w = 2[mm]
 ```
 
 Two custom materials are defined:
-```python
+```pycon
 >>> model.materials()
 ['medium 1', 'medium 2']
 ```
 
 They will be used by these physics interfaces:
-```python
+```pycon
 >>> model.physics()
 ['electrostatic', 'electric currents']
 ```
 
 To solve the model, we will run these studies:
-```python
+```pycon
 >>> model.studies()
 ['static', 'relaxation', 'sweep']
 ```
@@ -149,28 +149,28 @@ As we have learned from the list above, the model defines a parameter
 named `d` that denotes the electrode spacing. If we know a parameter's
 name, we can access its value directly.
 
-```python
+```pycon
 >>> model.parameter('d')
 '2[mm]'
 ```
 
 If we pass in not just the name, but also a value, that same method
 modifies it.
-```python
+```pycon
 >>> model.parameter('d', '1[mm]')
 >>> model.parameter('d')
 '1[mm]'
 ```
 
 This particular model's only geometry sequence
-```python
+```pycon
 >>> model.geometries()
 ['geometry']
 ```
 is set up to depend on that very value. So it will effectively change
 the next time it is rebuilt. This will happen automatically once we
 solve the model. But we may also trigger the geometry build right away.
-```python
+```pycon
 >>> model.build()
 ```
 
@@ -179,28 +179,28 @@ solve the model. But we may also trigger the geometry build right away.
 To solve the model, we need to create a mesh. This would also happen
 automatically, but let's make sure this critical step passes without
 a hitch.
-```python
+```pycon
 >>> model.mesh()
 ```
 
 Now run the first study, the one set up to compute the electrostatic
 solution, i.e. the instantaneous and purely capacitive response to the
 applied voltage, before leakage currents have any time to set in.
-```python
+```pycon
 >>> model.solve('static')
 ```
 
 This modest simulation should not take longer than a few seconds.
 While we are at it, we may as well solve the remaining two studies,
 one time-dependent, the other a parameter sweep.
-```python
+```pycon
 >>> model.solve('relaxation')
 >>> model.solve('sweep')
 ```
 
 They take a little longer, but not much. We could have solved all three
 studies at once, or rather, all of the studies defined in the model.
-```python
+```pycon
 >>> model.solve()
 ```
 
@@ -209,7 +209,7 @@ studies at once, or rather, all of the studies defined in the model.
 
 Let's see what we found out and evaluate the electrostatic capacitance,
 i.e. at zero time or infinite frequency.
-```python
+```pycon
 >>> model.evaluate('2*es.intWe/U^2', 'pF')
 array(1.31948342)
 ```
@@ -220,7 +220,7 @@ regular Python [`float`](python:float).
 
 We might also ask where the electric field is strongest and have
 {meth}`~mph.Model.evaluate` perform a "local" evaluation.
-```python
+```pycon
 >>> (x, y, E) = model.evaluate(['x', 'y', 'es.normE'])
 >>> E.max()
 1480.2743893783063
@@ -239,7 +239,7 @@ along with them. When not named specifically, Comsol will use what it
 considers the default dataset. That generally refers to the study
 defined first, here "static". The default dataset is the one resulting
 from that study, here — inconsistently — named "electrostatic".
-```python
+```pycon
 >>> model.datasets()
 ['electrostatic', 'time-dependent', 'parametric sweep', 'sweep//solution']
 ```
@@ -251,7 +251,7 @@ will accumulate at the interface between the media. This interface
 charge leads to a gradual relaxation of the electric field over time,
 and thus to a change of the capacitance as well. We can tell that from
 its value at the first and last time step.
-```python
+```pycon
 >>> C = '2*ec.intWe/U^2'
 >>> model.evaluate(C, 'pF', 'time-dependent', 'first')
 array(1.31948342)
@@ -261,7 +261,7 @@ array(1.48410283)
 
 The `'first'` and `'last'` time step defined in that study are 0 and 1
 second, respectively.
-```python
+```pycon
 >>> (indices, values) = model.inner('time-dependent')
 >>> values[0]
 0.0
@@ -274,7 +274,7 @@ between the electrodes. In the model, a parameter sweep was used to
 study that. These "outer" solutions, just like the time-dependent
 "inner" solutions, are referenced by indices, i.e. integer numbers,
 each of which corresponds to a particular parameter value.
-```python
+```pycon
 >>> (indices, values) = model.outer('parametric sweep')
 >>> indices
 array([1, 2, 3], dtype=int32)
@@ -299,7 +299,7 @@ therefore be limited.
 ## Exporting results
 
 Two exports are defined in the demonstration model:
-```python
+```pycon
 >>> model.exports()
 ['data', 'image']
 ```
@@ -314,7 +314,7 @@ We can trigger all exports at once by calling {meth}`model.export()
 folder as the model file itself and have the names that were assigned
 in the model's export nodes. Unless we supply custom file names or
 paths by adding them as the second argument.
-```python
+```pycon
 >>> model.export('image', 'static field.png')
 ```
 
@@ -328,13 +328,13 @@ file name.
 ## Saving results
 
 To save the model we just solved, along with its solution, just do:
-```python
+```pycon
 >>> model.save()
 ```
 
 This would overwrite the existing file we loaded the model from. To
 avoid this, we could specify a different file name.
-```python
+```pycon
 >>> model.save('capacitor_solved')
 ```
 
@@ -348,7 +348,7 @@ down the line. Comsol also keeps track of the modeling history: a log
 of which features were created, deleted, modified, and in which order.
 Typically, these details are irrelevant. We can prune them by resetting
 that record.
-```python
+```pycon
 >>> model.clear()
 >>> model.reset()
 >>> model.save('capacitor_compacted')
