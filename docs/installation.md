@@ -12,9 +12,9 @@ and [NumPy] for returning (fast) numerical arrays. Pip makes sure the
 two Python dependencies are installed and adds them if missing.
 
 Comsol, obviously, you need to license and install yourself. Versions
-from Comsol 5.1 onward are expected to work, though only Comsol 5.5 and
-newer have been rigorously tested. A separate Java run-time environment
-is *not* required as Comsol ships with one already built in.
+5.5 and newer are expected to work, i.e. have been tested. A separate
+Java run-time environment is *not* required as Comsol ships with one
+already built in.
 
 Comsol is expected to be installed in the default location suggested by
 its installer. Though on Windows, custom locations are also supported,
