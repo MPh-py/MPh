@@ -38,9 +38,6 @@ Find the full [documentation on Read-the-Docs][docs].
 [![coverage report](
     https://img.shields.io/codecov/c/github/MPh-py/MPh?token=02ZZ8ZJH3M)](
     https://codecov.io/gh/MPh-py/MPh)
-[![code quality](
-    https://img.shields.io/lgtm/grade/python/github/MPh-py/MPh?label=quality)](
-    https://lgtm.com/projects/g/MPh-py/MPh)
 [![latest documentation](
     https://readthedocs.org/projects/mph/badge/?version=latest)](
     https://mph.readthedocs.io/en/latest)
