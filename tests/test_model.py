@@ -602,16 +602,6 @@ def test_export():
     assert (here/'animation.gif').exists()
     (here/'animation.gif').unlink()
     animation.remove()
-    # Test export of Flash animations.
-    animation = (model/'exports').create('Animation', name='animation')
-    animation.property('plotgroup', model/'plots'/'time-dependent field')
-    animation.property('looplevelinput', 'manual')
-    animation.property('looplevel', [1, 2, 3])
-    assert not (here/'animation.swf').exists()
-    model.export(animation, here/'animation.swf')
-    assert (here/'animation.swf').exists()
-    (here/'animation.swf').unlink()
-    animation.remove()
     # Test export of AVI movies (which Comsol only supports on Windows).
     if system() == 'Windows':
         animation = (model/'exports').create('Animation', name='animation')

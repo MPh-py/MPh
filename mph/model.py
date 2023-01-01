@@ -814,6 +814,7 @@ class Model:
                     node.property('movietype', 'gif')
                     node.property('giffilename', str(file))
                 elif file.suffix == '.swf':
+                    # Flash format no longer supported as of Comsol 6.1.
                     node.property('type', 'movie')
                     node.property('movietype', 'flash')
                     node.property('flashfilename', str(file))
