@@ -650,7 +650,7 @@ def test_export():
         with raises(TypeError):
             model.export(model/'functions'/'step', file='irrelevant.txt')
         with raises(RuntimeError):
-            model.export(model/'functions'/'step')
+            model.export(model/'coordinates'/'boundary system')
 
 
 def test_clear():
