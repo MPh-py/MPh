@@ -1,4 +1,4 @@
-﻿## Automation tools for local development
+﻿## Automation tools
 
 These are simple helper scripts to run the various dev tools, such as
 pyTest or Flit. See the doc-strings of the individual scripts for

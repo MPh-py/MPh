@@ -8,7 +8,7 @@ process. This is why simply calling pyTest (with `python -m pytest`
 in the root folder) will not work.
 
 This script here runs each test group in a new subprocess. It also
-imposes a logical order: from the tests covering the most most basic
+imposes a logical order: from the tests covering the most basic
 functionality to the high-level abstractions.
 
 Here, as opposed to the similar script `coverage.py`, we don't actually
