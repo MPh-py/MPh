@@ -47,7 +47,7 @@ class Server:
     restricted. If no number is given, all cores are used by default.
 
     A specific `version` of the Comsol back-end can be specified if
-    several are installed on the machine, for example `version='5.3a'`.
+    several are installed on the machine, for example `version='6.0'`.
     Otherwise the latest version is used.
 
     The server can be instructed to use a specific network `port` for
@@ -139,7 +139,7 @@ class Server:
 
         # Save information in instance attributes.
         self.version = backend['name']
-        """Comsol version (e.g., `'5.3a'`) the server is running on."""
+        """Comsol version (e.g., `'6.0'`) the server is running on."""
         self.cores = cores
         """Number of processor cores the server was requested to use."""
         self.port = port

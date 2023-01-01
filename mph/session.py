@@ -70,7 +70,7 @@ def start(cores=None, version=None, port=0):
     will be used.
 
     A specific Comsol `version` can be selected if several are
-    installed, for example `version='5.3a'`. Otherwise the latest
+    installed, for example `version='6.0'`. Otherwise the latest
     version is used.
 
     The server `port` can be specified if client–server mode is used.
