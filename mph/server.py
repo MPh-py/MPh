@@ -154,7 +154,7 @@ class Server:
         """Returns whether the server process is still running."""
         return (self.process.poll() is None)
 
-    def stop(self, timeout=10):
+    def stop(self, timeout=20):
         """Shuts down the server."""
         if not self.running():
             log.error(f'Server on port {self.port} has already stopped.')

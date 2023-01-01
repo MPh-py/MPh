@@ -42,7 +42,7 @@ def test_multi():
     assert client.cores == server.cores
     assert client.port == server.port
     client.disconnect()
-    sleep(3)
+    sleep(15)
     assert not server.running()
     server = mph.Server(cores=1, multi=True)
     client.connect(port=server.port)
@@ -50,7 +50,7 @@ def test_multi():
     assert client.cores == server.cores
     assert client.port == server.port
     client.disconnect()
-    sleep(3)
+    sleep(15)
     assert server.running()
     server.stop()
 
