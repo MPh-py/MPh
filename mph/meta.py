@@ -2,7 +2,7 @@
 
 title     = 'MPh'
 synopsis  = 'Pythonic scripting interface for Comsol Multiphysics'
-version   = '1.2.0'
+version   = '1.2.1'
 author    = 'John Hennig'
 copyright = '2020–2022, John Hennig'
 license   = 'MIT'
