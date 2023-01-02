@@ -1,7 +1,6 @@
 # API
 
-Code documentation of the public application programming interface
-provided by this library.
+Public API (application programming interface) provided by this library:
 
 ```{currentmodule} mph
 ```
@@ -18,5 +17,13 @@ Model
 Node
 tree
 inspect
+```
+
+Internal helper module, not to be relied upon in application code:
+
+```{autosummary}
+:toctree: api
+:nosignatures:
+
 discovery
 ```
