@@ -22,4 +22,4 @@ __pycache__/
 
 # Auto-created files
 Thumbs.db
-DS_Store
+.DS_Store
