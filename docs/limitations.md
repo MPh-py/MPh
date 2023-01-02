@@ -4,8 +4,7 @@
 
 MPh is built on top of the Python-to-Java bridge [JPype]. It is
 JPype that allows us to look at Comsol's [Programming Manual] or its
-[API reference] and run the same commands from Python. All credit to
-the JPype developers for making this possible.
+[API reference] and run the same commands from Python.
 
 Unfortunately, the Comsol API does not support running more than one
 client at a time, i.e. within the same Java program. Meanwhile, JPype
