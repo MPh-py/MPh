@@ -526,7 +526,7 @@ class Model:
             raise RuntimeError(error)
 
         # Try to perform a global evaluation, which may fail.
-        eval = (self/'evaluations').create('Global')
+        eval = (self/'evaluations').create('EvalGlobal')
         eval.property('expr', expression)
         if unit:
             eval.property('unit', unit)
@@ -536,26 +536,28 @@ class Model:
         try:
             log.debug('Trying global evaluation.')
             java = eval.java
-            results = array(java.getData())
+            results = array(java.computeResult())
             if java.isComplex():
-                results = results.astype('complex')
-                results += 1j * array(java.getImagData())
-            eval.remove()
+                results = results[0].astype('complex') + 1j*results[1]
+            else:
+                results = results[0]
             log.info('Finished global evaluation.')
             if inner is None:
                 pass
             elif inner == 'first':
-                results = results[:, 0, :]
+                results = results[0]
             elif inner == 'last':
-                results = results[:, -1, :]
+                results = results[-1]
             else:
                 if isinstance(inner, list):
                     inner = array(inner)
-                results = results[:, inner-1, :]
+                results = results[inner-1]
             return results.squeeze()
         # Move on if this fails. Seems to not be a global expression then.
         except Exception:
             log.debug('Global evaluation failed. Moving on.')
+        finally:
+            eval.remove()
 
         # For particle datasets, create an "EvalPoint" feature.
         if dataset.type() == 'Particle':
