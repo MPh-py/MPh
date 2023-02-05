@@ -320,6 +320,13 @@ def test_evaluate():
     D = model.evaluate(expression, unit, dataset, outer=2)
     assert (D[0]  == Df).all()
     assert (D[-1] == Dl).all()
+    # Test varying time steps in parameter sweep. See issue #112.
+    study = model/'studies'/'sweep'
+    (study/'time-dependent').property('tlist', 'range(0, 0.01/d[1/mm], 1)')
+    model.solve(study)
+    assert len(model.evaluate('t', 's', 'parametric sweep', outer=1)) == 101
+    assert len(model.evaluate('t', 's', 'parametric sweep', outer=2)) == 201
+    assert len(model.evaluate('t', 's', 'parametric sweep', outer=3)) == 301
     # Test evaluation of complex-valued global expressions.
     U = model.evaluate('U')
     z = model.evaluate('U + j*U')
