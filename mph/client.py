@@ -168,6 +168,9 @@ class Client:
             jre  = backend['jvm'].parent.parent
             os.environ['PATH'] = str(jre) + os.pathsep + path
 
+        # This is a stand-alone client if no port given.
+        standalone = host and not port
+
         # Start the Java virtual machine.
         log.debug(f'JPype version is {jpype.__version__}.')
         log.info('Starting Java virtual machine.')
@@ -185,9 +188,6 @@ class Client:
         # Import Comsol client object, a static class, i.e. singleton.
         # See `ModelUtil()` constructor in [1].
         from com.comsol.model.util import ModelUtil as java
-
-        # This is a stand-alone client if no port given.
-        standalone = host and not port
 
         # Possibly initialize the stand-alone client.
         if standalone:
