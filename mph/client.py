@@ -176,7 +176,10 @@ class Client:
         if option('classkit'):
             args += ['-Dcs.ckl']
         log.debug(f'JVM arguments: {args}')
-        jpype.startJVM(*args, classpath=str(root/'apiplugins'/'*'))
+        if standalone:
+            jpype.startJVM(*args, classpath=str(root/'plugins'/'*'))
+        else:
+            jpype.startJVM(*args, classpath=str(root/'apiplugins'/'*'))
         log.info('Java virtual machine has started.')
 
         # Import Comsol client object, a static class, i.e. singleton.
