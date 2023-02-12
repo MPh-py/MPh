@@ -1,5 +1,12 @@
 ﻿# Releases
 
+## 1.2.2
+* [Published](https://pypi.org/project/MPh/1.2.2) on February 12, 2023.
+* Fixes: Not all time steps returned from parametric sweep.
+  ([#112](https://github.com/MPh-py/MPh/issues/112))
+* Fixes: Connect failure with Comsol 6.1 on some Linux distributions.
+  ([#114](https://github.com/MPh-py/MPh/issues/114))
+
 ## 1.2.1
 * [Published](https://pypi.org/project/MPh/1.2.1) on January 2, 2023.
 * Increases default time-out of server shutdown to accommodate Comsol 6.1.
