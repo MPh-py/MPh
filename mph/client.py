@@ -113,7 +113,7 @@ class Client:
     cores are used.
 
     A specific Comsol `version` can be selected if several are
-    installed, for example `version='5.3a'`. Otherwise the latest
+    installed, for example `version='6.0'`. Otherwise the latest
     version is used.
 
     Initializes a stand-alone Comsol session if no `port` number is
@@ -229,7 +229,7 @@ class Client:
         # render them in source-code order, even though that's what we
         # request in the configuration. This might be a bug in Sphinx.
         self.version = backend['name']
-        """Comsol version (e.g., `'5.3a'`) the client is running on."""
+        """Comsol version (e.g., `'6.0'`) the client is running on."""
         self.standalone = standalone
         """Whether this is a stand-alone client or connected to a server."""
         self.port = None

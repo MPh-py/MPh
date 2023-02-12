@@ -2,9 +2,9 @@
 
 ## 1.2.1
 * [Published](https://pypi.org/project/MPh/1.2.1) on January 2, 2023.
-* Increased default time-out of server shutdown to accommodate Comsol 6.1.
+* Increases default time-out of server shutdown to accommodate Comsol 6.1.
   ([#106](https://github.com/MPh-py/MPh/issues/106))
-* Fixed tests that would otherwise fail with Comsol 6.1.
+* Fixes tests that would otherwise fail with Comsol 6.1.
 * Added ["Credits"](https://mph.readthedocs.io/en/1.2/credits.html) page
   to documentation.
 

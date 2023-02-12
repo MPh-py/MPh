@@ -1,10 +1,12 @@
-# Build and test artifacts
+# Build artifacts
 __pycache__/
-.pytest_cache/
-/tests/MPh.ini
 /dist/
 /tools/dist/
 /tools/docs/
+
+# Test artifacts
+.pytest_cache/
+/tests/MPh.ini
 /tools/coverage/
 /.coverage
 /coverage.xml
@@ -14,12 +16,10 @@ __pycache__/
 /.ignore/
 /venv/
 /.venv/
-/local/
-/.local/
 .vscode/
 .idea/
 .spyproject
 
-# Auto-created files
+# OS cruft
 Thumbs.db
 .DS_Store

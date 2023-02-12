@@ -7,8 +7,9 @@ arrays, the corner stone of the scientific Python ecosystem.
 
 For automated testing we rely on [pyTest] and [Coverage.py]. Code
 quality is assured by [Flake8]. Packaging is handled by [Flit]. The
-documentation is rendered by [Sphinx] using the [Furo] theme to style
-the output and the [MyST] parser to process the Markdown input files.
+documentation is rendered by [Sphinx] using the [MyST] parser to
+process the Markdown input and the [Furo] theme to style the HTML
+output.
 
 Thanks to the [contributors] as well as anyone reporting [issues]
 and helping to resolve them.
