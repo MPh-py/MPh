@@ -1,5 +1,12 @@
 ﻿# Releases
 
+## 1.2.3
+* [Published](https://pypi.org/project/MPh/1.2.3) on March 18, 2023.
+* Tells Comsol server process to not save recovery files.
+  ([#128](https://github.com/MPh-py/MPh/issues/128))
+* Allows users to pass extra arguments to the server process.
+  ([#128](https://github.com/MPh-py/MPh/issues/128))
+
 ## 1.2.2
 * [Published](https://pypi.org/project/MPh/1.2.2) on February 12, 2023.
 * Fixes: Not all time steps returned from parametric sweep.
