@@ -35,11 +35,27 @@ class capture_stdout:
     def __enter__(self):
         self.stdout = sys.stdout
         self.buffer = io.StringIO()
-        sys.stdout = self.buffer
+        sys.stdout  = self.buffer
         return self
 
     def __exit__(self, type, value, traceback):
         sys.stdout = self.stdout
+
+    def text(self):
+        return self.buffer.getvalue()
+
+
+class capture_stderr:
+    """Captures text written to `sys.stdout` in this context."""
+
+    def __enter__(self):
+        self.stderr = sys.stderr
+        self.buffer = io.StringIO()
+        sys.stderr  = self.buffer
+        return self
+
+    def __exit__(self, type, value, traceback):
+        sys.stderr = self.stderr
 
     def text(self):
         return self.buffer.getvalue()

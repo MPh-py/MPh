@@ -6,6 +6,8 @@
 import mph
 from fixtures import logging_disabled
 from fixtures import setup_logging
+from fixtures import capture_stderr
+from pytest import raises
 
 
 ########################################
@@ -25,6 +27,8 @@ def teardown_module():
 
 def test_init():
     global server
+    with raises(RuntimeError), capture_stderr():
+        server = mph.Server(arguments=['-version'])
     server = mph.Server(cores=1, port=2035)
     assert server.port == 2035
 

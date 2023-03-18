@@ -69,10 +69,17 @@ class Server:
     A `timeout` can be set for the server start-up. The default is 60
     seconds. `TimeoutError` is raised if the server failed to start
     within that period.
+
+    A list of extra command-line `arguments` can be specified. They are
+    appended to the arguments passed by default when starting the
+    server process, and would thus override them in case of duplicates.
     """
 
     def __init__(self, cores=None, version=None, port=None,
-                       multi=None, timeout=60):
+                       multi=None, timeout=60, arguments=None):
+
+        # Remember user-provided command-line arguments.
+        extra_arguments = arguments if arguments else []
 
         # Start Comsol server as an external process.
         backend = discovery.backend(version)
@@ -96,7 +103,7 @@ class Server:
                 error = f'Invalid value "{multi}" for option "multi".'
                 log.error(error)
                 raise ValueError(error)
-        command = server + arguments
+        command = server + arguments + extra_arguments
         command[0] = str(command[0])   # Required for Python 3.6 and 3.7.
         process = start(command, stdin=PIPE, stdout=PIPE, errors='ignore')
 
