@@ -78,7 +78,7 @@ class Server:
         backend = discovery.backend(version)
         server  = backend['server']
         log.info('Starting external server process.')
-        arguments = ['-login', 'auto', '-graphics']
+        arguments = ['-login', 'auto', '-graphics', '-autosave', 'off']
         if option('classkit'):
             arguments += ['-ckl']
         if cores:
