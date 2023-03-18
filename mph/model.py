@@ -463,7 +463,12 @@ class Model:
         to return the expected results, consider using the Comsol API
         features directly via the `.java` attribute of this class, and
         refer to the "Results" chapter in the Comsol Programming Manual
-        for guidance.
+        for guidance. A known limitation is the evaluation of field
+        variables in time-dependent parameter sweeps, where not all
+        time steps are returned: see issues [#120] and [#119].
+
+        [#119]: https://github.com/MPh-py/MPh/issues/119
+        [#120]: https://github.com/MPh-py/MPh/issues/120
         """
         # Validate input arguments.
         if dataset is not None:
