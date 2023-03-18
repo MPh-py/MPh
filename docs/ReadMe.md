@@ -1,6 +1,5 @@
 ﻿## Documentation source
 
 The documentation hosted on Read-the-Docs is built from this folder.
-As Read-the-Docs does not parse `pyproject.toml`, the requirement
-declaration for a documentation build is duplicated here in
-`requirements.txt`. The start page corresponds to `index.md`.
+The start page corresponds to `index.md`. The build process is
+configured in `.readthedocs.yaml` in the project root folder.
