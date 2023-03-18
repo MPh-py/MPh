@@ -79,7 +79,7 @@ program that sets the environment variable and then runs MPh in a second
 Python subprocess. Clearly, none of this is ideal. Starting the client
 should work without any of these detours.
 
-The function [`mph.start()`](#start) exists to navigate these platform
+The function [`mph.start()`](#start) exists to mitigate these platform
 differences. On Windows, it starts a stand-alone client in order to
 profit from the better start-up performance. On Linux and macOS, it
 creates a local session in client–server mode so that no shell

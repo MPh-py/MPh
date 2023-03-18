@@ -889,7 +889,7 @@ def tree(node, max_depth=None):
     reasonably fast.
     """
 
-    def traverse(node, levels, max_depth=None):
+    def traverse(node, levels, max_depth):
         if max_depth and len(levels) > max_depth:
             return
         markers = ''.join('   ' if last else '│  ' for last in levels[:-1])

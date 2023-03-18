@@ -238,7 +238,7 @@ different studies that have separate solutions and datasets associated
 along with them. When not named specifically, Comsol will use what it
 considers the default dataset. That generally refers to the study
 defined first, here "static". The default dataset is the one resulting
-from that study, here — inconsistently — named "electrostatic".
+from that study, here (inconsistently) named "electrostatic".
 ```pycon
 >>> model.datasets()
 ['electrostatic', 'time-dependent', 'parametric sweep', 'sweep//solution']
@@ -346,8 +346,8 @@ The model was quick enough to solve, and we do like free disk space.
 We would just like to be able to look up modeling details somewhere
 down the line. Comsol also keeps track of the modeling history: a log
 of which features were created, deleted, modified, and in which order.
-Typically, these details are irrelevant. We can prune them by resetting
-that record.
+More often than not, such details are irrelevant. We can prune them by
+resetting that record.
 ```pycon
 >>> model.clear()
 >>> model.reset()

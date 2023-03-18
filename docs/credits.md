@@ -1,9 +1,9 @@
 ﻿# Credits
 
-MPh is essentially a wrapper around [JPype]. All credit to the JPype
-developers for making it possible to easily call Java code directly
-from Python. This ultimately allows us to retrieve results as [NumPy]
-arrays, the corner stone of the scientific Python ecosystem.
+MPh leverages [JPype] to easily call Java code directly from Python.
+All credit to the JPype developers for making that possible. This is
+what allows us to retrieve results as [NumPy] arrays, the corner stone
+of the scientific Python ecosystem.
 
 For automated testing we rely on [pyTest] and [Coverage.py]. Code
 quality is assured by [Flake8]. Packaging is handled by [Flit]. The
