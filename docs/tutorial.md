@@ -27,8 +27,8 @@ the client was Comsol. So let there be a Comsol client.
 >>> client = mph.start(cores=1)
 ```
 
-The {func}`~mph.start` function returns a client object, i.e. an
-instance of the {class}`~mph.Client` class. It takes roughly ten
+The [`start()`](#start) function returns a client object, i.e. an
+instance of the [`Client`](#Client) class. It takes roughly ten
 seconds for the client to spin up.
 
 In this example, the Comsol back-end is instructed to use but one
@@ -51,7 +51,7 @@ model file.
 >>> model = client.load('capacitor.mph')
 ```
 
-It returns a model object, i.e. an instance of the {class}`~mph.Model`
+It returns a model object, i.e. an instance of the [`Model`](#Model)
 class. We will learn what to do with it further down. For now, it was
 simply loaded into memory. We can list the names of all models the
 client currently manages.
@@ -214,12 +214,12 @@ i.e. at zero time or infinite frequency.
 array(1.31948342)
 ```
 
-All results are returned as [NumPy arrays](numpy:numpy.array). Though
+All results are returned as [NumPy arrays](#numpy.array). Though
 "global" evaluations such as this one could be readily cast to a
-regular Python [`float`](python:float).
+regular Python [`float`](#float).
 
 We might also ask where the electric field is strongest and have
-{meth}`~mph.Model.evaluate` perform a "local" evaluation.
+[`evaluate()`](#Model.evaluate) perform a "local" evaluation.
 ```pycon
 >>> (x, y, E) = model.evaluate(['x', 'y', 'es.normE'])
 >>> E.max()
@@ -308,12 +308,12 @@ The first exports the solution of the electrostatic field as text data.
 The second renders an image of the plot featured in the screen-shot at
 the top of the page.
 
-We can trigger all exports at once by calling {meth}`model.export()
-<mph.Model.export>`. Or we can be more selective and just export one:
-`model.export('image')`. The exported files will end up in the same
-folder as the model file itself and have the names that were assigned
-in the model's export nodes. Unless we supply custom file names or
-paths by adding them as the second argument.
+We can trigger all exports at once by calling
+[`model.export()`](#Model.export). Or we can be more selective and just
+export one: `model.export('image')`. The exported files will end up in
+the same folder as the model file itself and have the names that were
+assigned in the model's export nodes. Unless we supply custom file names
+or paths by adding them as the second argument.
 ```pycon
 >>> model.export('image', 'static field.png')
 ```
@@ -356,8 +356,8 @@ that record.
 
 Most functionality that the library offers is covered in this tutorial.
 The few things that were left out can be gleaned from the [API
-documentation](api). A number of use-case examples are showcased in
-chapter [Demonstrations](demonstrations). That chapter and the API
+documentation](#api). A number of use-case examples are showcased in
+chapter "[](#demonstrations)". That chapter and the API
 documentation also explain how to go beyond the scope of this library
 and access the full Comsol API from Python, if needed.
 

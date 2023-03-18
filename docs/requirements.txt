@@ -1,3 +1,3 @@
-sphinx
-furo
-myst-parser
+Sphinx >= 6.1
+Furo
+MyST-parser >= 1.0

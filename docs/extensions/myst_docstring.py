@@ -11,7 +11,7 @@ the document's source parser is and generate output accordingly.
 [domain]: https://www.sphinx-doc.org/en/master/usage/restructuredtext\
 /domains.html
 """
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 from sphinx.ext import autodoc
@@ -154,13 +154,6 @@ class AttributeDocumenter(Documenter, autodoc.AttributeDocumenter):
     pass
 
 
-class NewTypeAttributeDocumenter(
-    Documenter,
-    autodoc.NewTypeAttributeDocumenter
-):
-    pass
-
-
 class PropertyDocumenter(Documenter, autodoc.PropertyDocumenter):
     pass
 
@@ -170,10 +163,6 @@ class ExceptionDocumenter(Documenter, autodoc.ExceptionDocumenter):
 
 
 class DataDocumenter(Documenter, autodoc.DataDocumenter):
-    pass
-
-
-class NewTypeDataDocumenter(Documenter, autodoc.NewTypeDataDocumenter):
     pass
 
 
@@ -194,9 +183,7 @@ def setup(app):
     app.add_autodocumenter(ClassDocumenter, override=True)
     app.add_autodocumenter(MethodDocumenter, override=True)
     app.add_autodocumenter(AttributeDocumenter, override=True)
-    app.add_autodocumenter(NewTypeAttributeDocumenter, override=True)
     app.add_autodocumenter(PropertyDocumenter, override=True)
     app.add_autodocumenter(ExceptionDocumenter, override=True)
     app.add_autodocumenter(DataDocumenter, override=True)
-    app.add_autodocumenter(NewTypeDataDocumenter, override=True)
     return {'version': __version__, 'parallel_read_safe': True}

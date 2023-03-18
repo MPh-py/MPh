@@ -36,9 +36,9 @@ class Node:
     on/off, creating child nodes, or "running" it.
 
     Instances of this class reference a node in the model tree and work
-    similarly to [`Path`](python:pathlib.Path) objects from Python's
-    standard library. They support string concatenation to the right
-    with the division operator in order to reference child nodes:
+    similarly to [`Path`](#pathlib.Path) objects from Python's standard
+    library. They support string concatenation to the right with the
+    division operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -47,7 +47,7 @@ class Node:
     Node('functions/step')
     ```
 
-    Note how the {class}`model <Model>` object also supports the division
+    Note how the [`model`](#Model) object also supports the division
     operator in order to generate node references. As mere references,
     nodes must must not necessarily exist in the model tree:
     ```python
@@ -55,9 +55,9 @@ class Node:
     False
     ```
 
-    In interactive sessions, the convenience function {func}`mph.tree`
-    may prove useful to see the node's branch in the model tree at a
-    glance:
+    In interactive sessions, the convenience function
+    [`mph.tree()`](#tree) may prove useful to see the node's branch in
+    the model tree at a glance:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -77,8 +77,8 @@ class Node:
 
     In rare cases, the node name itself might contain a forward slash,
     such as the dataset `sweep/solution` that happens to exist in the
-    demo model from the [Tutorial](../tutorial.md). These literal
-    forward slashes can be escaped by doubling the character:
+    demo model from the [Tutorial](/tutorial.md). These literal forward
+    slashes can be escaped by doubling the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()
@@ -93,8 +93,8 @@ class Node:
     [`com.comsol.model.ModelEntity`][1] interface. That Java object
     can be accessed directly via the `.java` property. The full Comsol
     functionality is thus available if needed. The convenience function
-    {func}`mph.inspect` is provided for introspection of the Java object
-    in an interactive session.
+    [`mph.inspect()`](#inspect) is provided for introspection of the
+    Java object in an interactive session.
 
     [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html
@@ -857,7 +857,7 @@ def tree(node, max_depth=None):
 
     This is a convenience function to visualize, in an interactive
     Python session, the branch of the model tree underneath a given
-    {class}`node <Node>`. It produces console output such as this:
+    [`node`](#Node). It produces console output such as this:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -878,7 +878,7 @@ def tree(node, max_depth=None):
     Specify `max_depth` to possibly limit the number of lower branches.
 
     Often the node would refer to the model's root in order to inspect
-    the entire model tree. A {class}`Model` object is therefore also
+    the entire model tree. A [`Model`](#Model) object is therefore also
     accepted as a value for `node`.
 
     Note that this function performs poorly in client–server mode, the

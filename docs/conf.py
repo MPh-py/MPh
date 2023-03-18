@@ -64,7 +64,7 @@ html_favicon = 'images/logo.svg'       # browser icon
 # Source parsing
 root_doc = 'index'                     # start page
 nitpicky = True                        # Warn about missing references?
-exclude_patterns = ['ReadMe.md']       # Ignore ReadMe.md in this folder.
+exclude_patterns = ['ReadMe.md']       # Ignore ReadMe in this folder here.
 
 # Code documentation
 autodoc_default_options = {
@@ -74,7 +74,7 @@ autodoc_default_options = {
 autosummary_generate = False           # Stub files are created by hand.
 add_module_names = False               # Don't prefix members with module name.
 
-# Short-hand web links
+# External link targets
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3',    None),
     'numpy':  ('https://numpy.org/doc/stable', None),

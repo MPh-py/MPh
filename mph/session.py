@@ -55,15 +55,15 @@ def start(cores=None, version=None, port=0):
     (on Linux and macOS). The reason for this disparity is that, while
     stand-alone clients are more lightweight and start up much faster,
     support for this mode of operation is limited on Unix-like operating
-    systems, and thus not the default. Find more details in chapter
-    "[Limitations](limitations.md#platform-differences)".
+    systems, and thus not the default. Find more details in section
+    "[](/limitations.md#platform-differences)".
 
-    Returns a {class}`Client` instance. Only one client can be
+    Returns a [`Client`](#Client) instance. Only one client can be
     instantiated at a time. Subsequent calls to `start()` will return
     the client instance created in the first call. In order to work
     around this limitation of the Comsol API, separate Python processes
-    have to be started. Refer to section "[Multiple
-    processes](demonstrations.md#multiple-processes)" for guidance.
+    have to be started. Refer to section
+    "[](/demonstrations.md#multiple-processes)" for guidance.
 
     The number of `cores` (threads) the Comsol instance uses can be
     restricted by specifying a number. Otherwise all available cores

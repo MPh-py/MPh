@@ -93,7 +93,7 @@ class Model:
     Represents a Comsol model.
 
     The class is not intended to be instantiated directly. Rather, the
-    model would be loaded from a file by the [client](mph.Client.md).
+    model would be loaded from a file by the [client](#Client).
 
     Example usage:
     ```python
@@ -112,7 +112,7 @@ class Model:
     model, then evaluate the results. The intention is not *per se*
     to create the model from scratch or to extensively modify its
     structure, though some such functionality is offered here, and
-    even more of it through the {class}`Node` class.
+    even more of it through the [`Node`](#Node) class.
 
     This class is a wrapper around the [`com.comsol.model.Model`][1]
     Java class, which itself is wrapped by JPype and can be accessed
@@ -250,11 +250,11 @@ class Model:
         """
         Returns problems reported by nodes in the model.
 
-        See {meth}`Node.problems` on how problems (error/warning
-        messages and their origin) are returned. First and foremost,
-        this method lets users check if any problems are reported
+        This method lets users check if any problems are reported
         throughout the model by testing `if model.problems():` in
-        application code, to then act accordingly.
+        application code, to then act accordingly. See
+        [`Node.problems()`](#Node.problems) on how problems
+        (error/warning messages and their origin) are returned.
         """
         return (self/None).problems()
 
@@ -446,8 +446,8 @@ class Model:
         `unit` must be given correspondingly. If omitted, default
         units are used. The expression may be a global one, or a scalar
         field, or particle data. Results are returned as (lists of)
-        [NumPy arrays](numpy:ndarray), of whichever dimensionality they
-        may then have.
+        [NumPy arrays](#ndarray), of whichever dimensionality they may
+        then have.
 
         A `dataset` may be specified. Otherwise the expression will
         be evaluated on the default dataset. If the solution stored in

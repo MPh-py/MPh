@@ -10,9 +10,9 @@ but has some limitations.
 
 However, any and all functionality offered by the [Comsol API]
 is accessible via the "pythonized" Java layer provided by [JPype],
-which is exposed as the `.java` attribute of {class}`~mph.Client`
+which is exposed as the `.java` attribute of [`Client`](#Client)
 instances, mapping to Comsol's [`ModelUtil`], as well as of
-{class}`~mph.Model` instances, mapping to Comsol's [`model`].
+[`Model`](#Model) instances, mapping to Comsol's [`model`].
 
 Let's take this Comsol blog post as an example: ["Automate your modeling
 tasks with the Comsol API for use with Java"][blog]. It starts with the
@@ -83,7 +83,7 @@ The advantage of using Python over Java is:
 * You can use Python introspection to understand how Comsol models
   are "created in code". The Comsol documentation explains a lot of
   things, but not every little detail. Either use Python's built-in
-  [`dir()`](python:dir) or call {func}`mph.inspect` to print a
+  [`dir()`](#dir) or call [`mph.inspect()`](#inspect) to print a
   pretty-fied representation of a Java object in the model tree.
 
 To save the model created in the above example, we do:
@@ -106,7 +106,7 @@ found at the bottom.
 
 The example from the previous section can be expressed in much more
 idiomatic Python syntax if we ignore the Java layer and only use
-methods from the {class}`~mph.Model` class.
+methods from the [`Model`](#Model) class.
 ```python
 import mph
 client = mph.start()
@@ -131,18 +131,17 @@ model.property('geometries/geometry/ice block', 'size', ('0.1', '0.2', '0.5'))
 model.build('geometry')
 ```
 
-If {func}`model.create() <mph.Model.create>` receives a reference to a
-node that does not exist yet, such as `geometries/geometry` in the example,
-it creates that node in its parent group, here the built-in group
+If [`model.create()`](#Model.create) receives a reference to a node that
+does not exist yet, such as `geometries/geometry` in the example, it
+creates that node in its parent group, here the built-in group
 `geometries`, and gives it the name we supplied, here `geometry`.
 
 So far, we have used strings to refer to nodes. We could also use the
-{class}`~mph.Node` class, which offers more flexibility and extra
+[`Node`](#Node) class, which offers more flexibility and extra
 functionality. Instances of that class are returned by `model.create()`
 for convenience. But they can be generated from scratch by string
 concatenation with the division operator — much like
-[`pathlib.Path`](python:pathlib.Path) objects from Python's standard
-library.
+[`pathlib.Path`](#pathlib.Path) objects from Python's standard library.
 ```python
 import mph
 client = mph.start()
@@ -180,7 +179,7 @@ a geometry node displayed as "ice/frozen water" in the Comsol GUI
 would be referred to as `geometry/'ice//frozen water'`.
 
 The example model created above ends up having the following model
-[`tree`](mph.tree):
+[`tree`](#mph.tree):
 ```pycon
 >>> mph.tree(model)
 block of ice
@@ -221,7 +220,7 @@ for features to be created.
 
 The demo script [`create_capacitor.py`] shows how to create more
 advanced features than in the simple example here: It generates
-the demonstration model used in the [Tutorial](tutorial) entirely from
+the demonstration model used in the [](#tutorial) entirely from
 Python code.
 
 
@@ -286,33 +285,32 @@ source-code repository is a refined version of the above code. It
 displays more status information and also resets the modeling history.
 
 Note that we could easily go through all sub-directories recursively
-by replacing [`glob`](python:pathlib.Path.glob) with
-[`rglob`](python:pathlib.Path.rglob). However, this should be used
+by replacing [`glob`](#pathlib.Path.glob) with
+[`rglob`](#pathlib.Path.rglob). However, this should be used
 with caution so as to not accidentally modify models in folders that
 were not meant to be included.
 
 
 ## Multiple processes
 
-As explained in [Limitations](limitations), we cannot run more than
+As explained in chapter "[](#limitations)", we cannot run more than
 one Comsol session inside the same Python process. But we *can* start
 multiple Python processes in parallel if we leverage the
-[`multiprocessing`](python:multiprocessing) module from the standard
-library.
+[`multiprocessing`](#multiprocessing) module from the standard library.
 ```python
 import mph
 import multiprocessing
 import queue
 ```
 
-Additionally, we have imported the [`queue`](python:queue) module, also
-from the standard library, though only for the [`queue.Empty`](
-python:queue.Empty) exception type that it provides.
+Additionally, we have imported the [`queue`](#queue) module, also from
+the standard library, though only for the [`queue.Empty`](#queue.Empty)
+exception type that it provides.
 
 In this demonstration, we will solve the model [`capacitor.mph`] from
-the [Tutorial](tutorial). We want to sweep the electrode distance *d*
-and calculate the capacitance *C* for each value of the distance,
-ranging from 0.5 to 5 mm.
+the [](#tutorial). We want to sweep the electrode distance *d* and
+calculate the capacitance *C* for each value of the distance, ranging
+from 0.5 to 5 mm.
 ```python
 values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 ```
@@ -414,13 +412,13 @@ out of order.
 ```
 
 A more advanced implementation may use a class derived from
-[`multiprocessing.Process`](python:multiprocessing.Process) instead
-of a mere function, just to be able to save state. For long-running
-simulations it would make sense to store jobs and results on disk,
-rather than in memory, so that the execution of the queue may be resumed
-after a possible interruption. In that case one may, or may not, find
-the [`subprocess`](python:subprocess) module more convenient for starting
-the external processes. The worker implementation would then be in a
+[`multiprocessing.Process`](#multiprocessing.Process) instead of a mere
+function, just to be able to save state. For long-running simulations,
+it would make sense to store jobs and results on disk, rather than in
+memory, so that the execution of the queue may be resumed after a
+possible interruption. In that case one may, or may not, find the
+[`subprocess`](#subprocess) module more convenient for starting the
+external processes. The worker implementation would then be in a
 separate module that is run as a script.
 
 

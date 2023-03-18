@@ -31,9 +31,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    'Sphinx',
+    'Sphinx >= 6.1',
     'Furo',
-    'MyST-parser',
+    'MyST-parser >= 1.0',
     'pyTest',
     'pyTest-cov',
     'Flake8-pyproject',

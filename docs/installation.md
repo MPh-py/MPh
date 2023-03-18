@@ -25,9 +25,9 @@ Additionally, whichever Comsol installation starts when you run `comsol`
 in the console, will be found as well, even if in a custom location.
 
 If you want to be able to select an alternative Comsol installation via
-MPh's API, by passing the `version` argument to {func}`mph.start`, and
-that Comsol version happens to be installed in a custom location, you
-can [create a symbolic link] in `~/.local` on Linux and in
+MPh's API, by passing the `version` argument to [`mph.start()`](#start),
+and that Comsol version happens to be installed in a custom location,
+you can [create a symbolic link] in `~/.local` on Linux and in
 `~/Application` on macOS. Have it point to the corresponding Comsol
 folder and give the link a name that starts with `comsol`.
 
