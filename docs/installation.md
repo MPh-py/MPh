@@ -1,15 +1,21 @@
 ﻿# Installation
 
+## MPh
+
 MPh is [available on PyPI] and can be readily installed via
 ```
 pip install MPh
 ```
 
-Run `pip uninstall MPh` to remove the package from your system.
-
 Requires [JPype] for the bridge from Python to [Comsol's Java API]
 and [NumPy] for returning (fast) numerical arrays. Pip makes sure the
 two Python dependencies are installed and adds them if missing.
+
+Run `pip uninstall MPh` to remove the package from your system. Note
+that this won't uninstall the dependencies.
+
+
+## Comsol
 
 Comsol, obviously, you need to license and install yourself. [Versions]
 5.5 and newer are expected to work, i.e. have been tested. A separate
@@ -32,9 +38,31 @@ you can [create a symbolic link] in `~/.local` on Linux and in
 folder and give the link a name that starts with `comsol`.
 
 
+## Licenses
+
+Comsol offers a number of [license options] for its products.
+Generally speaking, MPh assumes that, whichever license you use,
+things will "just work". That is, you are able to start the Comsol GUI
+or invoke any of its command-line tools without extra configuration.
+Because Comsol's license management handles that in one way or another.
+This is true for the most common license types: "CPU-locked" and
+"floating network".
+
+For other license types, that may not be the case. For example, the
+"class kit" license requires you to pass the command-line argument
+`-ckl` when starting Comsol. In this particular case, you can tell MPh
+to do the same, by setting [`mph.option('classkit', True)`](#option)
+before calling [`mph.start()`](#start).
+
+Other "unusual" license types may not be supported. If you want to
+change that, [open an issue] and explain how they are different.
+
+
 [available on PyPI]:      https://pypi.python.org/pypi/mph
 [JPype]:                  https://jpype.readthedocs.io
 [Comsol's Java API]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [NumPy]:                  https://numpy.org
 [Versions]:               https://www.comsol.com/release-history
 [create a symbolic link]: https://www.howtogeek.com/287014
+[license options]:        https://www.comsol.com/products/licensing
+[open an issue]:          https://github.com/MPh-py/MPh/issues
