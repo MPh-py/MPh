@@ -564,10 +564,10 @@ def test_feature_path():
 
 
 def test_tag_pattern():
-    node.tag_pattern(['functions']) == 'func'
-    node.tag_pattern(['functions', 'Step']) == 'step*'
-    node.tag_pattern(['non-existing', '?']) == 'non*'
-    node.tag_pattern(['non-existing', 'tag']) == 'tag*'
+    assert node.tag_pattern(['functions'])            == 'func'
+    assert node.tag_pattern(['functions', 'Step'])    == 'step*'
+    assert node.tag_pattern(['non-existing', 'Step']) == 'ste*'
+    assert node.tag_pattern(['non-existing', '?'])    == 'tag*'
 
 
 def test_cast():
