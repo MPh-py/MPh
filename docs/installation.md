@@ -22,6 +22,10 @@ Comsol, obviously, you need to license and install yourself. [Versions]
 successfully tested — at one point or another. A separate Java run-time
 environment is *not* required as Comsol ships with one already built in.
 
+All major platforms are supported: Windows, Linux, macOS. Though
+ARM-based architectures are not, namely Apple Silicon on M1/M2 Macs.
+(Contribute to solving [GitHub issue #80] if you want to remedy that.)
+
 Comsol is expected to be installed in the default location suggested by
 its installer. Though on Windows, custom locations are also supported,
 as the installer stores that information in the central registry, which
@@ -63,6 +67,7 @@ change that, [open an issue] and explain how they are different.
 [Comsol's Java API]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [NumPy]:                  https://numpy.org
 [Versions]:               https://www.comsol.com/release-history
+[GitHub issue #80]:       https://github.com/MPh-py/MPh/issues/80
 [create a symbolic link]: https://www.howtogeek.com/287014
 [license options]:        https://www.comsol.com/products/licensing
 [open an issue]:          https://github.com/MPh-py/MPh/issues
