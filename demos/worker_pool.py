@@ -29,7 +29,7 @@ figure = graph = None
 
 
 def plot_create():
-    """Create the plot figure to be updated as simulations are under way."""
+    """Creates the plot figure to be updated as simulations are under way."""
     global figure, graph
     figure = pyplot.figure(figsize=(4,3), tight_layout=True)
     figure.canvas.manager.set_window_title('Simulation results')
@@ -92,8 +92,8 @@ def boss():
     values = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     for d in values:
         jobs.put(d)
-    results = Queue()
 
+    results = Queue()
     processes = []
     workers = cpu_count()
     for n in range(workers):
