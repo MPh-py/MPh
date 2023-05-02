@@ -18,9 +18,9 @@ that this won't uninstall the dependencies.
 ## Comsol
 
 Comsol, obviously, you need to license and install yourself. [Versions]
-5.5 and newer are expected to work, i.e. have been tested. A separate
-Java run-time environment is *not* required as Comsol ships with one
-already built in.
+5.5 and newer are expected to work. Up to version 6.1, they have been
+successfully tested — at one point or another. A separate Java run-time
+environment is *not* required as Comsol ships with one already built in.
 
 Comsol is expected to be installed in the default location suggested by
 its installer. Though on Windows, custom locations are also supported,

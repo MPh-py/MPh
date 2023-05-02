@@ -53,7 +53,7 @@ def parse(version):
 
     Returns `(name, major, minor, patch, build)` where `name` is a
     string and the rest are numbers. The name is a short-hand based
-    on the major, minor, and patch version numbers, e.g. `'6.0'`.
+    on the major, minor, and patch version numbers, e.g. `'5.3a'`.
 
     Raises `ValueError` if the input string deviates from the expected
     format, i.e., the format in which the Comsol executable returns
