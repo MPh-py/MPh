@@ -25,6 +25,9 @@ environment is *not* required as Comsol ships with one already built in.
 All major platforms are supported: Windows, Linux, macOS. Though
 ARM-based architectures are not, namely Apple Silicon on M1/M2 Macs.
 (Contribute to solving [GitHub issue #80] if you want to remedy that.)
+Linux support has only been rigorously tested on Ubuntu. Occasional
+problems may occur on other distributions. Specifically with image
+exports, for which Comsol depends on external libraries.
 
 Comsol is expected to be installed in the default location suggested by
 its installer. Though on Windows, custom locations are also supported,
