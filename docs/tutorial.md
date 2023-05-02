@@ -24,22 +24,22 @@ In the beginning was the client. And the client was with Comsol. And
 the client was Comsol. So let there be a Comsol client.
 ```pycon
 >>> import mph
->>> client = mph.start(cores=1)
+>>> client = mph.start()
 ```
 
 The [`start()`](#start) function returns a client object, i.e. an
 instance of the [`Client`](#Client) class. It takes roughly ten
 seconds for the client to spin up.
 
-In this example, the Comsol back-end is instructed to use but one
-processor core. If the optional parameter is omitted, it will use all
-cores available on the machine. Restricting this resource is useful
-when other simulations are running in parallel. Note, however, that
-within the same Java and therefore Python session, only one Comsol
-client can run at a time. So the `Client` class cannot be instantiated
-more than once. If you wish to work around this limitation imposed by
-Comsol, and realize the full parallelization potential of your
-simulation hardware, you will need to [run multiple Python
+We could instantiate the client with `client = mph.start(cores=1)`
+instead to have it use but one processor core. Restricting this
+resource is useful when other simulations are running in parallel
+on the same machine. Note, however, that within the same Java and
+therefore Python session, only one Comsol client can run at a time.
+Therefore, the `Client` class cannot be instantiated more than once.
+If you wish to work around this limitation imposed by Comsol, and
+realize the full parallelization potential of your compute hardware,
+you will need to [run multiple Python
 processes](demonstrations.md#multiple-processes), one for each client.
 
 
