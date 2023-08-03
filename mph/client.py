@@ -314,15 +314,19 @@ class Client:
     # Interaction                      #
     ####################################
 
-    def load(self, file):
+    def load(self, file, copy=False):
         """Loads a model from the given `file` and returns it."""
         file = Path(file).resolve()
         if self.caching() and file in self.files():
             log.info(f'Retrieving "{file.name}" from cache.')
             return self.models()[self.files().index(file)]
         tag = self.java.uniquetag('model')
-        log.info(f'Loading model "{file.name}".')
-        model = Model(self.java.load(tag, str(file)))
+        if copy:
+            log.info(f'Loading model "{file.name}" in read only mode.')
+            model = Model(self.java.loadCopy(tag, str(file)))
+        else:
+            log.info(f'Loading model "{file.name}".')
+            model = Model(self.java.load(tag, str(file)))
         log.info('Finished loading model.')
         return model
 
