@@ -142,6 +142,7 @@ class Model:
             java = parent
         self.java = java
         """Java object that this instance is wrapped around."""
+        self.readonly = False
 
     def __str__(self):
         return self.name()
@@ -185,6 +186,10 @@ class Model:
         """Returns the absolute path to the file the model was loaded from."""
         return Path(str(self.java.getFilePath())).resolve()
 
+    def locked(self):
+        """Returns whether a lock file exists for the model file"""
+        return Path(str(self.file()) + '.lock').exists()
+    
     def version(self):
         """Returns the Comsol version the model was last saved with."""
         version = str(self.java.getComsolVersion())
@@ -926,6 +931,14 @@ class Model:
         # Use model name if no file name specified.
         if path is None:
             file = self.file()
+            if self.readonly:
+                error = f'Model loaded as read only, please specify a new filename.'
+                log.error(error)
+                raise ValueError(error)
+            elif self.locked():
+                error = f'Can not save model as "{file.name}", as it is locked.'
+                log.error(error)
+                raise ValueError(error)
             if format == 'Comsol':
                 if file.is_file():
                     log.info(f'Saving model "{self}".')
@@ -947,11 +960,23 @@ class Model:
                 file = (path/self.name()).with_suffix(f'.{type}')
             else:
                 file = path.with_suffix(f'.{type}')
+            if self.readonly and file == self.file:
+                error = f'Model loaded as read only, please specify a new filename.'
+                log.error(error)
+                raise ValueError(error)
+            elif self.locked() and file == self.file:
+                error = f'Can not save model as "{file.name}", as it is locked.'
+                log.error(error)
+                raise ValueError(error)
+
             log.info(f'Saving model as "{file.name}".')
             if format == 'Comsol':
                 self.java.save(str(file))
             else:
                 self.java.save(str(file), type)
+
+        # always make sure to unset self.readonly after a successfully save
+        self.readonly = False
         log.info('Finished saving model.')
 
     ####################################

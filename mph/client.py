@@ -315,7 +315,11 @@ class Client:
     ####################################
 
     def load(self, file, copy=False):
-        """Loads a model from the given `file` and returns it."""
+        """
+        Loads a model from the given `file` and returns it.
+        
+        The model can be loaded as readonly by setting the copy flag.
+        """
         file = Path(file).resolve()
         if self.caching() and file in self.files():
             log.info(f'Retrieving "{file.name}" from cache.')
@@ -324,6 +328,7 @@ class Client:
         if copy:
             log.info(f'Loading model "{file.name}" in read only mode.')
             model = Model(self.java.loadCopy(tag, str(file)))
+            model.readonly = True
         else:
             log.info(f'Loading model "{file.name}".')
             model = Model(self.java.load(tag, str(file)))
