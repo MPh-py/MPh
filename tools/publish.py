@@ -1,9 +1,15 @@
-﻿"""Publishes the package on PyPI."""
+﻿"""Builds the wheel and publishes it on PyPI."""
 
 from subprocess import run
 from pathlib import Path
+from shutil import rmtree
 
 root = Path(__file__).resolve().parent.parent
-process = run(['flit', 'publish', '--format', 'wheel'], cwd=root)
-if process.returncode:
-    raise RuntimeError('Error while publishing on PyPI.')
+run(['flit', 'publish', '--format', 'wheel'], cwd=root, check=True)
+
+source = root/'dist'
+target = root/'build'/'wheel'
+if target.exists():
+    rmtree(target)
+target.parent.mkdir(exist_ok=True, parents=True)
+source.rename(target)

@@ -1,13 +1,11 @@
 # Build artifacts
 __pycache__/
+/build/
 /dist/
-/tools/dist/
-/tools/docs/
 
 # Test artifacts
 .pytest_cache/
 /tests/MPh.ini
-/tools/coverage/
 /.coverage
 /coverage.xml
 
