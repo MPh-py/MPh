@@ -1,11 +1,11 @@
 ﻿## Automation tools
 
-These are simple helper scripts to run the various dev tools, such as
-pyTest or Flit. See the doc-strings of the individual scripts for
-details.
+These are simple helper scripts to run the various development tools, such
+as pyTest, Flit, and Sphinx. See the doc-strings of the individual scripts
+for details.
 
 
-### Local development
+### Running tests
 
 MPh can be used and tested from source, provided NumPy, JPype, and pyTest
 are already installed. That is, the following runs the test suite for what
@@ -21,6 +21,9 @@ then `import mph` will find the subfolder `mph` and run the code from
 there, possibly ignoring a different MPh version installed in the
 Python environment.
 
+
+### Local development
+
 If you also want to build the documentation locally, or render the
 code-coverage report, or build the wheel, it's best to create a dedicated
 virtual environment:
@@ -33,7 +36,9 @@ pip install --editable .[dev]
 
 This installs MPh and all its development dependencies inside that
 new environment, in the newly created `venv` sub-folder. The `dev`
-dependencies are defined in `pyproject.toml`.
+dependencies are defined in `pyproject.toml`. The `--editable` flag makes
+it so that all code changes take immediate effect without re-installing
+the package.
 
 
 ### Releasing a new version
@@ -51,10 +56,10 @@ dependencies are defined in `pyproject.toml`.
 * Run code coverage: `python tools/coverage.py`
 * Push to GitHub:
 ```console
-    git push origin main
-    git push --tags
-    git push origin stable
-    git push origin 1.2
+git push origin main
+git push --tags
+git push origin stable
+git push origin 1.2
 ```
 * Upload coverage report: `python tools/codecov.py`
 * Create new release on GitHub and add release notes.

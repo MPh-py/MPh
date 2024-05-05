@@ -7,7 +7,7 @@ It also expects the CodeCov upload token for this project to be set as
 an environment variable.
 
 CodeCov does not accept Coverage.py's standard report format, i.e. the
-`.coverage` file. It must be converted to XML format before upload.
+`.coverage` file. It must be converted to XML format beforehand.
 """
 
 from subprocess import run
@@ -20,5 +20,8 @@ if not token:
     raise RuntimeError('CodeCov upload token not set in environment.')
 
 root = Path(__file__).resolve().parent.parent
-run(['coverage', 'xml'], cwd=root)
-run(['codecov', '--file', 'coverage.xml', '--token', token], cwd=root)
+run(['coverage', 'xml'], cwd=root, check=True)
+run(
+    ['codecov', '--file', 'coverage.xml', '--token', token],
+    cwd=root, check=True,
+)
