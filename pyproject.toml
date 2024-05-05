@@ -30,14 +30,27 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    'Sphinx >= 6.1',
-    'Furo',
-    'MyST-parser >= 1.0',
+build = [
+    'Flit',
+]
+test = [
     'pyTest',
     'pyTest-cov',
     'Flake8-pyproject',
+]
+docs = [
+    'Sphinx >= 6.1',
+    'Furo',
+    'MyST-parser >= 1.0',
+]
+dev = [                       # Must always be the union of all other extras.
     'Flit',
+    'pyTest',
+    'pyTest-cov',
+    'Flake8-pyproject',
+    'Sphinx >= 6.1',
+    'Furo',
+    'MyST-parser >= 1.0',
 ]
 
 [project.urls]
