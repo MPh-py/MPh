@@ -210,7 +210,10 @@ class Node:
             return self.model.java
         name = self.name()
         if self.is_group():
-            return eval(self.groups.get(name))
+            if name in self.groups:
+                return eval(self.groups[name])
+            else:
+                return None
         parent = self.parent()
         java = parent.java
         if not java:
@@ -225,6 +228,20 @@ class Node:
             member = container.get(tag)
             if name == escape(member.label()):
                 return member
+
+    def java_if_exists(self):
+        # Returns `self.java` if the node exists, raises an error otherwise.
+        #
+        # This helper function was introduced to reduce code repetition
+        # in the methods that follow. We should probably just straight up
+        # raise the error when `self.java` is accessed. However, that
+        # might break user code, so can only be done in a major release.
+        java = self.java
+        if not java:
+            error = f'Node "{self}" does not exist in model tree.'
+            log.error(error)
+            raise LookupError(error)
+        return java
 
     ####################################
     # Navigation                       #
@@ -292,11 +309,7 @@ class Node:
 
     def comment(self, text=None):
         """Returns or sets the comment attached to the node."""
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         if text is None:
             return str(java.comments())
         else:
@@ -376,11 +389,7 @@ class Node:
             error = 'Cannot change tag of built-in group.'
             log.error(error)
             raise PermissionError(error)
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         java.tag(tag)
 
     def property(self, name, value=None):
@@ -390,10 +399,11 @@ class Node:
         If no `value` is given, returns the value of property `name`.
         Otherwise sets the property to the given value.
         """
+        java = self.java_if_exists()
         if value is None:
-            return get(self.java, name)
+            return get(java, name)
         else:
-            self.java.set(name, cast(value))
+            java.set(name, cast(value))
 
     def properties(self):
         """
@@ -402,7 +412,7 @@ class Node:
         In the Comsol GUI, properties are displayed in the Settings tab
         of the model node (not to be confused with the Properties tab).
         """
-        java = self.java
+        java = self.java_if_exists()
         if not hasattr(java, 'properties'):
             return {}
         names = sorted(str(name) for name in java.properties())
@@ -425,11 +435,7 @@ class Node:
         Raises `TypeError` if the node does not have a selection and
         is not itself an "explicit" selection.
         """
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
             error = "Use the Java layer to change a geometry node's selection."
             log.error(error)
@@ -480,11 +486,7 @@ class Node:
         their Java methods directly. Raises `TypeError` if the node
         does not have a selection and is not itself a selection.
         """
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
             error = "Use the Java layer to query a geometry node's selection."
             log.error(error)
@@ -520,11 +522,7 @@ class Node:
         regardless of its current state. Pass `'disable'` or `'off'`
         to disable it.
         """
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         if action == 'flip':
             java.active(not java.isActive())
         elif action in ('enable', 'on', 'activate'):
@@ -534,11 +532,7 @@ class Node:
 
     def run(self):
         """Performs the "run" action if the node implements it."""
-        java = self.java
-        if not java:
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         if not hasattr(java, 'run'):
             error = f'Node "{self}" does not implement "run" operation.'
             log.error(error)
