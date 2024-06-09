@@ -8,6 +8,8 @@ import models
 from fixtures import logging_disabled
 from fixtures import warnings_disabled
 from fixtures import setup_logging
+from numpy import isclose
+from numpy.testing import assert_allclose
 from pytest import raises
 from pathlib import Path
 from platform import system
@@ -271,55 +273,54 @@ def test_outer():
 def test_evaluate():
     # Test global evaluation of stationary solution.
     C = model.evaluate('2*es.intWe/U^2', 'pF')
-    assert abs(C - 0.74) < 0.01
+    assert isclose(C, 0.73678541)
     # Test field evaluation of stationary solution.
     (x, y, E) = model.evaluate(['x', 'y', 'es.normE'], ['mm', 'mm', 'V/m'])
     (Emax, xmax, ymax) = (E.max(), x[E.argmax()], y[E.argmax()])
-    assert abs(Emax - 818) < 5
-    assert abs(abs(xmax) - 1.04) < 0.01
-    assert abs(abs(ymax) - 4.27) < 0.01
+    assert isclose(Emax, 818.24912)
+    assert isclose(xmax, -1.035589174)
+    assert isclose(ymax, -4.2644083186)
     # Test global evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', '2*ec.intWe/U^2', 'pF')
-    Cf = model.evaluate(expression, unit, dataset, 'first')
-    assert abs(Cf - 0.74) < 0.01
-    Cl = model.evaluate(expression, unit, dataset, 'last')
-    assert abs(Cl - 0.83) < 0.01
+    C_first = model.evaluate(expression, unit, dataset, 'first')
+    assert isclose(C_first, 0.73678541)
+    C_last = model.evaluate(expression, unit, dataset, 'last')
+    assert isclose(C_last, 0.82870712)
     C = model.evaluate(expression, unit, dataset)
-    assert C[0] == Cf
-    assert C[-1] == Cl
+    assert isclose(C[0], C_first)
+    assert isclose(C[-1], C_last)
     C = model.evaluate(expression, unit, dataset, inner=[1, 101])
-    assert C[0] == Cf
-    assert C[1] == Cl
+    assert isclose(C[0], C_first)
+    assert isclose(C[1], C_last)
     # Test field evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
-    Df = model.evaluate(expression, unit, dataset, 'first')
-    assert abs(Df.max() -  7.2) < 0.1
-    Dl = model.evaluate(expression, unit, dataset, 'last')
-    assert abs(Dl.max() - 10.8) < 0.1
+    D_first = model.evaluate(expression, unit, dataset, 'first')
+    assert isclose(D_first.max(), 7.24581146)
+    D_last = model.evaluate(expression, unit, dataset, 'last')
+    assert isclose(D_last.max(), 10.86515646)
     D = model.evaluate(expression, unit, dataset)
-    assert (D[0]  == Df).all()
-    assert (D[-1] == Dl).all()
+    assert_allclose(D[0], D_first)
+    assert_allclose(D[-1], D_last)
     D = model.evaluate(expression, unit, dataset, inner=[1, 101])
-    assert (D[0] == Df).all()
-    assert (D[1] == Dl).all()
+    assert_allclose(D[0], D_first)
+    assert_allclose(D[1], D_last)
     # Test global evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', '2*ec.intWe/U^2', 'pF')
-    (indices, values) = model.outer(dataset)
     C1 = model.evaluate(expression, unit, dataset, 'first', 1)
-    assert abs(C1 - 1.32) < 0.01
+    assert isclose(C1, 1.31947804)
     C2 = model.evaluate(expression, unit, dataset, 'first', 2)
-    assert abs(C2 - 0.74) < 0.01
+    assert isclose(C2, 0.73678541)
     C3 = model.evaluate(expression, unit, dataset, 'first', 3)
-    assert abs(C3 - 0.53) < 0.01
+    assert isclose(C3, 0.52865512)
     # Test field evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', 'ec.normD', 'nC/m^2')
-    Df = model.evaluate(expression, unit, dataset, 'first', 2)
-    assert abs(Df.max() -  7.2) < 0.1
-    Dl = model.evaluate(expression, unit, dataset, 'last', 2)
-    assert abs(Dl.max() - 10.8) < 0.1
+    D_first = model.evaluate(expression, unit, dataset, 'first', 2)
+    assert isclose(D_first.max(), 7.24581146)
+    D_last = model.evaluate(expression, unit, dataset, 'last', 2)
+    assert isclose(D_last.max(), 10.86515646)
     D = model.evaluate(expression, unit, dataset, outer=2)
-    assert (D[0]  == Df).all()
-    assert (D[-1] == Dl).all()
+    assert_allclose(D[0], D_first)
+    assert_allclose(D[-1], D_last)
     # Test varying time steps in parameter sweep. See issue #112.
     study = model/'studies'/'sweep'
     (study/'time-dependent').property('tlist', 'range(0, 0.01/d[1/mm], 1)')
@@ -450,11 +451,11 @@ def test_property():
     assert model.property('functions/step', 'funcname') == 'renamed'
     model.property('functions/step', 'funcname', 'step')
     assert model.property('functions/step', 'funcname') == 'step'
-    assert model.property('functions/step', 'from') == 0.0
+    assert isclose(model.property('functions/step', 'from'), 0.0)
     model.property('functions/step', 'from', 0.1)
-    assert model.property('functions/step', 'from') == 0.1
+    assert isclose(model.property('functions/step', 'from'), 0.1)
     model.property('functions/step', 'from', 0.0)
-    assert model.property('functions/step', 'from') == 0.0
+    assert isclose(model.property('functions/step', 'from'), 0.0)
 
 
 def test_properties():
