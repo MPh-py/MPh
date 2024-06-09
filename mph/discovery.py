@@ -410,12 +410,19 @@ def backend(version=None):
     """
     backends = find_backends()
     if not backends:
-        error = 'Could not locate any Comsol installation.'
+        error = 'Could not find a supported Comsol installation.'
         log.error(error)
         raise RuntimeError(error)
     if version is None:
-        numbers = [(backend['major'], backend['minor'], backend['patch'],
-                   backend['build']) for backend in backends]
+        numbers = [
+            (
+                backend['major'],
+                backend['minor'],
+                backend['patch'],
+                backend['build'],
+            )
+            for backend in backends
+        ]
         return backends[numbers.index(max(numbers))]
     else:
         names = [backend['name'] for backend in backends]
