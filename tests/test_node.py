@@ -395,6 +395,15 @@ def test_property():
     assert (material/'Basic').property('relpermittivity') == ['1']
     (material/'Basic').property('relpermittivity', 2)
     assert (material/'Basic').property('relpermittivity') == ['2']
+    # Test proper error handling.
+    (root/'studies/static/stationary').property('useinitsol')
+    with logging_disabled():
+        with raises(LookupError):
+            (root/'studies/static/stationar').property('useinitsol')
+        with raises(LookupError):
+            (root/'studies/stati/stationary').property('useinitsol')
+        with raises(LookupError):
+            (root/'studie/static/stationary').property('useinitsol')
     # Read and write back every node property in the model.
     if not client.port:
         # Skip test in client-server mode where it's excruciatingly slow.
