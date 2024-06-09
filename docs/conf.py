@@ -15,39 +15,23 @@ Markdown parser is MyST. Doc-string support for MyST is added by custom
 Sphinx extensions.
 """
 
-########################################
-# Dependencies                         #
-########################################
+from mph import meta
+from pathlib import Path
+import sys
 
-import sys                             # system specifics
-from pathlib import Path               # file-system path
-from unittest.mock import MagicMock    # mock imports
 
-# Modify module search path.
-here = Path(__file__).absolute().parent
-sys.path.insert(0, str(here.parent))
+# Add custom Sphinx extensions to module search path.
+here = Path(__file__).parent
 sys.path.insert(0, str(here/'extensions'))
 
 # Load Sphinx extensions.
 extensions = [
-    'myst_parser',                     # Accept Markdown as input.
-    'myst_docstring',                  # Get documentation from doc-strings.
-    'myst_summary',                    # Create summaries automatically.
-    'sphinx.ext.viewcode',             # Include highlighted source code.
-    'sphinx.ext.intersphinx',          # Support short-hand web links.
+    'myst_parser',                     # Markdown support in documents
+    'myst_docstring',                  # Markdown support in doc-strings
+    'myst_summary',                    # Markdown support in summary tables
+    'sphinx.ext.viewcode',             # additional [source] links
+    'sphinx.ext.intersphinx',          # inter-project cross-references
 ]
-
-# Mock external dependencies so they are not required at build time.
-for package in ('jpype', 'jpype.imports', 'numpy'):
-    sys.modules[package] = MagicMock()
-
-# Make the package's meta data available.
-from mph import meta
-
-
-########################################
-# Configuration                        #
-########################################
 
 # Meta information
 project   = meta.title
@@ -72,7 +56,7 @@ autodoc_default_options = {
     'member-order': 'bysource',        # Order members as in source file.
 }
 autosummary_generate = False           # Stub files are created by hand.
-add_module_names = False               # Don't prefix members with module name.
+add_module_names = False               # Drop module prefix from signatures.
 
 # External link targets
 intersphinx_mapping = {
