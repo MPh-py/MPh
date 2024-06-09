@@ -13,9 +13,6 @@ keywords = [
 ]
 classifiers = [
     'Development Status :: 5 - Production/Stable',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: POSIX :: Linux',
-    'Operating System :: MacOS :: MacOS X',
     'Topic :: Scientific/Engineering :: Physics',
     'Intended Audience :: Science/Research',
     'Natural Language :: English',
