@@ -271,7 +271,7 @@ def find_backends():
     for comsol in executables:
         log.debug(f'Checking executable "{comsol}".')
 
-        # The Java bridge is configured in a file named "comsol.ini".
+        # The Java VM is configured in a file named "comsol.ini".
         # That file is usually in the same folder as the Comsol executable.
         # Though on Linux and macOS, the executable may also be a script
         # that sits one folder up (for some reason).
@@ -283,9 +283,9 @@ def find_backends():
             if ini.is_file():
                 break
         else:
-            log.debug(f'Did not find Java bridge configuration "{ini.name}".')
+            log.debug(f'Did not find Java VM configuration "{ini.name}".')
             continue
-        log.debug(f'Found Java bridge configuration "{ini}".')
+        log.debug(f'Found Java VM configuration "{ini}".')
 
         # Make sure that parent folder has name of a valid architecture.
         arch = ini.parent.name
@@ -310,7 +310,7 @@ def find_backends():
         else:
             server = [comsol, 'mphserver']
 
-        # Parse Java bridge configuration.
+        # Parse Java VM configuration.
         with ini.open(encoding='UTF-8') as stream:
             jvm_on_next_line = False
             for line in stream:
