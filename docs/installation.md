@@ -71,6 +71,6 @@ change that, [open an issue] and explain how they are different.
 [NumPy]:                  https://numpy.org
 [Versions]:               https://www.comsol.com/release-history
 [GitHub issue #80]:       https://github.com/MPh-py/MPh/issues/80
-[create a symbolic link]: https://www.howtogeek.com/287014
+[create a symbolic link]: https://www.howtogeek.com/287014/how-to-create-and-use-symbolic-links-aka-symlinks-on-linux/
 [license options]:        https://www.comsol.com/products/licensing
 [open an issue]:          https://github.com/MPh-py/MPh/issues
