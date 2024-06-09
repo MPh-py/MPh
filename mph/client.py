@@ -146,7 +146,7 @@ class Client:
 
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
-            error = 'Only one client can be instantiated at a time.'
+            error = 'Only one client can be instantiated per Python session.'
             log.error(error)
             raise NotImplementedError(error)
 
