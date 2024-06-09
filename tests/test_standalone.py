@@ -29,7 +29,12 @@ def test_start():
     assert 'empty' not in client.names()
     assert model not in client.models()
     with logging_disabled():
-        with raises(Exception, match='Model node X is removed'):
+        contains_text = (
+            '(Model node X is removed)'                 # Comsol 6.1 or below
+            '|'
+            '(object which is no longer in the model)'  # Comsol 6.2+
+        )
+        with raises(Exception, match=contains_text):
             model.java.component()
         with raises(ValueError):
             client.remove(model)
