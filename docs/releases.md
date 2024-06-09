@@ -1,5 +1,10 @@
 ﻿# Releases
 
+## 1.2.4
+* [Published](https://pypi.org/project/MPh/1.2.4) on June 9, 2024.
+* Improves the phrasing of certain error messages.
+  ([#177](https://github.com/MPh-py/MPh/issues/177))
+
 ## 1.2.3
 * [Published](https://pypi.org/project/MPh/1.2.3) on March 18, 2023.
 * Tells Comsol server process to not save recovery files.
