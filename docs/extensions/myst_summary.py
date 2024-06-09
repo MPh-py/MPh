@@ -1,16 +1,20 @@
-"""
+﻿"""
 MyST-compatible drop-in replacement for Sphinx's Autosummary extension
 
-This extension monkey-patches Autosummary's generation of [domain]
-references (roles) so that the syntax is what the MyST Markdown parser
-expects, instead of Sphinx's own reStructuredText parser.
+This extension overrides Autosummary's generation of [domain] roles
+(cross-references) so that the syntax is Markdown, just as the MyST
+parser expects, and not reStructuredText, as intended for Sphinx's
+built-in parser.
 
 Needless to say, this is a hack. Autosummary should be aware of the
 the document parser it creates content for, but it's not. That would
 require substantial upstream changes.
 
+© 2022 John Hennig, [MIT license]
+
 [domain]: https://www.sphinx-doc.org/en/master/usage/restructuredtext\
 /domains.html
+[MIT license]: https://www.tldrlegal.com/license/mit-license
 """
 __version__ = '0.2.0'
 
@@ -61,8 +65,8 @@ def setup(app):
 
     Sphinx calls this function if the user named this extension in
     `conf.py`. We then set up the Autosummary extension that ships
-    with Sphinx and install our hook to convert Sphinx directives
-    to MyST directives.
+    with Sphinx and install our hook to possibly convert Sphinx
+    directives to MyST directives.
     """
     app.setup_extension('sphinx.ext.autosummary')
     app.add_directive('autosummary', Autosummary, override=True)

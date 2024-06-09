@@ -5,13 +5,18 @@ This extension overrides Autodoc's generation of [domain] directives
 so that the syntax is what the MyST Markdown parser expects, instead of
 Sphinx's own reStructuredText parser.
 
-Note that this is very much a hack. Ideally, Autodoc would query what
-the document's source parser is and generate output accordingly.
+Note that this is very much a hack, and that we simply assume that all
+doc-strings are written in MyST-flavored Markdown. However, unless your
+mileage differs, this here does make all of Sphinx's features available
+in Markdown, e.g. cross-references to other parts of the documentation.
+
+© 2022–2023 John Hennig, [MIT license]
 
 [domain]: https://www.sphinx-doc.org/en/master/usage/restructuredtext\
 /domains.html
+[MIT license]: https://www.tldrlegal.com/license/mit-license
 """
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 
 from sphinx.ext import autodoc
@@ -22,113 +27,110 @@ class Documenter(autodoc.Documenter):
     Mix-in to override content generation by `Documenter` class.
 
     All of Autodoc's documenter classes (for modules, functions, etc.)
-    derive from the `Documenter` base class. Two methods are important:
+    derive from the `Documenter` base class. Three of its methods are
+    important:
     * The one that adds the directive header, i.e. opens the directive.
     * The one that generates the content, which includes the actual
       doc-string as well as documentation for all child elements, such
       as methods of a class.
+    * The one methods that adds lines of generated mark-up.
 
-    Problem is, reStructuredText directives need never be explicitly
-    closed, as scopes are designated by indentation. With MyST, however,
-    we have to do just that: add an extra line to close a directive
-    previously opened, as indentation itself is not significant per se.
+    We assume that all doc-strings are written in Markdown. All we
+    need to do then is convert the reStructuredText that Autodoc
+    generates to MyST-flavored Markdown. There isn't much syntax
+    complexity to worry about (or so we presume), so we'll just search
+    and replace the syntax of domain directives that Autodoc adds.
 
-    To make our life at least somewhat easier, we also use an
-    undocumented feature of MyST, or perhaps Markdown-it: We can nest
-    directives delimited by exactly three back-ticks, ` ``` `, inside
-    directives delimited by three tildes, `~~~`. Then indentation *is*
-    significant, though we still have to close the directive's scope.
-    But at least we don't have to add extra back-ticks on enclosing
-    scopes, just so inner scopes don't mess with the delimitation,
-    which we would have to do otherwise.
+    A complication, however, is that in reStructuredText the scope of
+    directives is designated by indentation, whereas in Markdown
+    directives are delimited by enclosing fences (triple back-ticks).
+    These would typically be nested by adding extra back-ticks at each
+    nesting level, for example four back-ticks for the outer directive
+    when a directive delimited with the regular three back-ticks is
+    nested inside.
+
+    To make our life easier, we use a little known feature of MyST, or
+    perhaps Markdown-it: We may also nest directives delimited by
+    exactly three back-ticks, ` ``` `, inside directives delimited by
+    three tildes, `~~~`. Then indentation *is* significant, and we
+    don't have to keep track of additional back-ticks. Though we
+    still need to close the directive's scope.
 
     Ideally, Autodoc would be aware of such structural syntax
     requirements. But it's not. And it doesn't call out to the parser
     anyway, it simply generates reStructuredText no matter what. A
-    robust solution would make Autodoc parser-aware, upstream, i.e.
-    in Sphinx.
+    robust solution would either make Autodoc parser-aware or, better,
+    not have it generate intermediate mark-up at all and instead
+    produce Docutils nodes like Sphinx extensions should actually do.
     """
 
     def add_directive_header(self, sig):
         """Adds the directive header and options."""
 
-        # Defer to super method when not parsing Markdown.
-        # Hack. There must be a better way to find out if MyST is the parser.
-        parser_is_myst = self.directive.state.__module__.startswith('myst')
-        if not parser_is_myst:
-            super().add_directive_header(sig)
-            return
-
-        # This block is unchanged, just copied from the super method.
+        # Remembered we opened this directive.
+        # We add our own "stack" of directives to keep track of them.
+        if not hasattr(self, 'directives'):
+            self.directives = []
         domain = getattr(self, 'domain', 'py')
         directive = getattr(self, 'directivetype', self.objtype)
         name = self.format_name()
-        sourcename = self.get_sourcename()
+        self.directives.append( (domain, directive, name) )
 
-        # Modify the directive prefix.
-        markers = '```' if self.indent else '~~~'
-        prefix  = markers + '{' + f'{domain}:{directive}' + '} '
-
-        # Remember we opened this directive.
-        if not hasattr(self, 'directives'):
-            self.directives = []
-        self.directives.append((domain, directive, name, markers))
-
-        # Bail out if we are more than one level deep, which is unexpected.
-        if len(self.directives) > 1:
-            raise RuntimeError('MyST-Docstring cannot handle this project.')
-
-        # Open the directive. (This block is unchanged.)
-        for i, sig_line in enumerate(sig.split("\n")):
-            self.add_line('%s%s%s' % (prefix, name, sig_line), sourcename)
-            if i == 0:
-                prefix = " " * len(prefix)
-        if self.options.noindex:
-            self.add_line('   :noindex:', sourcename)
-        if self.objpath:
-            self.add_line('   :module: %s' % self.modname, sourcename)
+        # Let super method render directive header in reStructuredText.
+        # It will call `add_line()` repeatedly, which we intercept there
+        # to convert to Markdown after the fact.
+        super().add_directive_header(sig)
 
         # Close directive immediately if it is a module.
-        # This approach, of doing that right here, will break certain
-        # corners cases, see `ModuleDocumenter.add_directive_header()`
-        # in `sphinx.ext.autodoc.__init__.py`.
+        # Module directives are a special case in that way.
         if (domain, directive) == ('py', 'module'):
             self.directives.pop()
-            self.add_line(markers, sourcename)
+            self.add_line('~~~', self.get_sourcename())
 
     def generate(self, **arguments):
         """Generates documentation for the object and its members."""
 
-        # Defer to super method when not parsing Markdown.
-        # Hack. There must be a better way to find out if MyST is the parser.
-        parser_is_myst = self.directive.state.__module__.startswith('myst')
-        if not parser_is_myst:
-            super().generate(**arguments)
-
-        # Generate content as usual, but reset indent afterwards.
-        indent = self.indent
+        # Let super method render directive body.
         super().generate(**arguments)
-        self.indent = indent
 
-        # Close directive if it is one we previously opened.
-        if not hasattr(self, 'directives'):
+        # Close the directive if it's the one we last opened.
+        if not hasattr(self, 'directives') or not self.directives:
             return
-        if not self.directives:
-            return
-        (domain, directive, name, markers) = self.directives[-1]
-        if domain != getattr(self, 'domain', 'py'):
-            return
-        if directive != getattr(self, 'directivetype', self.objtype):
-            return
-        if name != self.format_name():
+        domain = getattr(self, 'domain', 'py')
+        directive = getattr(self, 'directivetype', self.objtype)
+        name = self.format_name()
+        (domain_, directive_, name_) = self.directives[-1]
+        if (domain_, directive_, name_) != (domain, directive, name):
             return
         self.directives.pop()
-        sourcename = self.get_sourcename()
-        self.add_line(markers, sourcename)
+        self.indent = self.indent.removeprefix('   ')
+        prefix = '```' if self.indent else '~~~'
+        self.add_line(prefix, self.get_sourcename())
+
+    def add_line(self, line: str, source: str, *lineno: int) -> None:
+        """Append one line of generated mark-up to the output."""
+
+        # Pass through empty lines.
+        if not line.strip():
+            self.directive.result.append('', source, *lineno)
+            return
+
+        # Convert syntax of domain directives at start of line.
+        domain = getattr(self, 'domain', 'py')
+        directive = getattr(self, 'directivetype', self.objtype)
+        prefix = f'.. {domain}:{directive}::'
+        if line.startswith(prefix):
+            line = line.removeprefix(prefix)
+            if self.indent:
+                prefix = '```{' + f'{domain}:{directive}' + '}'
+            else:
+                prefix = '~~~{' + f'{domain}:{directive}' + '}'
+            line = prefix + line
+        self.directive.result.append(self.indent + line, source, *lineno)
 
 
 # Mix the modified Documenter class back in with each directive defined
-# by Autodoc, so that they all use the methods overridden above.
+# by Autodoc, so that they all inherit the methods overridden above.
 
 class ModuleDocumenter(Documenter, autodoc.ModuleDocumenter):
     pass
@@ -172,9 +174,7 @@ def setup(app):
 
     Sphinx calls this function if the user named this extension in
     `conf.py`. We then set up the Autodoc extension that ships with
-    Sphinx and override the generation of domain directives, so that
-    the syntax is compatible with the Markdown extension provided by
-    MyST instead of the reStructuredText syntax expected by Sphinx.
+    Sphinx and override the generation of domain directives.
     """
     app.setup_extension('sphinx.ext.autodoc')
     app.add_autodocumenter(ModuleDocumenter, override=True)

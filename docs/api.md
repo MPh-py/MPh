@@ -1,4 +1,4 @@
-# API
+﻿# API
 
 Public API (application programming interface) provided by this library:
 
