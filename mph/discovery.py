@@ -39,7 +39,7 @@ system = platform.system()             # operating system
 architectures = {                      # valid system architecture names
     'Windows': ['win64'],
     'Linux':   ['glnxa64'],
-    'Darwin':  ['maci64'],
+    'Darwin':  ['maci64','macarm64'], # add parameters supporting for ARM-based architectures
 }
 
 
@@ -340,6 +340,9 @@ def find_backends():
 
         # Check that folder with Comsol Java API exists.
         api = root/'plugins'
+        if not api.exists():
+            api = root/'apiplugins'
+
         if not api.exists():
             log.debug('Did not find Comsol Java API plug-ins in root folder.')
             continue
