@@ -41,3 +41,26 @@ Find the full [documentation on Read-the-Docs][docs].
 [![latest documentation](
     https://readthedocs.org/projects/mph/badge/?version=latest)](
     https://mph.readthedocs.io/en/latest)
+
+# Settings for ARM-based architectures
+
+COMSOL installed in ARM-based architectures in default, does not resolve the [dynamic libraries] path automatically for running Java program through third party applications. In order to make it work, we have to do it manually. 
+
+As suggested in [COMSOL Multiphysics® Programming Reference Manual] in page 23:
+* "On macOS, use the Name DYLD_LIBRARY_PATH and enter the following text in Value: <comsolinstalldir>/ lib/maci64:<comsolinstalldir>/ext/graphicsmagick/maci64:<comsolinstalldir>/ext/ cadimport/maci64, where <comsolinstalldir> is the directory where COMSOL Multiphysics is installed."
+
+We have to do a bit modification as following: 
+```bash
+DYLD_FALLBACK_LIBRARY_PATH=/Applications/COMSOL62/Multiphysics/lib/macarm64:/Applications/COMSOL62/Multiphysics/ext/graphicsmagick/macarm64:/Applications/COMSOL62/Multiphysics/ext/cadimport/macarm64
+```
+
+We can add <code> <b>DYLD_FALLBACK_LIBRARY_PATH</b> </code> environment variable in PyCharm <code> <b> Run/Debug Configuration</b> </code>. 
+
+It works. 
+
+
+
+[dynamic libraries]: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/DynamicLibraryUsageGuidelines.html#//apple_ref/doc/uid/TP40001928-SW10
+[COMSOL Multiphysics® Programming Reference Manual]: https://doc.comsol.com/6.2/doc/com.comsol.help.comsol/COMSOL_ProgrammingReferenceManual.pdf&ved=2ahUKEwjv5fffxPuGAxUjQFUIHXKhD8UQFnoECA8QAQ&usg=AOvVaw08MpzY3BkIIfcJLWLuUxaZ
+
+
