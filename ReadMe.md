@@ -47,7 +47,7 @@ Find the full [documentation on Read-the-Docs][docs].
 COMSOL installed in ARM-based architectures in default, does not resolve the [dynamic libraries] path automatically for running Java program through third party applications. In order to make it work, we have to do it manually. 
 
 As suggested in [COMSOL Multiphysics® Programming Reference Manual] in page 23:
-* "On macOS, use the Name DYLD_LIBRARY_PATH and enter the following text in Value: <comsolinstalldir>/ lib/maci64:<comsolinstalldir>/ext/graphicsmagick/maci64:<comsolinstalldir>/ext/ cadimport/maci64, where <comsolinstalldir> is the directory where COMSOL Multiphysics is installed."
+* "On macOS, use the Name DYLD_LIBRARY_PATH and enter the following text in Value: \<comsolinstalldir\>/ lib/maci64:\<comsolinstalldir\>/ext/graphicsmagick/maci64:\<comsolinstalldir\>/ext/ cadimport/maci64, where <comsolinstalldir> is the directory where COMSOL Multiphysics is installed."
 
 We have to do a bit modification as following: 
 ```bash
