@@ -54,7 +54,7 @@ We have to do a bit modification as following:
 DYLD_FALLBACK_LIBRARY_PATH=/Applications/COMSOL62/Multiphysics/lib/macarm64:/Applications/COMSOL62/Multiphysics/ext/graphicsmagick/macarm64:/Applications/COMSOL62/Multiphysics/ext/cadimport/macarm64
 ```
 
-We can add <code> <b>DYLD_FALLBACK_LIBRARY_PATH</b> </code> environment variable in PyCharm <code> <b> Run/Debug Configuration</b> </code>. 
+We can add <code><b>DYLD_FALLBACK_LIBRARY_PATH</b></code> environment variable in PyCharm <code><b>Run/Debug Configuration</b></code>. 
 
 It works. 
 
