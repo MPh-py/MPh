@@ -356,7 +356,7 @@ def test_evaluate():
             model.evaluate('U', dataset=no_solution)
         no_solution.remove()
         solution = model/'solutions'/'electrostatic solution'
-        solution.java.clearSolution()
+        solution.java.clearSolutionData()
         with raises(RuntimeError):
             model.evaluate('U')
         model.solve('static')
