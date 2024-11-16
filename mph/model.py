@@ -912,7 +912,7 @@ class Model:
         log.info('Finished clearing plots.')
         log.info('Clearing solution data.')
         for solution in self/'solutions':
-            solution.java.clearSolution()
+            solution.java.clearSolutionData()
         log.info('Finished clearing solutions.')
         log.info('Clearing mesh data.')
         for mesh in self/'meshes':

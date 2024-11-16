@@ -218,7 +218,7 @@ def test_problems():
     anode.property('V0', '+U/2')
     study.run()
     assert not root.problems()
-    solver.parent().java.clearSolution()
+    solver.parent().java.clearSolutionData()
 
 
 def test_rename():
