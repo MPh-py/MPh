@@ -121,7 +121,12 @@ def capacitor():
     es.java.field('electricpotential').field('V_es')
     es.select(media)
     es.java.prop('d').set('d', 'l')
-    (es/'Charge Conservation 1').rename('Laplace equation')
+    if model.version() >= '6.3':
+        (es/'Free Space 1').rename('free space')
+        es.create("ChargeConservationSolid", 2, name='Laplace equation')
+        (es/'Laplace equation').select(media)
+    else:
+        (es/'Charge Conservation 1').rename('Laplace equation')
     (es/'Zero Charge 1').rename('zero charge')
     (es/'Initial Values 1').rename('initial values')
     anode = es.create('ElectricPotential', 1, name='anode')
@@ -480,7 +485,12 @@ def needle():
     physics = model/'physics'
     field = physics.create('Electrostatics', geometry, name='field')
     field.select(vacuum)
-    (field/'Charge Conservation 1').rename('Laplace equation')
+    if model.version() >= '6.3':
+        (field/'Free Space 1').rename('free space')
+        field.create("ChargeConservationSolid", 3, name='Laplace equation')
+        (field/'Laplace equation').select(vacuum)
+    else:
+        (field/'Charge Conservation 1').rename('Laplace equation')
     (field/'Zero Charge 1').rename('zero charge')
     (field/'Initial Values 1').rename('initial values')
     (field/'Laplace equation').property('epsilonr_mat', 'userdef')
