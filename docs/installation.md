@@ -17,10 +17,10 @@ that this won't uninstall the dependencies.
 
 ## Comsol
 
-Comsol, obviously, you need to license and install yourself. [Versions]
-5.5 and newer are expected to work. Up to version 6.2, they have been
-successfully tested — at one point or another. A separate Java run-time
-environment is *not* required as Comsol ships with one already built in.
+Comsol, obviously, you need to license and install yourself. [Versions] 5.6 and
+newer are expected to work. Up to version 6.3, they have been successfully
+tested. A separate Java run-time environment is *not* required as Comsol ships
+with one already built in.
 
 All major platforms are supported: Windows, Linux, macOS. Though
 ARM-based architectures are not, namely [Apple Silicon] on newer Macs.
