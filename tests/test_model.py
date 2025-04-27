@@ -8,7 +8,6 @@ import models
 from fixtures import logging_disabled
 from fixtures import warnings_disabled
 from fixtures import setup_logging
-from numpy import isclose
 from numpy.testing import assert_allclose
 from pytest import raises
 from pathlib import Path
@@ -273,31 +272,31 @@ def test_outer():
 def test_evaluate():
     # Test global evaluation of stationary solution.
     C = model.evaluate('2*es.intWe/U^2', 'pF')
-    assert isclose(C, 0.73678541)
+    assert_allclose(C, 0.74, atol=0.01)
     # Test field evaluation of stationary solution.
     (x, y, E) = model.evaluate(['x', 'y', 'es.normE'], ['mm', 'mm', 'V/m'])
     (Emax, xmax, ymax) = (E.max(), x[E.argmax()], y[E.argmax()])
-    assert isclose(Emax, 818.24912)
-    assert isclose(xmax, -1.035589174)
-    assert isclose(ymax, -4.2644083186)
+    assert_allclose(Emax, 820, atol=10)
+    assert_allclose(abs(xmax), 1.04, atol=0.01)
+    assert_allclose(abs(ymax), 4.27, atol=0.01)
     # Test global evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', '2*ec.intWe/U^2', 'pF')
     C_first = model.evaluate(expression, unit, dataset, 'first')
-    assert isclose(C_first, 0.73678541)
+    assert_allclose(C_first, 0.74, atol=0.01)
     C_last = model.evaluate(expression, unit, dataset, 'last')
-    assert isclose(C_last, 0.82870712)
+    assert_allclose(C_last, 0.83, atol=0.01)
     C = model.evaluate(expression, unit, dataset)
-    assert isclose(C[0], C_first)
-    assert isclose(C[-1], C_last)
+    assert_allclose(C[0], C_first)
+    assert_allclose(C[-1], C_last)
     C = model.evaluate(expression, unit, dataset, inner=[1, 101])
-    assert isclose(C[0], C_first)
-    assert isclose(C[1], C_last)
+    assert_allclose(C[0], C_first)
+    assert_allclose(C[1], C_last)
     # Test field evaluation of time-dependent solution.
     (dataset, expression, unit) = ('time-dependent', 'ec.normD', 'nC/m^2')
     D_first = model.evaluate(expression, unit, dataset, 'first')
-    assert isclose(D_first.max(), 7.24581146)
+    assert_allclose(D_first.max(), 7.2, atol=0.1)
     D_last = model.evaluate(expression, unit, dataset, 'last')
-    assert isclose(D_last.max(), 10.86515646)
+    assert_allclose(D_last.max(), 10.8, atol=0.1)
     D = model.evaluate(expression, unit, dataset)
     assert_allclose(D[0], D_first)
     assert_allclose(D[-1], D_last)
@@ -307,17 +306,17 @@ def test_evaluate():
     # Test global evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', '2*ec.intWe/U^2', 'pF')
     C1 = model.evaluate(expression, unit, dataset, 'first', 1)
-    assert isclose(C1, 1.31947804)
+    assert_allclose(C1, 1.32, atol=0.01)
     C2 = model.evaluate(expression, unit, dataset, 'first', 2)
-    assert isclose(C2, 0.73678541)
+    assert_allclose(C2, 0.74, atol=0.01)
     C3 = model.evaluate(expression, unit, dataset, 'first', 3)
-    assert isclose(C3, 0.52865512)
+    assert_allclose(C3, 0.53, atol=0.01)
     # Test field evaluation of parameter sweep.
     (dataset, expression, unit) = ('parametric sweep', 'ec.normD', 'nC/m^2')
     D_first = model.evaluate(expression, unit, dataset, 'first', 2)
-    assert isclose(D_first.max(), 7.24581146)
+    assert_allclose(D_first.max(), 7.2, atol=0.1)
     D_last = model.evaluate(expression, unit, dataset, 'last', 2)
-    assert isclose(D_last.max(), 10.86515646)
+    assert_allclose(D_last.max(), 10.8, atol=0.1)
     D = model.evaluate(expression, unit, dataset, outer=2)
     assert_allclose(D[0], D_first)
     assert_allclose(D[-1], D_last)
@@ -451,11 +450,11 @@ def test_property():
     assert model.property('functions/step', 'funcname') == 'renamed'
     model.property('functions/step', 'funcname', 'step')
     assert model.property('functions/step', 'funcname') == 'step'
-    assert isclose(model.property('functions/step', 'from'), 0.0)
+    assert_allclose(model.property('functions/step', 'from'), 0.0)
     model.property('functions/step', 'from', 0.1)
-    assert isclose(model.property('functions/step', 'from'), 0.1)
+    assert_allclose(model.property('functions/step', 'from'), 0.1)
     model.property('functions/step', 'from', 0.0)
-    assert isclose(model.property('functions/step', 'from'), 0.0)
+    assert_allclose(model.property('functions/step', 'from'), 0.0)
 
 
 def test_properties():

@@ -11,7 +11,8 @@ from fixtures import capture_stdout
 from fixtures import setup_logging
 from pytest import raises
 from pathlib import Path
-from numpy import array, isclose
+from numpy import array
+from numpy.testing import assert_allclose
 from textwrap import dedent
 
 
@@ -341,16 +342,16 @@ def test_property():
     # Test conversion to and from 'Double'.
     old = function.property('location')
     function.property('location', -10.0)
-    assert isclose(function.property('location'), -10)
+    assert_allclose(function.property('location'), -10)
     function.property('location', old)
-    assert isclose(function.property('location'), old)
+    assert_allclose(function.property('location'), old)
     # Test conversion to and from 'DoubleArray'.
     old = export.property('outersolnumindices')
     new = array([1.0, 2.0, 3.0])
     export.property('outersolnumindices', new)
-    assert isclose(export.property('outersolnumindices'), new).all()
+    assert_allclose(export.property('outersolnumindices'), new)
     export.property('outersolnumindices', old)
-    assert isclose(export.property('outersolnumindices'), old).all()
+    assert_allclose(export.property('outersolnumindices'), old)
     # Test conversion to and from 'File'.
     old = export.property('filename')
     export.property('filename', Path('new.tif'))
