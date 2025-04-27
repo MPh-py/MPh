@@ -1,11 +1,4 @@
-﻿"""
-Creates the demonstration model "capacitor" from scratch.
-
-The code below uses the higher-level Python layer as much as possible
-and falls back to the Java layer when functionality is (still) missing.
-
-Requires Comsol 5.4 or newer.
-"""
+﻿"""Creates the demonstration model "capacitor" from scratch."""
 
 import mph
 
@@ -124,7 +117,12 @@ es = physics.create('Electrostatics', geometry, name='electrostatic')
 es.java.field('electricpotential').field('V_es')
 es.select(media)
 es.java.prop('d').set('d', 'l')
-(es/'Charge Conservation 1').rename('Laplace equation')
+if model.version() >= '6.3':
+    (es/'Free Space 1').rename('free space')
+    es.create("ChargeConservationSolid", 2, name='Laplace equation')
+    (es/'Laplace equation').select(media)
+else:
+    (es/'Charge Conservation 1').rename('Laplace equation')
 (es/'Zero Charge 1').rename('zero charge')
 (es/'Initial Values 1').rename('initial values')
 anode = es.create('ElectricPotential', 1, name='anode')

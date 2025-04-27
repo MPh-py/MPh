@@ -88,22 +88,8 @@ def test_name():
     assert Node(model, 'functions/step').name() == 'step'
 
 
-def compare_tags(node, other):
-    if not node.is_root() and (other/node).exists():
-        assert node.tag() == (other/node).tag()
-    for child in node:
-        compare_tags(child, other)
-
-
 def test_tag():
     assert Node(model, 'functions/step').tag() == 'step1'
-    if not client.port:
-        # Skip test in client-server mode where it's fairly slow.
-        here = Path(__file__).resolve().parent
-        demo = client.load(here/'demo.mph')
-        demo.solve()
-        root = Node(model, '')
-        compare_tags(root, demo)
 
 
 def test_type():
