@@ -38,7 +38,7 @@ test = [
 docs = [
     'Sphinx >= 6.1',
     'Furo',
-    'MyST-parser >= 1.0',
+    'MyST-parser >= 1, < 4',
 ]
 dev = [                       # Must always be the union of all other extras.
     'Flit',
@@ -47,7 +47,7 @@ dev = [                       # Must always be the union of all other extras.
     'Flake8-pyproject',
     'Sphinx >= 6.1',
     'Furo',
-    'MyST-parser >= 1.0',
+    'MyST-parser >= 1, < 4',
 ]
 
 [project.urls]
