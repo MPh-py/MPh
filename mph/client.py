@@ -94,9 +94,9 @@ class Client:
     """
     Manages the Comsol client instance.
 
-    A client can either be a stand-alone instance or it could connect
-    to a Comsol server started independently, possibly on a different
-    machine on the network.
+    A client can either be a stand-alone instance or it could connect to a
+    Comsol server started independently, possibly on a different machine on the
+    network.
 
     Example usage:
     ```python
@@ -108,31 +108,31 @@ class Client:
     client.remove(model)
     ```
 
-    The number of `cores` (threads) the client instance uses can
-    be restricted by specifying a number. Otherwise all available
-    cores are used.
+    The number of `cores` (threads) the client instance uses can be restricted
+    by specifying a number. Otherwise all available cores are used.
 
-    A specific Comsol `version` can be selected if several are
-    installed, for example `version='6.0'`. Otherwise the latest
-    version is used.
+    A specific Comsol `version` can be selected if several are installed, for
+    example `version='6.0'`. Otherwise the latest version is used.
 
-    Initializes a stand-alone Comsol session if no `port` number is
-    specified. Otherwise tries to connect to the Comsol server
-    listening at the given port for client connections. The `host`
-    address defaults to `'localhost'`, but could be any domain name
-    or IP address.
+    Initializes a stand-alone Comsol session if no `port` number is specified.
+    Otherwise tries to connect to the Comsol server listening at the given port
+    for client connections.
+
+    The `host` address defaults to `'localhost'`, but could be any domain name
+    or IP address. If `host=None` is passed, the client will remain in a
+    disconnected state until [`connect()`](#connect) is called. This is
+    sometimes useful to catch runtime errors at start-up.
 
     This class is a wrapper around the [`com.comsol.model.util.ModelUtil`][1]
-    Java class, which itself is wrapped by JPype and can be accessed
-    directly via the `.java` attribute. The full Comsol functionality is
-    thus available if needed.
+    Java class, which itself is wrapped by JPype and can be accessed directly
+    via the `.java` attribute. The full Comsol functionality is thus available
+    if needed.
 
-    However, as that Comsol class is a singleton, i.e. a static class
-    that cannot be instantiated, we can only run one client within the
-    same Python process. Separate Python processes would have to be
-    created and coordinated in order to work around this limitation.
-    Within the same process, `NotImplementedError` is raised if a client
-    is already running.
+    However, as that Comsol class is a singleton, i.e. a static class that
+    cannot be instantiated, we can only run one client within the same Python
+    process. Separate Python processes would have to be created and coordinated
+    in order to work around this limitation. Within the same process,
+    `NotImplementedError` is raised if a client is already running.
 
     [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/util/ModelUtil.html
