@@ -7,12 +7,16 @@ MPh is [available on PyPI] and can be readily installed via
 pip install MPh
 ```
 
-Requires [JPype] for the bridge from Python to [Comsol's Java API]
-and [NumPy] for returning (fast) numerical arrays. Pip makes sure the
-two Python dependencies are installed and adds them if missing.
+Requires [JPype] for the bridge from Python to [Comsol's Java API] and [NumPy]
+for returning (fast) numerical arrays. Pip makes sure the two Python
+dependencies are installed and adds them if missing.
 
-Run `pip uninstall MPh` to remove the package from your system. Note
-that this won't uninstall the dependencies.
+Run `pip uninstall MPh` to remove the package from your system. Note that this
+won't uninstall the dependencies.
+
+On Windows, users have encountered problems with the Python installation from
+the Microsoft Store ([GitHub issue #57]). In that event, use the Python
+installers from [python.org] instead.
 
 
 ## Comsol
@@ -72,6 +76,8 @@ issue] if you want to add support to the code base.
 [JPype]:                  https://jpype.readthedocs.io
 [Comsol's Java API]:      https://comsol.com/documentation/COMSOL_ProgrammingReferenceManual.pdf
 [NumPy]:                  https://numpy.org
+[GitHub issue #57]:       https://github.com/MPh-py/MPh/issues/57
+[python.org]:             https://python.org
 [Versions]:               https://www.comsol.com/release-history
 [Apple Silicon]: https://en.wikipedia.org/wiki/Apple_silicon
 [GitHub issue #80]:       https://github.com/MPh-py/MPh/issues/80
