@@ -16,9 +16,9 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Topic :: Scientific/Engineering :: Physics',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: MIT License',
 ]
-license = {file='license.txt'}
+license = 'MIT'
+license-files = ['license.txt']
 readme = 'PyPI.md'
 requires-python = '>= 3.6'
 dependencies = [
@@ -55,10 +55,10 @@ Documentation = 'https://mph.readthedocs.io'
 Source        = 'https://github.com/MPh-py/MPh'
 
 
-# Wheel builder: Flit
+# Build backend: Flit
 
 [build-system]
-requires = ['flit_core >= 3.4, < 4']
+requires      = ['flit_core >= 3.11']
 build-backend = 'flit_core.buildapi'
 
 [tool.flit.module]
