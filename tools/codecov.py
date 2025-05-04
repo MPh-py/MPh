@@ -19,7 +19,7 @@ token = environ.get('MPh_CodeCov_token', None)
 if not token:
     raise RuntimeError('CodeCov upload token not set in environment.')
 
-root = Path(__file__).resolve().parent.parent
+root = Path(__file__).parent.parent
 run(['coverage', 'xml'], cwd=root, check=True)
 run(
     ['codecov', '--file', 'coverage.xml', '--token', token],
