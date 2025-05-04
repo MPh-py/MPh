@@ -744,17 +744,20 @@ class Model:
 
     def create(self, node, *arguments):
         """
-        Creates a new child node.
+        Creates a new feature node.
 
-        If the given `node` does not exist, creates a node with its
-        name in the node's parent group. Otherwise creates a child
-        node underneath the given node and assigns it an automatically
-        generated unique name/label.
+        Note that this only works for what Comsol considers model "features",
+        not for any and all nodes in the model tree (such as property groups of
+        materials).
 
-        Refer to the Comsol documentation for the values of valid
-        arguments. It is often just the feature type of the child node
-        to be created, given as a string such as "Block", but may also
-        require different or more arguments.
+        If the given `node` does not exist, creates a node with its name in the
+        node's parent group. Otherwise creates a child node underneath the
+        given node and assigns it an automatically generated unique name/label.
+
+        Refer to the Comsol documentation for valid `arguments`. It is often
+        just the feature type of the child node to be created, given as a
+        string such as "Block", but may also require different or more
+        arguments.
 
         Returns the newly created child node as a `Node` instance.
         """

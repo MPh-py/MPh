@@ -560,15 +560,21 @@ class Node:
 
     def create(self, *arguments, name=None):
         """
-        Creates a new child node and returns that node instance.
+        Creates a new child feature node.
 
-        Refer to the Comsol documentation for the values of valid
-        `arguments`. It is often just the feature type of the child
-        node to be created, given as a string such as `'Block'`, but
-        may also require different or more arguments.
+        Note that this only works for what Comsol considers model "features",
+        not for any and all nodes in the model tree (such as property groups of
+        materials).
+
+        Refer to the Comsol documentation for valid `arguments`. It is often
+        just the feature type of the child node to be created, given as a
+        string such as `'Block'`, but may also require different or more
+        arguments.
 
         If `name` is not given, a unique name/label will be assigned
         automatically.
+
+        Returns the node instance of the newly created feature.
         """
         if self.is_root():
             error = 'Cannot create nodes at root of model tree.'
