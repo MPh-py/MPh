@@ -24,8 +24,8 @@ from os         import environ, pathsep
 
 
 # Define order of test groups.
-groups = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
-          'client', 'multi', 'node', 'model', 'exit']
+groups = ['config', 'discovery', 'server', 'session', 'standalone', 'client',
+          'multi', 'node', 'model', 'exit']
 
 # Run MPh in source tree, not a possibly different version installed elsewhere.
 root = Path(__file__).resolve().parent.parent

@@ -1,6 +1,6 @@
 ﻿# The imports here define the public interface of the package.
 from .meta    import version as __version__
-from .meta    import synopsis as __doc__
+from .meta    import summary as __doc__
 from .session import start
 from .        import config
 from .config  import option

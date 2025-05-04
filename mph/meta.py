@@ -1,8 +1,14 @@
-﻿"""Meta information about the package."""
+"""Meta information about the application"""
 
-title     = 'MPh'
-synopsis  = 'Pythonic scripting interface for Comsol Multiphysics'
-version   = '1.2.4'
-author    = 'John Hennig'
-copyright = '2020–2023, John Hennig'
-license   = 'MIT'
+import importlib.metadata
+
+name = 'MPh'
+version = '?'
+summary = '?'
+
+try:
+    metadata = importlib.metadata.metadata(name)
+    version = metadata['Version']
+    summary = metadata['Summary']
+except importlib.metadata.PackageNotFoundError:              # pragma: no cover
+    pass
