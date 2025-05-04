@@ -441,34 +441,27 @@ class Model:
         """
         Evaluates an expression and returns the numerical results.
 
-        The `expression` may be a string, denoting a single expression,
-        or a sequence of strings, denoting multiple. The optional
-        `unit` must be given correspondingly. If omitted, default
-        units are used. The expression may be a global one, or a scalar
-        field, or particle data. Results are returned as (lists of)
-        [NumPy arrays](#ndarray), of whichever dimensionality they may
-        then have.
+        The `expression` may be a string, denoting a single expression, or a
+        sequence of strings, denoting multiple. The optional `unit` must be
+        given correspondingly. If omitted, default units are used. The
+        expression may be a global one, or a scalar field, or particle data.
+        Results are returned as (lists of) [NumPy arrays](#ndarray), of
+        whichever dimensionality they may then have.
 
-        A `dataset` may be specified. Otherwise the expression will
-        be evaluated on the default dataset. If the solution stored in
-        the dataset is time-dependent, one or several `inner` solutions
-        can be preselected, either by an index number, a sequence of
+        A `dataset` may be specified, but it must be a solution dataset.
+        Derived datasets are not supported. If no dataset is given, the
+        expression will be evaluated on the default dataset. If the solution
+        stored in the dataset is time-dependent, one or several `inner`
+        solutions can be preselected, either by an index number, a sequence of
         indices, or by passing `'first`'/`'last'` to select the very
-        first/last index. If the dataset represents a parameter sweep,
-        the `outer` solution(s) can be selected by index or sequence
-        of indices.
+        first/last index. If the dataset represents a parameter sweep, the
+        `outer` solution(s) can be selected by index or sequence of indices.
 
-        Please note that this method, while broad in its intended scope,
-        covers common use cases, but not all of them. In case it fails
-        to return the expected results, consider using the Comsol API
-        features directly via the `.java` attribute of this class, and
-        refer to the "Results" chapter in the Comsol Programming Manual
-        for guidance. A known limitation is the evaluation of field
-        variables in time-dependent parameter sweeps, where not all
-        time steps are returned: see issues [#120] and [#119].
-
-        [#119]: https://github.com/MPh-py/MPh/issues/119
-        [#120]: https://github.com/MPh-py/MPh/issues/120
+        With the help of appropriately defined operators in the model, this
+        method here should be able to query any and all data. If you don't
+        find that to be the case, consider using the Comsol API directly via
+        the `.java` attribute of this class, and refer to the "Results" chapter
+        in the Comsol Programming Manual for guidance.
         """
         # Validate input arguments.
         if dataset is not None:
