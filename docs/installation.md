@@ -27,31 +27,26 @@ newer are expected to work. Up to version 6.3, they have been successfully
 tested. A separate Java run-time environment is *not* required as Comsol ships
 with one already built in.
 
-All major platforms are supported: Windows, Linux, macOS. Though
-ARM-based architectures are not, namely [Apple Silicon] on newer Macs.
-(Contribute to solving [GitHub issue #80] if you want to remedy that.)
-Linux support has only been rigorously tested on Ubuntu. Occasional
-problems may occur on other distributions. Specifically with image
-exports, for which Comsol depends on external libraries.
+All major platforms are supported: Windows, Linux, macOS. Though ARM-based
+architectures are not, namely [Apple Silicon] on newer Macs. (Contribute to
+solving [GitHub issue #80] if you want to remedy that.)
 
-Comsol is expected to be installed in the default location suggested by
-its installer. Though on Windows, custom locations are also supported,
-as the installer stores that information in the central registry, which
-MPh looks up.
+Comsol is expected to be installed in the default location suggested by its
+installer. Though on Windows, custom locations are also supported, as the
+installer stores that information in the central registry, which MPh looks up.
 
-Additionally, whichever Comsol installation starts when you run `comsol`
-in the console, will be found as well, even if in a custom location.
+Additionally, whichever Comsol installation starts when you run `comsol` in
+the console, will be found as well, even if in a custom location.
 
-If you want to be able to select an alternative Comsol installation via
-MPh's API, by passing the `version` argument to [`mph.start()`](#start),
-and that Comsol version happens to be installed in a custom location,
-you can [create a symbolic link] in `~/.local` on Linux and in
-`~/Application` on macOS. Have it point to the corresponding Comsol
-folder and give the link a name that starts with `comsol`.
+If you want to be able to select an alternative Comsol installation via MPh's
+API, by passing the `version` argument to [`mph.start()`](#start), and that
+Comsol version happens to be installed in a custom location, you can [create a
+symbolic link] in `~/.local` on Linux and in `~/Application` on macOS. Have it
+point to the corresponding Comsol folder and give the link a name that starts
+with `comsol`.
 
 ```{note}
-For most users who already have Comsol installed, MPh will work out of
-the box.
+For most users who already have Comsol installed, MPh will work out of the box.
 ```
 
 
