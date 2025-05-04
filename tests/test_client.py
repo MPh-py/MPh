@@ -37,9 +37,8 @@ def test_init():
     assert client.host == 'localhost'
     assert client.java
     assert not client.standalone
-    with logging_disabled():
-        with raises(NotImplementedError):
-            mph.Client()
+    with logging_disabled(), raises(NotImplementedError):
+        mph.Client()
 
 
 def test_load():
@@ -101,7 +100,7 @@ def test_files():
 
 
 def test_modules():
-    for key in mph.client.modules.keys():
+    for key in mph.client.modules:
         assert client.java.hasProduct(key) in (True, False)
     for value in mph.client.modules.values():
         assert value in mph.model.modules.values()
@@ -122,9 +121,8 @@ def test_caching():
     assert model == copy
     client.caching(False)
     assert not client.caching()
-    with logging_disabled():
-        with raises(ValueError):
-            client.caching('anything else')
+    with logging_disabled(), raises(ValueError):
+        client.caching('anything else')
 
 
 def test_remove():
@@ -168,9 +166,8 @@ def test_connect():
     client.connect(server.port)
     assert client.port == server.port
     assert client.cores == 1
-    with logging_disabled():
-        with raises(RuntimeError):
-            client.connect(server.port)
+    with logging_disabled(), raises(RuntimeError):
+        client.connect(server.port)
     client.disconnect()
     server.stop()
 

@@ -43,9 +43,8 @@ def test_init():
     assert 'functions' in node.groups
     assert 'self.model.java.func()' in node.groups.values()
     Node(model, node)
-    with logging_disabled():
-        with raises(TypeError):
-            Node(model, False)
+    with logging_disabled(), raises(TypeError):
+        Node(model, False)
 
 
 def test_str():
@@ -62,9 +61,8 @@ def test_eq():
 
 def test_truediv():
     assert Node(model, 'functions')/'step' == Node(model, 'functions/step')
-    with logging_disabled():
-        with raises(TypeError):
-            Node(model, 'functions')/False
+    with logging_disabled(), raises(TypeError):
+        Node(model, 'functions')/False
 
 
 def test_contains():
@@ -202,11 +200,11 @@ def test_problems():
     problems = root.problems()
     assert problems
     assert len(problems) == 5
-    assert all([problem['message'] for problem in problems])
-    assert any([problem['category'] == 'error' for problem in problems])
-    assert any([problem['category'] == 'warning' for problem in problems])
-    assert all([problem['node'] == volume for problem in problems])
-    assert all([problem['selection'] for problem in problems])
+    assert all(problem['message'] for problem in problems)
+    assert any(problem['category'] == 'error' for problem in problems)
+    assert any(problem['category'] == 'warning' for problem in problems)
+    assert all(problem['node'] == volume for problem in problems)
+    assert all(problem['selection'] for problem in problems)
     # Test error in solver sequence.
     root = Node(model, '')
     anode = root/'physics'/'electrostatic'/'anode'
@@ -401,7 +399,6 @@ def test_properties():
     assert Node(model, 'functions').properties() == {}
     function = Node(model, 'functions/step')
     assert 'funcname' in function.properties()
-    assert 'funcname' in function.properties().keys()
     assert 'step' in function.properties().values()
     assert ('funcname', 'step') in function.properties().items()
 
@@ -473,9 +470,8 @@ def test_toggle():
     node.toggle('on')
     assert node.java.isActive()
     assert not Node(model, 'functions/non-existing').exists()
-    with logging_disabled():
-        with raises(LookupError):
-            Node(model, 'functions/non-existing').toggle()
+    with logging_disabled(), raises(LookupError):
+        Node(model, 'functions/non-existing').toggle()
 
 
 def test_run():
@@ -575,7 +571,7 @@ def test_unescape():
 
 def test_load_patterns():
     tags = node.load_patterns()
-    assert 'physics → Electrostatics' in tags.keys()
+    assert 'physics → Electrostatics' in tags
     assert 'es' in tags.values()
 
 
@@ -617,7 +613,7 @@ def test_get():
 def test_tree():
     with capture_stdout() as output:
         mph.tree(model, max_depth=1)
-    expected = '''
+    expected = """
         capacitor
         ├─ parameters
         ├─ functions
@@ -640,17 +636,17 @@ def test_tree():
         ├─ tables
         ├─ plots
         └─ exports
-    '''
+    """
     assert output.text().strip() == dedent(expected).strip()
     with capture_stdout() as output:
         mph.tree(model/'materials')
-    expected = '''
+    expected = """
         materials
         ├─ medium 1
         │  └─ Basic
         └─ medium 2
            └─ Basic
-    '''
+    """
     assert output.text().strip() == dedent(expected).strip()
 
 

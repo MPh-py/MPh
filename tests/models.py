@@ -123,7 +123,7 @@ def capacitor():
     es.java.prop('d').set('d', 'l')
     if model.version() >= '6.3':
         (es/'Free Space 1').rename('free space')
-        es.create("ChargeConservationSolid", 2, name='Laplace equation')
+        es.create('ChargeConservationSolid', 2, name='Laplace equation')
         (es/'Laplace equation').select(media)
     else:
         (es/'Charge Conservation 1').rename('Laplace equation')
@@ -487,7 +487,7 @@ def needle():
     field.select(vacuum)
     if model.version() >= '6.3':
         (field/'Free Space 1').rename('free space')
-        field.create("ChargeConservationSolid", 3, name='Laplace equation')
+        field.create('ChargeConservationSolid', 3, name='Laplace equation')
         (field/'Laplace equation').select(vacuum)
     else:
         (field/'Charge Conservation 1').rename('Laplace equation')

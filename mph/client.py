@@ -209,9 +209,9 @@ class Client:
             # Override certain settings not useful in headless operation.
             preferences = (
                 ('updates.update.check', 'off'),
-                ('tempfiles.saving.warnifoverwriteolder', 'off'), # issue #50
+                ('tempfiles.saving.warnifoverwriteolder', 'off'),  # issue #50
                 ('tempfiles.recovery.autosave', 'off'),
-                ('tempfiles.recovery.checkforrecoveries', 'off'), # issue #39
+                ('tempfiles.recovery.checkforrecoveries', 'off'),  # issue #39
                 ('tempfiles.saving.optimize', 'filesize'),
             )
             for (name, value) in preferences:
@@ -253,12 +253,10 @@ class Client:
         return f'{self.__class__.__name__}({connection})'
 
     def __contains__(self, item):
-        if isinstance(item, str):
-            if item in self.names():
-                return True
-        elif isinstance(item, Model):
-            if item in self.models():
-                return True
+        if isinstance(item, str) and item in self.names():
+            return True
+        if isinstance(item, Model) and item in self.models():
+            return True
         return False
 
     def __iter__(self):

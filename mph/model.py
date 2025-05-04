@@ -162,10 +162,7 @@ class Model:
         return NotImplemented
 
     def __contains__(self, node):
-        if isinstance(node, (str, Node)):
-            if (self/node).exists():
-                return True
-        return False
+        return (isinstance(node, (str, Node)) and (self/node).exists())
 
     def __iter__(self):
         yield from (self/None).children()
@@ -273,7 +270,7 @@ class Model:
         elif isinstance(geometry, str):
             geometry = geometries/geometry
         elif isinstance(geometry, Node):
-            if not geometry.parent() == self/'geometries':
+            if geometry.parent() != self/'geometries':
                 error = f'Node "{geometry}" is not a geometry node.'
                 log.error(error)
                 raise ValueError(error)
@@ -302,7 +299,7 @@ class Model:
         elif isinstance(mesh, str):
             mesh = meshes/mesh
         elif isinstance(mesh, Node):
-            if not mesh.parent() == self/'meshes':
+            if mesh.parent() != self/'meshes':
                 error = f'Node "{mesh}" is not a mesh node.'
                 log.error(error)
                 raise ValueError(error)
@@ -331,7 +328,7 @@ class Model:
         elif isinstance(study, str):
             study = studies/study
         elif isinstance(study, Node):
-            if not study.parent() == self/'studies':
+            if study.parent() != self/'studies':
                 error = f'Node "{study}" is not a study node.'
                 log.error(error)
                 raise ValueError(error)
