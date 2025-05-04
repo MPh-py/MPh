@@ -36,18 +36,18 @@ test = [
     'Flake8-pyproject',
 ]
 docs = [
-    'Sphinx >= 6.1',
+    'Sphinx >= 8.2',
     'Furo',
-    'MyST-parser >= 1, < 4',
+    'MyST-parser >= 1',
 ]
 dev = [                       # Must always be the union of all other extras.
     'Flit',
     'pyTest',
     'pyTest-cov',
     'Flake8-pyproject',
-    'Sphinx >= 6.1',
+    'Sphinx >= 8.2',
     'Furo',
-    'MyST-parser >= 1, < 4',
+    'MyST-parser >= 1',
 ]
 
 [project.urls]
