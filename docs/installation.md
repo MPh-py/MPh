@@ -16,7 +16,8 @@ won't uninstall the dependencies.
 
 On Windows, users have encountered problems with the Python installation from
 the Microsoft Store ([GitHub issue #57]). In that event, use the Python
-installers from [python.org] instead.
+installers from [python.org] instead. You will need the 64-bit version of
+Python, as is the default, to match Comsol's platform architecture.
 
 
 ## Comsol
