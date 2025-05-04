@@ -34,11 +34,9 @@ extensions = [
 ]
 
 # Meta information
-project   = meta.title
-author    = meta.author
-copyright = meta.copyright
-version   = meta.version
-release   = version
+project = meta.name
+version = meta.version
+release = version
 
 # Web site
 html_title   = f'{project} {version}'  # document title

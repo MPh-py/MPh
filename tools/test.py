@@ -33,8 +33,8 @@ from os         import environ, pathsep
 
 
 # Define order of test groups.
-groups = ['meta', 'config', 'discovery', 'server', 'session', 'standalone',
-          'client', 'multi', 'node', 'model', 'exit']
+groups = ['config', 'discovery', 'server', 'session', 'standalone', 'client',
+          'multi', 'node', 'model', 'exit']
 
 # Determine path of project root folder.
 here = Path(__file__).resolve().parent

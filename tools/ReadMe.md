@@ -47,7 +47,7 @@ the package.
 
 ### Releasing a new version
 
-* Bump version number in `mph/meta.py`.
+* Bump version number in `pyproject.toml`.
 * Add release notes to `docs/releases.md`.
 * Add dedicated commit for the version bump.
 * Tag commit with version number, e.g. `git tag v1.2.0`

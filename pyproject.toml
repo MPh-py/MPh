@@ -3,7 +3,8 @@
 [project]
 name = 'MPh'
 authors = [{name='John Hennig'}]
-license = {file='license.txt'}
+version = '1.2.4'
+description = 'Pythonic scripting interface for Comsol Multiphysics'
 keywords = [
     'Comsol',
     'multiphysics',
@@ -15,11 +16,10 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Topic :: Scientific/Engineering :: Physics',
     'Intended Audience :: Science/Research',
-    'Natural Language :: English',
     'License :: OSI Approved :: MIT License',
 ]
+license = {file='license.txt'}
 readme = 'PyPI.md'
-dynamic = ['version', 'description']
 requires-python = '>= 3.6'
 dependencies = [
     'JPype1',
@@ -52,7 +52,7 @@ dev = [                       # Must always be the union of all other extras.
 
 [project.urls]
 Documentation = 'https://mph.readthedocs.io'
-Source = 'https://github.com/MPh-py/MPh'
+Source        = 'https://github.com/MPh-py/MPh'
 
 
 # Wheel builder: Flit
@@ -98,7 +98,7 @@ per-file-ignores = [
 # Test runner: pyTest
 
 [tool.pytest.ini_options]
-addopts = '--verbose'
+addopts   = '--verbose'
 testpaths = ['tests']
 
 
@@ -106,11 +106,11 @@ testpaths = ['tests']
 
 [tool.coverage.run]
 source = ['mph/']
-omit = ['mph/discovery.py']  # Ignore platform-dependent discovery mechanism.
+omit   = ['mph/discovery.py']  # Ignore platform-dependent discovery mechanism.
 relative_files = true
 
 [tool.coverage.report]
 exclude_lines = [
     'pragma: no cover',
-    'def location',          # Ignore platform-dependent configuration search.
+    'def location',           # Ignore platform-dependent configuration search.
 ]
