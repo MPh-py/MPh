@@ -1,4 +1,4 @@
-# Project information: PyPI and Pip
+# Project meta information
 
 [project]
 name = 'MPh'
@@ -20,34 +20,27 @@ classifiers = [
 license = 'MIT'
 license-files = ['license.txt']
 readme = 'PyPI.md'
+
 requires-python = '>= 3.6'
 dependencies = [
     'JPype1',
     'NumPy',
 ]
 
-[project.optional-dependencies]
-build = [
-    'Flit',
-]
+[dependency-groups]
 test = [
-    'pyTest',
-    'pyTest-cov',
-    'Flake8-pyproject',
+    'pyTest           >= 8',
+    'pyTest-cov       >= 6',
+    'Flake8-pyproject >= 1.2',
 ]
 docs = [
-    'Sphinx >= 8.2',
-    'Furo',
+    'Sphinx      >= 8.2',
     'MyST-parser >= 1',
+    'Furo        >= 2024',
 ]
-dev = [                       # Must always be the union of all other extras.
-    'Flit',
-    'pyTest',
-    'pyTest-cov',
-    'Flake8-pyproject',
-    'Sphinx >= 8.2',
-    'Furo',
-    'MyST-parser >= 1',
+dev = [
+    {include-group = 'test'},
+    {include-group = 'docs'},
 ]
 
 [project.urls]

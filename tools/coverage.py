@@ -28,7 +28,7 @@ groups = ['config', 'discovery', 'server', 'session', 'standalone', 'client',
           'multi', 'node', 'model', 'exit']
 
 # Run MPh in source tree, not a possibly different version installed elsewhere.
-root = Path(__file__).resolve().parent.parent
+root = Path(__file__).parent.parent
 if 'PYTHONPATH' in environ:
     environ['PYTHONPATH'] = str(root) + pathsep + environ['PYTHONPATH']
 else:

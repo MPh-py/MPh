@@ -37,7 +37,7 @@ groups = ['config', 'discovery', 'server', 'session', 'standalone', 'client',
           'multi', 'node', 'model', 'exit']
 
 # Determine path of project root folder.
-here = Path(__file__).resolve().parent
+here = Path(__file__).parent
 root = here.parent
 
 # Run MPh in project folder, not a possibly different installed version.

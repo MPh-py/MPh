@@ -11,4 +11,3 @@ they would test whatever `import mph` finds, which may be an installed
 version of MPh. This behavior is intentional, so that new code can be
 tested without touching the installed version, even without a separate
 virtual environment.
-
