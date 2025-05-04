@@ -30,9 +30,8 @@ def teardown_module():
 
 def test_multi():
     global server
-    with logging_disabled():
-        with raises(ValueError):
-            server = mph.Server(multi='invalid')
+    with logging_disabled(), raises(ValueError):
+        server = mph.Server(multi='invalid')
     server = mph.Server(cores=1, multi=False)
     assert server.running()
     assert server.port

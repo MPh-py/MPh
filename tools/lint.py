@@ -5,4 +5,5 @@ from pathlib import Path
 
 
 root = Path(__file__).parent.parent
-run(['flake8'], cwd=root, check=True)
+
+run(['ruff', 'check'], cwd=root, check=True)

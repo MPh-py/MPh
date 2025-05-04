@@ -119,7 +119,7 @@ es.select(media)
 es.java.prop('d').set('d', 'l')
 if model.version() >= '6.3':
     (es/'Free Space 1').rename('free space')
-    es.create("ChargeConservationSolid", 2, name='Laplace equation')
+    es.create('ChargeConservationSolid', 2, name='Laplace equation')
     (es/'Laplace equation').select(media)
 else:
     (es/'Charge Conservation 1').rename('Laplace equation')

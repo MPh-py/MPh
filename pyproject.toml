@@ -29,9 +29,9 @@ dependencies = [
 
 [dependency-groups]
 test = [
-    'pyTest           >= 8',
-    'pyTest-cov       >= 6',
-    'Flake8-pyproject >= 1.2',
+    'pyTest     >= 8',
+    'pyTest-cov >= 6',
+    'Ruff       >= 0.11',
 ]
 docs = [
     'Sphinx      >= 8.2',
@@ -58,34 +58,74 @@ build-backend = 'flit_core.buildapi'
 name = 'mph'
 
 
-# Code linter: Flake8
+# Code linter: Ruff
 
-[tool.flake8]
-exclude = [
-    'local',  '.local',
-    'ignore', '.ignore',
-    'venv',   '.venv',
-]
-ignore = [
-    'E127',                  # Continuation line over-indented.
-    'E128',                  # Continuation line under-indented.
-    'E201',                  # Whitespace after '('.
-    'E202',                  # Whitespace before ')'.
-    'E221',                  # Multiple spaces before operator.
-    'E222',                  # Multiple spaces after operator.
-    'E226',                  # Missing whitespace around arithmetic operator.
-    'E231',                  # Missing whitespace after ',', ';', or ':'.
-    'E241',                  # Multiple spaces after ','.
-    'E251',                  # Unexpected spaces around keyword equals.
-    'E261',                  # At least two spaces before inline comment.
-    'E271',                  # Multiple spaces after keyword.
-    'E272',                  # Multiple spaces before keyword.
-    'E402',                  # Module level import not at top of file.
-    'W503',                  # Line break occurred before a binary operator.
-]
-per-file-ignores = [
-    '__init__.py:F401',      # Imported but unused.
-]
+[tool.ruff]
+line-length    = 79
+indent-width   = 4
+target-version = 'py37'
+include = ['mph/**/*.py', 'tests/**/*.py', 'pyproject.toml']
+
+    [tool.ruff.format]
+    # The project does not actually use the Ruff formatter (only the linter),
+    # but these settings would be used if it did.
+    quote-style = 'single'
+    line-ending = 'cr-lf'
+
+    [tool.ruff.lint]
+    preview = true
+    select = [
+        'F',                  # basic linter rules
+        'E',                  # code style errors
+        'W',                  # code style warnings
+        'B',                  # possible bugs
+        'C4',                 # correct comprehensions
+        'FA',                 # future annotations
+        'PIE',                # miscellaneous lints
+        'ARG',                # unused function arguments
+        'RSE',                # raised exceptions
+        'Q',                  # quotation marks
+        'SIM',                # simplifiable code
+        'PT',                 # pyTest style
+        'PTH',                # pathlib use mandatory
+        'ERA',                # commented-out code
+        'T10',                # debugger calls
+        'UP',                 # upgradable code
+        'RUF100',             # unnecessary `noqa` directives
+    ]
+    ignore = [
+        'E201',               # whitespace after (
+        'E221',               # missing whitespace before operator
+        'E226',               # missing whitespace around operator
+        'E231',               # missing whitespace after ','
+        'E241',               # multiple spaces after comma
+        'E251',               # unexpected spaces around keyword equals
+        'E272',               # multiple spaces before keyword
+        'B017',               # asserting blind `Exception`
+        'B028',               # warning issued without `stacklevel` keyword
+        'C416',               # list comprehension instead of `list()`
+        'SIM103',             # Return the boolean condition directly.
+        'SIM105',             # Use `contextlib.suppress(Exception)` instead.
+        'SIM108',             # ternary operator instead of if-else
+        'PT011',              # `pytest.raises(ValueError)` too broad
+        'PT012',              # `pytest.raises()` with multiple statements
+        'PT013',              # incorrect pytest import
+        'PTH201',             # Never use `Path('.')`.
+        'UP021',              # `universal_newlines` instead of `text`
+        'UP022',              # `PIPE` instead of `capture_output`
+        'UP024',              # Replace `IOError` with `OSError`.
+    ]
+
+    [tool.ruff.lint.per-file-ignores]
+    '__init__.py' = [
+        'F401',               # imported but unused
+    ]
+
+    [tool.ruff.lint.flake8-quotes]
+    inline-quotes    = 'single'
+    multiline-quotes = 'double'
+    docstring-quotes = 'double'
+    avoid-escape     = true
 
 
 # Test runner: pyTest

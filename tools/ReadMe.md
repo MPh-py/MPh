@@ -52,7 +52,7 @@ changes take immediate effect without re-installing the package.
 - Tag commit with version number, e.g. `git tag v1.2.0`
 - Force `stable` branch to latest commit: `git branch -f stable`
 - Same for the current documentation branch: `git branch -f 1.2`
-- Run code linter: `flake8`
+- Run code linter: `python tools/lint.py`
 - Test docs build: `python tools/docs.py`
 - Test wheel build: `python tools/wheel.py`
 - Run code coverage: `python tools/coverage.py`

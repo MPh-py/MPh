@@ -174,4 +174,3 @@ def cleanup():
         jpype.java.lang.Runtime.getRuntime().exit(exit_code)
         # No Python code is reached from here on.
         # We would like to log that the Java VM has exited, but we can't.
-        # log.info('Java virtual machine has exited.')

@@ -77,9 +77,8 @@ def test_truediv():
     node = model/'functions'/'step'
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
-    with logging_disabled():
-        with raises(TypeError):
-            model/False
+    with logging_disabled(), raises(TypeError):
+        model/False
 
 
 def test_contains():
@@ -360,13 +359,11 @@ def test_evaluate():
             model.evaluate('U')
         model.solve('static')
     # Test argument "inner".
-    with logging_disabled():
-        with raises(TypeError):
-            model.evaluate('U', dataset='time-dependent', inner='invalid')
+    with logging_disabled(), raises(TypeError):
+        model.evaluate('U', dataset='time-dependent', inner='invalid')
     # Test argument "outer".
-    with logging_disabled():
-        with raises(TypeError):
-            model.evaluate('U', dataset='parametric sweep', outer='invalid')
+    with logging_disabled(), raises(TypeError):
+        model.evaluate('U', dataset='parametric sweep', outer='invalid')
     # Test particle tracing (if that add-on module is installed).
     if 'Particle Tracing' in client.modules():
         needle = models.needle()
@@ -423,7 +420,6 @@ def test_parameter():
 
 def test_parameters():
     assert 'U' in model.parameters()
-    assert 'U' in model.parameters().keys()
     assert '1[V]' in model.parameters().values()
     assert ('U', '1[V]') in model.parameters().items()
     assert ('U', 1) in model.parameters(evaluate=True).items()
@@ -439,7 +435,6 @@ def test_description():
 
 def test_descriptions():
     assert 'U' in model.descriptions()
-    assert 'U' in model.descriptions().keys()
     assert 'applied voltage' in model.descriptions().values()
     assert ('U', 'applied voltage') in model.descriptions().items()
 
@@ -728,9 +723,8 @@ def test_features():
         assert 'initial values'   in model.features('electrostatic')
         assert 'anode'            in model.features('electrostatic')
         assert 'cathode'          in model.features('electrostatic')
-        with logging_disabled():
-            with raises(LookupError):
-                model.features('non-existing')
+        with logging_disabled(), raises(LookupError):
+            model.features('non-existing')
 
 
 def test_toggle():
@@ -765,9 +759,8 @@ def test_load():
         image.property('extrap', 'value')
         model.load('gaussian.tif', 'image')
         model.remove('functions/image')
-        with logging_disabled():
-            with raises(LookupError):
-                model.load('image.png', 'non-existing')
+        with logging_disabled(), raises(LookupError):
+            model.load('image.png', 'non-existing')
 
 
 ########################################

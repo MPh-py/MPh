@@ -348,7 +348,7 @@ def find_backends():
         command = server + ['--version']
         command[0] = str(command[0])   # Needed to support Python 3.6 and 3.7.
         try:
-            arguments = dict(
+            arguments = dict(  # noqa: C408 (unnecessary dict() call)
                 check=True, timeout=15,
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 universal_newlines=True, encoding='ascii', errors='ignore',

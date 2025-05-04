@@ -185,12 +185,10 @@ class Node:
         return NotImplemented
 
     def __contains__(self, node):
-        if isinstance(node, str):
-            if (self/node).exists():
-                return True
-        elif isinstance(node, Node):
-            if node.parent() == self and node.exists():
-                return True
+        if isinstance(node, str) and (self/node).exists():
+            return True
+        if isinstance(node, Node) and node.parent() == self and node.exists():
+            return True
         return False
 
     def __iter__(self):
