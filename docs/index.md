@@ -41,9 +41,9 @@ and sells the simulation software.
 
 installation
 tutorial
-limitations
 demonstrations
 api
+limitations
 releases
 credits
 ```
