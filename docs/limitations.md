@@ -53,20 +53,22 @@ libraries cannot be found. You would have to add the full paths of
 certain shared-library folders to an environment variable named
 `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on macOS.
 
-For example, for an installation of Comsol 6.0 on Ubuntu Linux, you
-would add the following lines at the end of the shell configuration
-file `.bashrc`.
+For example, for an installation of Comsol 6.3 on Linux, you would add the
+following lines at the end of the shell configuration file `.bashrc`.
 ```shell
 # Help MPh find Comsol's shared libraries.
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\
-/usr/local/comsol60/multiphysics/lib/glnxa64:\
-/usr/local/comsol60/multiphysics/ext/graphicsmagick/glnxa64:\
-/usr/local/comsol60/multiphysics/ext/cadimport/glnxa64
+ComsolDir=/usr/local/comsol63/multiphysics
+export LD_LIBRARY_PATH=\
+$ComsolDir/lib/glnxa64:\
+$ComsolDir/lib/glnxa64/gcc:\
+$ComsolDir/ext/graphicsmagick/glnxa64:\
+$ComsolDir/ext/cadimport/glnxa64:\
+$LD_LIBRARY_PATH
 ```
 
-On macOS, the root folder is `/Applications/COMSOL60/Multiphysics`.
-The folder names depend on the installed Comsol version and will have
-to be adapted accordingly.
+On macOS, `ComsolDir` would be `/Applications/COMSOL63/Multiphysics`. The above
+is [as documented for Comsol 6.3][comsol63_libpath] — make sure to consult the
+corresponding documentation for your Comsol version.
 
 Requiring the environment variable to be set correctly limits the
 possibility of selecting a specific Comsol version from within MPh,
@@ -107,3 +109,4 @@ where this works reliably.
 [API reference]:      https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api
 [pyJNIus]:            https://pyjnius.readthedocs.io
 [GitHub issue #8]:    https://github.com/MPh-py/MPh/issues/8
+[comsol63_libpath]:   https://doc.comsol.com/6.3/docserver/#!/com.comsol.help.comsol/comsol_api_intro.46.13.html
