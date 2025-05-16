@@ -29,9 +29,10 @@ dependencies = [
 
 [dependency-groups]
 test = [
-    'pyTest     >= 8',
-    'pyTest-cov >= 6',
-    'Ruff       >= 0.11',
+    'pyTest       >= 8',
+    'pyTest-cov   >= 6',
+    'Ruff         >= 0.11',
+    'basedPyright >= 1.29',
 ]
 docs = [
     'Sphinx      >= 8.2',
@@ -133,6 +134,20 @@ include = [
     multiline-quotes = 'double'
     docstring-quotes = 'double'
     avoid-escape     = true
+
+
+# Type checker: (based)Pyright
+
+[tool.pyright]
+include                            = ['mph/', 'tests/']
+typeCheckingMode                   = 'standard'
+reportUnnecessaryTypeIgnoreComment = true
+reportMissingImports               = false
+strictParameterNoneValue           = false
+reportOptionalMemberAccess         = false
+reportAttributeAccessIssue         = false
+reportPossiblyUnboundVariable      = false
+reportCallIssue                    = false
 
 
 # Test runner: pyTest

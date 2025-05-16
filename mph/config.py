@@ -1,14 +1,21 @@
 ﻿"""Manages configuration options."""
 
+from __future__ import annotations
+
 import configparser
 import os
 import platform
 from pathlib import Path
 from logging import getLogger
 
+from typing import overload, TypedDict
 
-system = platform.system()
-log    = getLogger(__package__)
+
+class Options(TypedDict):
+    session:  str
+    caching:  bool
+    classkit: bool
+
 
 options = {
     'session':  'platform-dependent',
@@ -17,11 +24,20 @@ options = {
 }
 """Default values for configuration options."""
 
+system = platform.system()
+log    = getLogger(__package__)
+
 
 ##########
 # Access #
 ##########
 
+@overload
+def option(name: None, value: None) ->  Options: ...
+@overload
+def option(name: str, value: None) -> str | bool | int | float: ...
+@overload
+def option(name: str, value: str | bool | int | float): ...
 def option(name=None, value=None):
     """
     Sets or returns the value of a configuration option.
@@ -46,7 +62,7 @@ def option(name=None, value=None):
 # Storage #
 ###########
 
-def location():
+def location() -> Path:
     """
     Returns the default location of the configuration file.
 
@@ -65,7 +81,7 @@ def location():
         return Path.home()/'MPh'
 
 
-def load(file=None):
+def load(file: Path | str = None):
     """
     Loads the configuration from the given `.ini` file.
 
@@ -104,7 +120,7 @@ def load(file=None):
                 options[key] = parser[section][key]
 
 
-def save(file=None):
+def save(file: Path | str = None):
     """
     Saves the configuration in the given `.ini` file.
 

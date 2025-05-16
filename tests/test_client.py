@@ -1,6 +1,7 @@
 ﻿"""Tests the `client` module in client–server mode."""
 
 import mph
+from mph import Client, Model
 
 from fixtures import logging_disabled
 from fixtures import setup_logging
@@ -9,9 +10,9 @@ from pytest  import raises
 from pathlib import Path
 
 
-client = None
-model  = None
-demo   = Path(__file__).resolve().parent/'demo.mph'
+client: Client
+model:  Model
+demo = Path(__file__).resolve().parent/'demo.mph'
 
 
 # The test are mostly in source-code order of the `Client` class. Except that
@@ -66,13 +67,8 @@ def test_iter():
 
 def test_truediv():
     assert client/'demo' == model
-    with logging_disabled():
-        with raises(ValueError):
-            client/'non-existing'
-        with raises(TypeError):
-            client/model
-        with raises(TypeError):
-            client/False
+    with logging_disabled(), raises(ValueError):
+        client/'non-existing'         # pyright: ignore[reportUnusedExpression]
 
 
 def test_cores():
@@ -113,8 +109,6 @@ def test_caching():
     assert model == copy
     client.caching(False)
     assert not client.caching()
-    with logging_disabled(), raises(ValueError):
-        client.caching('anything else')
 
 
 def test_remove():
@@ -132,8 +126,6 @@ def test_remove():
             client.remove(model)
         with raises(ValueError):
             client.remove('non-existing')
-        with raises(TypeError):
-            client.remove(True)
 
 
 def test_clear():

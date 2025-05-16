@@ -1,5 +1,7 @@
 ﻿"""Provides the wrapper class for a model node."""
 
+from __future__ import annotations
+
 from jpype     import JBoolean, JInt, JDouble, JString, JArray, JClass
 from numpy     import array, ndarray, integer
 from pathlib   import Path
@@ -8,6 +10,12 @@ from json      import load as json_load
 from difflib   import get_close_matches
 from functools import lru_cache
 from logging   import getLogger
+
+from typing       import TYPE_CHECKING, overload, Iterator, Sequence, Literal
+from numpy.typing import ArrayLike, NDArray
+from numpy        import int32
+if TYPE_CHECKING:
+    from .model   import Model
 
 
 log = getLogger(__package__)
@@ -90,102 +98,110 @@ class Node:
 /com/comsol/model/ModelEntity.html
     """
 
+    model: Model
+    """Model object this node refers to."""
+
+    groups: dict[str, str] = {
+        'parameters':   'self.model.java.param().group()',
+        'functions':    'self.model.java.func()',
+        'components':   'self.model.java.component()',
+        'geometries':   'self.model.java.geom()',
+        'views':        'self.model.java.view()',
+        'selections':   'self.model.java.selection()',
+        'coordinates':  'self.model.java.coordSystem()',
+        'variables':    'self.model.java.variable()',
+        'couplings':    'self.model.java.cpl()',
+        'physics':      'self.model.java.physics()',
+        'multiphysics': 'self.model.java.multiphysics()',
+        'materials':    'self.model.java.material()',
+        'meshes':       'self.model.java.mesh()',
+        'studies':      'self.model.java.study()',
+        'solutions':    'self.model.java.sol()',
+        'batches':      'self.model.java.batch()',
+        'datasets':     'self.model.java.result().dataset()',
+        'evaluations':  'self.model.java.result().numerical()',
+        'tables':       'self.model.java.result().table()',
+        'plots':        'self.model.java.result()',
+        'exports':      'self.model.java.result().export()',
+    }
+    """Mapping of the built-in groups to corresponding Java objects."""
+
+    alias: dict[str, str] = {
+        'parameter':  'parameters',
+        'function':   'functions',
+        'component':  'components',
+        'geometry':   'geometries',
+        'view':       'views',
+        'selection':  'selections',
+        'variable':   'variables',
+        'coupling':   'couplings',
+        'material':   'materials',
+        'mesh':       'meshes',
+        'study':      'studies',
+        'solution':   'solutions',
+        'batch':      'batches',
+        'dataset':    'datasets',
+        'evaluation': 'evaluations',
+        'table':      'tables',
+        'plot':       'plots',
+        'result':     'plots',
+        'results':    'plots',
+        'export':     'exports',
+    }
+    """Accepted aliases for the names of built-in groups."""
+
+    path: tuple[str, ...]
+    """Path of this node reference from the model's root."""
+
     ############
     # Internal #
     ############
 
-    def __init__(self, model, path=None):
-        if path is None:
-            path = ('',)
-        elif isinstance(path, str):
-            path = parse(path)
-        elif isinstance(path, Node):
-            path = path.path
+    def __init__(self, model: Model, node: str | Node = None):
+        self.model = model
+        if node is None:
+            self.path = ('',)
+        elif isinstance(node, str):
+            parts = parse(node)
+            if parts[0] in self.alias:
+                parts = (self.alias[parts[0]], *parts[1:])
+            self.path = parts
+        elif isinstance(node, Node):
+            self.path = node.path
         else:
-            error = f'Node path {path!r} is not a string or Node instance.'
+            error = f'Node path {node!r} is not a string or Node instance.'
             log.error(error)
             raise TypeError(error)
-        self.model = model
-        """Model object this node refers to."""
-        self.groups = {
-            'parameters':   'self.model.java.param().group()',
-            'functions':    'self.model.java.func()',
-            'components':   'self.model.java.component()',
-            'geometries':   'self.model.java.geom()',
-            'views':        'self.model.java.view()',
-            'selections':   'self.model.java.selection()',
-            'coordinates':  'self.model.java.coordSystem()',
-            'variables':    'self.model.java.variable()',
-            'couplings':    'self.model.java.cpl()',
-            'physics':      'self.model.java.physics()',
-            'multiphysics': 'self.model.java.multiphysics()',
-            'materials':    'self.model.java.material()',
-            'meshes':       'self.model.java.mesh()',
-            'studies':      'self.model.java.study()',
-            'solutions':    'self.model.java.sol()',
-            'batches':      'self.model.java.batch()',
-            'datasets':     'self.model.java.result().dataset()',
-            'evaluations':  'self.model.java.result().numerical()',
-            'tables':       'self.model.java.result().table()',
-            'plots':        'self.model.java.result()',
-            'exports':      'self.model.java.result().export()',
-        }
-        """Mapping of the built-in groups to corresponding Java objects."""
-        self.alias = {
-            'parameter':  'parameters',
-            'function':   'functions',
-            'component':  'components',
-            'geometry':   'geometries',
-            'view':       'views',
-            'selection':  'selections',
-            'variable':   'variables',
-            'coupling':   'couplings',
-            'material':   'materials',
-            'mesh':       'meshes',
-            'study':      'studies',
-            'solution':   'solutions',
-            'batch':      'batches',
-            'dataset':    'datasets',
-            'evaluation': 'evaluations',
-            'table':      'tables',
-            'plot':       'plots',
-            'result':     'plots',
-            'results':    'plots',
-            'export':     'exports',
-        }
-        """Accepted aliases for the names of built-in groups."""
-        if path[0] in self.alias:
-            path = (self.alias[path[0]],) + path[1:]
-        self.path = path
-        """Path of this node reference from the model's root."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return join(self.path)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}('{self}')"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Node):
+            return NotImplemented
         return (self.path == other.path and self.model == other.model)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: str) -> Node:
         if isinstance(other, str):
             other = other.lstrip('/')
             return self.__class__(self.model, join(parse(f'{self}/{other}')))
         return NotImplemented
 
-    def __contains__(self, node):
+    def __contains__(self, node: str | Node) -> bool:
         if isinstance(node, str) and (self/node).exists():
             return True
         if isinstance(node, Node) and node.parent() == self and node.exists():
             return True
         return False
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Node]:
         yield from self.children()
 
     @property
-    def java(self):
+    def java(self) -> JClass | None:
         """
         Java object this node maps to, if any.
 
@@ -217,7 +233,7 @@ class Node:
             if name == escape(member.label()):
                 return member
 
-    def java_if_exists(self):
+    def java_if_exists(self) -> JClass:
         # Returns `self.java` if the node exists, raises an error otherwise.
         #
         # This helper function was introduced to reduce code repetition
@@ -235,16 +251,16 @@ class Node:
     # Navigation #
     ##############
 
-    def name(self):
+    def name(self) -> str:
         """Returns the node's name."""
         return f'{self.model}' if self.is_root() else escape(self.path[-1])
 
-    def tag(self):
+    def tag(self) -> str | None:
         """Returns the node's tag."""
         java = self.java
         return str(java.tag()) if java else None
 
-    def type(self):
+    def type(self) -> str | None:
         """
         Returns the node's feature type.
 
@@ -256,14 +272,14 @@ class Node:
         java = self.java
         return str(java.getType()) if hasattr(java, 'getType') else None
 
-    def parent(self):
+    def parent(self) -> Node | None:
         """Returns the parent node."""
         if self.is_root():
             return None
         else:
             return self.__class__(self.model, join(self.path[:-1]))
 
-    def children(self):
+    def children(self) -> list[Node]:
         """Returns all child nodes."""
         java = self.java
         if self.is_root():
@@ -279,15 +295,15 @@ class Node:
         else:
             return []
 
-    def is_root(self):
+    def is_root(self) -> bool:
         """Checks if the node is the model's root node."""
         return bool(len(self.path) == 1 and not self.path[0])
 
-    def is_group(self):
+    def is_group(self) -> bool:
         """Checks if the node refers to a built-in group."""
         return bool(len(self.path) == 1 and self.path[0])
 
-    def exists(self):
+    def exists(self) -> bool:
         """Checks if the node exists in the model tree."""
         return (self.java is not None)
 
@@ -295,7 +311,7 @@ class Node:
     # Inspection #
     ##############
 
-    def comment(self, text=None):
+    def comment(self, text: str = None) -> None | str:
         """Returns or sets the comment attached to the node."""
         java = self.java_if_exists()
         if text is None:
@@ -303,7 +319,7 @@ class Node:
         else:
             java.comments(text)
 
-    def problems(self):
+    def problems(self) -> list[dict[str, str | Node]]:
         """
         Returns problems reported by the node and its descendants.
 
@@ -352,7 +368,7 @@ class Node:
     # Interaction #
     ###############
 
-    def rename(self, name):
+    def rename(self, name: str):
         """Renames the node."""
         if self.is_root():
             error = 'Cannot rename the root node.'
@@ -367,7 +383,7 @@ class Node:
             java.label(name)
         self.path = self.path[:-1] + (name,)
 
-    def retag(self, tag):
+    def retag(self, tag: str):
         """Assigns a new tag to the node."""
         if self.is_root():
             error = 'Cannot change tag of root node.'
@@ -380,6 +396,16 @@ class Node:
         java = self.java_if_exists()
         java.tag(tag)
 
+    @overload
+    def property(self,
+        name:  str,
+        value: bool | float | str | Path | Node | list[Node | str] | ArrayLike,
+    ): ...
+    @overload
+    def property(self,
+        name:  str,
+        value: None,
+    ) -> Node | bool | float | str | Path | NDArray: ...
     def property(self, name, value=None):
         """
         Returns or changes the value of the named property.
@@ -393,7 +419,12 @@ class Node:
         else:
             java.set(name, cast(value))
 
-    def properties(self):
+    def properties(self) -> dict[
+        str,
+        Node | bool | float | str | Path
+        | list[str] | list[list[str]] | NDArray
+        | None
+    ]:
         """
         Returns names and values of all node properties as a dictionary.
 
@@ -406,7 +437,11 @@ class Node:
         names = sorted(str(name) for name in java.properties())
         return {name: get(java, name) for name in names}
 
-    def select(self, entity):
+    def select(self,
+        entity: Literal['all'] | None
+                | int | Node
+                | Sequence[int] | NDArray[integer],
+    ):
         """
         Assigns `entity` as the node's selection.
 
@@ -459,7 +494,7 @@ class Node:
             log.error(error)
             raise ValueError(error)
 
-    def selection(self):
+    def selection(self) -> Node | NDArray[int32] | None:
         """
         Returns the entity or entities the node has selected.
 
@@ -500,7 +535,14 @@ class Node:
             entities = java.entities()
             return array(entities) if entities else None
 
-    def toggle(self, action='flip'):
+    def toggle(self,
+        action: Literal[
+            'flip',
+            'enable', 'disable',
+            'on', 'off',
+            'activate', 'deactivate',
+        ] = 'flip',
+    ):
         """
         Enables or disables the node.
 
@@ -527,7 +569,7 @@ class Node:
             raise RuntimeError(error)
         java.run()
 
-    def import_(self, file):
+    def import_(self, file: Path | str):
         """
         Imports external data from the given `file`.
 
@@ -546,7 +588,10 @@ class Node:
         self.java.importData()
         log.info('Finished loading external data.')
 
-    def create(self, *arguments, name=None):
+    def create(self,
+        *arguments: Node | bool | float | str | Path | None,
+        name:       str = None,
+    ):
         """
         Creates a new child feature node.
 
@@ -647,7 +692,7 @@ class Node:
 # Name parsing #
 ################
 
-def parse(string):
+def parse(string: str) -> tuple[str, ...]:
     """Parses a node path given as string to a tuple."""
     # Force-cast str subclasses to str, just like `pathlib` does.
     # See bugs.python.org/issue21127 for the rationale.
@@ -659,19 +704,19 @@ def parse(string):
     return path
 
 
-def join(path):
+def join(path: tuple[str, ...]) -> str:
     """Joins a node path given as tuple into a string."""
     return '/'.join(escape(name) for name in path)
 
 
-def escape(name):
+def escape(name: str) -> str:
     """Escapes forward slashes in a node name."""
     # Also accept Java strings, but always return Python string.
     name = str(name)
     return name.replace('/', '//')
 
 
-def unescape(name):
+def unescape(name: str) -> str:
     """Reverses escaping of forward slashes in a node name."""
     return name.replace('//', '/')
 
@@ -681,7 +726,7 @@ def unescape(name):
 ################
 
 @lru_cache(maxsize=1)
-def load_patterns():
+def load_patterns() -> dict[str, str]:
     """Loads the look-up table for tag patterns indexed by feature path."""
     file = Path(__file__).parent/'tags.json'
     with file.open(encoding='UTF-8-sig') as stream:
@@ -689,7 +734,7 @@ def load_patterns():
     return patterns
 
 
-def feature_path(node):
+def feature_path(node: Node | None) -> list[str]:
     """Returns the feature path of a node."""
     if node.is_group():
         return [node.name()]
@@ -699,7 +744,7 @@ def feature_path(node):
     return feature_path(node.parent()) + [type]
 
 
-def tag_pattern(feature_path):
+def tag_pattern(feature_path: Sequence[str]):
     """Looks up the tag pattern for the best match to given feature path."""
     (group, type) = (feature_path[0], feature_path[-1])
     patterns = load_patterns()
@@ -718,7 +763,10 @@ def tag_pattern(feature_path):
 # Type casting #
 ################
 
-def cast(value):
+def cast(
+    value: None | Node | bool | int | integer | float | str | Path
+           | list | tuple | NDArray
+) -> JBoolean | JInt | JDouble | JString | JArray | None:
     """Casts a value from its Python data type to a suitable Java data type."""
     if isinstance(value, Node):
         return JString(value.tag())
@@ -778,7 +826,15 @@ def cast(value):
         raise TypeError(error)
 
 
-def get(java, name):
+def get(
+    java: JClass,
+    name: str,
+) -> (
+    Node
+    | bool | float | str | Path
+    | list[str] | list[list[str]] | NDArray
+    | None
+):
     """Returns the value of a Java node property as a Python data type."""
     datatype = java.getValueType(name)
     if datatype == 'Boolean':
@@ -839,7 +895,7 @@ def get(java, name):
 # Inspection #
 ##############
 
-def tree(node, max_depth=None):
+def tree(node: Node | Model, max_depth: int = None):
     """
     Displays the model tree.
 
@@ -877,7 +933,7 @@ def tree(node, max_depth=None):
     reasonably fast.
     """
 
-    def traverse(node, levels, max_depth):
+    def traverse(node: Node, levels: list[bool], max_depth: int | None):
         if max_depth and len(levels) > max_depth:
             return
         markers = ''.join('   ' if last else '│  ' for last in levels[:-1])
@@ -891,10 +947,10 @@ def tree(node, max_depth=None):
     if not isinstance(node, Node):
         # Assume node is actually a model object and traverse from root.
         node = node/None
-    return traverse(node, [], max_depth)
+    traverse(node, [], max_depth)
 
 
-def inspect(java):
+def inspect(java: JClass | Node | Model):
     """
     Inspects a Java node object.
 

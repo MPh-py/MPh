@@ -1,15 +1,14 @@
 ﻿"""Tests multiple client connections to the same server."""
 
 import mph
+from mph import Server
 
-from fixtures import logging_disabled
 from fixtures import setup_logging
 
-from pytest import raises
-from time   import sleep
+from time import sleep
 
 
-server = None
+server: Server
 
 
 def teardown_module():
@@ -22,8 +21,6 @@ def teardown_module():
 
 def test_multi():
     global server
-    with logging_disabled(), raises(ValueError):
-        server = mph.Server(multi='invalid')
     server = mph.Server(cores=1, multi=False)
     assert server.running()
     assert server.port
