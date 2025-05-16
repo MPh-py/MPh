@@ -21,6 +21,8 @@ installation found in a later step that reports the same version as one
 found in an earlier step will be ignored, regardless of install location.
 """
 
+from __future__ import annotations
+
 import platform
 import subprocess
 import re
@@ -28,9 +30,23 @@ from pathlib   import Path
 from functools import lru_cache
 from logging   import getLogger
 
+from typing import TypedDict
 
-log = getLogger(__package__)
+
+class Backend(TypedDict):
+    name:   str
+    major:  int
+    minor:  int
+    patch:  int
+    build:  int
+    root:   Path
+    jvm:    Path
+    server: list[Path | str]
+
+
 system = platform.system()
+log = getLogger(__package__)
+
 architectures = {
     'Windows': ['win64'],
     'Linux':   ['glnxa64'],
@@ -42,7 +58,7 @@ architectures = {
 # Version information #
 #######################
 
-def parse(version):
+def parse(version: str) -> tuple[str, int, int, int, int]:
     """
     Parses version information as returned by Comsol executable.
 
@@ -86,7 +102,7 @@ def parse(version):
 # Back-end discovery #
 ######################
 
-def search_registry():
+def search_registry() -> list[Path]:
     """Returns Comsol executables found in the Windows Registry."""
 
     log.debug('Searching Windows Registry for Comsol executables.')
@@ -153,7 +169,7 @@ def search_registry():
     return executables
 
 
-def search_disk():
+def search_disk() -> list[Path]:
     """Returns Comsol executables found on the file system."""
 
     log.debug('Searching file system for Comsol executables.')
@@ -201,7 +217,7 @@ def search_disk():
     return executables
 
 
-def lookup_comsol():
+def lookup_comsol() -> Path | None:
     """Returns Comsol executable if found on the system's search path."""
 
     log.debug('Looking for Comsol executable on system search path.')
@@ -238,7 +254,7 @@ def lookup_comsol():
 
 
 @lru_cache(maxsize=1)
-def find_backends():
+def find_backends() -> list[Backend]:
     """Returns the list of available Comsol back-ends."""
 
     log.debug('Searching system for available Comsol back-ends.')
@@ -296,12 +312,13 @@ def find_backends():
             continue
 
         # On Windows, check that server executable exists in same folder.
+        server: list[Path | str]
         if system == 'Windows':
-            server = ini.parent/'comsolmphserver.exe'
-            if not server.exists():
+            file = ini.parent/'comsolmphserver.exe'
+            if not file.exists():
                 log.debug(f'No server executable alongside "{ini.name}".')
                 continue
-            server = [server]
+            server = [file]
         else:
             server = [comsol, 'mphserver']
 
@@ -340,6 +357,7 @@ def find_backends():
             continue
 
         # Get version information from Comsol server.
+        command: list[Path | str]
         command = server + ['--version']
         command[0] = str(command[0])   # Needed to support Python 3.6 and 3.7.
         try:
@@ -351,7 +369,10 @@ def find_backends():
             # `universal_newlines` instead of `text` to support Python 3.6.
             if system == 'Windows':
                 arguments['creationflags'] = 0x08000000
-            process = subprocess.run(command, **arguments)
+            process = subprocess.run(
+                command,
+                **arguments,              # pyright: ignore[reportArgumentType]
+            )
         except subprocess.CalledProcessError:
             log.debug('Querying version information failed.')
             continue
@@ -395,7 +416,7 @@ def find_backends():
 # Back-end selection #
 ######################
 
-def backend(version=None):
+def backend(version: str = None) -> Backend:
     """
     Returns information about the Comsol back-end.
 

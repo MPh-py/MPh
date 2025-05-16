@@ -1,5 +1,7 @@
 ﻿"""Starts and stops the local Comsol session."""
 
+from __future__ import annotations
+
 from .client import Client
 from .server import Server
 from .config import option
@@ -11,6 +13,8 @@ import platform
 import threading
 import faulthandler
 from logging import getLogger
+
+from types import TracebackType
 
 
 client = None
@@ -24,7 +28,11 @@ log    = getLogger(__package__)
 # Start #
 #########
 
-def start(cores=None, version=None, port=0):
+def start(
+    cores:   int = None,
+    version: str = None,
+    port:    int = 0,
+) -> Client:
     """
     Starts a local Comsol session.
 
@@ -110,7 +118,7 @@ exit_function = sys.exit
 exception_handler = sys.excepthook
 
 
-def exit_hook(code=None):
+def exit_hook(code: int = None):
     """Monkey-patches `sys.exit()` to preserve exit code at shutdown."""
     global exit_code
     if isinstance(code, int):
@@ -118,7 +126,11 @@ def exit_hook(code=None):
     exit_function(code)
 
 
-def exception_hook(exc_type, exc_value, exc_traceback):
+def exception_hook(
+    exc_type:      type[BaseException],
+    exc_value:     BaseException,
+    exc_traceback: TracebackType | None,
+):
     """Sets exit code to 1 if exception raised in main thread."""
     global exit_code
     exit_code = 1

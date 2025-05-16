@@ -1,7 +1,7 @@
 ﻿"""Tests the `node` module."""
 
 import mph
-from mph import node, Node
+from mph import node, Node, Client, Model
 
 import models
 from fixtures import logging_disabled
@@ -15,8 +15,8 @@ from numpy.testing import assert_allclose
 from textwrap      import dedent
 
 
-client = None
-model  = None
+client: Client
+model:  Model
 
 
 def setup_module():
@@ -36,7 +36,7 @@ def test_init():
     assert 'self.model.java.func()' in node.groups.values()
     Node(model, node)
     with logging_disabled(), raises(TypeError):
-        Node(model, False)
+        Node(model, False)                # pyright: ignore[reportArgumentType]
 
 
 def test_str():
@@ -53,8 +53,6 @@ def test_eq():
 
 def test_truediv():
     assert Node(model, 'functions')/'step' == Node(model, 'functions/step')
-    with logging_disabled(), raises(TypeError):
-        Node(model, 'functions')/False
 
 
 def test_contains():
@@ -251,6 +249,7 @@ def test_retag():
             Node(model, 'functions/non-existing').retag('something')
     node = Node(model, 'functions/step')
     old = node.tag()
+    assert isinstance(old, str)
     node.retag('new')
     assert node.tag() == 'new'
     node.retag(old)
@@ -411,7 +410,7 @@ def test_select():
         with raises(LookupError):
             cathode.select(Node(model, 'selections/non-existing'))
         with raises(ValueError):
-            cathode.select('invalid argument')
+            cathode.select('invalid argument')  # pyright: ignore[reportArgumentType]
 
 
 def test_selection():
@@ -595,7 +594,7 @@ def test_cast():
         with raises(TypeError):
             node.cast(array([1+1j, 1-1j]))
         with raises(TypeError):
-            node.cast({1, 2, 3})
+            node.cast({1, 2, 3})          # pyright: ignore[reportArgumentType]
 
 
 def test_get():

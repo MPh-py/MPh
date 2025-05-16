@@ -1,7 +1,9 @@
 ﻿"""Provides the wrapper for Comsol server instances."""
 
-from .          import discovery
-from .config    import option
+from __future__ import annotations
+
+from .       import discovery
+from .config import option
 
 from subprocess import Popen as start
 from subprocess import PIPE
@@ -9,6 +11,8 @@ from subprocess import TimeoutExpired
 from re         import match as regex
 from time       import perf_counter as now
 from logging    import getLogger
+
+from typing import Literal
 
 
 log = getLogger(__package__)
@@ -67,8 +71,14 @@ class Server:
     server process, and would thus override them in case of duplicates.
     """
 
-    def __init__(self, cores=None, version=None, port=None,
-                       multi=None, timeout=60, arguments=None):
+    def __init__(self,
+        cores:     int = None,
+        version:   str = None,
+        port:      int = None,
+        multi:     bool | Literal['on', 'off'] | None = None,
+        timeout:   int = 60,
+        arguments: list[str] = None,
+    ):
 
         # Remember user-provided command-line arguments.
         extra_arguments = arguments if arguments else []
@@ -146,14 +156,14 @@ class Server:
         self.process = process
         """Subprocess that the server is running in."""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__.__name__}(port={self.port})'
 
-    def running(self):
+    def running(self) -> bool:
         """Returns whether the server process is still running."""
         return (self.process.poll() is None)
 
-    def stop(self, timeout=20):
+    def stop(self, timeout: int = 20):
         """Shuts down the server."""
         if not self.running():
             log.error(f'Server on port {self.port} has already stopped.')
@@ -172,7 +182,7 @@ class Server:
 # Parsing #
 ###########
 
-def parse_port(line):
+def parse_port(line: str) -> int | None:
     """Parses out the port number from a line of server output."""
     match = regex(r'^COMSOL.* \(.*\) .*?(\d{4,5}).*$', line)
     if match:

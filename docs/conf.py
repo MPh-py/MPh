@@ -53,6 +53,7 @@ autodoc_default_options = {
     'members':       True,             # Include module/class members.
     'member-order': 'bysource',        # Order members as in source file.
 }
+autodoc_typehints = 'none'             # Rendering type hints doesn't work.
 autosummary_generate = False           # Stub files are created by hand.
 add_module_names = False               # Drop module prefix from signatures.
 

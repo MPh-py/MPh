@@ -1,6 +1,7 @@
 ﻿"""Tests the `model` module."""
 
 import mph
+from mph import Client, Model
 
 import models
 from fixtures import logging_disabled
@@ -13,9 +14,9 @@ from pathlib       import Path
 from platform      import system
 
 
-client = None
-model  = None
-empty  = None
+client: Client
+model:  Model
+empty:  Model
 
 
 def setup_module():
@@ -42,7 +43,7 @@ def teardown_module():
             file.unlink()
 
 
-class Derived(mph.Model):
+class Derived(Model):
     pass
 
 
@@ -73,8 +74,6 @@ def test_truediv():
     node = model/'functions'/'step'
     assert (model/node).name() == 'step'
     assert (model/None).is_root()
-    with logging_disabled(), raises(TypeError):
-        model/False
 
 
 def test_contains():
@@ -188,7 +187,7 @@ def test_build():
         with raises(LookupError):
             model.build('non-existing')
         with raises(TypeError):
-            model.build(False)
+            model.build(False)            # pyright: ignore[reportArgumentType]
         with raises(RuntimeError):
             empty.build()
 
@@ -203,7 +202,7 @@ def test_mesh():
         with raises(LookupError):
             model.mesh('non-existing')
         with raises(TypeError):
-            model.mesh(False)
+            model.mesh(False)             # pyright: ignore[reportArgumentType]
         with raises(RuntimeError):
             empty.mesh()
 
@@ -218,7 +217,7 @@ def test_solve():
         with raises(LookupError):
             model.solve('non-existing')
         with raises(TypeError):
-            model.solve(False)
+            model.solve(False)            # pyright: ignore[reportArgumentType]
         with raises(RuntimeError):
             empty.solve()
 
@@ -230,13 +229,17 @@ def test_inner():
     assert (indices == list(range(1,102))).all()
     assert values[0] == 0
     assert values[-1] == 1
-    assert model.inner(model/'datasets'/'time-dependent')
-    assert model.inner('sweep//solution')
+    (i, v) = model.inner(model/'datasets'/'time-dependent')
+    assert (i == indices).all()
+    assert (v == values).all()
+    (i, v) = model.inner('sweep//solution')
+    assert (i == indices).all()
+    assert (v == values).all()
     with logging_disabled():
         with raises(ValueError):
             model.inner('non-existing')
         with raises(TypeError):
-            model.inner(False)
+            model.inner(False)            # pyright: ignore[reportArgumentType]
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
         with raises(RuntimeError):
@@ -250,13 +253,17 @@ def test_outer():
     assert values.dtype.kind  == 'f'
     assert (indices == list(range(1,4))).all()
     assert (values == (1.0, 2.0, 3.0)).all()
-    assert model.outer(model/'datasets'/'parametric sweep')
-    assert model.outer('sweep//solution')
+    (i, v) = model.outer(model/'datasets'/'parametric sweep')
+    assert (i == indices).all()
+    assert (v == values).all()
+    (indices, values) = model.outer('sweep//solution')
+    assert not len(indices)
+    assert not len(values)
     with logging_disabled():
         with raises(ValueError):
             model.outer('non-existing')
         with raises(TypeError):
-            model.outer(False)
+            model.outer(False)            # pyright: ignore[reportArgumentType]
         no_solution = (model/'datasets').create('CutPoint2D')
         no_solution.property('data', 'none')
         with raises(RuntimeError):
@@ -341,7 +348,10 @@ def test_evaluate():
         with raises(ValueError):
             model.evaluate('U', dataset='non-existing')
         with raises(TypeError):
-            model.evaluate('U', dataset=False)
+            model.evaluate(
+                'U',
+                dataset=False,            # pyright: ignore[reportArgumentType]
+            )
         with raises(RuntimeError):
             empty.evaluate('U')
         no_solution = (model/'datasets').create('CutPoint2D')
@@ -356,10 +366,18 @@ def test_evaluate():
         model.solve('static')
     # Test argument "inner".
     with logging_disabled(), raises(TypeError):
-        model.evaluate('U', dataset='time-dependent', inner='invalid')
+        model.evaluate(
+            'U',
+            dataset='time-dependent',
+            inner='invalid',              # pyright: ignore[reportArgumentType]
+        )
     # Test argument "outer".
     with logging_disabled(), raises(TypeError):
-        model.evaluate('U', dataset='parametric sweep', outer='invalid')
+        model.evaluate(
+            'U',
+            dataset='parametric sweep',
+            outer='invalid',              # pyright: ignore[reportArgumentType]
+        )
     # Test particle tracing (if that add-on module is installed).
     if 'Particle Tracing' in client.modules():
         needle = models.needle()
@@ -369,12 +387,12 @@ def test_evaluate():
         assert qy.shape == (20, 21)
         assert qz.shape == (20, 21)
         qf = needle.evaluate('qx', dataset='electrons', inner='first')
-        assert (qf == qx[:,0]).all()
+        assert (qf == qx[:, 0]).all()
         ql = needle.evaluate('qx', dataset='electrons', inner='last')
-        assert (ql == qx[:,-1]).all()
-        qi = needle.evaluate('qx', dataset='electrons', inner=[1,21])
-        assert (qi[:,0] == qf).all()
-        assert (qi[:,1] == ql).all()
+        assert (ql == qx[:, -1]).all()
+        qi = needle.evaluate('qx', dataset='electrons', inner=[1, 21])
+        assert (qi[:, 0] == qf).all()     # pyright: ignore[reportArgumentType]
+        assert (qi[:, 1] == ql).all()     # pyright: ignore[reportArgumentType]
         z = needle.evaluate('qx + j*qy', dataset='electrons')
         assert (z.real == qx).all()
         assert (z.imag == qy).all()

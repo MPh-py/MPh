@@ -1,6 +1,7 @@
 ﻿"""Tests the `server` module."""
 
 import mph
+from mph import Server
 
 from fixtures import logging_disabled
 from fixtures import setup_logging
@@ -9,7 +10,7 @@ from fixtures import capture_stderr
 from pytest import raises
 
 
-server = None
+server: Server
 
 
 def teardown_module():

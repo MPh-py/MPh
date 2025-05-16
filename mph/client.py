@@ -1,5 +1,7 @@
 ﻿"""Provides the wrapper for a Comsol client instance."""
 
+from __future__ import annotations
+
 from .       import discovery
 from .model  import Model
 from .config import option
@@ -11,8 +13,9 @@ import faulthandler
 from pathlib import Path
 from logging import getLogger
 
+from typing import overload, Iterator
+from jpype  import JClass
 
-log = getLogger(__package__)
 
 # The following look-up table is used by the `modules()` method. It is
 # based on the table on page 41 of Comsol 6.0's Programming Reference
@@ -72,6 +75,8 @@ modules = {
     'WAVEOPTICS':               'Wave Optics',
 }
 
+log = getLogger(__package__)
+
 
 class Client:
     """
@@ -121,11 +126,31 @@ class Client:
 /com/comsol/model/util/ModelUtil.html
     """
 
+    version: str
+    """Comsol version (e.g., `'6.0'`) the client is running on."""
+
+    standalone: bool
+    """Whether this is a stand-alone client or connected to a server."""
+
+    port: int | None
+    """Port number on which the client has connected to the server."""
+
+    host: str | None
+    """Host name or IP address of the server the client is connected to."""
+
+    java: JClass
+    """Java model object that this class instance is wrapped around."""
+
     ############
     # Internal #
     ############
 
-    def __init__(self, cores=None, version=None, port=None, host='localhost'):
+    def __init__(self,
+        cores:   int = None,
+        version: str = None,
+        port:    int = None,
+        host:    str = 'localhost',
+    ):
 
         # Make sure this is the one and only client.
         if jpype.isJVMStarted():
@@ -206,27 +231,18 @@ class Client:
             # Log that we're done so the start-up time may be inspected.
             log.info('Stand-alone client initialized.')
 
-        # Save and document instance attributes.
-        # It seems to be necessary to document the instance attributes here
-        # towards the end of the method. If done earlier, Sphinx would not
-        # render them in source-code order, even though that's what we
-        # request in the configuration. This might be a bug in Sphinx.
-        self.version = backend['name']
-        """Comsol version (e.g., `'6.0'`) the client is running on."""
+        # Save instance attributes.
+        self.version    = backend['name']
         self.standalone = standalone
-        """Whether this is a stand-alone client or connected to a server."""
-        self.port = None
-        """Port number on which the client has connected to the server."""
-        self.host = None
-        """Host name or IP address of the server the client is connected to."""
-        self.java = java
-        """Java model object that this class instance is wrapped around."""
+        self.port       = None
+        self.host       = None
+        self.java       = java
 
         # Try to connect to server if not a stand-alone client.
-        if not standalone and host:
+        if not standalone and host and port is not None:
             self.connect(port, host)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.standalone:
             connection = 'stand-alone'
         elif self.port:
@@ -235,17 +251,17 @@ class Client:
             connection = 'disconnected'
         return f'{self.__class__.__name__}({connection})'
 
-    def __contains__(self, item):
+    def __contains__(self, item: str | Model) -> bool:
         if isinstance(item, str) and item in self.names():
             return True
         if isinstance(item, Model) and item in self.models():
             return True
         return False
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Model]:
         yield from self.models()
 
-    def __truediv__(self, name):
+    def __truediv__(self, name: str) -> Model:
         if isinstance(name, str):
             for model in self:
                 if name == model.name():
@@ -262,25 +278,25 @@ class Client:
     ##############
 
     @property
-    def cores(self):
+    def cores(self) -> int:
         """Number of processor cores (threads) the Comsol session is using."""
         cores = self.java.getPreference('cluster.processor.numberofprocessors')
         cores = int(str(cores))
         return cores
 
-    def models(self):
+    def models(self) -> list[Model]:
         """Returns all models currently held in memory."""
         return [Model(self.java.model(tag)) for tag in self.java.tags()]
 
-    def names(self):
+    def names(self) -> list[str]:
         """Returns the names of all loaded models."""
         return [model.name() for model in self.models()]
 
-    def files(self):
+    def files(self) -> list[Path]:
         """Returns the file-system paths of all loaded models."""
         return [model.file() for model in self.models()]
 
-    def modules(self):
+    def modules(self) -> list[str]:
         """Returns the names of available licensed modules/products."""
         names = []
         for (key, value) in modules.items():
@@ -295,7 +311,7 @@ class Client:
     # Interaction #
     ###############
 
-    def load(self, file):
+    def load(self, file: Path | str) -> Model:
         """Loads a model from the given `file` and returns it."""
         file = Path(file).resolve()
         if self.caching() and file in self.files():
@@ -307,6 +323,10 @@ class Client:
         log.info('Finished loading model.')
         return model
 
+    @overload
+    def caching(self, state: None) -> bool: ...
+    @overload
+    def caching(self, state: bool): ...
     def caching(self, state=None):
         """
         Enables or disables caching of previously loaded models.
@@ -329,7 +349,7 @@ class Client:
             log.error(error)
             raise ValueError(error)
 
-    def create(self, name=None):
+    def create(self, name: str = None) -> Model:
         """
         Creates a new model and returns it as a [`Model`](#Model) instance.
 
@@ -345,7 +365,7 @@ class Client:
         log.debug(f'Created model "{name}" with tag "{java.tag()}".')
         return model
 
-    def remove(self, model):
+    def remove(self, model: str | Model):
         """Removes the given [`model`](#Model) from memory."""
         if isinstance(model, str):
             if model not in self.names():
@@ -382,7 +402,7 @@ class Client:
     # Remote #
     ##########
 
-    def connect(self, port, host='localhost'):
+    def connect(self, port: int, host: str = 'localhost'):
         """
         Connects the client to a server.
 

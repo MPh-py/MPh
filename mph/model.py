@@ -1,6 +1,8 @@
 ﻿"""Provides the wrapper for Comsol model objects."""
 
-from .node    import Node
+from __future__ import annotations
+
+from .node import Node
 
 from numpy    import array, ndarray
 from numpy    import integer
@@ -9,8 +11,11 @@ from re       import match
 from warnings import warn
 from logging  import getLogger
 
+from jpype        import JClass
+from typing       import overload, Literal, Iterator
+from numpy.typing import ArrayLike, NDArray
+from numpy        import int32, float64
 
-log = getLogger(__package__)
 
 # The following look-up table is used by the `modules()` method. It maps
 # the product names (add-on modules) returned by `model.getUsedProducts()`
@@ -71,6 +76,8 @@ modules = {
     'Wave Optics Module':                    'Wave Optics',
 }
 
+log = getLogger(__package__)
+
 
 class Model:
     """
@@ -115,28 +122,32 @@ class Model:
 /com/comsol/model/Model.html
     """
 
+    java: JClass
+    """Java object that this instance is wrapped around."""
+
     ############
     # Internal #
     ############
 
-    def __init__(self, parent):
+    def __init__(self, parent: JClass | Model):
         if isinstance(parent, Model):
             java = parent.java
         else:
             java = parent
         self.java = java
-        """Java object that this instance is wrapped around."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}('{self}')"
 
-    def __eq__(self, other):
-        return self.java.tag() == other.java.tag()
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Model):
+            return NotImplemented
+        return (self.java.tag() == other.java.tag())
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: str | Node | None) -> Node:
         if isinstance(other, str):
             return Node(self, other)
         if isinstance(other, Node):
@@ -145,89 +156,91 @@ class Model:
             return Node(self, None)
         return NotImplemented
 
-    def __contains__(self, node):
+    def __contains__(self, node: str | Node) -> bool:
         return (isinstance(node, (str, Node)) and (self/node).exists())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Node]:
         yield from (self/None).children()
 
     ##############
     # Inspection #
     ##############
 
-    def name(self):
+    def name(self) -> str:
         """Returns the model's name."""
         name = str(self.java.label())
         if name.endswith('.mph'):
             name = name.rsplit('.', maxsplit=1)[0]
         return name
 
-    def file(self):
+    def file(self) -> Path:
         """Returns the absolute path to the file the model was loaded from."""
         return Path(str(self.java.getFilePath())).resolve()
 
-    def version(self):
+    def version(self) -> str:
         """Returns the Comsol version the model was last saved with."""
         version = str(self.java.getComsolVersion())
         return match(r'(?i)Comsol.+?(\d[0-9.a-z]*)', version).group(1)
 
-    def functions(self):
+    def functions(self) -> list[str]:
         """Returns the names of all globally defined functions."""
         return [child.name() for child in self/'functions']
 
-    def components(self):
+    def components(self) -> list[str]:
         """Returns the names of all model components."""
         return [child.name() for child in self/'components']
 
-    def geometries(self):
+    def geometries(self) -> list[str]:
         """Returns the names of all geometry sequences."""
         return [child.name() for child in self/'geometries']
 
-    def selections(self):
+    def selections(self) -> list[str]:
         """Returns the names of all selections."""
         return [child.name() for child in self/'selections']
 
-    def physics(self):
+    def physics(self) -> list[str]:
         """Returns the names of all physics interfaces."""
         return [child.name() for child in self/'physics']
 
-    def multiphysics(self):
+    def multiphysics(self) -> list[str]:
         """Returns the names of all multiphysics interfaces."""
         return [child.name() for child in self/'multiphysics']
 
-    def materials(self):
+    def materials(self) -> list[str]:
         """Returns the names of all materials."""
         return [child.name() for child in self/'materials']
 
-    def meshes(self):
+    def meshes(self) -> list[str]:
         """Returns the names of all mesh sequences."""
         return [child.name() for child in self/'meshes']
 
-    def studies(self):
+    def studies(self) -> list[str]:
         """Returns the names of all studies."""
         return [child.name() for child in self/'studies']
 
-    def solutions(self):
+    def solutions(self) -> list[str]:
         """Returns the names of all solutions."""
         return [child.name() for child in self/'solutions']
 
-    def datasets(self):
+    def datasets(self) -> list[str]:
         """Returns the names of all datasets."""
         return [child.name() for child in self/'datasets']
 
-    def plots(self):
+    def plots(self) -> list[str]:
         """Returns the names of all plots."""
         return [child.name() for child in self/'plots']
 
-    def exports(self):
+    def exports(self) -> list[str]:
         """Returns the names of all exports."""
         return [child.name() for child in self/'exports']
 
-    def modules(self):
+    def modules(self) -> list[str]:
         """Returns the names of modules/products required to be licensed."""
-        return [modules.get(key, key) for key in self.java.getUsedProducts()]
+        return [
+            modules.get(key, str(key)) for key in self.java.getUsedProducts()
+        ]
 
-    def problems(self):
+    def problems(self) -> list[dict[str, str | Node]]:
         """
         Returns problems reported by nodes in the model.
 
@@ -243,7 +256,7 @@ class Model:
     # Solving #
     ###########
 
-    def build(self, geometry=None):
+    def build(self, geometry: str | Node = None):
         """Builds the named geometry, or all of them if none given."""
         geometries = self/'geometries'
         if geometry is None:
@@ -272,7 +285,7 @@ class Model:
             node.run()
             log.info('Finished geometry sequence.')
 
-    def mesh(self, mesh=None):
+    def mesh(self, mesh: str | Node = None):
         """Runs the named mesh sequence, or all of them if none given."""
         meshes = self/'meshes'
         if mesh is None:
@@ -301,7 +314,7 @@ class Model:
             node.run()
             log.info('Finished mesh sequence.')
 
-    def solve(self, study=None):
+    def solve(self, study: str | Node = None):
         """Solves the named study, or all of them if none given."""
         studies = self/'studies'
         if study is None:
@@ -334,7 +347,9 @@ class Model:
     # Evaluation #
     ##############
 
-    def inner(self, dataset=None):
+    def inner(self,
+        dataset: str | Node = None,
+    ) -> tuple[NDArray[int32], NDArray[float64]]:
         """
         Returns the indices and values of inner solutions.
 
@@ -376,7 +391,9 @@ class Model:
         values  = array(java.getPVals())
         return (indices, values)
 
-    def outer(self, dataset=None):
+    def outer(self,
+        dataset: str | Node = None,
+    ) -> tuple[NDArray[int32], NDArray[float64]]:
         """
         Returns the indices and values of outer solutions.
 
@@ -417,8 +434,14 @@ class Model:
         values = array([info.getPvals([[index,1]])[0][0] for index in indices])
         return (indices, values)
 
-    def evaluate(self, expression, unit=None, dataset=None,
-                       inner=None, outer=None):
+    def evaluate(self,
+        expression: str | list[str],
+        unit:       str | list[str]                = None,
+        dataset:    str | Node                     = None,
+        inner:      Literal['first', 'last']
+                    | list[int] | NDArray[integer] = None,
+        outer:      int | integer                  = None,
+    ) -> NDArray[float64] | list[NDArray[float64]]:
         """
         Evaluates an expression and returns the numerical results.
 
@@ -600,12 +623,37 @@ class Model:
     # Interaction #
     ###############
 
-    def rename(self, name):
+    def rename(self, name: str):
         """Assigns a new name to the model."""
         self.java.label(name)
 
-    def parameter(self, name, value=None, unit=None, description=None,
-                        evaluate=False):
+    @overload
+    def parameter(self,
+        name:        str,
+        value:       str | int | float | complex,
+        unit:        str | None,
+        description: str | None,
+        evaluate:    Literal[False],
+    ): ...
+    @overload
+    def parameter(self,
+        name:        str,
+        value:       Literal[None],
+        unit:        Literal[None],
+        description: Literal[None],
+        evaluate:    Literal[False],
+    ) -> str: ...
+    @overload
+    def parameter(self,
+        name:        str,
+        value:       Literal[None],
+        unit:        Literal[None],
+        description: Literal[None],
+        evaluate:    Literal[True],
+    ) -> int | float | complex: ...
+    def parameter(
+        self, name, value=None, unit=None, description=None, evaluate=False
+    ):
         """
         Returns or sets the parameter of the given name.
 
@@ -660,6 +708,12 @@ class Model:
                 value = str(value)
             self.java.param().set(name, value)
 
+    @overload
+    def parameters(self,
+        evaluate: Literal[True],
+    ) -> dict[str, str | int | float | complex]: ...
+    @overload
+    def parameters(self, evaluate: Literal[False]) -> dict[str, str]: ...
     def parameters(self, evaluate=False):
         """
         Returns the global model parameters.
@@ -686,6 +740,10 @@ class Model:
             return {str(name): self.java.param().evaluate(name)
                     for name in self.java.param().varnames()}
 
+    @overload
+    def description(self, name: str, text: str) -> None: ...
+    @overload
+    def description(self, name: str, text: None) -> str: ...
     def description(self, name, text=None):
         """
         Returns or sets the description of the named parameter.
@@ -699,11 +757,23 @@ class Model:
         else:
             return str(self.java.param().descr(name))
 
-    def descriptions(self):
+    def descriptions(self) -> dict[str, str]:
         """Returns all parameter descriptions as a dictionary."""
         return {name: self.description(name) for name in self.parameters()}
 
-    def property(self, node, name, value=None):
+    @overload
+    def property(self,
+        node:  Node | str,
+        name:  str,
+        value: Node | bool | float | str | Path | ArrayLike,
+    ): ...
+    @overload
+    def property(self,
+        node:  Node | str,
+        name:  str,
+        value: None,
+    ) -> Node | bool | float | str | Path | ArrayLike: ...
+    def property(self, node, name, value = None):
         """
         Returns or changes the value of the named node property.
 
@@ -712,11 +782,19 @@ class Model:
         """
         return (self/node).property(name, value)
 
-    def properties(self, node):
+    def properties(
+        self,
+        node: Node | str,
+    ) -> dict[
+        str,
+        Node | bool | float | str | Path
+        | list[str] | list[list[str]] | NDArray
+        | None
+    ]:
         """Returns names and values of all node properties as a dictionary."""
         return (self/node).properties()
 
-    def create(self, node, *arguments):
+    def create(self, node: Node | str, *arguments: str) -> Node:
         """
         Creates a new feature node.
 
@@ -741,7 +819,7 @@ class Model:
         else:
             return node.parent().create(*arguments, name=node.name())
 
-    def remove(self, node):
+    def remove(self, node: Node | str):
         """Removes the node from the model tree."""
         (self/node).remove()
 
@@ -749,7 +827,7 @@ class Model:
     # Files #
     #########
 
-    def import_(self, node, file):
+    def import_(self, node: Node | str, file: Path | str):
         """
         Imports external data from a file and assigns it to the node.
 
@@ -765,7 +843,7 @@ class Model:
             raise LookupError(error)
         node.import_(file)
 
-    def export(self, node=None, file=None):
+    def export(self, node: Node | str | None = None, file: Path | str = None):
         """
         Runs the export node, either given by name or node reference.
 
@@ -847,7 +925,7 @@ class Model:
         self.java.resetHist()
         log.info('Finished resetting history.')
 
-    def save(self, path=None, format=None):
+    def save(self, path: Path | str = None, format: str = None):
         """
         Saves the model at the given file-system path.
 
@@ -921,7 +999,9 @@ class Model:
         # Otherwise save at given path.
         else:
             if path.is_dir():
-                file = (path/self.name()).with_suffix(f'.{type}')
+                file = (
+                    path/self.name()     # pyright: ignore[reportOperatorIssue]
+                ).with_suffix(f'.{type}')
             else:
                 file = path.with_suffix(f'.{type}')
             log.info(f'Saving model as "{file.name}".')
@@ -935,7 +1015,7 @@ class Model:
     # Deprecation #
     ###############
 
-    def features(self, physics):
+    def features(self, physics: str) -> list[str]:
         # Returns the names of all features in a given physics interface.
         #
         # The term feature refers to the nodes defined under a physics
@@ -952,7 +1032,7 @@ class Model:
         return [str(self.java.physics(ptag).feature(ftag).label())
                 for ftag in tags]
 
-    def toggle(self, physics, feature, action='flip'):
+    def toggle(self, physics: str, feature: str, action: str = 'flip'):
         # Enables or disables features of a physics interface.
         #
         # If `action` is `'flip'` (the default), it enables the feature
@@ -981,7 +1061,7 @@ class Model:
         elif action in ('disable', 'off', 'deactivate'):
             node.active(False)
 
-    def load(self, file, interpolation):
+    def load(self, file: Path | str, interpolation: str):
         # Loads data from a file and assigns it to an interpolation function.
         warn('Model.load() is deprecated. Call .import_() instead.')
         for tag in self.java.func().tags():
