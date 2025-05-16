@@ -1,8 +1,8 @@
 ﻿"""Creates models used by the test suite."""
 
 import mph
-from jpype import JInt
-from jpype import JBoolean
+
+from jpype import JInt, JBoolean
 
 
 def capacitor():

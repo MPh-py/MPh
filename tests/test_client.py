@@ -1,32 +1,24 @@
 ﻿"""Tests the `client` module in client–server mode."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
-from pytest import raises
+
+from pytest  import raises
 from pathlib import Path
 
 
-########################################
-# Fixtures                             #
-########################################
 client = None
 model  = None
 demo   = Path(__file__).resolve().parent/'demo.mph'
 
 
-########################################
-# Tests                                #
-########################################
-
-# The test are mostly in source-code order of the Client class. Except
-# that we load a model and create another one early on, just so we have
-# something to work with. And connect() is already called from __init__(),
-# which is why disconnect() comes before connect(), which actually tests
-# reconnecting the client.
+# The test are mostly in source-code order of the `Client` class. Except that
+# we load a model and create another one early on, just so we have something to
+# work with. And `connect()` is already called from `__init__()`, which is why
+# `disconnect()` comes before `connect()`, which actually tests reconnecting
+# the client.
 
 def test_init():
     global client
@@ -171,10 +163,6 @@ def test_connect():
     client.disconnect()
     server.stop()
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

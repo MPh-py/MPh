@@ -1,22 +1,18 @@
 ﻿"""Tests the `model` module."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 import models
 from fixtures import logging_disabled
 from fixtures import warnings_disabled
 from fixtures import setup_logging
+
 from numpy.testing import assert_allclose
-from pytest import raises
-from pathlib import Path
-from platform import system
+from pytest        import raises
+from pathlib       import Path
+from platform      import system
 
 
-########################################
-# Fixtures                             #
-########################################
 client = None
 model  = None
 empty  = None
@@ -762,10 +758,6 @@ def test_load():
         with logging_disabled(), raises(LookupError):
             model.load('image.png', 'non-existing')
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

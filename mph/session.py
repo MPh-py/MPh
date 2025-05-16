@@ -1,36 +1,28 @@
 ﻿"""Starts and stops the local Comsol session."""
 
-########################################
-# Components                           #
-########################################
-from .client import Client             # client class
-from .server import Server             # server class
-from .config import option             # configuration
+from .client import Client
+from .server import Server
+from .config import option
 
-########################################
-# Dependencies                         #
-########################################
-import jpype                           # Java bridge
-import atexit                          # exit handler
-import sys                             # system specifics
-import platform                        # platform information
-import threading                       # multi-threading
-import faulthandler                    # traceback dumps
-from logging import getLogger          # event logging
-
-########################################
-# Globals                              #
-########################################
-client = None                          # client instance
-server = None                          # server instance
-thread = None                          # current thread
-system = platform.system()             # operating system
-log    = getLogger(__package__)        # event log
+import jpype
+import atexit
+import sys
+import platform
+import threading
+import faulthandler
+from logging import getLogger
 
 
-########################################
-# Start                                #
-########################################
+client = None
+server = None
+thread = None
+system = platform.system()
+log    = getLogger(__package__)
+
+
+#########
+# Start #
+#########
 
 def start(cores=None, version=None, port=0):
     """
@@ -109,9 +101,9 @@ def start(cores=None, version=None, port=0):
     return client
 
 
-########################################
-# Stop                                 #
-########################################
+########
+# Stop #
+########
 
 exit_code = 0
 exit_function = sys.exit

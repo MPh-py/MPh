@@ -1,28 +1,16 @@
 ﻿"""Provides the wrapper for Comsol model objects."""
 
-########################################
-# Components                           #
-########################################
-from .node import Node                 # model node
+from .node    import Node
 
-########################################
-# Dependencies                         #
-########################################
-from numpy import array, ndarray       # numerical array
-from numpy import integer              # NumPy integer
-from pathlib import Path               # file-system path
-from re import match                   # pattern matching
-from warnings import warn              # user warning
-from logging import getLogger          # event logging
+from numpy    import array, ndarray
+from numpy    import integer
+from pathlib  import Path
+from re       import match
+from warnings import warn
+from logging  import getLogger
 
-########################################
-# Globals                              #
-########################################
-log = getLogger(__package__)           # event log
 
-########################################
-# Constants                            #
-########################################
+log = getLogger(__package__)
 
 # The following look-up table is used by the `modules()` method. It maps
 # the product names (add-on modules) returned by `model.getUsedProducts()`
@@ -31,7 +19,6 @@ log = getLogger(__package__)           # event log
 # as the redundant "Module". The strings returned by `getUsedProducts()`
 # seem to correspond exactly to the product names in the left column
 # of the table on page 41 of Comsol 6.0's Programming Reference Manual.
-
 modules = {
     'AC/DC Module':                          'AC/DC',
     'Acoustics Module':                      'Acoustics',
@@ -85,9 +72,6 @@ modules = {
 }
 
 
-########################################
-# Model                                #
-########################################
 class Model:
     """
     Represents a Comsol model.
@@ -131,9 +115,9 @@ class Model:
 /com/comsol/model/Model.html
     """
 
-    ####################################
-    # Internal                         #
-    ####################################
+    ############
+    # Internal #
+    ############
 
     def __init__(self, parent):
         if isinstance(parent, Model):
@@ -167,9 +151,9 @@ class Model:
     def __iter__(self):
         yield from (self/None).children()
 
-    ####################################
-    # Inspection                       #
-    ####################################
+    ##############
+    # Inspection #
+    ##############
 
     def name(self):
         """Returns the model's name."""
@@ -255,9 +239,9 @@ class Model:
         """
         return (self/None).problems()
 
-    ####################################
-    # Solving                          #
-    ####################################
+    ###########
+    # Solving #
+    ###########
 
     def build(self, geometry=None):
         """Builds the named geometry, or all of them if none given."""
@@ -346,9 +330,9 @@ class Model:
             node.run()
             log.info('Finished solving study.')
 
-    ####################################
-    # Evaluation                       #
-    ####################################
+    ##############
+    # Evaluation #
+    ##############
 
     def inner(self, dataset=None):
         """
@@ -612,9 +596,9 @@ class Model:
         # Return array of results.
         return results
 
-    ####################################
-    # Interaction                      #
-    ####################################
+    ###############
+    # Interaction #
+    ###############
 
     def rename(self, name):
         """Assigns a new name to the model."""
@@ -761,9 +745,9 @@ class Model:
         """Removes the node from the model tree."""
         (self/node).remove()
 
-    ####################################
-    # Files                            #
-    ####################################
+    #########
+    # Files #
+    #########
 
     def import_(self, node, file):
         """
@@ -947,9 +931,9 @@ class Model:
                 self.java.save(str(file), type)
         log.info('Finished saving model.')
 
-    ####################################
-    # Deprecation                      #
-    ####################################
+    ###############
+    # Deprecation #
+    ###############
 
     def features(self, physics):
         # Returns the names of all features in a given physics interface.

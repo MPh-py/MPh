@@ -1,7 +1,7 @@
 ﻿"""Publishes the package on PyPI."""
 
 from subprocess import run
-from pathlib import Path
+from pathlib    import Path
 
 
 root = Path(__file__).parent.parent

@@ -1,7 +1,7 @@
 ﻿"""Deletes build and test artifacts."""
 
 from pathlib import Path
-from shutil import rmtree
+from shutil  import rmtree
 
 
 root = Path(__file__).parent.parent

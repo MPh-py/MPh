@@ -9,10 +9,8 @@ the parent process ("boss") via inter-process queues to pass job
 instructions and results back and forth.
 """
 
-########################################
-# Dependencies                         #
-########################################
 import mph                             # Comsol interface
+
 from multiprocessing import Process    # external subprocess
 from multiprocessing import Queue      # inter-process queue
 from multiprocessing import cpu_count  # number of (logical) cores

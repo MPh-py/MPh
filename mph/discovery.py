@@ -21,31 +21,26 @@ installation found in a later step that reports the same version as one
 found in an earlier step will be ignored, regardless of install location.
 """
 
-########################################
-# Dependencies                         #
-########################################
-import platform                        # platform information
-import subprocess                      # external processes
-import re                              # regular expressions
-from pathlib import Path               # file paths
-from functools import lru_cache        # function cache
-from logging import getLogger          # event logging
+import platform
+import subprocess
+import re
+from pathlib   import Path
+from functools import lru_cache
+from logging   import getLogger
 
-########################################
-# Globals                              #
-########################################
-log = getLogger(__package__)           # event log
-system = platform.system()             # operating system
-architectures = {                      # valid system architecture names
+
+log = getLogger(__package__)
+system = platform.system()
+architectures = {
     'Windows': ['win64'],
     'Linux':   ['glnxa64'],
     'Darwin':  ['maci64'],
 }
 
 
-########################################
-# Version information                  #
-########################################
+#######################
+# Version information #
+#######################
 
 def parse(version):
     """
@@ -87,9 +82,9 @@ def parse(version):
     return (name, major, minor, patch, build)
 
 
-########################################
-# Back-end discovery                   #
-########################################
+######################
+# Back-end discovery #
+######################
 
 def search_registry():
     """Returns Comsol executables found in the Windows Registry."""
@@ -396,9 +391,9 @@ def find_backends():
     return backends
 
 
-########################################
-# Back-end selection                   #
-########################################
+######################
+# Back-end selection #
+######################
 
 def backend(version=None):
     """

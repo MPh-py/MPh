@@ -1,18 +1,14 @@
 ﻿"""Tests multiple client connections to the same server."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
+
 from pytest import raises
-from time import sleep
+from time   import sleep
 
 
-########################################
-# Fixtures                             #
-########################################
 server = None
 
 
@@ -23,10 +19,6 @@ def teardown_module():
         except Exception:
             pass
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_multi():
     global server
@@ -53,10 +45,6 @@ def test_multi():
     assert server.running()
     server.stop()
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

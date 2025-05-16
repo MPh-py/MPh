@@ -1,31 +1,18 @@
 ﻿"""Provides the wrapper for a Comsol client instance."""
 
-########################################
-# Components                           #
-########################################
-from . import discovery                # back-end discovery
-from .model import Model               # model class
-from .config import option             # configuration
+from .       import discovery
+from .model  import Model
+from .config import option
 
-########################################
-# Dependencies                         #
-########################################
-import jpype                           # Java bridge
-import jpype.imports                   # Java object imports
-import os                              # operating system
-from pathlib import Path               # file-system paths
-from logging import getLogger          # event logging
-import faulthandler                    # traceback dumps
-
-########################################
-# Globals                              #
-########################################
-log = getLogger(__package__)           # event log
+import jpype
+import jpype.imports
+import os
+import faulthandler
+from pathlib import Path
+from logging import getLogger
 
 
-########################################
-# Constants                            #
-########################################
+log = getLogger(__package__)
 
 # The following look-up table is used by the `modules()` method. It is
 # based on the table on page 41 of Comsol 6.0's Programming Reference
@@ -34,7 +21,6 @@ log = getLogger(__package__)           # event log
 # somewhat (drop "Module" everywhere) and leave out the pointless
 # trademark symbols. The vendor strings are what we need to query the
 # `ModelUtil.hasProduct()` Java method.
-
 modules = {
     'COMSOL':                   'Comsol core',
     'ACDC':                     'AC/DC',
@@ -87,9 +73,6 @@ modules = {
 }
 
 
-########################################
-# Client                               #
-########################################
 class Client:
     """
     Manages the Comsol client instance.
@@ -138,9 +121,9 @@ class Client:
 /com/comsol/model/util/ModelUtil.html
     """
 
-    ####################################
-    # Internal                         #
-    ####################################
+    ############
+    # Internal #
+    ############
 
     def __init__(self, cores=None, version=None, port=None, host='localhost'):
 
@@ -274,9 +257,9 @@ class Client:
             return model
         return NotImplemented
 
-    ####################################
-    # Inspection                       #
-    ####################################
+    ##############
+    # Inspection #
+    ##############
 
     @property
     def cores(self):
@@ -308,9 +291,9 @@ class Client:
                 pass
         return names
 
-    ####################################
-    # Interaction                      #
-    ####################################
+    ###############
+    # Interaction #
+    ###############
 
     def load(self, file):
         """Loads a model from the given `file` and returns it."""
@@ -395,9 +378,9 @@ class Client:
         log.debug('Clearing all models from memory.')
         self.java.clear()
 
-    ####################################
-    # Remote                           #
-    ####################################
+    ##########
+    # Remote #
+    ##########
 
     def connect(self, port, host='localhost'):
         """

@@ -11,8 +11,8 @@ CodeCov does not accept Coverage.py's standard report format, i.e. the
 """
 
 from subprocess import run
-from pathlib import Path
-from os import environ
+from pathlib    import Path
+from os         import environ
 
 
 token = environ.get('MPh_CodeCov_token', None)

@@ -1,18 +1,13 @@
 ﻿"""Tests the `session` module in stand-alone mode."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
-from pytest import raises
+
+from pytest   import raises
 from platform import system
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_start():
     if system() != 'Windows':
@@ -43,10 +38,6 @@ def test_start():
         with raises(RuntimeError):
             client.disconnect()
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

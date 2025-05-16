@@ -1,18 +1,14 @@
 ﻿"""Tests the `server` module."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
 from fixtures import capture_stderr
+
 from pytest import raises
 
 
-########################################
-# Fixtures                             #
-########################################
 server = None
 
 
@@ -20,10 +16,6 @@ def teardown_module():
     if server and server.running():
         server.stop()
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_init():
     global server
@@ -68,10 +60,6 @@ def test_parse_port():
     assert mph.server.parse_port(german)  == 12345
     assert mph.server.parse_port(chinese) == 12345
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

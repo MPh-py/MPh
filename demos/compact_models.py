@@ -6,12 +6,10 @@ solution and mesh data, resets the modeling history, then saves the
 model file under its original name, effectively compacting its size.
 """
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from pathlib import Path
-from time import perf_counter as now
+from time    import perf_counter as now
 
 
 ########################################
