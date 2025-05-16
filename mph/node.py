@@ -1,32 +1,22 @@
 ﻿"""Provides the wrapper class for a model node."""
 
-########################################
-# Dependencies                         #
-########################################
-from numpy import array, ndarray       # numerical array
-from jpype import JBoolean             # Java boolean
-from jpype import JInt                 # Java integer
-from jpype import JDouble              # Java float
-from jpype import JString              # Java string
-from jpype import JArray               # Java array
-from jpype import JClass               # Java class
-from numpy import integer              # NumPy integer
-from pathlib import Path               # file-system path
-from re import split                   # string splitting
-from json import load as json_load     # JSON parser
-from difflib import get_close_matches  # fuzzy matching
-from functools import lru_cache        # function cache
-from logging import getLogger          # event logging
-
-########################################
-# Globals                              #
-########################################
-log = getLogger(__package__)           # event log
+from jpype     import JBoolean, JInt, JDouble, JString, JArray, JClass
+from numpy     import array, ndarray, integer
+from pathlib   import Path
+from re        import split
+from json      import load as json_load
+from difflib   import get_close_matches
+from functools import lru_cache
+from logging   import getLogger
 
 
-########################################
-# Node                                #
-########################################
+log = getLogger(__package__)
+
+
+########
+# Node #
+########
+
 class Node:
     """
     Represents a model node.
@@ -100,9 +90,9 @@ class Node:
 /com/comsol/model/ModelEntity.html
     """
 
-    ####################################
-    # Internal                         #
-    ####################################
+    ############
+    # Internal #
+    ############
 
     def __init__(self, model, path=None):
         if path is None:
@@ -241,9 +231,9 @@ class Node:
             raise LookupError(error)
         return java
 
-    ####################################
-    # Navigation                       #
-    ####################################
+    ##############
+    # Navigation #
+    ##############
 
     def name(self):
         """Returns the node's name."""
@@ -301,9 +291,9 @@ class Node:
         """Checks if the node exists in the model tree."""
         return (self.java is not None)
 
-    ####################################
-    # Inspection                       #
-    ####################################
+    ##############
+    # Inspection #
+    ##############
 
     def comment(self, text=None):
         """Returns or sets the comment attached to the node."""
@@ -358,9 +348,9 @@ class Node:
             items += child.problems()
         return items
 
-    ####################################
-    # Interaction                      #
-    ####################################
+    ###############
+    # Interaction #
+    ###############
 
     def rename(self, name):
         """Renames the node."""
@@ -653,9 +643,9 @@ class Node:
         container.remove(self.java.tag())
 
 
-########################################
-# Name parsing                         #
-########################################
+################
+# Name parsing #
+################
 
 def parse(string):
     """Parses a node path given as string to a tuple."""
@@ -686,9 +676,9 @@ def unescape(name):
     return name.replace('//', '/')
 
 
-########################################
-# Tag patterns                         #
-########################################
+################
+# Tag patterns #
+################
 
 @lru_cache(maxsize=1)
 def load_patterns():
@@ -724,9 +714,9 @@ def tag_pattern(feature_path):
         return 'tag*'
 
 
-########################################
-# Type casting                         #
-########################################
+################
+# Type casting #
+################
 
 def cast(value):
     """Casts a value from its Python data type to a suitable Java data type."""
@@ -845,9 +835,9 @@ def get(java, name):
         raise TypeError(error)
 
 
-########################################
-# Inspection                           #
-########################################
+##############
+# Inspection #
+##############
 
 def tree(node, max_depth=None):
     """

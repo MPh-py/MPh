@@ -1,30 +1,22 @@
 ﻿"""Provides the wrapper for Comsol server instances."""
 
-########################################
-# Components                           #
-########################################
-from . import discovery                # back-end discovery
-from .config import option             # configuration
+from .          import discovery
+from .config    import option
 
-########################################
-# Dependencies                         #
-########################################
-from subprocess import Popen as start  # background process
-from subprocess import PIPE            # I/O redirection
-from subprocess import TimeoutExpired  # communication time-out
-from re import match as regex          # regular expression
-from time import perf_counter as now   # wall-clock time
-from logging import getLogger          # event logging
-
-########################################
-# Globals                              #
-########################################
-log = getLogger(__package__)           # event log
+from subprocess import Popen as start
+from subprocess import PIPE
+from subprocess import TimeoutExpired
+from re         import match as regex
+from time       import perf_counter as now
+from logging    import getLogger
 
 
-########################################
-# Server                               #
-########################################
+log = getLogger(__package__)
+
+
+##########
+# Server #
+##########
 
 class Server:
     """
@@ -176,9 +168,9 @@ class Server:
             self.process.kill()
 
 
-########################################
-# Parsing                              #
-########################################
+###########
+# Parsing #
+###########
 
 def parse_port(line):
     """Parses out the port number from a line of server output."""

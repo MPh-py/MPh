@@ -1,18 +1,12 @@
 ﻿"""Tests the `config` module."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
-from pytest import raises
-from pathlib import Path
+from pytest   import raises
+from pathlib  import Path
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_option():
     assert 'session' in mph.option()
@@ -57,10 +51,6 @@ def test_load():
     file.unlink()
     assert not file.exists()
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

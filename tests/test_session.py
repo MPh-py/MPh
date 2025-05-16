@@ -1,17 +1,12 @@
 ﻿"""Tests the `session` module in client–server mode."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import logging_disabled
 from fixtures import setup_logging
+
 from pytest import raises
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_start():
     with logging_disabled(), raises(ValueError):
@@ -22,10 +17,6 @@ def test_start():
     assert client.java is not None
     assert client.cores == 1
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

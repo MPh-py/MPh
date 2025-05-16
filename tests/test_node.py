@@ -1,24 +1,20 @@
 ﻿"""Tests the `node` module."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
 from mph import node, Node
+
 import models
 from fixtures import logging_disabled
 from fixtures import capture_stdout
 from fixtures import setup_logging
-from pytest import raises
-from pathlib import Path
-from numpy import array
+
+from pytest        import raises
+from pathlib       import Path
+from numpy         import array
 from numpy.testing import assert_allclose
-from textwrap import dedent
+from textwrap      import dedent
 
 
-########################################
-# Fixtures                             #
-########################################
 client = None
 model  = None
 
@@ -28,10 +24,6 @@ def setup_module():
     client = mph.start()
     model = models.capacitor()
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_init():
     node = Node(model, '')
@@ -657,10 +649,6 @@ def test_inspect():
         mph.inspect(node)
     assert output.text().strip().startswith('name:')
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

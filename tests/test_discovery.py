@@ -1,15 +1,9 @@
 ﻿"""Tests the `discovery` module."""
 
-########################################
-# Dependencies                         #
-########################################
 import mph
+
 from fixtures import setup_logging
 
-
-########################################
-# Tests                                #
-########################################
 
 def test_parse():
     version = 'COMSOL Multiphysics 5.5.0.359'
@@ -28,10 +22,6 @@ def test_backend():
     assert backend['jvm']
     assert backend['server']
 
-
-########################################
-# Main                                 #
-########################################
 
 if __name__ == '__main__':
     setup_logging()

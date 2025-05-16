@@ -1,19 +1,14 @@
 ﻿"""Manages configuration options."""
 
-########################################
-# Dependencies                         #
-########################################
-import configparser                    # configuration files
-import os                              # operating system
-import platform                        # platform information
-from pathlib import Path               # file-system path
-from logging import getLogger          # event logging
+import configparser
+import os
+import platform
+from pathlib import Path
+from logging import getLogger
 
-########################################
-# Globals                              #
-########################################
-system = platform.system()             # operating system
-log    = getLogger(__package__)        # event log
+
+system = platform.system()
+log    = getLogger(__package__)
 
 options = {
     'session':  'platform-dependent',
@@ -23,9 +18,9 @@ options = {
 """Default values for configuration options."""
 
 
-########################################
-# Access                               #
-########################################
+##########
+# Access #
+##########
 
 def option(name=None, value=None):
     """
@@ -47,9 +42,9 @@ def option(name=None, value=None):
         options[name] = value
 
 
-########################################
-# Storage                              #
-########################################
+###########
+# Storage #
+###########
 
 def location():
     """
@@ -130,6 +125,10 @@ def save(file=None):
     with file.open('w', encoding='UTF-8') as stream:
         parser.write(stream)
 
+
+##########
+# Init   #
+##########
 
 # Load custom configuration at start-up.
 load()
