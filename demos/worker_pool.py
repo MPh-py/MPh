@@ -94,7 +94,7 @@ def boss():
     results = Queue()
     processes = []
     workers = cpu_count()
-    for n in range(workers):
+    for _ in range(workers):
         process = Process(target=worker, args=(jobs, results))
         processes.append(process)
         process.start()
