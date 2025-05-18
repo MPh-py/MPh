@@ -15,7 +15,7 @@ from time    import perf_counter as now
 ########################################
 # Timer                                #
 ########################################
-class Timer():
+class Timer:
     """Convenience class for measuring and displaying elapsed time."""
 
     def __init__(self, margin=4, padding=12):

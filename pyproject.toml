@@ -64,7 +64,13 @@ name = 'mph'
 line-length    = 79
 indent-width   = 4
 target-version = 'py37'
-include = ['mph/*.py', 'tests/*.py', 'tools/*.py', 'pyproject.toml']
+include = [
+    'mph/*.py',
+    'tests/*.py',
+    'tools/*.py',
+    'demos/*.py',
+    'pyproject.toml',
+]
 
     [tool.ruff.format]
     # The project does not actually use the Ruff formatter (only the linter),
