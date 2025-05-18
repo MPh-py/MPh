@@ -64,7 +64,7 @@ name = 'mph'
 line-length    = 79
 indent-width   = 4
 target-version = 'py37'
-include = ['mph/**/*.py', 'tests/**/*.py', 'pyproject.toml']
+include = ['mph/*.py', 'tests/*.py', 'tools/*.py', 'pyproject.toml']
 
     [tool.ruff.format]
     # The project does not actually use the Ruff formatter (only the linter),
@@ -107,6 +107,7 @@ include = ['mph/**/*.py', 'tests/**/*.py', 'pyproject.toml']
         'SIM103',             # Return the boolean condition directly.
         'SIM105',             # Use `contextlib.suppress(Exception)` instead.
         'SIM108',             # ternary operator instead of if-else
+        'SIM112',             # only capitalized environment variables
         'PT011',              # `pytest.raises(ValueError)` too broad
         'PT012',              # `pytest.raises()` with multiple statements
         'PT013',              # incorrect pytest import
