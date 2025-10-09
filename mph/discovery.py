@@ -39,7 +39,7 @@ system = platform.system()             # operating system
 architectures = {                      # valid system architecture names
     'Windows': ['win64'],
     'Linux':   ['glnxa64'],
-    'Darwin':  ['maci64'],
+    'Darwin':  ['maci64','macarm64'],
 }
 
 
