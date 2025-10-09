@@ -50,7 +50,7 @@ log = getLogger(__package__)
 architectures = {
     'Windows': ['win64'],
     'Linux':   ['glnxa64'],
-    'Darwin':  ['maci64'],
+    'Darwin':  ['maci64','macarm64'],
 }
 
 
