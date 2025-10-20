@@ -30,14 +30,14 @@ class Node:
     """
     Represents a model node.
 
-    This class makes it possible to navigate the model tree, inspect a
-    node, namely its properties, and manipulate it, like toggling it
-    on/off, creating child nodes, or "running" it.
+    This class makes it possible to navigate the model tree, inspect a node,
+    namely its properties, and manipulate it, like toggling it on/off, creating
+    child nodes, or "running" it.
 
     Instances of this class reference a node in the model tree and work
     similarly to [`Path`](#pathlib.Path) objects from Python's standard
-    library. They support string concatenation to the right with the
-    division operator in order to reference child nodes:
+    library. They support string concatenation to the right with the division
+    operator in order to reference child nodes:
     ```python
     >>> node = model/'functions'
     >>> node
@@ -46,17 +46,16 @@ class Node:
     Node('functions/step')
     ```
 
-    Note how the [`model`](#Model) object also supports the division
-    operator in order to generate node references. As mere references,
-    nodes must must not necessarily exist in the model tree:
+    Note how the [`model`](#Model) object also supports the division operator
+    in order to generate node references. As mere references, nodes must must
+    not necessarily exist in the model tree:
     ```python
     >>> (node/'new function').exists()
     False
     ```
 
-    In interactive sessions, the convenience function
-    [`mph.tree()`](#tree) may prove useful to see the node's branch in
-    the model tree at a glance:
+    In interactive sessions, the convenience function [`mph.tree()`](#tree) may
+    prove useful to see the node's branch in the model tree at a glance:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -74,10 +73,10 @@ class Node:
        └─ cathode
     ```
 
-    In rare cases, the node name itself might contain a forward slash,
-    such as the dataset `sweep/solution` that happens to exist in the
-    demo model from the [Tutorial](/tutorial.md). These literal forward
-    slashes can be escaped by doubling the character:
+    In rare cases, the node name itself might contain a forward slash, such as
+    the dataset `sweep/solution` that happens to exist in the demo model from
+    the [Tutorial](/tutorial.md). These literal forward slashes can be escaped
+    by doubling the character:
     ```python
     >>> node = model/'datasets/sweep//solution'
     >>> node.name()
@@ -86,14 +85,13 @@ class Node:
     Node('datasets')
     ```
 
-    If the node refers to an existing model feature, then the instance
-    wraps the corresponding Java object, which could belong to a variety
-    of classes, but would necessarily implement the
-    [`com.comsol.model.ModelEntity`][1] interface. That Java object
-    can be accessed directly via the `.java` property. The full Comsol
-    functionality is thus available if needed. The convenience function
-    [`mph.inspect()`](#inspect) is provided for introspection of the
-    Java object in an interactive session.
+    If the node refers to an existing model feature, then the instance wraps
+    the corresponding Java object, which could belong to a variety of classes,
+    but would necessarily implement the [`com.comsol.model.ModelEntity`][1]
+    interface. That Java object can be accessed directly via the `.java`
+    property. The full Comsol functionality is thus available if needed. The
+    convenience function [`mph.inspect()`](#inspect) is provided for
+    introspection of the Java object in an interactive session.
 
     [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html
@@ -206,10 +204,10 @@ class Node:
         """
         Java object this node maps to, if any.
 
-        Note that this is a property, not an attribute. Internally,
-        it is a function that performs a top-down search of the model
-        tree in order to resolve the node reference. So it introduces
-        a certain overhead every time it is accessed.
+        Note that this is a property, not an attribute. Internally, it is a
+        function that performs a top-down search of the model tree in order to
+        resolve the node reference. So it introduces a certain overhead every
+        time it is accessed.
         """
         if self.is_root():
             return self.model.java
@@ -237,10 +235,10 @@ class Node:
     def java_if_exists(self) -> JClass:
         # Returns `self.java` if the node exists, raises an error otherwise.
         #
-        # This helper function was introduced to reduce code repetition
-        # in the methods that follow. We should probably just straight up
-        # raise the error when `self.java` is accessed. However, that
-        # might break user code, so can only be done in a major release.
+        # This helper function was introduced to reduce code repetition in the
+        # methods that follow. We should probably just straight up raise the
+        # error when `self.java` is accessed. However, that might break user
+        # code, so can only be done in a major release.
         java = self.java
         if not java:
             error = f'Node "{self}" does not exist in model tree.'
@@ -265,10 +263,9 @@ class Node:
         """
         Returns the node's feature type.
 
-        This a something like `'Block'` for "a right-angled solid or
-        surface block in 3D". Refer to the Comsol documentation for
-        details. Feature types are displayed in the Comsol GUI at the
-        top of the `Settings` tab.
+        This a something like `'Block'` for "a right-angled solid or surface
+        block in 3D". Refer to the Comsol documentation for details. Feature
+        types are displayed in the Comsol GUI at the top of the `Settings` tab.
         """
         java = self.java
         return str(java.getType()) if hasattr(java, 'getType') else None
@@ -324,14 +321,14 @@ class Node:
         """
         Returns problems reported by the node and its descendants.
 
-        The problems are returned as a list of dictionaries, each with
-        an entry for `'message'` (the warning or error message),
-        `'category'` (either `'warning'` or `'error'`), `'node'` (either
-        this one or a node beneath it in the model tree), and
-        `'selection'` (an empty string if not applicable).
+        The problems are returned as a list of dictionaries, each with an entry
+        for `'message'` (the warning or error message), `'category'` (either
+        `'warning'` or `'error'`), `'node'` (either this one or a node beneath
+        it in the model tree), and `'selection'` (an empty string if not
+        applicable).
 
-        Calling this method on the root node returns all warnings and
-        errors in geometry, mesh, and solver sequences.
+        Calling this method on the root node returns all warnings and errors in
+        geometry, mesh, and solver sequences.
         """
         java = self.java
         stack = []
@@ -411,8 +408,8 @@ class Node:
         """
         Returns or changes the value of the named property.
 
-        If no `value` is given, returns the value of property `name`.
-        Otherwise sets the property to the given value.
+        If no `value` is given, returns the value of property `name`. Otherwise
+        sets the property to the given value.
         """
         java = self.java_if_exists()
         if value is None:
@@ -429,8 +426,8 @@ class Node:
         """
         Returns names and values of all node properties as a dictionary.
 
-        In the Comsol GUI, properties are displayed in the Settings tab
-        of the model node (not to be confused with the Properties tab).
+        In the Comsol GUI, properties are displayed in the Settings tab of the
+        model node (not to be confused with the Properties tab).
         """
         java = self.java_if_exists()
         if not hasattr(java, 'properties'):
@@ -446,18 +443,18 @@ class Node:
         """
         Assigns `entity` as the node's selection.
 
-        `entity` can either be another node representing a selection
-        feature, in which case a "named" selection is created. Or it
-        can be a list/array of integers denoting domain, boundary,
-        edge, or point numbers (depending on which of those the selection
-        requires), producing a "manual" selection. It may also be `'all'`
-        to select everything or `None` to clear the selection.
+        `entity` can either be another node representing a selection feature,
+        in which case a "named" selection is created. Or it can be a list/array
+        of integers denoting domain, boundary, edge, or point numbers
+        (depending on which of those the selection requires), producing a
+        "manual" selection. It may also be `'all'` to select everything or
+        `None` to clear the selection.
 
-        Raises `NotImplementedError` if the node (that this method is
-        called on) is a geometry node. These may be supported in a
-        future release. Meanwhile, access their Java methods directly.
-        Raises `TypeError` if the node does not have a selection and
-        is not itself an "explicit" selection.
+        Raises `NotImplementedError` if the node (that this method is called
+        on) is a geometry node. These may be supported in a future release.
+        Meanwhile, access their Java methods directly. Raises `TypeError` if
+        the node does not have a selection and is not itself an "explicit"
+        selection.
         """
         java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
@@ -499,16 +496,15 @@ class Node:
         """
         Returns the entity or entities the node has selected.
 
-        If it is a "named" selection, the corresponding selection node
-        is returned. If it is a "manual" selection, an array of domain,
-        boundary, edge, or point numbers is returned (depending on
-        which of those the selection holds). `None` is returned if
-        nothing is selected.
+        If it is a "named" selection, the corresponding selection node is
+        returned. If it is a "manual" selection, an array of domain, boundary,
+        edge, or point numbers is returned (depending on which of those the
+        selection holds). `None` is returned if nothing is selected.
 
-        Raises `NotImplementedError` if the node is a geometry node.
-        These may be supported in a future release. Meanwhile, access
-        their Java methods directly. Raises `TypeError` if the node
-        does not have a selection and is not itself a selection.
+        Raises `NotImplementedError` if the node is a geometry node. These may
+        be supported in a future release. Meanwhile, access their Java methods
+        directly. Raises `TypeError` if the node does not have a selection and
+        is not itself a selection.
         """
         java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
@@ -547,11 +543,10 @@ class Node:
         """
         Enables or disables the node.
 
-        If `action` is `'flip'` (the default), it enables the feature
-        in the model tree if it is currently disabled or disables it
-        if enabled. Pass `'enable'` or `'on'` to enable the feature
-        regardless of its current state. Pass `'disable'` or `'off'`
-        to disable it.
+        If `action` is `'flip'` (the default), it enables the feature in the
+        model tree if it is currently disabled or disables it if enabled. Pass
+        `'enable'` or `'on'` to enable the feature regardless of its current
+        state. Pass `'disable'` or `'off'` to disable it.
         """
         java = self.java_if_exists()
         if action == 'flip':
@@ -574,9 +569,8 @@ class Node:
         """
         Imports external data from the given `file`.
 
-        Note the trailing underscore in the method name. It is needed
-        so that the Python parser does not treat the name as an
-        `import` statement.
+        Note the trailing underscore in the method name. It is needed so that
+        the Python parser does not treat the name as an `import` statement.
         """
         file = Path(file)
         if not file.exists():
@@ -900,9 +894,9 @@ def tree(node: Node | Model, max_depth: int = None):
     """
     Displays the model tree.
 
-    This is a convenience function to visualize, in an interactive
-    Python session, the branch of the model tree underneath a given
-    [`node`](#Node). It produces console output such as this:
+    This is a convenience function to visualize, in an interactive Python
+    session, the branch of the model tree underneath a given [`node`](#Node).
+    It produces console output such as this:
     ```console
     >>> mph.tree(model/'physics')
     physics
@@ -922,16 +916,15 @@ def tree(node: Node | Model, max_depth: int = None):
 
     Specify `max_depth` to possibly limit the number of lower branches.
 
-    Often the node would refer to the model's root in order to inspect
-    the entire model tree. A [`Model`](#Model) object is therefore also
-    accepted as a value for `node`.
+    Often the node would refer to the model's root in order to inspect the
+    entire model tree. A [`Model`](#Model) object is therefore also accepted
+    as a value for `node`.
 
-    Note that this function performs poorly in client–server mode, the
-    default on Linux and macOS, especially for complex models. The
-    client–server communication introduces inefficiencies that do not
-    occur in stand-alone mode, the default on Windows, where the model
-    tree, i.e. the hierarchy of related Java objects, can be traversed
-    reasonably fast.
+    Note that this function performs poorly in client–server mode, the default
+    on Linux and macOS, especially for complex models. The client–server
+    communication introduces inefficiencies that do not occur in stand-alone
+    mode, the default on Windows, where the model tree, i.e. the hierarchy of
+    related Java objects, can be traversed reasonably fast.
     """
 
     def traverse(node: Node, levels: list[bool], max_depth: int | None):
@@ -955,16 +948,15 @@ def inspect(java: JClass | Node | Model):
     """
     Inspects a Java node object.
 
-    This is a convenience function to facilitate exploring Comsol's
-    Java API in an interactive Python session. It expects a Java
-    node object, such as the one returned by the `.java` property
-    of an existing node reference, which would implement the
-    [`com.comsol.model.ModelEntity`][1] interface.
+    This is a convenience function to facilitate exploring Comsol's Java API in
+    an interactive Python session. It expects a Java node object, such as the
+    one returned by the `.java` property of an existing node reference, which
+    would implement the [`com.comsol.model.ModelEntity`][1] interface.
 
-    Like any object, it could also be inspected with Python's built-in
-    `dir` command. This function here outputs a "pretty-fied" version
-    of that. It displays (prints to the console) the methods implemented
-    by the Java node as well as its properties, if any are defined.
+    Like any object, it could also be inspected with Python's built-in `dir`
+    command. This function here outputs a "pretty-fied" version of that. It
+    displays (prints to the console) the methods implemented by the Java node
+    as well as its properties, if any are defined.
 
     ```console
     >>> mph.inspect((model/'studies').java)
@@ -995,10 +987,9 @@ def inspect(java: JClass | Node | Model):
       uniquetag
     ```
 
-    The node's name, tag, and documentation reference marker are
-    listed first. These access methods and a few others, which are
-    common to all objects, are suppressed in the method list further
-    down, for the sake of clarity.
+    The node's name, tag, and documentation reference marker are listed first.
+    These access methods and a few others, which are common to all objects, are
+    suppressed in the method list further down, for the sake of clarity.
 
     [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/ModelEntity.html

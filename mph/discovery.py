@@ -1,25 +1,25 @@
 ﻿"""
 Discovers Comsol installations.
 
-This is an internal helper module that is not part of the public API.
-It retrieves information about installed Comsol versions, i.e.
-available simulation back-ends, and locates the installation folders.
+This is an internal helper module that is not part of the public API. It
+retrieves information about installed Comsol versions, i.e. available
+simulation back-ends, and locates the installation folders.
 
 On Windows, the discovery mechanism relies on the Registry to provide
-information about install locations. On Linux and macOS, Comsol is
-expected to be installed at its respective default location. Though the
-folder `.local` in the user's home directory is also searched to allow
-symbolic linking to a custom location.
+information about install locations. On Linux and macOS, Comsol is expected to
+be installed at its respective default location. Though the folder `.local` in
+the user's home directory is also searched to allow symbolic linking to a
+custom location.
 
-Additionally, we also run the shell command `where comsol` (on Windows)
-or `which comsol` (on Linux and macOS) to find a Comsol installation
-that isn't in a default location, but for which the Comsol executable
-was added to the executable search path.
+Additionally, we also run the shell command `where comsol` (on Windows) or
+`which comsol` (on Linux and macOS) to find a Comsol installation that isn't in
+a default location, but for which the Comsol executable was added to the
+executable search path.
 
 Note that duplicate installations will be ignored. That is, a Comsol
-installation found in a later step that reports the same version as one
-found in an earlier step will be ignored, regardless of install location.
-The one found on the search path, if any, will be prioritized.
+installation found in a later step that reports the same version as one found
+in an earlier step will be ignored, regardless of install location. The one
+found on the search path, if any, will be prioritized.
 """
 
 from __future__ import annotations
@@ -82,13 +82,13 @@ def parse(version: str) -> tuple[str, int, int, int, int]:
     """
     Parses version information as returned by Comsol executable.
 
-    Returns `(name, major, minor, patch, build)` where `name` is a
-    string and the rest are numbers. The name is a short-hand based
-    on the major, minor, and patch version numbers, e.g. `'5.3a'`.
+    Returns `(name, major, minor, patch, build)` where `name` is a string and
+    the rest are numbers. The name is a short-hand based on the major, minor,
+    and patch version numbers, e.g. `'5.3a'`.
 
-    Raises `ValueError` if the input string deviates from the expected
-    format, i.e., the format in which the Comsol executable returns
-    version information.
+    Raises `ValueError` if the input string deviates from the expected format,
+    i.e., the format in which the Comsol executable returns version
+    information.
     """
 
     # Separate version number from preceding program name.
@@ -304,10 +304,10 @@ def find_backends() -> list[Backend]:
     for comsol in executables:
         log.debug(f'Checking executable "{comsol}".')
 
-        # The Java VM is configured in a file named "comsol.ini".
-        # That file is usually in the same folder as the Comsol executable.
-        # Though on Linux and macOS, the executable may also be a script
-        # that sits one folder up (for some reason).
+        # The Java VM is configured in a file named "comsol.ini". That file is
+        # usually in the same folder as the Comsol executable. Though on Linux
+        # and macOS, the executable may also be a script that sits one folder
+        # up (for some reason).
         ini_name = 'comsol.ini'
         for ini in [comsol.parent/ini_name, comsol.parent/arch/ini_name]:
             if ini.is_file():
@@ -430,9 +430,9 @@ def backend(version: str = None) -> Backend:
     """
     Returns information about the Comsol back-end.
 
-    A specific Comsol `version` can be selected by name if several
-    are installed, for example `version='6.0'`. Otherwise the latest
-    version is used.
+    A specific Comsol `version` can be selected by name if several are
+    installed, for example `version='6.0'`. Otherwise the latest version is
+    used.
     """
     backends = find_backends()
     if not backends:

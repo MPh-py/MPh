@@ -26,10 +26,10 @@ class Server:
     """
     Manages a Comsol server process.
 
-    Instances of this class start and eventually stop Comsol servers
-    running on the local machine. Clients, either running on the same
-    machine or elsewhere on the network, can then connect to the
-    server at the network port it exposes for that purpose.
+    Instances of this class start and eventually stop Comsol servers running on
+    the local machine. Clients, either running on the same machine or elsewhere
+    on the network, can then connect to the server at the network port it
+    exposes for that purpose.
 
     Example usage:
     ```python
@@ -39,36 +39,34 @@ class Server:
     server.stop()
     ```
 
-    The number of processor `cores` the server makes use of may be
-    restricted. If no number is given, all cores are used by default.
+    The number of processor `cores` the server makes use of may be restricted.
+    If no number is given, all cores are used by default.
 
-    A specific `version` of the Comsol back-end can be specified if
-    several are installed on the machine, for example `version='6.0'`.
-    Otherwise the latest version is used.
+    A specific `version` of the Comsol back-end can be specified if several are
+    installed on the machine, for example `version='6.0'`. Otherwise the latest
+    version is used.
 
     The server can be instructed to use a specific network `port` for
-    communication with clients by passing the number of a free port
-    explicitly. If `port=None`, the default, the server will try to
-    use port 2036 or, in case it is blocked by another server already
-    running, will try subsequent numbers until it finds a free port.
-    This is also Comsol's default behavior. It is however not robust
-    and may lead to start-up failures if multiple servers are spinning
-    up at the same time. Pass `port=0` to work around this issue. The
-    server will then select a random free port, which will almost always
-    avoid collisions.
+    communication with clients by passing the number of a free port explicitly.
+    If `port=None`, the default, the server will try to use port 2036 or, in
+    case it is blocked by another server already running, will try subsequent
+    numbers until it finds a free port. This is also Comsol's default behavior.
+    It is however not robust and may lead to start-up failures if multiple
+    servers are spinning up at the same time. Pass `port=0` to work around this
+    issue. The server will then select a random free port, which will almost
+    always avoid collisions.
 
-    If `multi` is `False` or `'off'` or `None` (the default), then
-    the server will shut down as soon as the first connected clients
-    disconnects itself. If it is `True` or `'on'`, the server process
-    will stay alive and accept multiple client connections.
+    If `multi` is `False` or `'off'` or `None` (the default), then the server
+    will shut down as soon as the first connected clients disconnects itself.
+    If it is `True` or `'on'`, the server process will stay alive and accept
+    multiple client connections.
 
-    A `timeout` can be set for the server start-up. The default is 60
-    seconds. `TimeoutError` is raised if the server failed to start
-    within that period.
+    A `timeout` can be set for the server start-up. The default is 60 seconds.
+    `TimeoutError` is raised if the server failed to start within that period.
 
     A list of extra command-line `arguments` can be specified. They are
-    appended to the arguments passed by default when starting the
-    server process, and would thus override them in case of duplicates.
+    appended to the arguments passed by default when starting the server
+    process, and would thus override them in case of duplicates.
     """
 
     def __init__(self,
@@ -128,11 +126,10 @@ class Server:
                 raise TimeoutError(error)
 
         # Bail out if server exited with an error.
-        # We don't use `process.returncode` here, as we would like to,
-        # because on Linux the server executable exits with code 0,
-        # indicating no error, even when an error has occurred.
-        # We assume that the last line in the server's output is the
-        # actual error message.
+        # We don't use `process.returncode` here, as we would like to, because
+        # on Linux the server executable exits with code 0, indicating no
+        # error, even when an error has occurred. We assume that the last line
+        # in the server's output is the actual error message.
         if port is None:
             error = f'Starting server failed: {lines[-1]}'
             log.error(error)

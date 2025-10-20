@@ -17,13 +17,13 @@ from numpy.typing    import ArrayLike, NDArray
 from numpy           import int32, float64
 
 
-# The following look-up table is used by the `modules()` method. It maps
-# the product names (add-on modules) returned by `model.getUsedProducts()`
-# to the same sanitized names used in the look-up table in the `clients`
-# module. So it essentially drops the Unicode trademark symbols as well
-# as the redundant "Module". The strings returned by `getUsedProducts()`
-# seem to correspond exactly to the product names in the left column
-# of the table on page 41 of Comsol 6.0's Programming Reference Manual.
+# The following look-up table is used by the `modules()` method. It maps the
+# product names (add-on modules) returned by `model.getUsedProducts()` to the
+# same sanitized names used in the look-up table in the `clients` module. So it
+# essentially drops the Unicode trademark symbols as well as the redundant
+# "Module". The strings returned by `getUsedProducts()` seem to correspond
+# exactly to the product names in the left column of the table on page 41 of
+# Comsol 6.0's Programming Reference Manual.
 modules = {
     'AC/DC Module':                          'AC/DC',
     'Acoustics Module':                      'Acoustics',
@@ -83,8 +83,8 @@ class Model:
     """
     Represents a Comsol model.
 
-    The class is not intended to be instantiated directly. Rather, the
-    model would be loaded from a file by the [client](#Client).
+    The class is not intended to be instantiated directly. Rather, the model
+    would be loaded from a file by the [client](#Client).
 
     Example usage:
     ```python
@@ -98,25 +98,24 @@ class Model:
     print(f'capacitance C = {C:.3f} pF')
     ```
 
-    The focus of the functionality exposed by this class is to
-    inspect an existing model, possibly change parameters, solve the
-    model, then evaluate the results. The intention is not *per se*
-    to create the model from scratch or to extensively modify its
-    structure, though some such functionality is offered here, and
-    even more of it through the [`Node`](#Node) class.
+    The focus of the functionality exposed by this class is to inspect an
+    existing model, possibly change parameters, solve the model, then evaluate
+    the results. The intention is not *per se* to create the model from scratch
+    or to extensively modify its structure, though some such functionality is
+    offered here, and even more of it through the [`Node`](#Node) class.
 
-    This class is a wrapper around the [`com.comsol.model.Model`][1]
-    Java class, which itself is wrapped by JPype and can be accessed
-    directly via the `.java` attribute. The full Comsol functionality
-    is thus available if needed.
+    This class is a wrapper around the [`com.comsol.model.Model`][1] Java
+    class, which itself is wrapped by JPype and can be accessed directly via
+    the `.java` attribute. The full Comsol functionality is thus available if
+    needed.
 
-    The `parent` argument to the constructor is usually that internal
-    Java object. But in order to simplify extending the class with
-    custom functionality, the constructor also accepts instances of
-    this very class or a child class. In that case, it will preserve
-    the original `.java` reference throughout the class hierarchy so
-    that it is possible to "type-cast" an existing `Model` instance
-    (as loaded by the client) to a derived child class.
+    The `parent` argument to the constructor is usually that internal Java
+    object. But in order to simplify extending the class with custom
+    functionality, the constructor also accepts instances of this very class
+    or a child class. In that case, it will preserve the original `.java`
+    reference throughout the class hierarchy so that it is possible to
+    "type-cast" an existing `Model` instance (as loaded by the client) to a
+    derived child class.
 
     [1]: https://doc.comsol.com/6.0/doc/com.comsol.help.comsol/api\
 /com/comsol/model/Model.html
@@ -244,11 +243,10 @@ class Model:
         """
         Returns problems reported by nodes in the model.
 
-        This method lets users check if any problems are reported
-        throughout the model by testing `if model.problems():` in
-        application code, to then act accordingly. See
-        [`Node.problems()`](#Node.problems) on how problems
-        (error/warning messages and their origin) are returned.
+        This method lets users check if any problems are reported throughout
+        the model by testing `if model.problems():` in application code, to
+        then act accordingly. See [`Node.problems()`](#Node.problems) on how
+        problems (error/warning messages and their origin) are returned.
         """
         return (self/None).problems()
 
@@ -353,10 +351,10 @@ class Model:
         """
         Returns the indices and values of inner solutions.
 
-        These are the solution indices and time values in
-        time-dependent studies, returned as a tuple of an integer
-        array and a floating-point array. A `dataset` name may be
-        specified. Otherwise the default dataset is used.
+        These are the solution indices and time values in time-dependent
+        studies, returned as a tuple of an integer array and a floating-point
+        array. A `dataset` name may be specified. Otherwise the default dataset
+        is used.
         """
         # Validate dataset argument.
         if dataset is not None:
@@ -398,9 +396,8 @@ class Model:
         Returns the indices and values of outer solutions.
 
         These are the solution indices and values in parametric sweeps,
-        returned as a tuple of an integer array and a floating-point
-        array. A `dataset` name may be specified. Otherwise the default
-        dataset is used.
+        returned as a tuple of an integer array and a floating-point array. A
+        `dataset` name may be specified. Otherwise the default dataset is used.
         """
         # Validate dataset argument.
         if dataset is not None:
@@ -654,18 +651,17 @@ class Model:
         """
         Returns or sets the parameter of the given name.
 
-        Returns the value of parameter `name` if no `value` is given.
-        Otherwise sets the value.
+        Returns the value of parameter `name` if no `value` is given. Otherwise
+        sets the value.
 
-        Values are accepted as expressions (strings, possibly including
-        the unit inside square brackets) or as numerical values
-        (referring to default units).
+        Values are accepted as expressions (strings, possibly including the
+        unit inside square brackets) or as numerical values (referring to
+        default units).
 
-        By default, values are returned as strings, i.e. the expression
-        as entered in the user interface. That expression may include
-        the unit, again inside brackets. If the option `evaluate` is set
-        to `True`, the numerical value that the expression evaluates to
-        is returned.
+        By default, values are returned as strings, i.e. the expression as
+        entered in the user interface. That expression may include the unit,
+        again inside brackets. If the option `evaluate` is set to `True`, the
+        numerical value that the expression evaluates to is returned.
         """
         if value is None:
             if not evaluate:
@@ -701,13 +697,12 @@ class Model:
         """
         Returns the global model parameters.
 
-        The parameters are returned as a dictionary indexed by the
-        parameter names and mapping to the parameter values.
+        The parameters are returned as a dictionary indexed by the parameter
+        names and mapping to the parameter values.
 
-        Value are returned as string expressions, i.e. as entered by
-        the user, unless `evaluate` is set to `True`, in which case
-        the expressions are evaluated and the corresponding numbers
-        are returned.
+        Value are returned as string expressions, i.e. as entered by the user,
+        unless `evaluate` is set to `True`, in which case the expressions are
+        evaluated and the corresponding numbers are returned.
         """
         if not evaluate:
             return {str(name): str(self.java.param().get(name))
@@ -724,8 +719,8 @@ class Model:
         """
         Returns or sets the description of the named parameter.
 
-        If no `text` is given, returns the text description of
-        parameter `name`. Otherwise sets it.
+        If no `text` is given, returns the text description of parameter
+        `name`. Otherwise sets it.
         """
         if text is not None:
             value = self.parameter(name)
@@ -753,8 +748,8 @@ class Model:
         """
         Returns or changes the value of the named node property.
 
-        If no `value` is given, returns the value of property `name`.
-        Otherwise sets the property to the given value.
+        If no `value` is given, returns the value of property `name`. Otherwise
+        sets the property to the given value.
         """
         return (self/node).property(name, value)
 
@@ -807,9 +802,8 @@ class Model:
         """
         Imports external data from a file and assigns it to the node.
 
-        Note the trailing underscore in the method name. It is needed
-        so that the Python parser does not treat the name as an
-        `import` statement.
+        Note the trailing underscore in the method name. It is needed so that
+        the Python parser does not treat the name as an `import` statement.
         """
         if isinstance(node, str):
             node = self/node
@@ -823,10 +817,9 @@ class Model:
         """
         Runs the export node, either given by name or node reference.
 
-        A `file` name can be specified. Otherwise the file name defined
-        in the node's properties will be used. If called without any
-        arguments, all export nodes defined in the model are run using
-        the default file names.
+        A `file` name can be specified. Otherwise the file name defined in the
+        node's properties will be used. If called without any arguments, all
+        export nodes defined in the model are run using the default file names.
         """
         if node is None:
             for node in self/'exports':
@@ -905,19 +898,19 @@ class Model:
         """
         Saves the model at the given file-system path.
 
-        If `path` is not given, the original file name is used, i.e.
-        the one from which the model was loaded to begin with. If
-        the path contains no folder information, the current folder
-        (working directory) is used. If the path points to a folder,
-        the model name is used to name the file inside that folder.
+        If `path` is not given, the original file name is used, i.e. the one
+        from which the model was loaded to begin with. If the path contains no
+        folder information, the current folder (working directory) is used. If
+        the path points to a folder, the model name is used to name the file
+        inside that folder.
 
-        A `format` can be specified as either "Comsol", "Java",
-        "Matlab", or "VBA". If no format is given, it will be deduced
-        from the file's ending, being either `.mph`, `.java`, `.m`, or
-        `.vba`, respectively. No file ending implies "Comsol" format.
+        A `format` can be specified as either "Comsol", "Java", "Matlab", or
+        "VBA". If no format is given, it will be deduced from the file's
+        ending, being either `.mph`, `.java`, `.m`, or `.vba`, respectively.
+        No file ending implies "Comsol" format.
 
-        Imposes the correct file ending for the format. Overwrites
-        existing files.
+        Imposes the correct file ending for the format. Overwrites existing
+        files.
         """
 
         # Coerce paths given as string to Path objects.
