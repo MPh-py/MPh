@@ -19,7 +19,7 @@ from jpype           import JClass
 
 
 # The following look-up table is used by the `modules()` method. It is based on
-# the table on page 41 of Comsol 6.0's Programming Reference Manual, with the
+# the table on page 42 of Comsol 6.3's Programming Reference Manual, with the
 # two columns swapped. It thus maps vendor strings to product names (add-on
 # modules), except that we also shorten the names somewhat (drop "Module"
 # everywhere) and leave out the pointless trademark symbols. The vendor strings
@@ -37,6 +37,7 @@ modules = {
     'CORROSION':                'Corrosion',
     'DESIGN':                   'Design',
     'ECADIMPORT':               'ECAD Import',
+    'ELECTRICDISCHARGE':        'Electric Discharge',
     'ELECTROCHEMISTRY':         'Electrochemistry',
     'ELECTRODEPOSITION':        'Electrodeposition',
     'FATIGUE':                  'Fatigue',
@@ -74,6 +75,7 @@ modules = {
     'UQ':                       'Uncertainty Quantification',
     'WAVEOPTICS':               'Wave Optics',
 }
+
 
 log = getLogger(__package__)
 
