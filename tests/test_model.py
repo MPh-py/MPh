@@ -5,7 +5,6 @@ from mph import Client, Model
 
 import models
 from fixtures import logging_disabled
-from fixtures import warnings_disabled
 from fixtures import setup_logging
 
 from numpy.testing import assert_allclose
@@ -424,10 +423,6 @@ def test_parameter():
             model.parameter('non-existing')
         with raises(RuntimeError):
             model.parameter('non-existing', evaluate=True)
-    with warnings_disabled():
-        model.parameter('U', '1', 'V')
-        assert model.parameter('U') == '1 [V]'
-        model.parameter('U', description='applied voltage')
     model.parameter('U', value)
     assert model.parameter('U') == value
 
@@ -730,53 +725,6 @@ def test_problems():
     assert not model.problems()
 
 
-def test_features():
-    with warnings_disabled():
-        assert 'Laplace equation' in model.features('electrostatic')
-        assert 'zero charge'      in model.features('electrostatic')
-        assert 'initial values'   in model.features('electrostatic')
-        assert 'anode'            in model.features('electrostatic')
-        assert 'cathode'          in model.features('electrostatic')
-        with logging_disabled(), raises(LookupError):
-            model.features('non-existing')
-
-
-def test_toggle():
-    with warnings_disabled():
-        model.solve('static')
-        assert abs(model.evaluate('V_es').mean()) < 0.1
-        model.toggle('electrostatic', 'cathode')
-        model.solve('static')
-        assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
-        model.toggle('electrostatic', 'cathode', 'on')
-        model.solve('static')
-        assert abs(model.evaluate('V_es').mean()) < 0.1
-        model.toggle('electrostatic', 'cathode', 'off')
-        model.solve('static')
-        assert abs(model.evaluate('V_es').mean() - 0.5) < 0.1
-        with logging_disabled():
-            with raises(LookupError):
-                model.toggle('non-existing', 'feature')
-            with raises(LookupError):
-                model.toggle('electrostatic', 'non-existing')
-
-
-def test_load():
-    with warnings_disabled():
-        image = model.create('functions/image', 'Image')
-        image.property('funcname', 'im')
-        image.property('fununit', '1/m^2')
-        image.property('xmin', -5)
-        image.property('xmax', +5)
-        image.property('ymin', -5)
-        image.property('ymax', +5)
-        image.property('extrap', 'value')
-        model.load('gaussian.tif', 'image')
-        model.remove('functions/image')
-        with logging_disabled(), raises(LookupError):
-            model.load('image.png', 'non-existing')
-
-
 if __name__ == '__main__':
     setup_logging()
     setup_module()
@@ -832,10 +780,6 @@ if __name__ == '__main__':
         test_save()
 
         test_problems()
-
-        test_features()
-        test_toggle()
-        test_load()
 
     finally:
         teardown_module()

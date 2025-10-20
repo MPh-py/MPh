@@ -8,7 +8,6 @@ from numpy    import array, ndarray
 from numpy    import integer
 from pathlib  import Path
 from re       import match
-from warnings import warn
 from logging  import getLogger
 
 from jpype        import JClass
@@ -629,30 +628,27 @@ class Model:
 
     @overload
     def parameter(self,
-        name:        str,
-        value:       str | int | float | complex,
-        unit:        str | None,
-        description: str | None,
-        evaluate:    Literal[False],
+        name:  str,
+        value: str | int | float | complex,
+        *,
+        evaluate: Literal[False],
     ): ...
     @overload
     def parameter(self,
-        name:        str,
-        value:       Literal[None],
-        unit:        Literal[None],
-        description: Literal[None],
-        evaluate:    Literal[False],
+        name:  str,
+        value: Literal[None],
+        *,
+        evaluate: Literal[False],
     ) -> str: ...
     @overload
     def parameter(self,
-        name:        str,
-        value:       Literal[None],
-        unit:        Literal[None],
-        description: Literal[None],
-        evaluate:    Literal[True],
+        name:  str,
+        value: Literal[None],
+        *,
+        evaluate: Literal[True],
     ) -> int | float | complex: ...
     def parameter(
-        self, name, value=None, unit=None, description=None, evaluate=False
+        self, name, value=None, *, evaluate=False
     ):
         """
         Returns or sets the parameter of the given name.
@@ -669,21 +665,7 @@ class Model:
         the unit, again inside brackets. If the option `evaluate` is set
         to `True`, the numerical value that the expression evaluates to
         is returned.
-
-        *Warning*: The optional arguments `unit` and `description` are
-        deprecated and will be removed in a future release. Include the
-        unit in the value expression and call the `description()` method
-        to change a parameter description.
         """
-        if unit is not None:
-            warn('Argument "unit" to Model.parameter() is deprecated. '
-                 'Include the unit in the value inside square brackets.')
-            if value:
-                value = f'{value} [{unit}]'
-        if description is not None:
-            warn('Argument "description" to Model.parameter() is deprecated. '
-                 'Call .description() instead.')
-            self.description(name, description)
         if value is None:
             if not evaluate:
                 try:
@@ -725,13 +707,6 @@ class Model:
         the user, unless `evaluate` is set to `True`, in which case
         the expressions are evaluated and the corresponding numbers
         are returned.
-
-        *Warning*: Prior to version 1.0, this method would return
-        a list of named tuples holding name, value, and description.
-        It now returns a dictionary, which is a breaking change that
-        may require application code to be adapted. The descriptions
-        can be retrieved by additionally calling `.description()` or
-        `.descriptions()`.
         """
         if not evaluate:
             return {str(name): str(self.java.param().get(name))
@@ -1010,70 +985,3 @@ class Model:
             else:
                 self.java.save(str(file), type)
         log.info('Finished saving model.')
-
-    ###############
-    # Deprecation #
-    ###############
-
-    def features(self, physics: str) -> list[str]:
-        # Returns the names of all features in a given physics interface.
-        #
-        # The term feature refers to the nodes defined under a physics
-        # interface. They define the differential equations, boundary
-        # conditions, initial values, etc.
-        warn('Model.features() is deprecated. Use the Node class instead.')
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            log.error(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        tags = [tag for tag in self.java.physics(ptag).feature().tags()]
-        return [str(self.java.physics(ptag).feature(ftag).label())
-                for ftag in tags]
-
-    def toggle(self, physics: str, feature: str, action: str = 'flip'):
-        # Enables or disables features of a physics interface.
-        #
-        # If `action` is `'flip'` (the default), it enables the feature
-        # if it is currently disabled or disables it if enabled. Pass
-        # `'enable'` or `'on'` to enable the feature regardless of its
-        # current state. Pass `'disable'` or `'off'` to disable it.
-        warn('Model.toggle() is deprecated. Use the Node class instead.')
-        if physics not in self.physics():
-            error = f'No physics interface named "{physics}".'
-            log.error(error)
-            raise LookupError(error)
-        tags = [tag for tag in self.java.physics().tags()]
-        ptag = tags[self.physics().index(physics)]
-        node = self.java.physics(ptag)
-        if feature not in self.features(physics):
-            error = f'No feature named "{feature}" in physics "{physics}".'
-            log.error(error)
-            raise LookupError(error)
-        tags = [tag for tag in node.feature().tags()]
-        ftag = tags[self.features(physics).index(feature)]
-        node = node.feature(ftag)
-        if action == 'flip':
-            node.active(not node.isActive())
-        elif action in ('enable', 'on', 'activate'):
-            node.active(True)
-        elif action in ('disable', 'off', 'deactivate'):
-            node.active(False)
-
-    def load(self, file: Path | str, interpolation: str):
-        # Loads data from a file and assigns it to an interpolation function.
-        warn('Model.load() is deprecated. Call .import_() instead.')
-        for tag in self.java.func().tags():
-            if str(self.java.func(tag).label()) == interpolation:
-                break
-        else:
-            error = f'Interpolation function "{interpolation}" does not exist.'
-            log.error(error)
-            raise LookupError(error)
-        file = Path(file)
-        log.info(f'Loading external data from file "{file.name}".')
-        self.java.func(tag).discardData()
-        self.java.func(tag).set('filename', f'{file}')
-        self.java.func(tag).importData()
-        log.info('Finished loading external data.')
