@@ -21,7 +21,7 @@ license = 'MIT'
 license-files = ['license.txt']
 readme = 'PyPI.md'
 
-requires-python = '>= 3.6'
+requires-python = '>= 3.10'
 dependencies = [
     'JPype1',
     'NumPy',
@@ -64,7 +64,7 @@ name = 'mph'
 [tool.ruff]
 line-length    = 79
 indent-width   = 4
-target-version = 'py37'
+target-version = 'py310'
 include = [
     'mph/*.py',
     'tests/*.py',
@@ -119,8 +119,6 @@ include = [
         'PT012',              # `pytest.raises()` with multiple statements
         'PT013',              # incorrect pytest import
         'PTH201',             # Never use `Path('.')`.
-        'UP021',              # `universal_newlines` instead of `text`
-        'UP022',              # `PIPE` instead of `capture_output`
         'UP024',              # Replace `IOError` with `OSError`.
     ]
 

@@ -106,7 +106,6 @@ class Server:
                 log.error(error)
                 raise ValueError(error)
         command = server + arguments + extra_arguments
-        command[0] = str(command[0])   # Required for Python 3.6 and 3.7.
         process = start(command, stdin=PIPE, stdout=PIPE, errors='ignore')
 
         # Remember the requested port (if any).
