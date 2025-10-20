@@ -7,7 +7,7 @@ from .model  import Model
 from .config import option
 
 import jpype
-import jpype.imports
+import jpype.imports                      # noqa: F401 (imported, but not used)
 import os
 import faulthandler
 from pathlib import Path
