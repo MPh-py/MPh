@@ -11,7 +11,7 @@ expected to be installed at its respective default location. Though the
 folder `.local` in the user's home directory is also searched to allow
 symbolic linking to a custom location.
 
-In a last step, we also run the shell command `where comsol` (on Windows)
+Additionally, we also run the shell command `where comsol` (on Windows)
 or `which comsol` (on Linux and macOS) to find a Comsol installation
 that isn't in a default location, but for which the Comsol executable
 was added to the executable search path.
@@ -19,6 +19,7 @@ was added to the executable search path.
 Note that duplicate installations will be ignored. That is, a Comsol
 installation found in a later step that reports the same version as one
 found in an earlier step will be ignored, regardless of install location.
+The one found on the search path, if any, will be prioritized.
 """
 
 from __future__ import annotations
@@ -232,7 +233,7 @@ def search_disk(architecture: str) -> list[Path]:
     return executables
 
 
-def lookup_comsol() -> Path | None:
+def search_path() -> Path | None:
     """Returns Comsol executable if found on the system's search path."""
 
     log.debug('Looking for Comsol executable on system search path.')
@@ -289,10 +290,14 @@ def find_backends() -> list[Backend]:
         raise NotImplementedError(error)
 
     # Look up `comsol` command as if run in terminal.
-    comsol = lookup_comsol()
+    comsol = search_path()
     if comsol:
         if comsol not in executables:
-            executables.append(comsol)
+            executables.insert(0, comsol)
+            # We put that Comsol executable first so that users have a way of
+            # prioritizing one Comsol installation over another. This makes
+            # sense for multiple installations of the same Comsol version, each
+            # with a single-user license for a different user.
         else:
             log.debug('Ignoring executable as it was previously found.')
 
