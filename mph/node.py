@@ -451,10 +451,9 @@ class Node:
         `None` to clear the selection.
 
         Raises `NotImplementedError` if the node (that this method is called
-        on) is a geometry node. These may be supported in a future release.
-        Meanwhile, access their Java methods directly. Raises `TypeError` if
-        the node does not have a selection and is not itself an "explicit"
-        selection.
+        on) is a geometry node. Access their Java methods directly. Raises
+        `TypeError` if the node does not have a selection and is not itself an
+        "explicit" selection.
         """
         java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
@@ -501,10 +500,9 @@ class Node:
         edge, or point numbers is returned (depending on which of those the
         selection holds). `None` is returned if nothing is selected.
 
-        Raises `NotImplementedError` if the node is a geometry node. These may
-        be supported in a future release. Meanwhile, access their Java methods
-        directly. Raises `TypeError` if the node does not have a selection and
-        is not itself a selection.
+        Raises `NotImplementedError` if the node is a geometry node. Access
+        their Java methods directly. Raises `TypeError` if the node does not
+        have a selection and is not itself a selection.
         """
         java = self.java_if_exists()
         if isinstance(java, JClass('com.comsol.model.GeomFeature')):
