@@ -22,8 +22,8 @@ from numpy           import int32, float64
 # same sanitized names used in the look-up table in the `clients` module. So it
 # essentially drops the Unicode trademark symbols as well as the redundant
 # "Module". The strings returned by `getUsedProducts()` seem to correspond
-# exactly to the product names in the left column of the table on page 41 of
-# Comsol 6.0's Programming Reference Manual.
+# exactly to the product names in the left column of the table on page 42 of
+# Comsol 6.3's Programming Reference Manual.
 modules = {
     'AC/DC Module':                          'AC/DC',
     'Acoustics Module':                      'Acoustics',
@@ -38,6 +38,7 @@ modules = {
     'Corrosion Module':                      'Corrosion',
     'Design Module':                         'Design',
     'ECAD Import Module':                    'ECAD Import',
+    'Electric Discharge Module':             'Electric Discharge',
     'Electrochemistry Module':               'Electrochemistry',
     'Electrodeposition Module':              'Electrodeposition',
     'Fatigue Module':                        'Fatigue',

@@ -8,6 +8,7 @@ from fixtures import setup_logging
 
 from pytest  import raises
 from pathlib import Path
+from packaging import version
 
 
 client: Client
@@ -88,7 +89,10 @@ def test_files():
 
 
 def test_modules():
+    Comsol62_or_older = (version.parse(client.version) < version.parse('6.3'))
     for key in mph.client.modules:
+        if key == 'ELECTRICDISCHARGE' and Comsol62_or_older:
+            continue
         assert client.java.hasProduct(key) in (True, False)
     for value in mph.client.modules.values():
         assert value in mph.model.modules.values()
@@ -169,6 +173,7 @@ if __name__ == '__main__':
     test_models()
     test_names()
     test_files()
+    test_modules()
     test_caching()
     test_remove()
     test_clear()
