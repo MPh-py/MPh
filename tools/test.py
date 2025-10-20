@@ -1,26 +1,25 @@
 ﻿"""
 Runs all tests in the intended order.
 
-Each test script (in the `tests` folder) contains a group of tests.
-These scripts must be run in separate processes as most of them start
-and stop the Java virtual machine, which can only be done once per
-process. This is why simply calling pyTest (with `python -m pytest`
-in the root folder) will not work.
+Each test script (in the `tests` folder) contains a group of tests. These
+scripts must be run in separate processes as most of them start and stop the
+Java virtual machine, which can only be done once per process. This is why
+simply calling pyTest (with `python -m pytest` in the root folder) will not
+work.
 
-This script here runs each test group in a new subprocess. It also
-imposes a logical order: from the tests covering the most basic
-functionality to the high-level abstractions.
+This script here runs each test group in a new subprocess. It also imposes a
+logical order: from the tests covering the most basic functionality to the
+high-level abstractions.
 
-Here, as opposed to the similar script `coverage.py`, we don't actually
-run the tests through pyTest. Rather, we run the scripts directly so
-that the output is less verbose. Note, however, that pyTest still needs
-to be installed as some of the test fixtures require it.
+Here, as opposed to the similar script `coverage.py`, we don't actually run the
+tests through pyTest. Rather, we run the scripts directly so that the output is
+less verbose. Note, however, that pyTest still needs to be installed as some of
+the test fixtures require it.
 
-The verbosity can be increased by passing `--log` as a command-line
-argument. This will display the log messages produced by MPh as the
-tests are running. You can also pass the name of a test group to run
-only that one. For example, passing "model" will only run the tests
-defined in `test_model.py`.
+The verbosity can be increased by passing `--log` as a command-line argument.
+This will display the log messages produced by MPh as the tests are running.
+You can also pass the name of a test group to run only that one. For example,
+passing "model" will only run the tests defined in `test_model.py`.
 """
 
 from subprocess import run

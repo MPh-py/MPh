@@ -1,12 +1,11 @@
 ﻿"""
 Distributes a parameter sweep over multiple worker processes.
 
-This demonstration works around the limitation that only a single
-Comsol client can run inside one Python process. It leverages the
-`multiprocessing` module from Python's standard library to create
-several independent subprocesses ("workers") that communicate with
-the parent process ("boss") via inter-process queues to pass job
-instructions and results back and forth.
+This demonstration works around the limitation that only a single Comsol client
+can run inside one Python process. It leverages the `multiprocessing` module
+from Python's standard library to create several independent subprocesses
+("workers") that communicate with the parent process ("boss") via inter-process
+queues to pass job instructions and results back and forth.
 """
 
 import mph                             # Comsol interface

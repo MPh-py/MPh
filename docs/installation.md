@@ -53,19 +53,19 @@ For most users who already have Comsol installed, MPh will work out of the box.
 ## Licenses
 
 Comsol offers a number of [license options] for its products. Generally
-speaking, MPh wants nothing to do with that complication, but rather
-assumes that, whichever license you use, things will "just work". That is,
-you are able to start the Comsol GUI or invoke any of its command-line
-tools without extra configuration. Because Comsol's license management
-handles that in one way or another. This is true for the most common
-license types: "CPU-Locked" and "Floating Network".
+speaking, MPh wants nothing to do with that complication, but rather assumes
+that, whichever license you use, things will "just work". That is, you are able
+to start the Comsol GUI or invoke any of its command-line tools without extra
+configuration. Because Comsol's license management handles that in one way or
+another. This is true for the most common license types: "CPU-Locked" and
+"Floating Network".
 
-For more outlandish license types, that may not be the case. For example,
-the "Class Kit" license requires users to pass the command-line argument
-`-ckl` when starting Comsol. In this particular case, you can tell MPh
-to do the same, by setting [`mph.option('classkit', True)`](#option)
-before calling [`mph.start()`](#start). In other such cases, [open an
-issue] if you want to add support to the code base.
+For more outlandish license types, that may not be the case. For example, the
+"Class Kit" license requires users to pass the command-line argument `-ckl`
+when starting Comsol. In this particular case, you can tell MPh to do the same,
+by setting [`mph.option('classkit', True)`](#option) before calling
+[`mph.start()`](#start). In other such cases, [open an issue] if you want to
+add support to the code base.
 
 
 [available on PyPI]:      https://pypi.python.org/pypi/mph

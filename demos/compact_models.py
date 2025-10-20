@@ -1,9 +1,9 @@
 ﻿"""
 Compacts Comsol models in the working directory.
 
-Loads each Comsol model (`.mph` file) in the current folder, removes
-solution and mesh data, resets the modeling history, then saves the
-model file under its original name, effectively compacting its size.
+Loads each Comsol model (`.mph` file) in the current folder, removes solution
+and mesh data, resets the modeling history, then saves the model file under its
+original name, effectively compacting its size.
 """
 
 import mph

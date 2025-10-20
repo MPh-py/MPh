@@ -7,19 +7,18 @@ for details.
 
 ### Running tests
 
-MPh can be used and tested from source, provided NumPy, JPype, and pyTest
-are already installed. That is, the following runs the test suite for what
-is currently in the `main` branch:
+MPh can be used and tested from source, provided NumPy, JPype, and pyTest are
+already installed. That is, the following runs the test suite for what is
+currently in the `main` branch:
 ```
 ❯ git clone https://github.com/MPh-py/MPh.git
 ❯ cd MPh
 ❯ python tools/test.py --log
 ```
 
-This works because when you are in the project folder (named `MPh`),
-then `import mph` will find the subfolder `mph` and run the code from
-there, possibly ignoring a different MPh version installed in the
-Python environment.
+This works because when you are in the project folder (named `MPh`), then
+`import mph` will find the subfolder `mph` and run the code from there,
+possibly ignoring a different MPh version installed in the Python environment.
 
 Note that just calling `pytest` will fail as the test suite starts a Comsol
 client, and hence the Java VM, multiple times, which JPype does not support.

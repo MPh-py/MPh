@@ -50,31 +50,28 @@ def start(
     client.remove(model)
     ```
 
-    Depending on the platform, this may either be a stand-alone client
-    (on Windows) or a thin client connected to a server running locally
-    (on Linux and macOS). The reason for this disparity is that, while
-    stand-alone clients are more lightweight and start up much faster,
-    support for this mode of operation is limited on Unix-like operating
-    systems, and thus not the default. Find more details in section
+    Depending on the platform, this may either be a stand-alone client (on
+    Windows) or a thin client connected to a server running locally (on Linux
+    and macOS). The reason for this disparity is that, while stand-alone
+    clients are more lightweight and start up much faster, support for this
+    mode of operation is limited on Unix-like operating systems, and thus not
+    the default. Find more details in section
     "[](/limitations.md#platform-differences)".
 
     Returns a [`Client`](#Client) instance. Only one client can be
-    instantiated at a time. Subsequent calls to `start()` will return
-    the client instance created in the first call. In order to work
-    around this limitation of the Comsol API, separate Python processes
-    have to be started. Refer to section
-    "[](/demonstrations.md#multiple-processes)" for guidance.
+    instantiated at a time. Subsequent calls to `start()` will return the
+    client instance created in the first call. In order to work around this
+    limitation of the Comsol API, separate Python processes have to be started.
+    Refer to section "[](/demonstrations.md#multiple-processes)" for guidance.
 
-    The number of `cores` (threads) the Comsol instance uses can be
-    restricted by specifying a number. Otherwise all available cores
-    will be used.
+    The number of `cores` (threads) the Comsol instance uses can be restricted
+    by specifying a number. Otherwise all available cores will be used.
 
-    A specific Comsol `version` can be selected if several are
-    installed, for example `version='6.0'`. Otherwise the latest
-    version is used.
+    A specific Comsol `version` can be selected if several are installed, for
+    example `version='6.0'`. Otherwise the latest version is used.
 
-    The server `port` can be specified if client–server mode is used.
-    If omitted, the server chooses a random free port.
+    The server `port` can be specified if client–server mode is used. If
+    omitted, the server chooses a random free port.
     """
     global client, server, thread
 
@@ -146,12 +143,12 @@ def cleanup():
     """
     Cleans up resources at the end of the Python session.
 
-    This function is not part of the public API. It runs automatically
-    at the end of the Python session and is not intended to be called
-    directly from application code.
+    This function is not part of the public API. It runs automatically at the
+    end of the Python session and is not intended to be called directly from
+    application code.
 
-    Stops the local server instance possibly created by `start()` and
-    shuts down the Java Virtual Machine hosting the client instance.
+    Stops the local server instance possibly created by `start()` and shuts
+    down the Java Virtual Machine hosting the client instance.
     """
     if client and client.port:
         try:
@@ -165,12 +162,12 @@ def cleanup():
         sys.stdout.flush()
         sys.stderr.flush()
         # Only deactivate fault handler on Windows, just like we do in
-        # `Client.__init__()`. pyTest seems to turn them back on right
-        # before entering the exit sequence. On Linux, we do get the
-        # occasional segmentation fault when running tests, just as
-        # pyTest exits. But disabling the fault handler doesn't help,
-        # so let's not touch it. It does seem to have some effect on
-        # Windows, but even there the benefit is fairly unclear.
+        # `Client.__init__()`. pyTest seems to turn them back on right before
+        # entering the exit sequence. On Linux, we do get the occasional
+        # segmentation fault when running tests, just as pyTest exits. But
+        # disabling the fault handler doesn't help, so let's not touch it. It
+        # does seem to have some effect on Windows, but even there the benefit
+        # is fairly unclear.
         if system == 'Windows' and faulthandler.is_enabled():
             log.debug('Turning off Python fault handlers.')
             faulthandler.disable()
