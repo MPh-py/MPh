@@ -245,9 +245,8 @@ def search_path() -> Path | None:
         process = subprocess.run(
             command, shell=True, check=True, timeout=3,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-            universal_newlines=True, encoding='UTF-8',
+            text=True, encoding='UTF-8',
         )
-        # `universal_newlines` instead of `text` to support Python 3.6.
     except subprocess.CalledProcessError:
         log.debug('Command exited with an error.')
         return
@@ -376,14 +375,12 @@ def find_backends() -> list[Backend]:
         # Get version information from Comsol server.
         command: list[Path | str]
         command = server + ['--version']
-        command[0] = str(command[0])   # Needed to support Python 3.6 and 3.7.
         try:
             arguments = dict(          # noqa: C408 (unnecessary `dict()` call)
                 check=True, timeout=15,
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                universal_newlines=True, encoding='ascii', errors='ignore',
+                text=True, encoding='ascii', errors='ignore',
             )
-            # `universal_newlines` instead of `text` to support Python 3.6.
             if system == 'Windows':
                 arguments['creationflags'] = 0x08000000
             process = subprocess.run(

@@ -2,12 +2,12 @@
 
 from fixtures   import setup_logging
 
-from subprocess import run, PIPE
+from subprocess import run
 from pathlib    import Path
 from sys        import executable as python
 
 
-def run_script(name):
+def run_script(name: str):
     # Runs the named script from the project's root folder so that coverage
     # reporting doesn't get confused about source file locations.
     here = Path(__file__).resolve().parent
@@ -15,8 +15,7 @@ def run_script(name):
     assert file.is_file()
     assert file.suffix == '.py'
     root = here.parent
-    process = run([python, str(file)], cwd=root,
-                  stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    process = run([python, file], cwd=root, capture_output=True, text=True)
     return process
 
 

@@ -13,8 +13,9 @@ import faulthandler
 from pathlib import Path
 from logging import getLogger
 
-from typing import overload, Iterator
-from jpype  import JClass
+from typing          import overload
+from collections.abc import Iterator
+from jpype           import JClass
 
 
 # The following look-up table is used by the `modules()` method. It is

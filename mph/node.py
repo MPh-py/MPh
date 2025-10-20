@@ -11,11 +11,12 @@ from difflib   import get_close_matches
 from functools import lru_cache
 from logging   import getLogger
 
-from typing       import TYPE_CHECKING, overload, Iterator, Sequence, Literal
-from numpy.typing import ArrayLike, NDArray
-from numpy        import int32
+from typing          import TYPE_CHECKING, overload, Literal
+from collections.abc import Iterator, Sequence
+from numpy.typing    import ArrayLike, NDArray
+from numpy           import int32
 if TYPE_CHECKING:
-    from .model   import Model
+    from .model      import Model
 
 
 log = getLogger(__package__)

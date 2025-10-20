@@ -10,10 +10,11 @@ from pathlib  import Path
 from re       import match
 from logging  import getLogger
 
-from jpype        import JClass
-from typing       import overload, Literal, Iterator
-from numpy.typing import ArrayLike, NDArray
-from numpy        import int32, float64
+from jpype           import JClass
+from typing          import overload, Literal
+from collections.abc import Iterator
+from numpy.typing    import ArrayLike, NDArray
+from numpy           import int32, float64
 
 
 # The following look-up table is used by the `modules()` method. It maps
