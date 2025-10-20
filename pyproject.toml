@@ -49,14 +49,15 @@ Documentation = 'https://mph.readthedocs.io'
 Source        = 'https://github.com/MPh-py/MPh'
 
 
-# Build backend: Flit
+# Build backend: UV
 
 [build-system]
-requires      = ['flit_core >= 3.11']
-build-backend = 'flit_core.buildapi'
+requires      = ['uv_build >= 0.8']
+build-backend = 'uv_build'
 
-[tool.flit.module]
-name = 'mph'
+[tool.uv.build-backend]
+module-name = 'mph'
+module-root = '.'
 
 
 # Code linter: Ruff
