@@ -47,16 +47,35 @@ class Backend(TypedDict):
 system = platform.system()
 log = getLogger(__package__)
 
-architectures = {
-    'Windows': ['win64'],
-    'Linux':   ['glnxa64'],
-    'Darwin':  ['maci64','macarm64'],
-}
 
+@lru_cache(maxsize=1)
+def detect_architecture() -> str:
+    """
+    Detects platform architecture to determine name of platform folder.
 
-#######################
-# Version information #
-#######################
+    Comsol binaries (executables and native libraries) are found in sub-folders
+    with special names specific to the platform architecture, such as `win64`
+    or `macarm64`. We return the correct folder name based on the detected
+    platform (OS) and CPU architecture.
+    """
+    system    = platform.system()
+    machine   = platform.machine()
+    bits      = platform.architecture()[0]
+    processor = platform.processor()
+    if system == 'Windows' and machine == 'AMD64' and bits == '64bit':
+        log.debug('Platform architecture is 64-bit x86 Windows.')
+        return 'win64'
+    if system == 'Linux' and machine == 'x86_64' and bits == '64bit':
+        log.debug('Platform architecture is 64-bit x86 Linux.')
+        return 'glnxa64'
+    if system == 'Darwin' and processor == 'i386' and bits == '64bit':
+        log.debug('Platform architecture is 64-bit Intel macOS.')
+        return 'maci64'
+    if system == 'Darwin' and processor == 'arm':
+        log.debug('Platform architecture is 64-bit ARM macOS.')
+        return 'macarm64'
+    raise OSError('Did not recognize platform architecture.')
+
 
 def parse(version: str) -> tuple[str, int, int, int, int]:
     """
@@ -98,11 +117,7 @@ def parse(version: str) -> tuple[str, int, int, int, int]:
     return (name, major, minor, patch, build)
 
 
-######################
-# Back-end discovery #
-######################
-
-def search_registry() -> list[Path]:
+def search_registry(architecture: str) -> list[Path]:
     """Returns Comsol executables found in the Windows Registry."""
 
     log.debug('Searching Windows Registry for Comsol executables.')
@@ -154,22 +169,21 @@ def search_registry() -> list[Path]:
         root = Path(value[0])
         log.debug(f'Checking installation folder "{root}".')
 
-        # Only add to list if Comsol executable exists in valid sub-folder.
-        for arch in architectures[system]:
-            comsol = root/'bin'/arch/'comsol.exe'
-            if comsol.is_file():
-                break
-        else:
-            log.debug('Did not find Comsol executable.')
+        # Make sure Comsol executable exists in platform-specific sub-folder.
+        comsol = root/'bin'/architecture/'comsol.exe'
+        if not comsol.is_file():
+            log.debug(f'Did not find Comsol executable in "{comsol.parent}".')
             continue
         log.debug(f'Found Comsol executable "{comsol}".')
+
+        # Accept Comsol installation as one of the backends.
         executables.append(comsol)
 
     # Return list with file-system paths of Comsol executables.
     return executables
 
 
-def search_disk() -> list[Path]:
+def search_disk(architecture: str) -> list[Path]:
     """Returns Comsol executables found on the file system."""
 
     log.debug('Searching file system for Comsol executables.')
@@ -186,6 +200,8 @@ def search_disk() -> list[Path]:
             Path('/Applications'),
             Path.home() / 'Applications',
         ]
+    else:
+        raise ValueError('Unexpected value "{system}" for "system".')
 
     # Look for Comsol executables at those locations.
     folders = [item for location in locations
@@ -202,15 +218,14 @@ def search_disk() -> list[Path]:
             log.debug('No sub-folder named "multiphysics".')
             root = folder
 
-        # Only add to list if Comsol executable exists in valid sub-folder.
-        for arch in architectures[system]:
-            comsol = root/'bin'/arch/'comsol'
-            if comsol.is_file():
-                break
-        else:
-            log.debug('Did not find Comsol executable.')
+        # Make sure Comsol executable exists in platform-specific sub-folder.
+        comsol = root/'bin'/architecture/'comsol.exe'
+        if not comsol.is_file():
+            log.debug(f'Did not find Comsol executable in "{comsol.parent}".')
             continue
         log.debug(f'Found Comsol executable "{comsol}".')
+
+        # Accept Comsol installation as one of the backends.
         executables.append(comsol)
 
     # Return list with file-system paths of Comsol executables.
@@ -260,11 +275,14 @@ def find_backends() -> list[Backend]:
     log.debug('Searching system for available Comsol back-ends.')
     backends = []
 
+    # Detect platform architecture.
+    arch = detect_architecture()
+
     # Search system for Comsol executables.
     if system == 'Windows':
-        executables = search_registry()
+        executables = search_registry(arch)
     elif system in ('Linux', 'Darwin'):
-        executables = search_disk()
+        executables = search_disk(arch)
     else:
         error = f'Unsupported operating system "{system}".'
         log.error(error)
@@ -286,24 +304,14 @@ def find_backends() -> list[Backend]:
         # That file is usually in the same folder as the Comsol executable.
         # Though on Linux and macOS, the executable may also be a script
         # that sits one folder up (for some reason).
-        folders = [comsol.parent]
-        for arch in architectures[system]:
-            folders.append(comsol.parent/arch)
-        for folder in folders:
-            ini = folder/'comsol.ini'
+        ini_name = 'comsol.ini'
+        for ini in [comsol.parent/ini_name, comsol.parent/arch/ini_name]:
             if ini.is_file():
                 break
         else:
-            log.debug(f'Did not find Java VM configuration "{ini.name}".')
+            log.debug(f'Did not find Java VM configuration "{ini_name}".')
             continue
         log.debug(f'Found Java VM configuration "{ini}".')
-
-        # Make sure that parent folder has name of a valid architecture.
-        arch = ini.parent.name
-        if arch not in architectures[system]:
-            log.debug('Its parent folder does not name a valid architecture.')
-            continue
-        log.debug(f'System architecture is "{arch}".')
 
         # The actual executable is the one sitting right next to "comsol.ini".
         comsol = ini.parent/comsol.name
@@ -348,11 +356,15 @@ def find_backends() -> list[Backend]:
 
         # The root folder of the Comsol installation is up two levels.
         root = ini.parent.parent.parent
-        log.debug(f'Root folder is "{root}".')
+        log.debug(f'Comsol root folder is "{root}".')
 
-        # Check that folder with Comsol Java API exists.
-        api = root/'plugins'
-        if not api.exists():
+        # Check that folders with Comsol Java API exists.
+        plugins = root/'plugins'
+        if not plugins.exists():
+            log.debug('Did not find Comsol Java plug-ins in root folder.')
+            continue
+        apiplugins = root/'apiplugins'
+        if not apiplugins.exists():
             log.debug('Did not find Comsol Java API plug-ins in root folder.')
             continue
 
@@ -411,10 +423,6 @@ def find_backends() -> list[Backend]:
     # Return list with information about all installed Comsol back-ends.
     return backends
 
-
-######################
-# Back-end selection #
-######################
 
 def backend(version: str = None) -> Backend:
     """
