@@ -35,7 +35,7 @@ test = [
     'basedPyright >= 1.29',
 ]
 docs = [
-    'Sphinx      >= 8.2',
+    'Sphinx      >= 8',
     'MyST-parser >= 1',
     'Furo        >= 2024',
 ]
