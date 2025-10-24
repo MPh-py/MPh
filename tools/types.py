@@ -6,4 +6,4 @@ from pathlib    import Path
 
 root = Path(__file__).parent.parent
 
-run(['basedpyright'], cwd=root, check=True)
+run(['uv', 'run',  '--no-sync', 'basedpyright'], cwd=root, check=True)

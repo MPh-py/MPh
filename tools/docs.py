@@ -9,8 +9,11 @@ source = root/'docs'
 target = root/'build'/'docs'
 
 process = run(
-    ['sphinx-build', '--fail-on-warning', 'docs', 'build/docs'],
-    cwd=root
+    [
+        'uv', 'run',  '--no-sync',
+        'sphinx-build', '--fail-on-warning', 'docs', 'build/docs',
+    ],
+    cwd=root,
 )
 if process.returncode:
     raise RuntimeError('Error while rendering documentation.')

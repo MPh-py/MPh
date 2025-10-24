@@ -6,4 +6,10 @@ from pathlib    import Path
 
 root = Path(__file__).parent.parent
 
-run(['ruff', 'check'], cwd=root, check=True)
+run(
+    [
+        'uv', 'run',  '--no-sync',
+        'ruff', 'check',
+    ],
+    cwd=root, check=True,
+)
