@@ -29,10 +29,11 @@ dependencies = [
 
 [dependency-groups]
 test = [
-    'pyTest       >= 8',
-    'pyTest-cov   >= 6',
     'Ruff         >= 0.11',
     'basedPyright >= 1.29',
+    'pyTest       >= 8',
+    'pyTest-cov   >= 6',
+    'codecov      >= 2',
 ]
 docs = [
     'Sphinx      >= 8',
