@@ -35,7 +35,7 @@ else:
     environ['PYTHONPATH'] = str(root)
 
 # Report code coverage one by one for each test group.
-report = root/'.coverage'
+report = root/'coverage'/'.coverage'
 if report.exists():
     report.unlink()
 for group in groups:
