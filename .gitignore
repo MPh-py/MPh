@@ -6,8 +6,6 @@ uv.lock
 # Test artifacts
 **/.pytest_cache
 tests/MPh.ini
-.coverage
-coverage.xml
 
 # OS cruft
 Thumbs.db

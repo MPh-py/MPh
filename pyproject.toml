@@ -161,6 +161,7 @@ testpaths = ['tests']
 [tool.coverage.run]
 source = ['mph/']
 omit   = ['mph/discovery.py']  # Ignore platform-dependent discovery mechanism.
+data_file = 'build/coverage/.coverage'
 relative_files = true
 
 [tool.coverage.report]
@@ -168,3 +169,9 @@ exclude_lines = [
     'pragma: no cover',
     'def location',           # Ignore platform-dependent configuration search.
 ]
+
+[tool.coverage.html]
+directory = "build/coverage"
+
+[tool.coverage.xml]
+output = "build/coverage/coverage.xml"

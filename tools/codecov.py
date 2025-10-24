@@ -21,6 +21,6 @@ if not token:
 root = Path(__file__).parent.parent
 run(['coverage', 'xml'], cwd=root, check=True)
 run(
-    ['codecov', '--file', 'coverage.xml', '--token', token],
+    ['codecov', '--file', 'build/coverage/coverage.xml', '--token', token],
     cwd=root, check=True,
 )
