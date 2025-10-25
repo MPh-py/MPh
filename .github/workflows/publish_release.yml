@@ -1,0 +1,54 @@
+﻿# Publish new GitHub release on PyPI.
+name: Publish release
+
+on: [workflow_dispatch]
+
+jobs:
+
+  build:
+      name: Build wheel
+      runs-on:  ubuntu-latest
+      steps:
+
+        - name: Check out code.
+          uses: actions/checkout@v5
+
+        - name: Install Python.
+          uses: actions/setup-python@v6
+          with:
+              python-version: "3.13"
+
+        - name: Install UV.
+          uses: astral-sh/setup-uv@v7
+
+        - name: Build wheel.
+          run:  uv build --wheel --out-dir build/wheel
+
+        - name: Store wheel.
+          uses: actions/upload-artifact@v4
+          with:
+             name: python-wheel
+             path: build/wheel
+
+
+  publish:
+      name: Publish to PyPI
+      needs:
+        - build
+      if: startsWith(github.ref, 'refs/tags/')         # Commit must be tagged.
+      runs-on: ubuntu-latest
+      environment:
+          name: pypi
+          url:  https://pypi.org/p/MPh
+      permissions:
+          id-token: write
+      steps:
+
+        - name: Download wheel.
+          uses: actions/download-artifact@v5
+          with:
+            name: python-wheel
+            path: build/wheel
+
+        - name: Publish to PyPI.
+          uses: pypa/gh-action-pypi-publish@release/v1
