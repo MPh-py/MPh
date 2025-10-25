@@ -1,11 +1,12 @@
 # Build artifacts
 build/
-**/__pycache__
+__pycache__/
 uv.lock
 
 # Test artifacts
-**/.pytest_cache
-tests/MPh.ini
+.pytest_cache/
+.ruff_cache/
+*.mph.lock
 
 # OS cruft
 Thumbs.db

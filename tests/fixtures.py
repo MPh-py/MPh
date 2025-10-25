@@ -2,8 +2,14 @@
 
 import logging
 import warnings
+import tempfile
 import io
 import sys
+from pathlib import Path
+
+
+def temp_dir() -> Path:
+    return Path(tempfile.mkdtemp(prefix='MPh_tests_'))
 
 
 class logging_disabled:

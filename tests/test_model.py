@@ -4,6 +4,7 @@ import mph
 from mph import Client, Model
 
 import models
+from fixtures import temp_dir
 from fixtures import logging_disabled
 from fixtures import setup_logging
 
@@ -11,15 +12,20 @@ from numpy.testing import assert_allclose
 from pytest        import raises
 from pathlib       import Path
 from platform      import system
+from logging       import getLogger
 
 
 client: Client
 model:  Model
 empty:  Model
+tmpdir: Path
 
 
 def setup_module():
-    global client, model, empty
+    global client, model, empty, tmpdir
+    tmpdir = temp_dir()
+    log = getLogger(__name__)
+    log.debug(f'Temporary folder is "{tmpdir}".')
     client = mph.start()
     model  = models.capacitor()
     empty  = client.create('empty')
@@ -27,28 +33,10 @@ def setup_module():
 
 def teardown_module():
     client.clear()
-    here = Path(__file__).resolve().parent
-    files = (Path('capacitor.mph'), Path('empty.java'),
-             here/'capacitor.mph', here/'model.mph',
-             here/'model.java', here/'model.m', here/'model.vba',
-             here/'data.txt', here/'data.vtu',
-             here/'image.png',
-             here/'mesh.mphbin', here/'mesh.mphtxt',
-             here/'animation.gif', here/'animation.swf',
-             here/'animation.avi', here/'animation.webm',
-             here/'frame1.png', here/'frame2.png', here/'frame3.png')
-    for file in files:
-        if file.exists():
-            file.unlink()
 
 
 class Derived(Model):
     pass
-
-
-########################################
-# Tests                                #
-########################################
 
 
 def test_init():
@@ -554,64 +542,59 @@ def test_import():
 
 
 def test_export():
-    here = Path(__file__).resolve().parent
     # Test export of text data.
-    assert not (here/'data.txt').exists()
-    model.export('data', here/'data.txt')
-    assert (here/'data.txt').exists()
-    (here/'data.txt').unlink()
-    assert not (here/'data.txt').exists()
+    assert not (tmpdir/'data.txt').exists()
+    model.export('data', tmpdir/'data.txt')
+    assert (tmpdir/'data.txt').exists()
+    (tmpdir/'data.txt').unlink()
+    assert not (tmpdir/'data.txt').exists()
     model.export('data')
-    assert (here/'data.txt').exists()
-    (here/'data.txt').unlink()
-    assert not (here/'data.txt').exists()
+    assert (tmpdir/'data.txt').exists()
+    (tmpdir/'data.txt').unlink()
+    assert not (tmpdir/'data.txt').exists()
     model.export(model/'exports'/'data')
-    assert (here/'data.txt').exists()
-    (here/'data.txt').unlink()
-    assert not (here/'data.txt').exists()
+    assert (tmpdir/'data.txt').exists()
+    (tmpdir/'data.txt').unlink()
+    assert not (tmpdir/'data.txt').exists()
     model.property('exports/data', 'exporttype', 'text')
-    model.export('data', here/'data.txt')
-    assert (here/'data.txt').exists()
-    (here/'data.txt').unlink()
+    model.export('data', tmpdir/'data.txt')
+    assert (tmpdir/'data.txt').exists()
     # Test export of VTK data.
-    assert not (here/'data.vtu').exists()
+    assert not (tmpdir/'data.vtu').exists()
     model.property('exports/data', 'exporttype', 'vtu')
-    model.export('data', here/'data.vtu')
-    assert (here/'data.vtu').exists()
-    (here/'data.vtu').unlink()
+    model.export('data', tmpdir/'data.vtu')
+    assert (tmpdir/'data.vtu').exists()
     # Test export of images.
-    assert not (here/'image.png').exists()
-    model.export('image', here/'image.png')
-    assert (here/'image.png').exists()
-    (here/'image.png').unlink()
-    assert not (here/'image.png').exists()
+    assert not (tmpdir/'image.png').exists()
+    model.export('image', tmpdir/'image.png')
+    assert (tmpdir/'image.png').exists()
     # Test running all exports at once.
+    (tmpdir/'data.vtu').unlink()
+    (tmpdir/'image.png').unlink()
+    assert not (tmpdir/'data.vtu').exists()
+    assert not (tmpdir/'image.png').exists()
     model.export()
-    assert (here/'data.vtu').exists()
-    assert (here/'image.png').exists()
-    (here/'data.vtu').unlink()
-    (here/'image.png').unlink()
+    assert (tmpdir/'data.vtu').exists()
+    assert (tmpdir/'image.png').exists()
     # Test export of meshes.
     mesh = (model/'exports').create('Mesh', name='mesh')
     mesh.java.set('filename', 'mesh')
-    assert not (here/'mesh.mphbin').exists()
-    model.export('mesh', here/'mesh.mphbin')
-    assert (here/'mesh.mphbin').exists()
-    (here/'mesh.mphbin').unlink()
-    assert not (here/'mesh.mphtxt').exists()
-    model.export('mesh', here/'mesh.mphtxt')
-    assert (here/'mesh.mphtxt').exists()
-    (here/'mesh.mphtxt').unlink()
+    assert not (tmpdir/'mesh.mphbin').exists()
+    model.export('mesh', tmpdir/'mesh.mphbin')
+    assert (tmpdir/'mesh.mphbin').exists()
+    (tmpdir/'mesh.mphbin').unlink()
+    assert not (tmpdir/'mesh.mphtxt').exists()
+    model.export('mesh', tmpdir/'mesh.mphtxt')
+    assert (tmpdir/'mesh.mphtxt').exists()
     mesh.remove()
     # Test export of GIF animations.
     animation = (model/'exports').create('Animation', name='animation')
     animation.property('plotgroup', model/'plots'/'time-dependent field')
     animation.property('looplevelinput', 'manual')
     animation.property('looplevel', [1, 2, 3])
-    assert not (here/'animation.gif').exists()
-    model.export(animation, here/'animation.gif')
-    assert (here/'animation.gif').exists()
-    (here/'animation.gif').unlink()
+    assert not (tmpdir/'animation.gif').exists()
+    model.export(animation, tmpdir/'animation.gif')
+    assert (tmpdir/'animation.gif').exists()
     animation.remove()
     # Test export of AVI movies (which Comsol only supports on Windows).
     if system() == 'Windows':
@@ -619,36 +602,31 @@ def test_export():
         animation.property('plotgroup', model/'plots'/'time-dependent field')
         animation.property('looplevelinput', 'manual')
         animation.property('looplevel', [1, 2, 3])
-        assert not (here/'animation.avi').exists()
-        model.export(animation, here/'animation.avi')
-        assert (here/'animation.avi').exists()
-        (here/'animation.avi').unlink()
+        assert not (tmpdir/'animation.avi').exists()
+        model.export(animation, tmpdir/'animation.avi')
+        assert (tmpdir/'animation.avi').exists()
         animation.remove()
     # Test export of WebM movies.
     animation = (model/'exports').create('Animation', name='animation')
     animation.property('plotgroup', model/'plots'/'time-dependent field')
     animation.property('looplevelinput', 'manual')
     animation.property('looplevel', [1, 2, 3])
-    assert not (here/'animation.webm').exists()
-    model.export(animation, here/'animation.webm')
-    assert (here/'animation.webm').exists()
-    (here/'animation.webm').unlink()
+    assert not (tmpdir/'animation.webm').exists()
+    model.export(animation, tmpdir/'animation.webm')
+    assert (tmpdir/'animation.webm').exists()
     animation.remove()
     # Test export of image sequences.
     animation = (model/'exports').create('Animation', name='animation')
     animation.property('plotgroup', model/'plots'/'time-dependent field')
     animation.property('looplevelinput', 'manual')
     animation.property('looplevel', [1, 2, 3])
-    assert not (here/'frame1.png').exists()
-    assert not (here/'frame2.png').exists()
-    assert not (here/'frame3.png').exists()
-    model.export(animation, here/'frame.png')
-    assert (here/'frame1.png').exists()
-    assert (here/'frame2.png').exists()
-    assert (here/'frame3.png').exists()
-    (here/'frame1.png').unlink()
-    (here/'frame2.png').unlink()
-    (here/'frame3.png').unlink()
+    assert not (tmpdir/'frame1.png').exists()
+    assert not (tmpdir/'frame2.png').exists()
+    assert not (tmpdir/'frame3.png').exists()
+    model.export(animation, tmpdir/'frame.png')
+    assert (tmpdir/'frame1.png').exists()
+    assert (tmpdir/'frame2.png').exists()
+    assert (tmpdir/'frame3.png').exists()
     animation.remove()
     # Test error conditions.
     with logging_disabled():
@@ -656,7 +634,7 @@ def test_export():
             model.export('non-existing')
         animation = (model/'exports').create('Animation', name='animation')
         with raises(ValueError):
-            model.export(animation, here/'animation.invalid')
+            model.export(animation, tmpdir/'animation.invalid')
         animation.remove()
         with raises(TypeError):
             model.export(model/'functions'/'step', file='irrelevant.txt')
@@ -673,41 +651,31 @@ def test_reset():
 
 
 def test_save():
-    here = Path(__file__).resolve().parent
-    model.save()
-    empty.save(format='java')
-    assert Path(f'{model}.mph').exists()
-    assert Path(f'{empty}.java').exists()
-    Path(f'{empty}.java').unlink()
-    model.save(here)
-    model.save(here, format='java')
-    assert (here/f'{model}.mph').exists()
-    assert (here/f'{model}.java').exists()
-    (here/f'{model}.java').unlink()
-    model.save(here/'model.mph')
-    model.save()
-    assert (here/'model.mph').read_text(errors='ignore').startswith('PK')
-    model.save(here/'model.java')
-    assert (here/'model.java').exists()
-    assert 'public static void main' in (here/'model.java').read_text()
-    (here/'model.java').unlink()
-    assert not (here/'model.java').exists()
+    model.save(tmpdir)
+    assert (tmpdir/f'{model}.mph').exists()
+    model.save(tmpdir/'model.mph')
+    assert (tmpdir/'model.mph').exists()
+    assert (tmpdir/'model.mph').read_text(errors='ignore').startswith('PK')
+    model.save(tmpdir, format='java')
+    assert (tmpdir/f'{model}.java').exists()
+    model.save(tmpdir/'model.java')
+    assert (tmpdir/'model.java').exists()
+    assert 'public static void main' in (tmpdir/'model.java').read_text()
+    (tmpdir/'model.java').unlink()
+    assert not (tmpdir/'model.java').exists()
     model.save(format='java')
-    assert (here/'model.java').exists()
-    (here/'model.java').unlink()
-    model.save(here/'model.m')
-    assert (here/'model.m').exists()
-    assert 'function out = model' in (here/'model.m').read_text()
-    (here/'model.m').unlink()
-    model.save(here/'model.vba')
-    assert (here/'model.vba').exists()
-    assert 'Sub run()' in (here/'model.vba').read_text()
-    (here/'model.vba').unlink()
+    assert (tmpdir/'model.java').exists()
+    model.save(tmpdir/'model.m')
+    assert (tmpdir/'model.m').exists()
+    assert 'function out = model' in (tmpdir/'model.m').read_text()
+    model.save(tmpdir/'model.vba')
+    assert (tmpdir/'model.vba').exists()
+    assert 'Sub run()' in (tmpdir/'model.vba').read_text()
     with logging_disabled():
         with raises(ValueError):
-            model.save('model.invalid')
+            model.save(tmpdir/'model.invalid')
         with raises(ValueError):
-            model.save('model.mph', format='invalid')
+            model.save(tmpdir/'model.mph', format='invalid')
 
 
 def test_problems():
