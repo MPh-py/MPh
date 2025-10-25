@@ -87,7 +87,7 @@ for group in groups:
     print(f'Running test group "{group}".')
     t0 = now()
     process = run(
-        ['uv', 'run',  '--no-sync', f'test_{group}.py'] + options,
+        ['uv', 'run',  '--no-sync', f'test_{group}.py', *options],
         cwd=root/'tests',
     )
     if process.returncode == 0:

@@ -88,19 +88,19 @@ include = [
         'E',                  # code style errors
         'W',                  # code style warnings
         'B',                  # possible bugs
+        'Q',                  # quotation marks
+        'ARG',                # unused function arguments
         'C4',                 # correct comprehensions
+        'ERA',                # commented-out code
         'FA',                 # future annotations
         'PIE',                # miscellaneous lints
-        'ARG',                # unused function arguments
-        'RSE',                # raised exceptions
-        'Q',                  # quotation marks
-        'SIM',                # simplifiable code
         'PT',                 # pyTest style
         'PTH',                # pathlib use mandatory
-        'ERA',                # commented-out code
+        'RSE',                # raised exceptions
+        'RUF',                # ruff-specific rules
+        'SIM',                # simplifiable code
         'T10',                # debugger calls
         'UP',                 # upgradable code
-        'RUF100',             # unnecessary `noqa` directives
     ]
     ignore = [
         'E201',               # whitespace after (
@@ -121,6 +121,10 @@ include = [
         'PT012',              # `pytest.raises()` with multiple statements
         'PT013',              # incorrect pytest import
         'PTH201',             # Never use `Path('.')`.
+        'RUF001',             # string with en-dash
+        'RUF002',             # docstring with en-dash
+        'RUF013',             # no implicit optional types by assigning `None`
+        'RUF036',             # `None` not at end of type annotation
         'UP024',              # Replace `IOError` with `OSError`.
     ]
 

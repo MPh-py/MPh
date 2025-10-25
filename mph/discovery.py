@@ -202,13 +202,13 @@ def search_disk(architecture: str) -> list[Path]:
             Path.home() / 'Applications',
         ]
     else:
-        raise ValueError('Unexpected value "{system}" for "system".')
+        raise ValueError(f'Unexpected value "{system}" for "system".')
 
     # Look for Comsol executables at those locations.
     folders = [item for location in locations
                     if location.is_dir()
                     for item in location.iterdir()
-                    if item.is_dir() and re.match('(?i)comsol', item.name)]
+                    if item.is_dir() and re.match(r'(?i)comsol', item.name)]
     for folder in folders:
         log.debug(f'Checking candidate folder "{folder}".')
 
@@ -374,7 +374,7 @@ def find_backends() -> list[Backend]:
 
         # Get version information from Comsol server.
         command: list[Path | str]
-        command = server + ['--version']
+        command = [*server, '--version']
         try:
             arguments = dict(          # noqa: C408 (unnecessary `dict()` call)
                 check=True, timeout=15,

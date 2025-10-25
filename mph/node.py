@@ -11,7 +11,7 @@ from difflib   import get_close_matches
 from functools import lru_cache
 from logging   import getLogger
 
-from typing          import TYPE_CHECKING, overload, Literal
+from typing          import TYPE_CHECKING, overload, Literal, ClassVar
 from collections.abc import Iterator, Sequence
 from numpy.typing    import ArrayLike, NDArray
 from numpy           import int32
@@ -100,7 +100,7 @@ class Node:
     model: Model
     """Model object this node refers to."""
 
-    groups: dict[str, str] = {
+    groups: ClassVar[dict[str, str]] = {
         'parameters':   'self.model.java.param().group()',
         'functions':    'self.model.java.func()',
         'components':   'self.model.java.component()',
@@ -125,7 +125,7 @@ class Node:
     }
     """Mapping of the built-in groups to corresponding Java objects."""
 
-    alias: dict[str, str] = {
+    alias: ClassVar[dict[str, str]] = {
         'parameter':  'parameters',
         'function':   'functions',
         'component':  'components',
@@ -379,7 +379,7 @@ class Node:
         java = self.java
         if java:
             java.label(name)
-        self.path = self.path[:-1] + (name,)
+        self.path = (*self.path[:-1], name)
 
     def retag(self, tag: str):
         """Assigns a new tag to the node."""
@@ -627,7 +627,7 @@ class Node:
                 break
         else:
             type = '?'
-        pattern = tag_pattern(feature_path(self) + [type])
+        pattern = tag_pattern([*feature_path(self), type])
         if pattern.endswith('*'):
             tag = container.uniquetag(pattern[:-1])
         elif pattern in container.tags():
@@ -734,7 +734,7 @@ def feature_path(node: Node | None) -> list[str]:
     type = node.type()
     if not type:
         type = '?'
-    return feature_path(node.parent()) + [type]
+    return [*feature_path(node.parent()), type]
 
 
 def tag_pattern(feature_path: Sequence[str]):
@@ -934,7 +934,7 @@ def tree(node: Node | Model, max_depth: int = None):
         children = node.children()
         last = len(children) - 1
         for (index, child) in enumerate(children):
-            traverse(child, levels + [index == last], max_depth)
+            traverse(child, [*levels, index == last], max_depth)
 
     if not isinstance(node, Node):
         # Assume node is actually a model object and traverse from root.
