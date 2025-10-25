@@ -2,10 +2,23 @@
 
 import mph
 
+from fixtures import temp_dir
 from fixtures import logging_disabled
 from fixtures import setup_logging
 from pytest   import raises
-from pathlib  import Path
+
+from pathlib import Path
+from logging import getLogger
+
+
+tmpdir: Path
+
+
+def setup_module():
+    global tmpdir
+    tmpdir = temp_dir()
+    log = getLogger(__name__)
+    log.debug(f'Temporary folder is "{tmpdir}".')
 
 
 def test_option():
@@ -27,33 +40,32 @@ def test_location():
 
 
 def test_save():
-    file = Path(__file__).parent/'MPh.ini'
+    file = tmpdir/'MPh.ini'
     mph.config.save(file)
     assert file.exists()
 
 
 def test_load():
-    options = mph.option().copy()
-    for (key, value) in options.items():
+    defaults = mph.option().copy()
+    file = tmpdir/'defaults.ini'
+    mph.config.save(file)
+    for (key, value) in defaults.items():
         if isinstance(value, bool):
             mph.option(key, not value)
         elif isinstance(value, (int, float)):
             mph.option(key, value - 1)
         else:
-            mph.option(key, value + '(modified)')
-    for (key, value) in options.items():
+            mph.option(key, value + ' (modified)')
+    for (key, value) in defaults.items():
         assert mph.option(key) != value
-    file = Path(__file__).parent/'MPh.ini'
-    assert file.exists()
     mph.config.load(file)
-    for (key, value) in options.items():
+    for (key, value) in defaults.items():
         assert mph.option(key) == value
-    file.unlink()
-    assert not file.exists()
 
 
 if __name__ == '__main__':
     setup_logging()
+    setup_module()
     test_option()
     test_location()
     test_save()
