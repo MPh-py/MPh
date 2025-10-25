@@ -73,8 +73,8 @@ def timed_records(*args, **kwargs):
 
 
 def setup_logging():
-    """Sets up logging to console if `--log` command-line argument present."""
-    if '--log' not in sys.argv[1:]:
+    """Sets up logging to console unless `--quiet` passed on command line."""
+    if '--quiet' in sys.argv[1:]:
         return
     logging.setLogRecordFactory(timed_records)
     logging.basicConfig(

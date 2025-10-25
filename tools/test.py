@@ -10,15 +10,13 @@ This script here runs each test group in a new subprocess. It also imposes a
 logical order: from the tests covering the most basic functionality to the
 high-level abstractions.
 
-Here, as opposed to the similar script `coverage.py`, we don't actually run the
-tests through pyTest. Rather, we run the scripts directly so that the output is
-less verbose. Note, however, that pyTest still needs to be installed as we use
-some of its test fixtures.
-
-The verbosity can be increased by passing `--log` as a command-line argument.
-This will display the log messages produced by MPh as the tests are running.
-You can also pass the name of a test group to run only that one. For example,
-passing "model" will only run the tests defined in `test_model.py`.
+As opposed to the similar script `coverage.py`, we don't actually run the tests
+through pyTest. Rather, we run the scripts directly so that the output is less
+verbose. You can further reduce the verbosity by passing `--quiet` as a
+command-line argument. This will suppress the log messages produced by MPh as
+the tests are running. You may also pass the name of a test group to run only
+that particular one. For example, passing "model" will only run the tests
+defined in `test_model.py`.
 """
 
 from subprocess import run
@@ -51,8 +49,8 @@ parser.add_argument(
     action='help',
 )
 parser.add_argument(
-    '--log',
-    help='Display log output.',
+    '--quiet',
+    help='Suppress log output.',
     action='store_true',
 )
 parser.add_argument(
@@ -62,7 +60,7 @@ parser.add_argument(
 )
 parser.add_argument(
     'group',
-    help='Run only this group of tests.',
+    help='Run only this group of tests. If not given, run all tests.',
     nargs='?')
 arguments = parser.parse_args()
 if arguments.groups:
@@ -76,9 +74,11 @@ if arguments.group:
     if group.endswith('.py'):
         group = group[:-3]
     groups = [group]
+
+# Collect optional arguments to be passed to all test scripts.
 options = []
-if arguments.log:
-    options.append('--log')
+if arguments.quiet:
+    options.append('--quiet')
 
 # Run each test group in new process.
 for group in groups:
