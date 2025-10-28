@@ -19,17 +19,18 @@ environment in the `.venv` folder with all dependencies installed in it, as
 defined in `pyproject.toml`.
 
 Run any of the dev tools via the helper scripts in the `tools` folder. For
-example `uv run tools/lint.py` to lint the code (same as `uv run ruff check`),
-`uv run tools/types.py` to check types, etc.
+example `uv run tools/lint_code.py` to lint the code for quality issues (same
+as `uv run ruff check`), `uv run tools/check_types.py` to check type
+annotations, etc.
 
-You may also install into an existing virtual environment or even the global
-Python environment with `uv pip install --editable .`. The `--editable` flag
-makes it so that all code changes take immediate effect without re-installing
-the package.
+Alternatively, you may also install from source into an existing virtual
+environment or even the global Python environment with `uv pip install --group
+dev --editable .`. The `--editable` flag makes it so that all code changes take
+immediate effect without re-installing the package.
 
 When using Pip, follow the standard workflow: Create a virtual Python
 environment `python -m venv .venv`, activate it, and install the project in it
-with `pip install --editable .`
+with `pip install --group dev --editable .`
 
 [UV]: https://docs.astral.sh/uv
 [Pip]: https://pip.pypa.io
@@ -42,10 +43,10 @@ with `pip install --editable .`
 - Tag commit with version number, e.g. `git tag v1.3.0`
 - Force `stable` branch to latest commit: `git branch -f stable`
 - Same for the current documentation branch: `git branch -f 1.3`
-- Run code linter: `uv run tools/lint.py`
-- Test docs build: `un run tools/docs.py`
-- Test wheel build: `uv run tools/wheel.py`
-- Run code coverage: `uv run tools/coverage.py`
+- Run code linter: `uv run tools/lint_code.py`
+- Test docs build: `un run tools/render_docs.py`
+- Test wheel build: `uv run tools/build_wheel.py`
+- Run code coverage: `uv run tools/measure_coverage.py`
 - Push to GitHub:
 ```
 git push origin main
@@ -53,6 +54,6 @@ git push --tags
 git push origin stable
 git push origin 1.3
 ```
-- Upload coverage report: `uv run tools/codecov.py`
+- Upload coverage report: `uv run tools/report_codecov.py`
 - Create new release on GitHub and add release notes.
-- Publish to PyPI: `uv run tools/publish.py`
+- Publish to PyPI via GitHub Action.

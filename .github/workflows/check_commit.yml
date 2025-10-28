@@ -37,7 +37,7 @@ jobs:
           run:  uv run basedpyright
 
         - name: Run tests.
-          run:  uv run tools/test.py config
+          run:  uv run tools/run_tests.py config
           # We only run the very small part of the test suite that doesn't
           # require Comsol to be installed. This essentially just tests that
           # the library can be successfully imported, but not much more.
