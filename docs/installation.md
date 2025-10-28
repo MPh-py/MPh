@@ -22,7 +22,7 @@ Python, as is the default, to match Comsol's platform architecture.
 
 ## Comsol
 
-Comsol, obviously, you need to license and install yourself. [Versions] 5.6 and
+Comsol, obviously, you need to license and install yourself. [Versions] 6.0 and
 newer are expected to work. Up to version 6.3, they have been successfully
 tested. A separate Java run-time environment is *not* required as Comsol ships
 with one already built in.
@@ -46,7 +46,12 @@ point to the corresponding Comsol folder and give the link a name that starts
 with `comsol`.
 
 ```{note}
-For most users who already have Comsol installed, MPh will work out of the box.
+For most users who already have a recent Comsol version installed, MPh will
+work out of the box.
+
+Comsol 5.5 and 5.6 may work if you downgrade JPype: `pip install "jpype1<1.6"`.
+Newer JPype versions no longer support Java 8, which these older Comsol
+versions ship with.
 ```
 
 
