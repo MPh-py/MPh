@@ -39,7 +39,7 @@ root = here.parent
 
 # Parse command-line arguments.
 parser = ArgumentParser(
-    prog='test.py',
+    prog=Path(__file__).name,
     description='Runs the MPh test suite.',
     add_help=False, allow_abbrev=False,
 )
