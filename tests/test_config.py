@@ -23,11 +23,11 @@ def setup_module():
 
 def test_option():
     assert 'session' in mph.option()
-    assert 'platform-dependent' in mph.option().values()
-    assert mph.option('session') == 'platform-dependent'
+    assert 'client-server' in mph.option().values()
+    assert mph.option('session') == 'client-server'
     mph.option('session', 'something else')
     assert mph.option('session') == 'something else'
-    mph.option('session', 'platform-dependent')
+    mph.option('session', 'client-server')
     with logging_disabled():
         with raises(LookupError):
             mph.option('non-existing')

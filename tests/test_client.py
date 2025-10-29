@@ -24,7 +24,6 @@ demo = Path(__file__).resolve().parent/'demo.mph'
 
 def test_init():
     global client
-    mph.option('session', 'client-server')
     client = mph.start(cores=1)
     assert client.version
     assert client.port

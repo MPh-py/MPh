@@ -37,9 +37,9 @@ def start(
     """
     Starts a local Comsol session.
 
-    This convenience function provides for the typical use case of
-    running a Comsol session on the local machine, i.e. *not* have a
-    client connect to a remote server elsewhere on the network.
+    This convenience function provides for the typical use case of running a
+    Comsol session on the local machine, i.e. *not* have a client connect to a
+    remote server elsewhere on the network.
 
     Example usage:
     ```python
@@ -51,19 +51,18 @@ def start(
     client.remove(model)
     ```
 
-    Depending on the platform, this may either be a stand-alone client (on
-    Windows) or a thin client connected to a server running locally (on Linux
-    and macOS). The reason for this disparity is that, while stand-alone
-    clients are more lightweight and start up much faster, support for this
-    mode of operation is limited on Unix-like operating systems, and thus not
-    the default. Find more details in section
-    "[](/limitations.md#platform-differences)".
+    Returns a [`Client`](#Client) instance. Only one client can be instantiated
+    at a time. Subsequent calls to `start()` will return the client instance
+    created in the first call. In order to work around this limitation of the
+    Comsol API, separate Python processes have to be started. Refer to section
+    "[](/demonstrations.md#multiple-processes)" for guidance.
 
-    Returns a [`Client`](#Client) instance. Only one client can be
-    instantiated at a time. Subsequent calls to `start()` will return the
-    client instance created in the first call. In order to work around this
-    limitation of the Comsol API, separate Python processes have to be started.
-    Refer to section "[](/demonstrations.md#multiple-processes)" for guidance.
+    By default, we communicate with the Comsol compute back-end in
+    client–server mode. To run a stand-alone client, set `mph.option('session',
+    'stand-alone')` up front. A stand-alone client starts up faster and reduces
+    the call overhead to the Comsol API. However, it only works out of the box
+    on Windows, but not Linux and macOS. Find more details in section
+    "[](/limitations.md#platform-differences)".
 
     The number of `cores` (threads) the Comsol instance uses can be restricted
     by specifying a number. Otherwise all available cores will be used.
@@ -87,6 +86,11 @@ def start(
         log.info('mph.start() returning the existing client instance.')
         return client
 
+    # The default value for the session option used to be "platform-dependent",
+    # which is why the option even exists. This distinction between operating
+    # was removed in MPh 1.3. Otherwise we'd probably have no code for that
+    # here in the `start()` function. So in a way this is legacy code that
+    # might be deprecated at some point.
     session = option('session')
     if session == 'platform-dependent':
         if system == 'Windows':
