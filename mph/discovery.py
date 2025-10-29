@@ -219,7 +219,7 @@ def search_disk(architecture: str) -> list[Path]:
             root = folder
 
         # Make sure Comsol executable exists in platform-specific sub-folder.
-        comsol = root/'bin'/architecture/'comsol.exe'
+        comsol = root/'bin'/architecture/'comsol'
         if not comsol.is_file():
             log.debug(f'Did not find Comsol executable in "{comsol.parent}".')
             continue
