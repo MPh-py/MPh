@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from jpype     import JBoolean, JInt, JDouble, JString, JArray, JClass
 from numpy     import array, ndarray, integer
+
 from pathlib   import Path
 from re        import split
 from json      import load as json_load

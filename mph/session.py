@@ -7,6 +7,7 @@ from .server import Server
 from .config import option
 
 import jpype
+
 import atexit
 import sys
 import platform

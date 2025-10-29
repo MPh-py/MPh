@@ -8,6 +8,7 @@ from .config import option
 
 import jpype
 import jpype.imports                      # noqa: F401 (imported, but not used)
+
 import os
 import faulthandler
 from pathlib import Path
@@ -182,7 +183,6 @@ class Client:
         standalone = host and not port
 
         # Start the Java virtual machine.
-        log.debug(f'JPype version is {jpype.__version__}.')
         log.info('Starting Java virtual machine.')
         root = backend['root']
         args = [str(backend['jvm'])]
