@@ -919,11 +919,12 @@ def tree(node: Node | Model, max_depth: int = None):
     entire model tree. A [`Model`](#Model) object is therefore also accepted
     as a value for `node`.
 
-    Note that this function performs poorly in client–server mode, the default
-    on Linux and macOS, especially for complex models. The client–server
+    Note that this function performs poorly in client–server mode, which is the
+    default way to communicate with the Comsol backend. The client–server
     communication introduces inefficiencies that do not occur in stand-alone
-    mode, the default on Windows, where the model tree, i.e. the hierarchy of
-    related Java objects, can be traversed reasonably fast.
+    mode, where client and backend run in the same process, and the model tree,
+    i.e. the hierarchy of related Java objects, can thus be traversed
+    reasonably fast.
     """
 
     def traverse(node: Node, levels: list[bool], max_depth: int | None):

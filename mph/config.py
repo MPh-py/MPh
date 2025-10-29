@@ -18,7 +18,7 @@ class Options(TypedDict):
 
 
 options = {
-    'session':  'platform-dependent',
+    'session':  'client-server',
     'caching':  False,
     'classkit': False,
 }

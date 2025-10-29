@@ -85,9 +85,9 @@ class Client:
     """
     Manages the Comsol client instance.
 
-    A client can either be a stand-alone instance or it could connect to a
-    Comsol server started independently, possibly on a different machine on the
-    network.
+    A client can connect to a Comsol server started independently, possibly on
+    a different machine on the network, unless it is a stand-alone client
+    running independently.
 
     Example usage:
     ```python
@@ -112,7 +112,7 @@ class Client:
     The `host` address defaults to `'localhost'`, but could be any domain name
     or IP address. If `host=None` is passed, the client will remain in a
     disconnected state until [`connect()`](#connect) is called. This is
-    sometimes useful to catch runtime errors at start-up.
+    sometimes useful to catch run-time errors at start-up.
 
     This class is a wrapper around the [`com.comsol.model.util.ModelUtil`][1]
     Java class, which itself is wrapped by JPype and can be accessed directly

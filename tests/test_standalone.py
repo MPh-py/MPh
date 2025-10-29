@@ -12,6 +12,7 @@ from platform import system
 def test_start():
     if system() != 'Windows':
         return
+    mph.option('session', 'stand-alone')
     client = mph.start(cores=1)
     assert client.java
     assert client.cores == 1
