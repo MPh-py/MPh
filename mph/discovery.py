@@ -24,8 +24,12 @@ found on the search path, if any, will be prioritized.
 
 from __future__ import annotations
 
+from numpy import __version__ as numpy_version
+from jpype import __version__ as jpype_version
+
 import platform
 import subprocess
+import sys
 import re
 from pathlib   import Path
 from functools import lru_cache
@@ -277,6 +281,11 @@ def find_backends() -> list[Backend]:
 
     # Detect platform architecture.
     arch = detect_architecture()
+
+    # Log relevant software versions for easier bug reporting.
+    log.debug(f'Python version is "{sys.version}".')
+    log.debug(f'NumPy version is {numpy_version}.')
+    log.debug(f'JPype version is {jpype_version}.')
 
     # Search system for Comsol executables.
     if system == 'Windows':

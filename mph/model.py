@@ -6,6 +6,7 @@ from .node import Node
 
 from numpy    import array, ndarray
 from numpy    import integer
+
 from pathlib  import Path
 from re       import match
 from logging  import getLogger
