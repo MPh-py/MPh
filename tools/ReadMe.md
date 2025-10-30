@@ -47,7 +47,7 @@ with `pip install --group dev --editable .`
   ❯ uv run tools/check_types.py
   ❯ uv run tools/render_docs.py
   ❯ uv run tools/build_wheel.py
-  ❯ uv run tools/measure_coverage.py
+  ❯ uv run tools/run_tests.py
   ```
 - Create pull request and merge.
 - Check latest documentation build on Read-the-Docs.
@@ -60,7 +60,11 @@ with `pip install --group dev --editable .`
   ❯ git push origin stable
   ❯ git push origin 1.3
   ```
-- Tag commit with version number, e.g. `git tag v1.3.0`
-- Create new release on GitHub and add release notes.
 - Publish to PyPI via GitHub Action.
-- Upload coverage report: `uv run tools/report_coverage.py`
+- Create release on GitHub, tag it (like `v1.3.0`), add release notes.
+- Report code coverage:
+  ```shell
+  ❯ uv run tools/measure_coverage.py
+  # Add upload token in environment.
+  ❯ uv run tools/report_coverage.py`
+  ```
