@@ -35,25 +35,32 @@ with `pip install --group dev --editable .`
 [UV]: https://docs.astral.sh/uv
 [Pip]: https://pip.pypa.io
 
+
 ### Releasing a new version
 
 - Bump version number in `pyproject.toml`.
 - Add release notes to `docs/releases.md`.
 - Add dedicated commit for the version bump.
+- Test code and measure coverage:
+  ```shell
+  ❯ uv run tools/lint_code.py
+  ❯ uv run tools/check_types.py
+  ❯ uv run tools/render_docs.py
+  ❯ uv run tools/build_wheel.py
+  ❯ uv run tools/measure_coverage.py
+  ```
+- Create pull request and merge.
+- Check latest documentation build on Read-the-Docs.
+- Fast-forward stable documentation branches:
+  ```shell
+  ❯ git switch main
+  ❯ git pull
+  ❯ git branch --force stable
+  ❯ git branch --force 1.3
+  ❯ git push origin stable
+  ❯ git push origin 1.3
+  ```
 - Tag commit with version number, e.g. `git tag v1.3.0`
-- Force `stable` branch to latest commit: `git branch -f stable`
-- Same for the current documentation branch: `git branch -f 1.3`
-- Run code linter: `uv run tools/lint_code.py`
-- Test docs build: `un run tools/render_docs.py`
-- Test wheel build: `uv run tools/build_wheel.py`
-- Run code coverage: `uv run tools/measure_coverage.py`
-- Push to GitHub:
-```
-git push origin main
-git push --tags
-git push origin stable
-git push origin 1.3
-```
-- Upload coverage report: `uv run tools/report_codecov.py`
 - Create new release on GitHub and add release notes.
 - Publish to PyPI via GitHub Action.
+- Upload coverage report: `uv run tools/report_coverage.py`
