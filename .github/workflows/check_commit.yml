@@ -1,4 +1,5 @@
 ﻿# Check code quality of latest commit.
+name: Check commit
 
 on: [push, pull_request, workflow_dispatch]
 

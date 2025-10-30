@@ -22,14 +22,15 @@ Python, as is the default, to match Comsol's platform architecture.
 
 ## Comsol
 
-Comsol, obviously, you need to license and install yourself. [Versions] 6.0 and
-newer are expected to work. Up to version 6.3, they have been successfully
-tested. A separate Java run-time environment is *not* required as Comsol ships
-with one already built in.
+Comsol, obviously, you need to license and install yourself.  All major
+platforms are supported: Windows, Linux, macOS. [Comsol versions] 6.0 and newer
+are expected to work. Up to version 6.3, they have been successfully tested. A
+separate Java run-time environment is *not* required as Comsol ships with one
+already built in.
 
-All major platforms are supported: Windows, Linux, macOS. Though ARM-based
-architectures are not, namely [Apple Silicon] on newer Macs. (Contribute to
-solving [GitHub issue #80] if you want to remedy that.)
+Comsol 5.5 and 5.6 may work if you manually downgrade JPype: `pip install
+"jpype1<1.6"`. Newer JPype versions no longer support Java 8, which these older
+Comsol versions ship with.
 
 Comsol is expected to be installed in the default location suggested by its
 installer. Though on Windows, custom locations are also supported, as the
@@ -48,10 +49,6 @@ with `comsol`.
 ```{note}
 For most users who already have a recent Comsol version installed, MPh will
 work out of the box.
-
-Comsol 5.5 and 5.6 may work if you downgrade JPype: `pip install "jpype1<1.6"`.
-Newer JPype versions no longer support Java 8, which these older Comsol
-versions ship with.
 ```
 
 
@@ -79,7 +76,7 @@ add support to the code base.
 [NumPy]:                  https://numpy.org
 [GitHub issue #57]:       https://github.com/MPh-py/MPh/issues/57
 [python.org]:             https://python.org
-[Versions]:               https://www.comsol.com/release-history
+[Comsol versions]:        https://www.comsol.com/release-history
 [Apple Silicon]: https://en.wikipedia.org/wiki/Apple_silicon
 [GitHub issue #80]:       https://github.com/MPh-py/MPh/issues/80
 [create a symbolic link]: https://www.howtogeek.com/287014/how-to-create-and-use-symbolic-links-aka-symlinks-on-linux/
