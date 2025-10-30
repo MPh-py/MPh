@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import configparser
 import os
 import platform
+from configparser import ConfigParser
 from pathlib import Path
 from logging import getLogger
 
@@ -99,7 +99,7 @@ def load(file: Path | str = None):
             log.debug('Using default configuration.')
             return
     log.debug(f'Loading configuration from "{file}".')
-    parser = configparser.RawConfigParser(interpolation=None)
+    parser = ConfigParser(interpolation=None)
     parser.optionxform = str
     parser.read(file, encoding='UTF-8')
     section = 'config'
@@ -129,7 +129,7 @@ def save(file: Path | str = None):
         file = location()/'MPh.ini'
     else:
         file = Path(file)
-    parser = configparser.ConfigParser(interpolation=None)
+    parser = ConfigParser(interpolation=None)
     parser.optionxform = str
     section = 'config'
     parser.add_section(section)
