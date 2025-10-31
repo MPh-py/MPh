@@ -719,6 +719,13 @@ def unescape(name: str) -> str:
 # Tag patterns #
 ################
 
+# When creating a new node, we have to assign it a tag. The Comsol API does not
+# seem to have a way of suggesting a tag, such as "std1" for the first study.
+# That seems to be a feature of Comsol Desktop. Rather than creating generic
+# tags such as "tag1", "tag2", etc., we use a heuristic to try and mirror the
+# more meaningful tags that the Comsol GUI generates. This is purely cosmetic.
+# The tag names don't matter, they just have to be unique.
+
 @lru_cache(maxsize=1)
 def load_patterns() -> dict[str, str]:
     """Loads the look-up table for tag patterns indexed by feature path."""
