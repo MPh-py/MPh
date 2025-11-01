@@ -6,7 +6,7 @@ on: [workflow_dispatch]
 jobs:
 
   build:
-      runs-on:  ubuntu-latest
+      runs-on: ubuntu-latest
       steps:
 
         - name: Check out code.
@@ -21,13 +21,13 @@ jobs:
           uses: astral-sh/setup-uv@v7
 
         - name: Build wheel.
-          run:  uv build --wheel
+          run:  uv build --wheel --out-dir build/wheel
 
         - name: Store wheel.
           uses: actions/upload-artifact@v4
           with:
-            name: python-wheel
-            path: dist/
+            name: wheel
+            path: build/wheel
 
 
   publish:
@@ -44,8 +44,10 @@ jobs:
         - name: Download wheel.
           uses: actions/download-artifact@v5
           with:
-            name: python-wheel
-            path: dist/
+            name: wheel
+            path: build/wheel
 
         - name: Publish to PyPI.
           uses: pypa/gh-action-pypi-publish@release/v1
+          with:
+            packages-dir: build/wheel
