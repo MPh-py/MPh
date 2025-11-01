@@ -6,9 +6,9 @@ retrieve results as [NumPy] arrays, the corner stone of the scientific Python
 ecosystem.
 
 For automated testing we rely on [pyTest] and [Coverage.py]. Code quality is
-assured by [Ruff]. Packaging is handled by [Flit]. The documentation is
-rendered by [Sphinx] using the [MyST] parser to process the Markdown input and
-the [Furo] theme to style the HTML output.
+assured by [Ruff]. Packaging and project management is handled by [UV]. The
+documentation is rendered by [Sphinx] using the [MyST] parser to process the
+Markdown input and the [Furo] theme to style the HTML output.
 
 Thanks to the [contributors] as well as anyone reporting [issues] and helping
 to resolve them.
@@ -22,6 +22,6 @@ to resolve them.
 [pyTest]:       https://docs.pytest.org
 [Coverage.py]:  https://github.com/nedbat/coveragepy
 [Ruff]:         https://docs.astral.sh/ruff/linter
-[Flit]:         https://flit.pypa.io
+[UV]:           https://docs.astral.sh/uv
 [contributors]: https://github.com/MPh-py/MPh/graphs/contributors
 [issues]:       https://github.com/MPh-py/MPh/issues
