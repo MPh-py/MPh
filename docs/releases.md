@@ -33,13 +33,14 @@
   mode on Windows in order to connect to the Comsol compute back-end, instead
   of the stand-alone client we used to prefer for better start-up performance.
   This might solve some non-reproducible problems Windows users have reported.
-  It is not expected to have detrimental effects on the user experience.
+  It is not expected to have detrimental effects on the overall user
+  experience.
 - Prioritizes Comsol installation found on search path.
   ([#232](https://github.com/MPh-py/MPh/pull/232))
   \
   The Comsol installation associated with the Comsol executable found on the
   search path (the `PATH` environment variable) is now preferred over other
-  Comsol installations of the same versions. This is useful for the rare
+  Comsol installations of the same version. This is useful for the rare
   scenario when different single-user licenses are to be used on the same
   machine.
 - Replaces Comsol's deprecated `clearSolution()` with `clearSolutionData()`.

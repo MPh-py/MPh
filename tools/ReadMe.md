@@ -66,5 +66,5 @@ with `pip install --group dev --editable .`
   ```shell
   ❯ uv run tools/measure_coverage.py
   # Add upload token in shell environment.
-  ❯ uv run tools/report_coverage.py`
+  ❯ uv run tools/report_coverage.py
   ```

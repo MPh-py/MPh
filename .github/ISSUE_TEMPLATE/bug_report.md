@@ -9,9 +9,9 @@ assignees: ''
 
 <!--
 - Start with a clear description of the unintended behavior.
-- Provide the steps to reproduce the it.
+- Provide the steps to reproduce what you're seeing.
 - Provide code and attach model file(*) as needed.
-- Mention your operating system and Python version.
+- Mention your operating system, Comsol and Python version.
 - Describe the expected behavior if not obvious.
 - Pick a descriptive issue title tailored to your bug report.
 
