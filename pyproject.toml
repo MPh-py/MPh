@@ -53,7 +53,7 @@ Source        = 'https://github.com/MPh-py/MPh'
 # Build backend: UV
 
 [build-system]
-requires      = ['uv_build >= 0.8']
+requires      = ['uv_build >= 0.9.8']
 build-backend = 'uv_build'
 
 [tool.uv.build-backend]
