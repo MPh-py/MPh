@@ -1,11 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ask on Stack Overflow.
+  - name: Ask on Stack Overflow
     url: https://stackoverflow.com/questions/tagged/comsol
-    about: If you want to figure out "how to program" something Comsol-related.
-  - name: Ask on Reddit.
+    about: If you want to figure out how to program something Comsol-related.
+  - name: Ask on Reddit
     url: https://www.reddit.com/r/COMSOL
     about: If you want to ask other Comsol users for advice.
-  - name: Start a new discussion.
-    url: https://github.com/MPh-py/MPh/discussions/new/choose
-    about: For vague ideas regarding MPh. See pinned discussion for details.

@@ -51,7 +51,7 @@ with `pip install --group dev --editable .`
   ```
 - Create pull request and merge.
 - Check latest documentation build on Read-the-Docs.
-- Fast-forward stable documentation branches:
+- Fast-forward current documentation branches:
   ```shell
   ❯ git switch main
   ❯ git pull
@@ -61,10 +61,10 @@ with `pip install --group dev --editable .`
   ❯ git push origin 1.3
   ```
 - Publish to PyPI via GitHub Action.
-- Create release on GitHub, tag it (like `v1.3.0`), add release notes.
+- Create release on GitHub, tag it (like `v1.3.1`), add release notes.
 - Report code coverage:
   ```shell
   ❯ uv run tools/measure_coverage.py
-  # Add upload token in environment.
+  # Add upload token in shell environment.
   ❯ uv run tools/report_coverage.py`
   ```
