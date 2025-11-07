@@ -1,25 +1,34 @@
 ﻿# Releases
 
+## 1.3.1
+
+- [Published](https://pypi.org/project/MPh/1.3.1) on November 7, 2025.
+- Fixes spelling of project name (MPh, not mph) on PyPI.
+  \
+  This was due to a bug in the build backend, which has since been fixed.
+
+
 ## 1.3.0
+
 - [Published](https://pypi.org/project/MPh/1.3.0) on October 30, 2025.
 - Adds support for ARM versions of Comsol on macOS.
   ([#80](https://github.com/MPh-py/MPh/issues/80))
-  <br>
+  \
   On newer Macs with Apple Silicon CPUs, we now look for the ARM versions of
   Comsol, unless Python is running through the Rosetta emulation layer.
 - Drops support for Python 3.6, 3.7, 3.8, 3.9.
   ([#234](https://github.com/MPh-py/MPh/pull/234))
-  <br>
+  \
   These older Python versions have reached end of life and are poorly supported
   by modern development tools.
 - Adds type annotations to code base for an improved development experience.
   ([#230](https://github.com/MPh-py/MPh/pull/230))
-  <br>
+  \
   Type annotations improve autocompletion results and enhance context-based
   suggestions in code editors and IDEs.
 - Makes client–server mode the default also on Windows.
   ([#236](https://github.com/MPh-py/MPh/pull/236))
-  <br>
+  \
   This has always been the default on Linux and macOS. We now use client–server
   mode on Windows in order to connect to the Comsol compute back-end, instead
   of the stand-alone client we used to prefer for better start-up performance.
@@ -27,7 +36,7 @@
   It is not expected to have detrimental effects on the user experience.
 - Prioritizes Comsol installation found on search path.
   ([#232](https://github.com/MPh-py/MPh/pull/232))
-  <br>
+  \
   The Comsol installation associated with the Comsol executable found on the
   search path (the `PATH` environment variable) is now preferred over other
   Comsol installations of the same versions. This is useful for the rare
@@ -35,31 +44,39 @@
   machine.
 - Replaces Comsol's deprecated `clearSolution()` with `clearSolutionData()`.
   ([#193](https://github.com/MPh-py/MPh/pull/193))
-  <br>
+  \
   For reasons unexplained, Comsol has introduced a new method to purge solution
   data from models. What it does differently is unclear. Therefore, this change
   may not be 100% backward-compatible, but it is not expected to be noticeable.
 
+
 ## 1.2.4
+
 - [Published](https://pypi.org/project/MPh/1.2.4) on June 9, 2024.
 - Improves the phrasing of certain error messages.
   ([#177](https://github.com/MPh-py/MPh/issues/177))
 
+
 ## 1.2.3
+
 - [Published](https://pypi.org/project/MPh/1.2.3) on March 18, 2023.
 - Tells Comsol server process to not save recovery files.
   ([#128](https://github.com/MPh-py/MPh/issues/128))
 - Allows users to pass extra arguments to the server process.
   ([#128](https://github.com/MPh-py/MPh/issues/128))
 
+
 ## 1.2.2
+
 - [Published](https://pypi.org/project/MPh/1.2.2) on February 12, 2023.
 - Fixes: Not all time steps returned from parametric sweep.
   ([#112](https://github.com/MPh-py/MPh/issues/112))
 - Fixes: Connect failure with Comsol 6.1 on some Linux distributions.
   ([#114](https://github.com/MPh-py/MPh/issues/114))
 
+
 ## 1.2.1
+
 - [Published](https://pypi.org/project/MPh/1.2.1) on January 2, 2023.
 - Increases default time-out of server shutdown to accommodate Comsol 6.1.
   ([#106](https://github.com/MPh-py/MPh/issues/106))
@@ -67,24 +84,26 @@
 - Added ["Credits"](https://mph.readthedocs.io/en/1.2/credits.html) page
   to documentation.
 
+
 ## 1.2.0
+
 - [Published](https://pypi.org/project/MPh/1.2.0) on August 31, 2022.
 - Includes Comsol installation found on `PATH` in discovery.
   ([#89](https://github.com/MPh-py/MPh/issues/89))
-  <br>
+  \
   So if the `comsol` command works in the console, the corresponding
   installation will now be found automatically, even if not in a default
   location.
 - Adds support for material property groups, which now show up in model tree.
   ([#78](https://github.com/MPh-py/MPh/issues/78))
-  <br>
+  \
   Material properties can be read and altered by calling
   [`property()`](https://mph.readthedocs.io/en/1.2/api/mph.Node.html#mph.Node.property)
   on the node referring to its property group.
 - Adds method
   [`problems()`](https://mph.readthedocs.io/en/1.2/api/mph.Model.html#mph.Model.problems)
   to the `Model` class.
-  <br>
+  \
   It does the same as calling
   [`Node.problems()`](https://mph.readthedocs.io/en/1.2/api/mph.Node.html#mph.Node.problems)
   on the model's root node, but provides for an easy way to check if
@@ -93,33 +112,47 @@
   [`modules`](https://mph.readthedocs.io/en/1.2/api/mph.Client.html#mph.Client.modules).
 - External links to Comsol documentation now refer to Comsol 6.0.
 
+
 ## 1.1.6
+
 - [Published](https://pypi.org/project/MPh/1.1.6) on June 30, 2022.
 - Adds missing support for export of meshes. ([#73](https://github.com/MPh-py/MPh/issues/73))
 - No longer checks process environment in stand-alone mode. ([#13](https://github.com/MPh-py/MPh/issues/13))
 
+
 ## 1.1.5
+
 - [Published](https://pypi.org/project/MPh/1.1.5) on February 28, 2022.
 - Fixes: Server does not start when language set to Chinese. ([#72](https://github.com/MPh-py/MPh/issues/72))
 
+
 ## 1.1.4
+
 - [Published](https://pypi.org/project/MPh/1.1.4) on February 23, 2022.
 - Fixes discovery of Comsol 6.0 on Linux. ([#67](https://github.com/MPh-py/MPh/issues/67))
 
+
 ## 1.1.3
+
 - [Published](https://pypi.org/project/MPh/1.1.3) on February 21, 2022.
 - Adds support for export of animations. ([#43](https://github.com/MPh-py/MPh/issues/43))
 - Catches spurious exceptions when reading properties in [`mph.inspect()`](https://mph.readthedocs.io/en/1.1/api/mph.inspect.html). ([#68](https://github.com/MPh-py/MPh/issues/68))
 
+
 ## 1.1.2
+
 - [Published](https://pypi.org/project/MPh/1.1.2) on January 8, 2022.
 - Fixes evaluation error for datasets with slash in name. ([#66](https://github.com/MPh-py/MPh/issues/66))
 
+
 ## 1.1.1
+
 - [Published](https://pypi.org/project/MPh/1.1.1) on December 2, 2021.
 - Supports custom Comsol install locations on Linux via symbolic links in `~/.local`. ([#62](https://github.com/MPh-py/MPh/issues/62))
 
+
 ## 1.1.0
+
 - [Published](https://pypi.org/project/MPh/1.1.0) on October 21, 2021.
 - Client instances may now re-[`connect()`](https://mph.readthedocs.io/en/1.1/api/mph.Client.html#mph.Client.connect) to a different server. ([#41](https://github.com/MPh-py/MPh/pull/41))
 - [`Server`](https://mph.readthedocs.io/en/1.1/api/mph.Server.html) instances can be started with the `multi` option.
@@ -135,7 +168,9 @@
 - Improved API documentation. Cross-referenced [Comsol API docs](https://doc.comsol.com/5.6/doc/com.comsol.help.comsol/api).
 - Added new logo. (Not subject to the source code's MIT license.)
 
+
 ## 1.0.4
+
 - [Published](https://pypi.org/project/MPh/1.0.4) on May 23, 2021.
 - Adds missing support for installations with classkit license. ([#40](https://github.com/MPh-py/MPh/pull/40))
 - Adds name validation of available configuration options. ([#40](https://github.com/MPh-py/MPh/pull/40))
@@ -143,7 +178,9 @@
 - Fixes: No preference `checkforrecoveries` on certain installations. ([#39](https://github.com/MPh-py/MPh/issues/39))
 - Fixes: Unclear error message when requested version is not installed. ([#42](https://github.com/MPh-py/MPh/issues/42))
 
+
 ## 1.0.3
+
 - [Published](https://pypi.org/project/MPh/1.0.3) on May 5, 2021.
 - Fixes: [`Client.remove()`](https://mph.readthedocs.io/en/1.0/api/mph.Client.html#mph.Client.remove) did not accept model by name.
 - Fixes: Node names were not escaped when creating new features.
@@ -155,7 +192,9 @@
 - Adds missing built-in group `'couplings'`.
 - [`mph.start()`](https://mph.readthedocs.io/en/1.0/api/mph.start.html) now returns existing client instance on subsequent calls.
 
+
 ## 1.0.2
+
 - [Published](https://pypi.org/project/MPh/1.0.2) on April 28, 2021.
 - Assigns more typical tag names when creating new model features.
 - In most cases, tags are now named like they are in the Comsol GUI.
@@ -169,13 +208,17 @@
 - Moved tutorial model to [`demos`](https://github.com/MPh-py/MPh/tree/main/demos) folder.
 - Added demo script [`create_capacitor.py`](https://github.com/MPh-py/MPh/blob/main/demos/create_capacitor.py) that generates the tutorial model.
 
+
 ## 1.0.1
+
 - [Published](https://pypi.org/project/MPh/1.0.1) on April 23, 2021.
 - Fixes failing evaluation when name of default dataset contains slash.
 - Fixes failing evaluation of complex-valued expressions.
 - Fixes issue with complex numbers in parameter assignments. ([#36](https://github.com/MPh-py/MPh/issues/36))
 
+
 ## 1.0.0
+
 - [Published](https://pypi.org/project/MPh/1.0.0) on April 13, 2021.
 - We now offer you the best API Comsol has ever seen! 🎉
 - See ["Creating models: Python style"](https://mph.readthedocs.io/en/1.0/demonstrations.html#creating-models-python-style) for a feature demonstration.
@@ -202,7 +245,9 @@
 - Made folder search case-insensitive on Linux/macOS, as requested in [#31](https://github.com/MPh-py/MPh/issues/31).
 - Documentation builds now use the [MyST parser](https://github.com/executablebooks/MyST-Parser) and the [Furo theme](https://github.com/pradyunsg/furo).
 
+
 ## 0.9.1
+
 - [Published](https://pypi.org/project/MPh/0.9.1) on March 24, 2021.
 - Added documentation chapter ["Demonstrations"](https://mph.readthedocs.io/en/0.9/demonstrations.html).
 - Added [demo script](https://github.com/MPh-py/MPh/blob/72624ea6d92f009af07b3c7468084ab2a62dccfb/demos/worker_pool.py) that runs parallel Comsol sessions.
@@ -212,7 +257,9 @@
 - Relaxed log levels during [discovery](https://mph.readthedocs.io/en/0.9/api/mph.discovery.html) of Comsol installations.
 - This suppresses possibly confusing log messages as described in [#28](https://github.com/MPh-py/MPh/issues/28).
 
+
 ## 0.9.0
+
 - [Published](https://pypi.org/project/MPh/0.9.0) on March 10, 2021.
 - [`mph.start()`](https://mph.readthedocs.io/en/0.9/api/mph.start.html) is now the preferred way to start a local Comsol session.
 - On Windows, it starts a lightweight, stand-alone client.
@@ -230,23 +277,31 @@
 - Fixes [issue #23](https://github.com/MPh-py/MPh/issues/23) regarding discovery with older Python versions on Windows.
 - Fixes [issue #24](https://github.com/MPh-py/MPh/issues/24) regarding localized server output messages.
 
+
 ## 0.8.2
+
 - [Published](https://pypi.org/project/MPh/0.8.2) on February 13, 2021.
 - Fixes: Exit code was always 0, even when terminating with `sys.exit(2)`. ([#15](https://github.com/MPh-py/MPh/issues/15))
 - Fixes: Exit code was 0, not 1, when exiting due to unhandled exception. ([#15](https://github.com/MPh-py/MPh/issues/15))
 
+
 ## 0.8.1
+
 - [Published](https://pypi.org/project/MPh/0.8.1) on February 9, 2021.
 - Applies fixes for macOS from [pull request #11](https://github.com/MPh-py/MPh/pull/11).
 - macOS support has now actually been tested according to [issue #13](https://github.com/MPh-py/MPh/issues/13).
 
+
 ## 0.8.0
+
 - [Published](https://pypi.org/project/MPh/0.8.0) on February 7, 2020.
 - Adds support for Linux and macOS.
 - Caveats apply. See documentation chapter ["Limitations"](https://mph.readthedocs.io/en/0.8/limitations.html) as well as issues [#8](https://github.com/MPh-py/MPh/issues/8) and [#9](https://github.com/MPh-py/MPh/issues/9).
 - Refactored [discovery](https://mph.readthedocs.io/en/0.8/api/mph.discovery.html) mechanism for Comsol installations.
 
+
 ## 0.7.6
+
 - [Published](https://pypi.org/project/MPh/0.7.6) on November 29, 2020.
 - Unpins [JPype](https://pypi.org/project/JPype1) and Python version.
 - Works around [issue #1](https://github.com/MPh-py/MPh/issues/1) by brute-forcing shutdown of Java VM.
@@ -255,7 +310,9 @@
 - Resolves [issue #4](https://github.com/MPh-py/MPh/issues/4) regarding compatibility with 32-bit Python.
 - Possibly resolves [issue #5](https://github.com/MPh-py/MPh/issues/5) regarding spaces in path names.
 
+
 ## 0.7.5
+
 - [Published](https://pypi.org/project/MPh/0.7.5) on July 30, 2020.
 - First release used extensively "in production".
 - Last release based on [JPype 0.7.5](https://github.com/jpype-project/jpype/releases/tag/v0.7.5).
@@ -263,27 +320,37 @@
 - Respects user-set Comsol preferences when starting [`Client`](https://mph.readthedocs.io/en/0.7/api/mph.Client.html).
 - Adds screen-shot of Comsol demonstration model to [Tutorial](https://mph.readthedocs.io/en/0.7/tutorial.html).
 
+
 ## 0.7.4
+
 - [Published](https://pypi.org/project/MPh/0.7.4) on July 17, 2020.
 - Pins JPype dependency to [version 0.7.5](https://github.com/jpype-project/jpype/releases/tag/v0.7.5).
 - Works around shutdown delays of the Java VM, see [issue #1](https://github.com/MPh-py/MPh/issues/1).
 - Requires Python version to be 3.8.3 or below.
 - Minor improvements to wording of documentation.
 
+
 ## 0.7.3
+
 - [Published](https://pypi.org/project/MPh/0.7.3) on June 15, 2020.
 - Suppresses console pop-up during [client initialization](https://mph.readthedocs.io/en/0.7/api/mph.Client.html).
 - Ignores empty units in [parameter assignments](https://mph.readthedocs.io/en/0.7/api/mph.Model.html#mph.Model.parameter).
 
+
 ## 0.7.2
+
 - [Published](https://pypi.org/project/MPh/0.7.2) on May 18, 2020.
 - Makes `dataset` argument to [`Model.outer()`](https://mph.readthedocs.io/en/0.7/api/mph.Model.html#mph.Model.outer) optional.
 - Minor tweaks to project's meta information.
 
+
 ## 0.7.1
+
 - [Published](https://pypi.org/project/MPh/0.7.1) on May 17, 2020… later that day.
 - Fixes meta information on PyPI.
 
+
 ## 0.7.0
+
 - [Published](https://pypi.org/project/MPh/0.7.0) on May 17, 2020.
 - First open-source release published on PyPI.
