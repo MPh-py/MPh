@@ -29,8 +29,8 @@ dev --editable .`. The `--editable` flag makes it so that all code changes take
 immediate effect without re-installing the package.
 
 When using Pip, follow the standard workflow: Create a virtual Python
-environment `python -m venv .venv`, activate it, and install the project in it
-with `pip install --group dev --editable .`
+environment with `python -m venv .venv`, activate it, and install the project
+in it with `pip install --group dev --editable .`
 
 [UV]: https://docs.astral.sh/uv
 [Pip]: https://pip.pypa.io
@@ -57,8 +57,8 @@ with `pip install --group dev --editable .`
   ❯ git pull
   ❯ git branch --force stable
   ❯ git branch --force 1.3
-  ❯ git push origin stable
-  ❯ git push origin 1.3
+  ❯ git push upstream stable
+  ❯ git push upstream 1.3
   ```
 - Publish to PyPI via GitHub Action.
 - Create release on GitHub, tag it (like `v1.3.1`), add release notes.
