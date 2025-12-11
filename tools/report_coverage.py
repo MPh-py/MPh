@@ -21,7 +21,7 @@ root = Path(__file__).parent.parent
 run(['uv', 'run', '--no-sync', 'coverage', 'xml'], cwd=root, check=True)
 run(
     [
-        'uv', 'run',  '--no-sync',
+        'uv', 'run', '--no-sync',
         'codecov',
         '--file', 'build/coverage/coverage.xml',
         '--token', token,

@@ -50,8 +50,8 @@ folder = root/'build'/'coverage'
 folder.mkdir(exist_ok=True, parents=True)
 run(
     [
-        'uv', 'run',  '--no-sync',
-        'coverage', 'html', f'--directory={folder}',
+        'uv', 'run', '--no-sync',
+        'coverage', 'html',
     ],
     cwd=root, check=True,
 )

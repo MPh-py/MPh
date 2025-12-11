@@ -32,7 +32,7 @@ test = [
     'Ruff         >= 0.11',
     'basedPyright >= 1.29',
     'pyTest       >= 8',
-    'pyTest-cov   >= 6',
+    'pyTest-cov   >= 7',
     'codecov      >= 2',
 ]
 docs = [
@@ -157,17 +157,16 @@ reportCallIssue                    = false
 # Test runner: pyTest
 
 [tool.pytest.ini_options]
-addopts   = '--verbose'
-testpaths = ['tests']
-
-
-# Code coverage: Coverage.py
+addopts              = '--verbose'
+testpaths            = ['tests']
+console_output_style = 'count'
 
 [tool.coverage.run]
 source = ['mph/']
 omit   = ['mph/discovery.py']  # Ignore platform-dependent discovery mechanism.
 data_file = 'build/coverage/.coverage'
 relative_files = true
+patch = ['subprocess']
 
 [tool.coverage.report]
 exclude_lines = [
@@ -176,7 +175,7 @@ exclude_lines = [
 ]
 
 [tool.coverage.html]
-directory = "build/coverage"
+directory = 'build/coverage'
 
 [tool.coverage.xml]
-output = "build/coverage/coverage.xml"
+output = 'build/coverage/coverage.xml'
