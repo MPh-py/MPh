@@ -1,6 +1,7 @@
 ---
-name:  Feature request
-about: Suggest a new feature you want to contribute.
+name:   Feature request
+about:  Suggest a new feature you want to contribute.
+labels: ["feature"]
 ---
 
 <!--

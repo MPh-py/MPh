@@ -1,6 +1,7 @@
 ---
-name:  Maintenance task
-about: Suggest a maintenance task you think is due.
+name:   Maintenance task
+about:  Suggest a maintenance task you think is due.
+labels: ["maintenance"]
 ---
 
 <!--

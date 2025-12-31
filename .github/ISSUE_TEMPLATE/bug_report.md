@@ -1,6 +1,7 @@
 ---
-name:  Bug report
-about: Report unintended behavior you've experienced.
+name:   Bug report
+about:  Report unintended behavior you've experienced.
+labels: ["bug"]
 ---
 
 <!--
