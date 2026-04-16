@@ -105,6 +105,9 @@ class Client:
     A specific Comsol `version` can be selected if several are installed, for
     example `version='6.0'`. Otherwise the latest version is used.
 
+    A `path` to a Comsol executable can be specified, e.g. `path='/.../comsol'`
+    in Linux and `path='C:\...\comsol.exe'` in Windows.
+
     Initializes a stand-alone Comsol session if no `port` number is specified.
     Otherwise tries to connect to the Comsol server listening at the given port
     for client connections.
@@ -151,6 +154,7 @@ class Client:
     def __init__(self,
         cores:   int = None,
         version: str = None,
+        path:    str = None,
         port:    int = None,
         host:    str = 'localhost',
     ):
@@ -162,7 +166,7 @@ class Client:
             raise NotImplementedError(error)
 
         # Discover Comsol back-end.
-        backend = discovery.backend(version)
+        backend = discovery.backend(version, path)
 
         # On Windows, turn off fault handlers if enabled.
         # Without this, pyTest will crash when starting the Java VM.

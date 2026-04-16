@@ -32,6 +32,7 @@ log    = getLogger(__package__)
 def start(
     cores:   int = None,
     version: str = None,
+    path:    str = None,
     port:    int = 0,
 ) -> Client:
     """
@@ -70,6 +71,9 @@ def start(
     A specific Comsol `version` can be selected if several are installed, for
     example `version='6.0'`. Otherwise the latest version is used.
 
+    A `path` to a Comsol executable can be specified, e.g. `path='/.../comsol'`
+    in Linux and `path='C:\...\comsol.exe'` in Windows.
+
     The server `port` can be specified if client–server mode is used. If
     omitted, the server chooses a random free port.
     """
@@ -100,10 +104,10 @@ def start(
 
     log.info('Starting local Comsol session.')
     if session == 'stand-alone':
-        client = Client(cores=cores, version=version)
+        client = Client(cores=cores, version=version, path=path)
     elif session == 'client-server':
-        server = Server(cores=cores, version=version, port=port)
-        client = Client(cores=cores, version=version, port=server.port)
+        server = Server(cores=cores, version=version, path=path, port=port)
+        client = Client(cores=cores, version=version, path=path, port=server.port)
     else:
         error = f'Invalid session type "{session}".'
         log.error(error)

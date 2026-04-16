@@ -46,6 +46,9 @@ class Server:
     installed on the machine, for example `version='6.0'`. Otherwise the latest
     version is used.
 
+    A `path` to a Comsol executable can be specified, e.g. `path='/.../comsol'`
+    in Linux and `path='C:\...\comsol.exe'` in Windows.
+
     The server can be instructed to use a specific network `port` for
     communication with clients by passing the number of a free port explicitly.
     If `port=None`, the default, the server will try to use port 2036 or, in
@@ -72,6 +75,7 @@ class Server:
     def __init__(self,
         cores:     int = None,
         version:   str = None,
+        path:      str = None,
         port:      int = None,
         multi:     bool | Literal['on', 'off'] | None = None,
         timeout:   int = 60,
@@ -82,7 +86,7 @@ class Server:
         extra_arguments = arguments if arguments else []
 
         # Start Comsol server as an external process.
-        backend = discovery.backend(version)
+        backend = discovery.backend(version, path)
         server  = backend['server']
         log.info('Starting external server process.')
         arguments = ['-login', 'auto', '-graphics', '-autosave', 'off']

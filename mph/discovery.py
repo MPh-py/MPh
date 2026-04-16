@@ -273,8 +273,12 @@ def search_path() -> Path | None:
 
 
 @lru_cache(maxsize=1)
-def find_backends() -> list[Backend]:
-    """Returns the list of available Comsol back-ends."""
+def find_backends(path: str = None) -> list[Backend]:
+    """
+    Returns the list of available Comsol back-ends.
+    
+    A `path` to a Comsol executable can be given.
+    """
 
     log.debug('Searching system for available Comsol back-ends.')
     backends = []
@@ -287,27 +291,37 @@ def find_backends() -> list[Backend]:
     log.debug(f'NumPy version is {numpy_version}.')
     log.debug(f'JPype version is {jpype_version}.')
 
-    # Search system for Comsol executables.
-    if system == 'Windows':
-        executables = search_registry(arch)
-    elif system in ('Linux', 'Darwin'):
-        executables = search_disk(arch)
+    if path is not None:
+        # Resolve Comsol executable at the given path.
+        try:
+            comsol = Path(path).resolve(strict=True)
+        except FileNotFoundError:
+            log.debug('No Comsol executable found at the specified path.')
+            return
+        executables = [comsol]
     else:
-        error = f'Unsupported operating system "{system}".'
-        log.error(error)
-        raise NotImplementedError(error)
-
-    # Look up `comsol` command as if run in terminal.
-    comsol = search_path()
-    if comsol:
-        if comsol not in executables:
-            executables.insert(0, comsol)
-            # We put that Comsol executable first so that users have a way of
-            # prioritizing one Comsol installation over another. This makes
-            # sense for multiple installations of the same Comsol version, each
-            # with a single-user license for a different user.
+        # Search system for Comsol executables.
+        if system == 'Windows':
+            executables = search_registry(arch)
+        elif system in ('Linux', 'Darwin'):
+            executables = search_disk(arch)
         else:
-            log.debug('Ignoring executable as it was previously found.')
+            error = f'Unsupported operating system "{system}".'
+            log.error(error)
+            raise NotImplementedError(error)
+
+        # Look up `comsol` command as if run in terminal.
+        comsol = search_path()
+
+        if comsol:
+            if comsol not in executables:
+                executables.insert(0, comsol)
+                # We put that Comsol executable first so that users have a way of
+                # prioritizing one Comsol installation over another. This makes
+                # sense for multiple installations of the same Comsol version, each
+                # with a single-user license for a different user.
+            else:
+                log.debug('Ignoring executable as it was previously found.')
 
     # Only accept executable when Java API was found as well.
     for comsol in executables:
@@ -435,19 +449,28 @@ def find_backends() -> list[Backend]:
     return backends
 
 
-def backend(version: str = None) -> Backend:
+def backend(version: str = None, path: str = None) -> Backend:
     """
     Returns information about the Comsol back-end.
 
     A specific Comsol `version` can be selected by name if several are
     installed, for example `version='6.0'`. Otherwise the latest version is
     used.
+
+    A `path` to a Comsol executable can be specified, e.g. `path='/.../comsol'`
+    in Linux and `path='C:\...\comsol.exe'` in Windows. If both `version`
+    and `path` are given, the `version` argument is ignored.
     """
-    backends = find_backends()
+    backends = find_backends(path)
     if not backends:
         error = 'Could not find a supported Comsol installation.'
         log.error(error)
         raise RuntimeError(error)
+
+    if version is not None and path is not None:
+        log.debug('Ignoring specified version as path argument was given.')
+        version = None
+
     if version is None:
         numbers = [
             (
