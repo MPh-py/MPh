@@ -36,7 +36,7 @@ test = [
     'codecov      >= 2',
 ]
 docs = [
-    'Sphinx      >= 8',
+    'Sphinx      >= 8, < 9',
     'MyST-parser >= 1',
     'Furo        >= 2024',
 ]
