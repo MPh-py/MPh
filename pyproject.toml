@@ -125,6 +125,7 @@ include = [
         'RUF002',             # docstring with en-dash
         'RUF013',             # no implicit optional types by assigning `None`
         'RUF036',             # `None` not at end of type annotation
+        'RUF069',             # unreliable floating point equality comparison
         'UP024',              # Replace `IOError` with `OSError`.
     ]
 
