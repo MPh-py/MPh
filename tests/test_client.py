@@ -89,8 +89,11 @@ def test_files():
 
 def test_modules():
     Comsol62_or_older = (version.parse(client.version) < version.parse('6.3'))
+    Comsol64_or_later = (version.parse(client.version) >= version.parse('6.4'))
     for key in mph.client.modules:
         if key == 'ELECTRICDISCHARGE' and Comsol62_or_older:
+            continue
+        if key == 'OPTIMIZATION' and Comsol64_or_later:
             continue
         assert client.java.hasProduct(key) in (True, False)
     for value in mph.client.modules.values():
