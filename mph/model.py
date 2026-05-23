@@ -124,7 +124,11 @@ class Model:
     """
 
     java: JClass
-    """Java object that this instance is wrapped around."""
+    """
+    Java [`Model`] object that this class instance wraps.
+
+    [`Model`]: https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/Model.html
+    """
 
     ############
     # Internal #

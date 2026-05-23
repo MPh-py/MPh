@@ -142,7 +142,11 @@ class Client:
     """Host name or IP address of the server the client is connected to."""
 
     java: JClass
-    """Java model object that this class instance is wrapped around."""
+    """
+    Java [`ModelUtil`] object that this singleton class wraps.
+
+    [`ModelUtil`]: https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/util/ModelUtil.html
+    """
 
     ############
     # Internal #
