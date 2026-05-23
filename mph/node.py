@@ -203,12 +203,14 @@ class Node:
     @property
     def java(self) -> JClass | None:
         """
-        Java object this node maps to, if any.
+        Java [`ModelNode`] object that this class instance wraps, if any.
 
         Note that this is a property, not an attribute. Internally, it is a
         function that performs a top-down search of the model tree in order to
         resolve the node reference. So it introduces a certain overhead every
         time it is accessed.
+
+        [`ModelNode`]: https://doc.comsol.com/6.4/doc/com.comsol.help.comsol/api/com/comsol/model/ModelNode.html
         """
         if self.is_root():
             return self.model.java
