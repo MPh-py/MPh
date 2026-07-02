@@ -73,6 +73,13 @@ def detect_architecture() -> str:
     if system == 'Linux' and machine == 'x86_64' and bits == '64bit':
         log.debug('Platform architecture is 64-bit x86 Linux.')
         return 'glnxa64'
+    if (
+        system == 'Linux'
+        and machine in ('aarch64', 'arm64')
+        and bits == '64bit'
+    ):
+        log.debug('Platform architecture is 64-bit ARM Linux.')
+        return 'glnxarm64'
     if system == 'Darwin' and processor == 'i386' and bits == '64bit':
         log.debug('Platform architecture is 64-bit Intel macOS.')
         return 'maci64'
