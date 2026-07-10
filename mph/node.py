@@ -856,14 +856,8 @@ def get(
         value = java.getDoubleMatrix(name)
         if len(value) == 0:
             rows = []
-        elif len(value) == 1:
-            rows = [array(value[0])]
-        elif len(value) == 2:
-            rows = [array(value[0]), array(value[1])]
         else:
-            error = 'Cannot convert double-row matrix with more than two rows.'
-            log.error(error)
-            raise TypeError(error)
+            rows = [array(row) for row in value]
         return array(rows, dtype=object)
     elif datatype == 'File':
         return Path(str(java.getString(name)))
