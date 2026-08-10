@@ -318,13 +318,19 @@ class Client:
     ###############
 
     def load(self, file: Path | str) -> Model:
-        """Loads a model from the given `file` and returns it."""
-        file = Path(file).resolve()
+        """Loads a model from the given `file` path or database URI."""
+        if isinstance(file, str) and file.startswith(
+            ('dbmodel://', 'dbfile://')
+        ):
+            name = file
+        else:
+            file = Path(file).resolve()
+            name = file.name
         if self.caching() and file in self.files():
-            log.info(f'Retrieving "{file.name}" from cache.')
+            log.info(f'Retrieving "{name}" from cache.')
             return self.models()[self.files().index(file)]
         tag = self.java.uniquetag('model')
-        log.info(f'Loading model "{file.name}".')
+        log.info(f'Loading model "{name}".')
         model = Model(self.java.load(tag, str(file)))
         log.info('Finished loading model.')
         return model
