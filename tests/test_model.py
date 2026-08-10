@@ -10,7 +10,7 @@ from fixtures import setup_logging
 
 from jpype import JClass
 from numpy.testing import assert_allclose
-from pytest        import raises, skip
+from pytest        import raises
 from pathlib       import Path
 from platform      import system
 from logging       import getLogger
@@ -684,9 +684,10 @@ def test_load_database():
     db_api = DatabaseApiUtil.api()
     configs = [config for config in db_api.queryDatabaseConfigurations()]
     if not configs:
-        skip('no Model Manager database configured for testing')
+        print('SKIPPED test_load_database(): no Model Manager database configured')
+        return
     config = configs[-1]
-    database = db_api.databaseByAlias(config.databaseAlias())
+    database = db_api.databaseByKey(config.databaseKey())
 
     branch = database.defaultRepository().defaultBranch()
     db_model_name = 'My Test Model'
@@ -772,7 +773,6 @@ if __name__ == '__main__':
         test_reset()
         test_save()
         test_load_database()
-
         test_problems()
 
     finally:
