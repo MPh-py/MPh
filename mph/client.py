@@ -319,9 +319,7 @@ class Client:
 
     def load(self, file: Path | str) -> Model:
         """Loads a model from the given `file` path or database URI."""
-        if isinstance(file, str) and file.startswith(
-            ('dbmodel://', 'dbfile://')
-        ):
+        if isinstance(file, str) and file.startswith('dbmodel://'):
             name = file
         else:
             file = Path(file).resolve()
