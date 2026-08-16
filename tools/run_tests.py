@@ -10,13 +10,13 @@ This script here runs each test group in a new subprocess. It also imposes a
 logical order: from the tests covering the most basic functionality to the
 high-level abstractions.
 
-As opposed to the similar script `coverage.py`, we don't actually run the tests
-through pyTest. Rather, we run the scripts directly so that the output is less
-verbose. You can further reduce the verbosity by passing `--quiet` as a
-command-line argument. This will suppress the log messages produced by MPh as
-the tests are running. You may also pass the name of a test group to run only
-that particular one. For example, passing "model" will only run the tests
-defined in `test_model.py`.
+As opposed to the similar script `measure_coverage.py`, we don't actually run
+the tests through pyTest. Rather, we run the scripts directly so that the
+output is less verbose. You can further reduce the verbosity by passing
+`--quiet` as a command-line argument. This will suppress the log messages
+produced by MPh as the tests are running. You may also pass the name of a test
+group to run only that particular one. For example, passing "model" will only
+run the tests defined in `test_model.py`.
 """
 
 from subprocess import run

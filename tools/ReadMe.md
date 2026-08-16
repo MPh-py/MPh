@@ -41,7 +41,7 @@ in it with `pip install --group dev --editable .`
 - Bump version number in `pyproject.toml`.
 - Add release notes to `docs/releases.md`.
 - Add dedicated commit for the version bump.
-- Test code and measure coverage:
+- Run tests:
   ```shell
   ❯ uv run tools/lint_code.py
   ❯ uv run tools/check_types.py
