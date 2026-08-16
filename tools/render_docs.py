@@ -10,7 +10,7 @@ target = root/'build'/'docs'
 
 process = run(
     [
-        'uv', 'run', '--no-sync',
+        'uv', 'run',
         'sphinx-build', '--fail-on-warning', 'docs', 'build/docs',
     ],
     cwd=root,

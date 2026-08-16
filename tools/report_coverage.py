@@ -18,10 +18,10 @@ if not token:
     raise RuntimeError('CodeCov upload token not set in environment.')
 
 root = Path(__file__).parent.parent
-run(['uv', 'run', '--no-sync', 'coverage', 'xml'], cwd=root, check=True)
+run(['uv', 'run', 'coverage', 'xml'], cwd=root, check=True)
 run(
     [
-        'uv', 'run', '--no-sync',
+        'uv', 'run',
         'codecov',
         '--file', 'build/coverage/coverage.xml',
         '--token', token,
