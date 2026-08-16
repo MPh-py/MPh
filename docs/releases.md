@@ -1,5 +1,15 @@
 ﻿# Releases
 
+## 1.3.2
+
+- [Published](https://pypi.org/project/MPh/1.3.2) on August 16, 2026.
+- Fixes setting [`Node.property()`](
+  https://mph.readthedocs.io/en/1.3/api/mph.Node.html#mph.Node.property) 
+  with values of Java datatype `DoubleRowMatrix`.
+  ([#255](https://github.com/MPh-py/MPh/issues/255),
+  [#256](https://github.com/MPh-py/MPh/pull/256))
+
+
 ## 1.3.1
 
 - [Published](https://pypi.org/project/MPh/1.3.1) on November 7, 2025.
