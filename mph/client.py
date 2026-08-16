@@ -7,7 +7,7 @@ from .model  import Model
 from .config import option
 
 import jpype
-import jpype.imports                      # noqa: F401 (imported, but not used)
+import jpype.imports                      # ruff: ignore[unused-import]
 
 import os
 import faulthandler

@@ -385,7 +385,7 @@ def find_backends() -> list[Backend]:
         command: list[Path | str]
         command = [*server, '--version']
         try:
-            arguments = dict(          # noqa: C408 (unnecessary `dict()` call)
+            arguments = dict(       # ruff: ignore[unnecessary-collection-call]
                 check=True, timeout=15,
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 text=True, encoding='ascii', errors='ignore',

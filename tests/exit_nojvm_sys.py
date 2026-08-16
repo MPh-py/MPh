@@ -1,6 +1,6 @@
 ﻿"""Process exiting via `sys.exit()` with no Java VM running."""
 
-import mph                                 # noqa: F401 (imported but not used)
+import mph                              # ruff: ignore[unused-import]
 
 import sys
 
