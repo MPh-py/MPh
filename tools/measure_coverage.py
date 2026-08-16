@@ -37,7 +37,7 @@ if report.exists():
 for group in groups:
     run(
         [
-            'uv', 'run',  '--no-sync',
+            'uv', 'run',
             'pytest', '--cov', '--cov-append',
             f'tests/test_{group}.py',
         ],
@@ -50,7 +50,7 @@ folder = root/'build'/'coverage'
 folder.mkdir(exist_ok=True, parents=True)
 run(
     [
-        'uv', 'run', '--no-sync',
+        'uv', 'run',
         'coverage', 'html',
     ],
     cwd=root, check=True,
