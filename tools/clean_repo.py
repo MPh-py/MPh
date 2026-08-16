@@ -13,6 +13,7 @@ folders = [
 folder_names = [
     '__pycache__',
     '.pytest_cache',
+    '.ruff_cache',
 ]
 for folder_name in folder_names:
     for folder in root.rglob(folder_name):
