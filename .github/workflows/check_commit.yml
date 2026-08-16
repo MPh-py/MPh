@@ -14,6 +14,7 @@ jobs:
               - "3.11"
               - "3.12"
               - "3.13"
+              - "3.14"
     steps:
 
       - name: Check out code.
@@ -25,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install UV.
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
 
       - name: Install package.
         run:  uv sync
@@ -48,15 +49,15 @@ jobs:
     steps:
 
       - name: Check out code.
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Python.
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install UV.
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
 
       - name: Install package.
         run:  uv sync --group docs
