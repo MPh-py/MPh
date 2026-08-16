@@ -29,7 +29,7 @@ dependencies = [
 
 [dependency-groups]
 test = [
-    'Ruff         >= 0.11',
+    'Ruff         >= 0.16',
     'basedPyright >= 1.29',
     'pyTest       >= 8',
     'pyTest-cov   >= 7',
@@ -103,35 +103,37 @@ include = [
         'UP',                 # upgradable code
     ]
     ignore = [
-        'E201',               # whitespace after (
-        'E221',               # missing whitespace before operator
-        'E226',               # missing whitespace around operator
-        'E231',               # missing whitespace after ','
-        'E241',               # multiple spaces after comma
-        'E251',               # unexpected spaces around keyword equals
-        'E272',               # multiple spaces before keyword
-        'B017',               # asserting blind `Exception`
-        'B028',               # warning issued without `stacklevel` keyword
-        'C416',               # list comprehension instead of `list()`
-        'SIM103',             # Return the boolean condition directly.
-        'SIM105',             # Use `contextlib.suppress(Exception)` instead.
-        'SIM108',             # ternary operator instead of if-else
-        'SIM112',             # only capitalized environment variables
-        'PT011',              # `pytest.raises(ValueError)` too broad
-        'PT012',              # `pytest.raises()` with multiple statements
-        'PT013',              # incorrect pytest import
-        'PTH201',             # Never use `Path('.')`.
-        'RUF001',             # string with en-dash
-        'RUF002',             # docstring with en-dash
-        'RUF013',             # no implicit optional types by assigning `None`
-        'RUF036',             # `None` not at end of type annotation
-        'RUF069',             # unreliable floating point equality comparison
-        'UP024',              # Replace `IOError` with `OSError`.
+        'whitespace-after-open-bracket',
+        'multiple-spaces-before-operator',
+        'missing-whitespace-around-arithmetic-operator',
+        'missing-whitespace',
+        'multiple-spaces-after-comma',
+        'unexpected-spaces-around-keyword-parameter-equals',
+        'multiple-spaces-before-keyword',
+        'assert-raises-exception',
+        'no-explicit-stacklevel',
+        'unnecessary-comprehension',
+        'needless-bool',
+        'suppressible-exception',
+        'if-else-block-instead-of-if-exp',
+        'uncapitalized-environment-variables',
+        'pytest-raises-too-broad',
+        'pytest-raises-with-multiple-statements',
+        'pytest-incorrect-pytest-import',
+        'path-constructor-current-directory',
+        'implicit-optional',
+        'none-not-at-end-of-union',
+        'float-equality-comparison',
+        'os-error-alias',
     ]
+    allowed-confusables = [
+        "–",        # n-dash
+    ]
+
 
     [tool.ruff.lint.per-file-ignores]
     '__init__.py' = [
-        'F401',               # imported but unused
+        'unused-import',
     ]
 
     [tool.ruff.lint.flake8-quotes]
