@@ -8,7 +8,6 @@ from fixtures import temp_dir
 from fixtures import logging_disabled
 from fixtures import setup_logging
 
-from jpype import JClass
 from numpy.testing import assert_allclose
 from pytest        import raises
 from pathlib       import Path
@@ -679,31 +678,6 @@ def test_save():
             model.save(tmpdir/'model.mph', format='invalid')
 
 
-def test_load_database():
-    DatabaseApiUtil = JClass('com.comsol.api.database.DatabaseApiUtil')
-    db_api = DatabaseApiUtil.api()
-    configs = [config for config in db_api.queryDatabaseConfigurations()]
-    if not configs:
-        print('SKIPPED test_load_database(): no Model Manager database configured')
-        return
-    config = configs[-1]
-    database = db_api.databaseByKey(config.databaseKey())
-
-    branch = database.defaultRepository().defaultBranch()
-    db_model_name = 'My Test Model'
-    version = branch.saveNewModel(
-        str(model.file()), db_model_name, 'test commit comment'
-    )
-    location_uri = str(version.modelLocationUri())
-    try:
-        loaded = client.load(location_uri)
-        assert loaded.name() == db_model_name
-        assert loaded.parameters() == model.parameters()
-    finally:
-        client.remove(loaded)
-        branch.modelByKey(version.itemKey()).delete('test cleanup')
-
-
 def test_problems():
     assert not model.problems()
     anode = model/'physics'/'electrostatic'/'anode'
@@ -772,7 +746,7 @@ if __name__ == '__main__':
         test_clear()
         test_reset()
         test_save()
-        test_load_database()
+
         test_problems()
 
     finally:

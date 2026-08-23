@@ -6,8 +6,9 @@ from mph import Client, Model
 from fixtures import logging_disabled
 from fixtures import setup_logging
 
-from pytest  import raises
-from pathlib import Path
+from jpype     import JClass
+from pytest    import raises
+from pathlib   import Path
 from packaging import version
 
 
@@ -34,11 +35,36 @@ def test_init():
         mph.Client()
 
 
-def test_load():
+def test_load_file():
     global model
     assert demo.is_file()
     model = client.load(demo)
     assert model
+
+
+def test_load_database():
+    DatabaseApiUtil = JClass('com.comsol.api.database.DatabaseApiUtil')
+    db_api = DatabaseApiUtil.api()
+    configs = [config for config in db_api.queryDatabaseConfigurations()]
+    if not configs:
+        print('SKIPPED test_load_database(): no Model Manager database configured')
+        return
+    config = configs[-1]
+    database = db_api.databaseByKey(config.databaseKey())
+
+    branch = database.defaultRepository().defaultBranch()
+    db_model_name = 'My Test Model'
+    version = branch.saveNewModel(
+        str(model.file()), db_model_name, 'test commit comment'
+    )
+    location_uri = str(version.modelLocationUri())
+    try:
+        loaded = client.load(location_uri)
+        assert loaded.name() == db_model_name
+        assert loaded.parameters() == model.parameters()
+    finally:
+        client.remove(loaded)
+        branch.modelByKey(version.itemKey()).delete('test cleanup')
 
 
 def test_create():
@@ -165,7 +191,8 @@ def test_connect():
 if __name__ == '__main__':
     setup_logging()
     test_init()
-    test_load()
+    test_load_file()
+    test_load_database()
     test_create()
     test_repr()
     test_contains()
