@@ -8,8 +8,10 @@ from fixtures import setup_logging
 
 from jpype     import JClass
 from pytest    import raises
+from pytest    import skip
 from pathlib   import Path
 from packaging import version
+from logging   import getLogger
 
 
 client: Client
@@ -45,10 +47,14 @@ def test_load_file():
 def test_load_database():
     DatabaseApiUtil = JClass('com.comsol.api.database.DatabaseApiUtil')
     db_api = DatabaseApiUtil.api()
-    configs = [config for config in db_api.queryDatabaseConfigurations()]
+
+    try:
+        configs = [config for config in db_api.queryDatabaseConfigurations()]
+    except Exception:
+        skip('Model Manager not available.')
     if not configs:
-        print('SKIPPED test_load_database(): no Model Manager database configured')
-        return
+        skip('No Model Manager database configured.')
+
     config = configs[-1]
     database = db_api.databaseByKey(config.databaseKey())
 
@@ -190,9 +196,13 @@ def test_connect():
 
 if __name__ == '__main__':
     setup_logging()
+    log = getLogger(__name__)
     test_init()
     test_load_file()
-    test_load_database()
+    try:
+        test_load_database()
+    except skip.Exception as exc:
+        log.debug(f'Skipped `test_load_database()`: {exc}')
     test_create()
     test_repr()
     test_contains()
