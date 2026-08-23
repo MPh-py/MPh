@@ -88,8 +88,8 @@ def start(
 
     # The default value for the session option used to be "platform-dependent",
     # which is why the option even exists. This distinction between operating
-    # was removed in MPh 1.3. Otherwise we'd probably have no code for that
-    # here in the `start()` function. So in a way this is legacy code that
+    # systems was removed in MPh 1.3. Otherwise we'd probably have no code for
+    # that here in the `start()` function. So in a way this is legacy code that
     # might be deprecated at some point.
     session = option('session')
     if session == 'platform-dependent':
