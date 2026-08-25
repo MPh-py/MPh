@@ -250,6 +250,7 @@ def search_path() -> Path | None:
             command, shell=True, check=True, timeout=3,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             text=True, encoding='UTF-8',
+            creationflags = subprocess.CREATE_NO_WINDOW
         )
     except subprocess.CalledProcessError:
         log.debug('Command exited with an error.')
@@ -389,6 +390,7 @@ def find_backends() -> list[Backend]:
                 check=True, timeout=15,
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 text=True, encoding='ascii', errors='ignore',
+                creationflags = subprocess.CREATE_NO_WINDOW
             )
             if system == 'Windows':
                 arguments['creationflags'] = 0x08000000
