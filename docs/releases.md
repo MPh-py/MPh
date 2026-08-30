@@ -1,10 +1,19 @@
 ﻿# Releases
 
+## 1.4.0
+
+- [Published](https://pypi.org/project/MPh/1.4.0) on August 30, 2026.
+- Allows loading models from the Model Manager database.
+  ([#250](https://github.com/MPh-py/MPh/issues/250))
+- Fixes: Command-line window pops up when Comsol server starts on Windows.
+  ([#260](https://github.com/MPh-py/MPh/issues/260))
+
+
 ## 1.3.2
 
 - [Published](https://pypi.org/project/MPh/1.3.2) on August 16, 2026.
 - Fixes setting [`Node.property()`](
-  https://mph.readthedocs.io/en/1.3/api/mph.Node.html#mph.Node.property) 
+  https://mph.readthedocs.io/en/1.3/api/mph.Node.html#mph.Node.property)
   with values of Java datatype `DoubleRowMatrix`.
   ([#255](https://github.com/MPh-py/MPh/issues/255),
   [#256](https://github.com/MPh-py/MPh/pull/256))
