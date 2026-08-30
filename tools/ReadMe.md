@@ -62,9 +62,3 @@ in it with `pip install --group dev --editable .`
   ```
 - Publish to PyPI via GitHub Action.
 - Create release on GitHub, tag it (like `v1.3.1`), add release notes.
-- Report code coverage:
-  ```shell
-  ❯ uv run tools/measure_coverage.py
-  # Add upload token in shell environment.
-  ❯ uv run tools/report_coverage.py
-  ```

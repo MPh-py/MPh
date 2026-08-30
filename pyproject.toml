@@ -33,7 +33,6 @@ test = [
     'basedPyright >= 1.29',
     'pyTest       >= 8',
     'pyTest-cov   >= 7',
-    'codecov      >= 2',
 ]
 docs = [
     'Sphinx      >= 8, < 9',

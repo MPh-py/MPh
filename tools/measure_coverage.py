@@ -1,21 +1,10 @@
 ﻿"""
 Measures code coverage by test suite.
 
-We cannot just run pyTest on the entire test suite (in the `tests` folder of
-the repo) because many of the individual test scripts there start a Comsol
-client in their respective setup routine. That is, they start the Java VM,
-which will fail once pyTest gets to the second script in the sequence because
-JPype doesn't allow that within the same Python process.
-
-Instead, we run pyTest for each test group separately, with the coverage
-plug-in enabled, and thus generate the coverage report incrementally.
-
-We also render the coverage report as static HTML for easy inspection. This is
-helpful during development. Find it in the `build/coverage` folder.
-
-The coverage report may be uploaded to the online service CodeCov. This is
-usually only done for a new release, but could also happen on each commit.
-There's a separate script, `codecov.py`, to take care of that whenever needed.
+This script essentially does the same as `run_tests.py`, but runs each test
+group through pyTest with code-coverage reporting turned on. We thus generate
+the code-coverage report incrementally and render it as an HTML page for easy
+inspection in the `build/coverage` folder.
 """
 
 from subprocess import run
