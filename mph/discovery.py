@@ -82,6 +82,11 @@ def detect_architecture() -> str:
     raise OSError('Did not recognize platform architecture.')
 
 
+def subprocess_creation_flags():
+    """Returns platform-specific creation flags for subprocesses."""
+    return subprocess.CREATE_NO_WINDOW if system == 'Windows' else 0
+
+
 def parse(version: str) -> tuple[str, int, int, int, int]:
     """
     Parses version information as returned by Comsol executable.
@@ -250,7 +255,7 @@ def search_path() -> Path | None:
             command, shell=True, check=True, timeout=3,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             text=True, encoding='UTF-8',
-            creationflags = subprocess.CREATE_NO_WINDOW
+            creationflags=subprocess_creation_flags(),
         )
     except subprocess.CalledProcessError:
         log.debug('Command exited with an error.')
@@ -386,17 +391,12 @@ def find_backends() -> list[Backend]:
         command: list[Path | str]
         command = [*server, '--version']
         try:
-            arguments = dict(       # ruff: ignore[unnecessary-collection-call]
+            process = subprocess.run(
+                command,
                 check=True, timeout=15,
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 text=True, encoding='ascii', errors='ignore',
-                creationflags = subprocess.CREATE_NO_WINDOW
-            )
-            if system == 'Windows':
-                arguments['creationflags'] = 0x08000000
-            process = subprocess.run(
-                command,
-                **arguments,              # pyright: ignore[reportArgumentType]
+                creationflags=subprocess_creation_flags(),
             )
         except subprocess.CalledProcessError:
             log.debug('Querying version information failed.')
