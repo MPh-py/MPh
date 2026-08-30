@@ -32,7 +32,7 @@ When using Pip, follow the standard workflow: Create a virtual Python
 environment with `python -m venv .venv`, activate it, and install the project
 in it with `pip install --group dev --editable .`
 
-[UV]: https://docs.astral.sh/uv
+[UV]:  https://docs.astral.sh/uv
 [Pip]: https://pip.pypa.io
 
 
@@ -56,9 +56,9 @@ in it with `pip install --group dev --editable .`
   ❯ git switch main
   ❯ git pull
   ❯ git branch --force stable
-  ❯ git branch --force 1.3
+  ❯ git branch --force 1.4
   ❯ git push upstream stable
-  ❯ git push upstream 1.3
+  ❯ git push upstream 1.4
   ```
 - Publish to PyPI via GitHub Action.
-- Create release on GitHub, tag it (like `v1.3.1`), add release notes.
+- Create release on GitHub, tag it (like `v1.4.1`), add release notes.
