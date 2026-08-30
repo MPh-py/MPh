@@ -36,9 +36,6 @@ Find the full [documentation on Read-the-Docs][docs].
 [![scientific citation](
     https://zenodo.org/badge/264718959.svg)](
     https://zenodo.org/badge/latestdoi/264718959)
-[![coverage report](
-    https://img.shields.io/codecov/c/github/MPh-py/MPh?token=02ZZ8ZJH3M)](
-    https://codecov.io/gh/MPh-py/MPh)
 [![latest documentation](
     https://readthedocs.org/projects/mph/badge/?version=latest)](
     https://mph.readthedocs.io/en/latest)
