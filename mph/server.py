@@ -8,7 +8,6 @@ from .config import option
 from subprocess import Popen as start
 from subprocess import PIPE
 from subprocess import TimeoutExpired
-from subprocess import CREATE_NO_WINDOW
 from re         import match as regex
 from time       import perf_counter as now
 from logging    import getLogger
@@ -105,11 +104,11 @@ class Server:
                 log.error(error)
                 raise ValueError(error)
         command = server + arguments + extra_arguments
-        process = start(command,
-                        stdin=PIPE,
-                        stdout=PIPE,
-                        errors='ignore',
-                        creationflags=CREATE_NO_WINDOW)
+        process = start(
+            command,
+            stdin=PIPE, stdout=PIPE, errors='ignore',
+            creationflags=discovery.subprocess_creation_flags(),
+        )
 
         # Remember the requested port (if any).
         requested = port
