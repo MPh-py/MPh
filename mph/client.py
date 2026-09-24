@@ -199,6 +199,12 @@ class Client:
             jpype.startJVM(*args, classpath=str(root/'apiplugins'/'*'))
         log.info('Java virtual machine has started.')
 
+        # Capture the exit code from here on, as the hard JVM shutdown at
+        # session end would otherwise lose it. Tied to starting the JVM, not
+        # to `session.start()`, since a client can be created directly.
+        from .session import install_hooks
+        install_hooks()
+
         # Import Comsol client object, a static class, i.e. singleton.
         # See `ModelUtil()` constructor in [1].
         from com.comsol.model.util import ModelUtil as java
