@@ -13,7 +13,7 @@ from functools import lru_cache
 from logging   import getLogger
 
 from typing          import TYPE_CHECKING, overload, Literal, ClassVar
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from numpy.typing    import ArrayLike, NDArray
 from numpy           import int32
 if TYPE_CHECKING:
@@ -101,30 +101,30 @@ class Node:
     model: Model
     """Model object this node refers to."""
 
-    groups: ClassVar[dict[str, str]] = {
-        'parameters':   'self.model.java.param().group()',
-        'functions':    'self.model.java.func()',
-        'components':   'self.model.java.component()',
-        'geometries':   'self.model.java.geom()',
-        'views':        'self.model.java.view()',
-        'selections':   'self.model.java.selection()',
-        'coordinates':  'self.model.java.coordSystem()',
-        'variables':    'self.model.java.variable()',
-        'couplings':    'self.model.java.cpl()',
-        'physics':      'self.model.java.physics()',
-        'multiphysics': 'self.model.java.multiphysics()',
-        'materials':    'self.model.java.material()',
-        'meshes':       'self.model.java.mesh()',
-        'studies':      'self.model.java.study()',
-        'solutions':    'self.model.java.sol()',
-        'batches':      'self.model.java.batch()',
-        'datasets':     'self.model.java.result().dataset()',
-        'evaluations':  'self.model.java.result().numerical()',
-        'tables':       'self.model.java.result().table()',
-        'plots':        'self.model.java.result()',
-        'exports':      'self.model.java.result().export()',
+    groups: ClassVar[dict[str, Callable[[Node], JClass | None]]] = {
+        'parameters':   lambda node: node.model.java.param().group(),
+        'functions':    lambda node: node.model.java.func(),
+        'components':   lambda node: node.model.java.component(),
+        'geometries':   lambda node: node.model.java.geom(),
+        'views':        lambda node: node.model.java.view(),
+        'selections':   lambda node: node.model.java.selection(),
+        'coordinates':  lambda node: node.model.java.coordSystem(),
+        'variables':    lambda node: node.model.java.variable(),
+        'couplings':    lambda node: node.model.java.cpl(),
+        'physics':      lambda node: node.model.java.physics(),
+        'multiphysics': lambda node: node.model.java.multiphysics(),
+        'materials':    lambda node: node.model.java.material(),
+        'meshes':       lambda node: node.model.java.mesh(),
+        'studies':      lambda node: node.model.java.study(),
+        'solutions':    lambda node: node.model.java.sol(),
+        'batches':      lambda node: node.model.java.batch(),
+        'datasets':     lambda node: node.model.java.result().dataset(),
+        'evaluations':  lambda node: node.model.java.result().numerical(),
+        'tables':       lambda node: node.model.java.result().table(),
+        'plots':        lambda node: node.model.java.result(),
+        'exports':      lambda node: node.model.java.result().export(),
     }
-    """Mapping of the built-in groups to corresponding Java objects."""
+    """Mapping of the built-in groups to the callables that return them."""
 
     alias: ClassVar[dict[str, str]] = {
         'parameter':  'parameters',
@@ -217,7 +217,7 @@ class Node:
         name = self.name()
         if self.is_group():
             if name in self.groups:
-                return eval(self.groups[name])
+                return self.groups[name](self)
             else:
                 return None
         parent = self.parent()
