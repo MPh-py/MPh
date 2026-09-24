@@ -11,6 +11,7 @@ from subprocess import TimeoutExpired
 from re         import match as regex
 from time       import perf_counter as now
 from logging    import getLogger
+from atexit     import register as on_exit
 
 from typing import Literal
 
@@ -59,7 +60,8 @@ class Server:
     If `multi` is `False` or `'off'` or `None` (the default), then the server
     will shut down as soon as the first connected clients disconnects itself.
     If it is `True` or `'on'`, the server process will stay alive and accept
-    multiple client connections.
+    multiple client connections. Either way it is shut down when the Python
+    session ends, though a process killed outright leaves it behind.
 
     A `timeout` can be set for the server start-up. The default is 60 seconds.
     `TimeoutError` is raised if the server failed to start within that period.
@@ -156,6 +158,10 @@ class Server:
         self.process = process
         """Subprocess that the server is running in."""
 
+        # A server must not outlive the process that started it, even one told
+        # to accept multiple clients. `session.cleanup()` sees only its own.
+        on_exit(stop_server, self)
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(port={self.port})'
 
@@ -176,6 +182,18 @@ class Server:
             log.warning('Server did not shut down within time-out period.')
             log.info('Trying to forcefully terminate server process.')
             self.process.kill()
+            # Without the wait it lingers as a zombie.
+            try:
+                self.process.wait(timeout=timeout)
+                log.info(f'Server on port {self.port} has been terminated.')
+            except TimeoutExpired:
+                log.error(f'Server on port {self.port} would not terminate.')
+
+
+def stop_server(server: Server):
+    """Stops the named server unless it has already stopped on its own."""
+    if server.running():
+        server.stop()
 
 
 ###########
