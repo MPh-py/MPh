@@ -564,60 +564,63 @@ class Model:
         finally:
             eval.remove()
 
-        # For particle datasets, create an "EvalPoint" feature.
-        if dataset.type() == 'Particle':
+        # Particle datasets take a different feature type and settings.
+        particle = (dataset.type() == 'Particle')
+        if particle:
             eval = (self/'evaluations').create('EvalPoint')
-            if inner in ('first', 'last'):
-                eval.property('innerinput', inner)
-            elif inner is not None:
-                eval.property('innerinput', 'manual')
-                eval.property('solnum', inner)
-        # Otherwise create an "Eval" feature.
         else:
             eval = (self/'evaluations').create('Eval')
 
-        # Set up the evaluation feature.
-        eval.property('expr', expression)
-        if unit:
-            eval.property('unit', unit)
-        eval.property('data', dataset)
-        if outer is not None:
-            eval.property('outersolnum', outer)
+        try:
+            if particle:
+                if inner in ('first', 'last'):
+                    eval.property('innerinput', inner)
+                elif inner is not None:
+                    eval.property('innerinput', 'manual')
+                    eval.property('solnum', inner)
 
-        # Retrieve the data.
-        log.info('Retrieving data.')
-        java = eval.java
-        if dataset.type() == 'Particle':
-            results = array(java.getReal())
-            if java.isComplex():
-                results = results.astype('complex')
-                results += 1j * array(java.getImag())
-            if isinstance(expression, (tuple, list)):
-                shape = results.shape[1:]
-                results = results.reshape(len(expression), -1, *shape)
-        else:
-            results = array(java.getData())
-            if java.isComplex():
-                results = results.astype('complex')
-                results += 1j * array(java.getImagData())
-            if inner == 'first':
-                results = results[:, 0, :]
-            elif inner == 'last':
-                results = results[:, -1, :]
-            elif inner is not None:
-                if isinstance(inner, list):
-                    inner = array(inner)
-                results = results[:, inner-1, :]
-        log.info('Finished retrieving data.')
+            # Set up the evaluation feature.
+            eval.property('expr', expression)
+            if unit:
+                eval.property('unit', unit)
+            eval.property('data', dataset)
+            if outer is not None:
+                eval.property('outersolnum', outer)
 
-        # Remove the temporary evaluation feature we added to the model.
-        eval.remove()
+            # Retrieve the data.
+            log.info('Retrieving data.')
+            java = eval.java
+            if particle:
+                results = array(java.getReal())
+                if java.isComplex():
+                    results = results.astype('complex')
+                    results += 1j * array(java.getImag())
+                if isinstance(expression, (tuple, list)):
+                    shape = results.shape[1:]
+                    results = results.reshape(len(expression), -1, *shape)
+            else:
+                results = array(java.getData())
+                if java.isComplex():
+                    results = results.astype('complex')
+                    results += 1j * array(java.getImagData())
+                if inner == 'first':
+                    results = results[:, 0, :]
+                elif inner == 'last':
+                    results = results[:, -1, :]
+                elif inner is not None:
+                    if isinstance(inner, list):
+                        inner = array(inner)
+                    results = results[:, inner-1, :]
+            log.info('Finished retrieving data.')
 
-        # Squeeze out singleton array dimensions.
-        if isinstance(expression, (list, tuple)):
-            results = [result.squeeze() for result in results]
-        else:
-            results = results.squeeze()
+            # Squeeze out singleton array dimensions.
+            if isinstance(expression, (list, tuple)):
+                results = [result.squeeze() for result in results]
+            else:
+                results = results.squeeze()
+        finally:
+            # Remove the temporary evaluation feature we added to the model.
+            eval.remove()
 
         # Return array of results.
         return results
