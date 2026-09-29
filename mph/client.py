@@ -324,9 +324,13 @@ class Client:
         else:
             file = Path(file).resolve()
             name = file.name
-        if self.caching() and file in self.files():
-            log.info(f'Retrieving "{name}" from cache.')
-            return self.models()[self.files().index(file)]
+        if self.caching():
+            # Enumerated once; each call here round-trips to Comsol.
+            models = self.models()
+            files = [model.file() for model in models]
+            if file in files:
+                log.info(f'Retrieving "{name}" from cache.')
+                return models[files.index(file)]
         tag = self.java.uniquetag('model')
         log.info(f'Loading model "{name}".')
         model = Model(self.java.load(tag, str(file)))

@@ -669,19 +669,16 @@ class Node:
             error = 'Cannot remove a built-in group.'
             log.error(error)
             raise PermissionError(error)
-        if not self.exists():
-            error = f'Node "{self}" does not exist in model tree.'
-            log.error(error)
-            raise LookupError(error)
+        java = self.java_if_exists()
         parent = self.parent()
-        java = parent.java
+        parent_java = parent.java
         if parent.is_group():
-            container = java
-        elif hasattr(java, 'propertyGroup'):
-            container = java.propertyGroup()
+            container = parent_java
+        elif hasattr(parent_java, 'propertyGroup'):
+            container = parent_java.propertyGroup()
         else:
-            container = java.feature()
-        container.remove(self.java.tag())
+            container = parent_java.feature()
+        container.remove(java.tag())
 
 
 ################
