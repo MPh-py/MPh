@@ -33,7 +33,7 @@ def test_init():
     assert 'function' in node.alias
     assert 'functions' in node.alias.values()
     assert 'functions' in node.groups
-    assert 'self.model.java.func()' in node.groups.values()
+    assert callable(node.groups['functions'])
     Node(model, node)
     with logging_disabled(), raises(TypeError):
         Node(model, False)                # pyright: ignore[reportArgumentType]
