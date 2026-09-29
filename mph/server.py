@@ -11,6 +11,9 @@ from subprocess import TimeoutExpired
 from re         import match as regex
 from time       import perf_counter as now
 from logging    import getLogger
+from collections import deque
+from queue       import Empty, Queue
+from threading   import Event, Thread
 
 from typing import Literal
 
@@ -113,21 +116,55 @@ class Server:
         # Remember the requested port (if any).
         requested = port
 
-        # Wait for the server to report the port number.
+        # Wait for the port. Reading the output blocks, so a separate thread
+        # feeds a queue that we consume against a deadline.
         t0 = now()
-        lines = []
+        lines: deque[str] = deque(maxlen=10)
+        output: Queue[str | None] = Queue()
         port = None
+
+        def read_output():
+            """Reads the server's output onto the queue."""
+            while not done.is_set():
+                line = process.stdout.readline()
+                # An empty line means the output has ended; pass a sentinel
+                # on so waiting for a port stops instead of timing out.
+                if not line:
+                    if not done.is_set():
+                        output.put(None)
+                    return
+                line = line.strip()
+                if line and not done.is_set():
+                    output.put(line)
+
+        done = Event()
+        reader = Thread(target=read_output, daemon=True)
+        reader.start()
         while process.poll() is None:
-            line = process.stdout.readline().strip()
-            if line:
-                lines.append(line)
+            remaining = timeout - (now() - t0)
+            if remaining <= 0:
+                error = 'Server failed to start within time-out period.'
+                log.error(error)
+                done.set()
+                # Don't leave a half-started server holding its licence.
+                process.kill()
+                try:
+                    process.wait(timeout=timeout)
+                except TimeoutExpired:
+                    log.error('Server process would not terminate.')
+                raise TimeoutError(error)
+            try:
+                line = output.get(timeout=remaining)
+            except Empty:
+                continue
+            if line is None:
+                break
+            lines.append(line)
             port = parse_port(line)
             if port:
                 break
-            if now() - t0 > timeout:
-                error = 'Sever failed to start within time-out period.'
-                log.error(error)
-                raise TimeoutError(error)
+        # Stop reading; the queue would otherwise grow while the server runs.
+        done.set()
 
         # Bail out if server exited with an error.
         # We don't use `process.returncode` here, as we would like to, because
@@ -135,7 +172,18 @@ class Server:
         # error, even when an error has occurred. We assume that the last line
         # in the server's output is the actual error message.
         if port is None:
-            error = f'Starting server failed: {lines[-1]}'
+            # The server has exited. Let the reader finish and take what it
+            # passed on, so the error message can quote the last line.
+            reader.join(timeout=1)
+            while not output.empty():
+                line = output.get_nowait()
+                if line is not None:
+                    lines.append(line)
+            if lines:
+                error = f'Starting server failed: {lines[-1]}'
+            else:
+                error = ('Starting server failed: the process exited with '
+                         f'code {process.returncode} and printed nothing.')
             log.error(error)
             raise RuntimeError(error)
         log.info(f'Server listening on port {port}.')
@@ -184,7 +232,10 @@ class Server:
 
 def parse_port(line: str) -> int | None:
     """Parses out the port number from a line of server output."""
-    match = regex(r'^COMSOL.* \(.*\) .*?(\d{4,5}).*$', line)
+    # The parenthesised build field marks where the version banner ends, so a
+    # line of another shape is not recognized. After it, the first standalone
+    # four- or five-digit number is the port, whatever the wording around it.
+    match = regex(r'^COMSOL.* \(.*\) .*?(?<!\d)(\d{4,5})(?!\d).*$', line)
     if match:
         port = int(match.group(1))
         return port
