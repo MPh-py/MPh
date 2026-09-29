@@ -118,6 +118,7 @@ def start(
 exit_code = 0
 exit_function = sys.exit
 exception_handler = sys.excepthook
+hooks_installed = False
 
 
 def exit_hook(code: int = None):
@@ -139,8 +140,38 @@ def exception_hook(
     exception_handler(exc_type, exc_value, exc_traceback)
 
 
-sys.exit = exit_hook
-sys.excepthook = exception_hook
+def install_hooks():
+    """
+    Remembers the exit code so that `cleanup()` can pass it on.
+
+    Only done once a client exists, so that merely importing this library
+    leaves the interpreter's exit handling alone.
+    """
+    global exit_function, exception_handler, hooks_installed
+    if hooks_installed:
+        return
+    exit_function = sys.exit
+    exception_handler = sys.excepthook
+    sys.exit = exit_hook
+    sys.excepthook = exception_hook
+    hooks_installed = True
+
+
+def remove_hooks():
+    """
+    Restores the exit handling that `install_hooks()` replaced.
+
+    Only takes back what it installed, so a handler installed in the meantime
+    is left alone.
+    """
+    global hooks_installed
+    if not hooks_installed:
+        return
+    if sys.exit is exit_hook:
+        sys.exit = exit_function
+    if sys.excepthook is exception_hook:
+        sys.excepthook = exception_handler
+    hooks_installed = False
 
 
 @atexit.register
@@ -152,8 +183,9 @@ def cleanup():
     end of the Python session and is not intended to be called directly from
     application code.
 
-    Stops the local server instance possibly created by `start()` and shuts
-    down the Java Virtual Machine hosting the client instance.
+    Stops the local server instance possibly created by `start()`, gives the
+    interpreter's exit handling back, and shuts down the Java Virtual Machine
+    hosting the client instance.
     """
     if client and client.port:
         try:
@@ -161,6 +193,8 @@ def cleanup():
         except Exception:
             error = 'Error while disconnecting client at session clean-up.'
             log.exception(error)
+    # Undo what `install_hooks()` changed, so nothing leaks after us.
+    remove_hooks()
     if jpype.isJVMStarted():
         log.info('Exiting the Java virtual machine.')
         # Work around Unix-style "lazy writing" before we pull the plug.
