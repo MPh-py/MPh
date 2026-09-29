@@ -5,10 +5,28 @@ from mph import Server
 
 from fixtures import setup_logging
 
-from time import sleep
+from time import monotonic, sleep
 
 
-server: Server
+server: Server | None = None
+
+# How long a server gets to shut down. Used where we assert one survived a
+# disconnect, since there is no event to await there.
+grace = 15
+
+# How long we wait for a server to go away. Polling returns as soon as it has,
+# so a generous deadline costs nothing.
+patience = 60
+
+
+def wait_until(predicate, timeout: float = patience):
+    """Waits until the predicate holds, failing once the time-out is up."""
+    deadline = monotonic() + timeout
+    while monotonic() < deadline:
+        if predicate():
+            return
+        sleep(0.25)
+    assert predicate()
 
 
 def teardown_module():
@@ -30,7 +48,7 @@ def test_multi():
     assert client.cores == server.cores
     assert client.port == server.port
     client.disconnect()
-    sleep(15)
+    wait_until(lambda: not server.running())
     assert not server.running()
     server = mph.Server(cores=1, multi=True)
     client.connect(port=server.port)
@@ -38,8 +56,11 @@ def test_multi():
     assert client.cores == server.cores
     assert client.port == server.port
     client.disconnect()
-    sleep(15)
-    assert server.running()
+    # The server has to outlive the disconnect. Fail as soon as it stops.
+    deadline = monotonic() + grace
+    while monotonic() < deadline:
+        assert server.running()
+        sleep(0.25)
     server.stop()
 
 

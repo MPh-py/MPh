@@ -8,9 +8,17 @@ from fixtures import setup_logging
 from fixtures import capture_stderr
 
 from pytest import raises
+from socket import socket
 
 
-server: Server
+server: Server | None = None
+
+
+def free_port() -> int:
+    """Returns a port number that is free at the time of the call."""
+    with socket() as probe:
+        probe.bind(('localhost', 0))
+        return int(probe.getsockname()[1])
 
 
 def teardown_module():
@@ -22,8 +30,10 @@ def test_init():
     global server
     with raises(RuntimeError), capture_stderr():
         server = mph.Server(arguments=['-version'])
-    server = mph.Server(cores=1, port=2035)
-    assert server.port == 2035
+    # A free port now, though another process could still take it in between.
+    port = free_port()
+    server = mph.Server(cores=1, port=port)
+    assert server.port == port
 
 
 def test_repr():
